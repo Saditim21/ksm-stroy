@@ -79,7 +79,7 @@ const Projects = () => {
       </section>
 
       {/* Search and Filter Section */}
-      <section className="py-8 bg-primary-50 border-b border-gold-500/20 sticky top-20 z-40">
+      <section className="py-8 bg-primary-50 border-b border-gold-500/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Search Bar */}

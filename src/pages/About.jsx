@@ -109,29 +109,7 @@ const About = () => {
         ogImage={seoData.about.ogImage}
       />
       
-      <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white py-20">
-        <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-hero font-bold mb-6">За нас</h1>
-            <p className="text-xl md:text-2xl text-platinum-300 max-w-4xl mx-auto leading-relaxed">
-              Повече от 15 години изграждаме доверие чрез качество, иновации и професионализъм
-            </p>
-            
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">{stat.number}</div>
-                  <div className="text-sm md:text-base text-platinum-200">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <main className="min-h-screen pt-20">
 
       {/* Company Story */}
       <section className="py-20 bg-primary-50">

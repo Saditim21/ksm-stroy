@@ -127,61 +127,52 @@ const Contact = () => {
       />
       
       <motion.main 
-        className="min-h-screen bg-primary-50 pt-8"
+        className="min-h-screen pt-20"
         initial="initial"
         animate="in"
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
       >
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-300 mb-2">15+</div>
-                <div className="text-sm text-blue-100">Години опит</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Contact Form & Info */}
-      <section className="py-20 bg-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-            
-            {/* Contact Information */}
-            <div className="lg:col-span-1">
-              <div className="mb-8">
-                <span className="text-blue-600 font-semibold text-sm uppercase tracking-wide">Информация за контакт</span>
-                <h2 className="text-display-1 text-primary-900 mt-2 mb-6">
-                  Как можете да се свържете с нас
-                </h2>
-                <p className="text-primary-600 leading-relaxed">
-                  Нашият екип е на ваше разположение за консултации, оферти и отговори на всички ваши въпроси.
-                </p>
-              </div>
+        {/* Contact Form & Info */}
+        <section className="py-20 bg-primary-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
               
-              <div className="space-y-8">
-                {contactInfo.map((info, index) => (
-                  <div key={index} className="flex items-start">
-                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mr-4 text-blue-600 flex-shrink-0">
-                      {info.icon}
+              {/* Contact Information */}
+              <div className="lg:col-span-1">
+                <div className="mb-8">
+                  <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Информация за контакт</span>
+                  <h2 className="text-display-1 text-primary-900 mt-2 mb-6">
+                    Как можете да се свържете с нас
+                  </h2>
+                  <p className="text-primary-600 leading-relaxed">
+                    Нашият екип е на ваше разположение за консултации, оферти и отговори на всички ваши въпроси.
+                  </p>
+                </div>
+                
+                <div className="space-y-8">
+                  {contactInfo.map((info, index) => (
+                    <div key={index} className="flex items-start">
+                      <div className="w-14 h-14 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury flex items-center justify-center mr-4 text-primary-900 flex-shrink-0">
+                        {info.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-primary-900 mb-2">{info.title}</h3>
+                        {info.details.map((detail, idx) => (
+                          <p key={idx} className="text-primary-600 mb-1">{detail}</p>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{info.title}</h3>
-                      {info.details.map((detail, idx) => (
-                        <p key={idx} className="text-gray-600 mb-1">{detail}</p>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <div className="bg-gray-50 rounded-2xl p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Изпратете запитване</h2>
+              {/* Contact Form */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-luxury-lg p-8 shadow-luxury border border-silver-200">
+                  <h2 className="text-3xl font-bold text-primary-900 mb-8">Изпратете запитване</h2>
                 
                 {/* Success Message */}
                 {isSubmitted && (
@@ -196,7 +187,7 @@ const Contact = () => {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {/* Name Field */}
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-primary-700 mb-2">
                       Име и фамилия *
                     </label>
                     <input
@@ -209,8 +200,8 @@ const Contact = () => {
                           message: 'Името трябва да е поне 2 символа'
                         }
                       })}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.name ? 'border-red-300' : 'border-gray-300'
+                      className={`w-full px-4 py-3 border rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury ${
+                        errors.name ? 'border-red-300' : 'border-silver-200'
                       }`}
                       placeholder="Вашето пълно име"
                     />
@@ -222,7 +213,7 @@ const Contact = () => {
                   {/* Email and Phone */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-2">
                         Имейл адрес *
                       </label>
                       <input
@@ -235,8 +226,8 @@ const Contact = () => {
                             message: 'Невалиден имейл адрес'
                           }
                         })}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                          errors.email ? 'border-red-300' : 'border-gray-300'
+                        className={`w-full px-4 py-3 border rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury ${
+                          errors.email ? 'border-red-300' : 'border-silver-200'
                         }`}
                         placeholder="email@example.com"
                       />
@@ -278,7 +269,7 @@ const Contact = () => {
                       <select
                         id="projectType"
                         {...register('projectType')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        className="w-full px-4 py-3 border border-silver-200 rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury"
                       >
                         <option value="">Изберете тип проект</option>
                         {projectTypes.map((type, index) => (
@@ -294,7 +285,7 @@ const Contact = () => {
                       <select
                         id="budget"
                         {...register('budget')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        className="w-full px-4 py-3 border border-silver-200 rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury"
                       >
                         <option value="">Изберете бюджет</option>
                         {budgetRanges.map((range, index) => (
@@ -319,8 +310,8 @@ const Contact = () => {
                           message: 'Съобщението трябва да е поне 10 символа'
                         }
                       })}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                        errors.message ? 'border-red-300' : 'border-gray-300'
+                      className={`w-full px-4 py-3 border rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury ${
+                        errors.message ? 'border-red-300' : 'border-silver-200'
                       }`}
                       placeholder="Опишете подробно вашия проект, изисквания и очаквания..."
                     />
@@ -333,7 +324,7 @@ const Contact = () => {
                   <motion.button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-4 px-6 rounded-lg font-semibold flex items-center justify-center"
+                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 disabled:from-gold-400 disabled:to-gold-400 text-primary-900 py-4 px-6 rounded-luxury font-semibold flex items-center justify-center shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-200"
                     variants={buttonExpand}
                     whileHover={!isSubmitting ? "hover" : {}}
                     whileTap={!isSubmitting ? "tap" : {}}
@@ -362,44 +353,67 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Google Maps Section */}
-      <section className="py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-blue-600 font-semibold text-sm uppercase tracking-wide">Местоположение</span>
-            <h2 className="text-display-1 text-primary-900 mt-2 mb-6">Нашият офис</h2>
-            <p className="text-primary-600 max-w-2xl mx-auto">
-              Посетете ни в нашия офис в центъра на София за лична консултация и обсъждане на вашия проект
-            </p>
-          </div>
-          
-          {/* Google Maps Embed */}
-          <div className="rounded-luxury-lg overflow-hidden shadow-luxury border border-silver-200">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2932.086749715398!2d23.31591831545768!3d42.69751527916949!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40aa8682cb317bf5%3A0x400a01269bf5e60!2sSofia%2C%20Bulgaria!5e0!3m2!1sen!2sbg!4v1642092876543!5m2!1sen!2sbg"
-              width="100%"
-              height="400"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="KSM Stroy Office Location"
-              className="w-full"
-            />
-          </div>
-          
-          {/* Map Info */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
-              <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span className="text-gray-700 font-medium">гр. София, ул. Строителна 123, 1000</span>
+        {/* Google Maps Section */}
+        <section className="py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Местоположение</span>
+              <h2 className="text-display-1 text-primary-900 mt-2 mb-6">Нашият офис</h2>
+              <p className="text-primary-600 max-w-2xl mx-auto">
+                Посетете ни в нашия офис в центъра на София за лична консултация и обсъждане на вашия проект
+              </p>
+            </div>
+            
+            {/* Google Maps Embed */}
+            <div className="rounded-luxury-lg overflow-hidden shadow-luxury border border-silver-200">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2932.086749715398!2d23.31591831545768!3d42.69751527916949!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40aa8682cb317bf5%3A0x400a01269bf5e60!2sSofia%2C%20Bulgaria!5e0!3m2!1sen!2sbg!4v1642092876543!5m2!1sen!2sbg"
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="KSM Stroy Office Location"
+                className="w-full"
+              />
+            </div>
+            
+            {/* Map Info */}
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
+                <svg className="w-5 h-5 text-gold-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-primary-700 font-medium">гр. София, ул. Строителна 123, 1000</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Call to Action Section */}
+        <section className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
+          {/* Gold accent overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-display-1 font-bold mb-4">
+              Готови сте да започнете своя проект?
+            </h2>
+            <p className="text-xl text-platinum-300 mb-8 max-w-2xl mx-auto">
+              Нашият екип е готов да ви помогне да реализирате мечтания проект с качество и професионализъм
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200">
+                Получете безплатна оферта
+              </button>
+              <button className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
+                Обадете се сега
+              </button>
+            </div>
+          </div>
+        </section>
     </motion.main>
     </>)
 }

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import Hero from '../components/ui/Hero'
+import HeroCarousel from '../components/ui/HeroCarousel'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { seoData, generateStructuredData } from '../utils/seo'
@@ -57,7 +57,7 @@ const Home = () => {
         transition={pageTransition}
       >
       {/* Hero Section */}
-      <Hero />
+      <HeroCarousel />
 
       {/* Services Section */}
       <motion.section 

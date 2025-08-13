@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Thumbs, Autoplay } from 'swiper/modules'
 import { projectsData, statusConfig, categoryConfig } from '../data/projectsData'
 import ThreeDModelViewer from '../components/ui/ThreeDModelViewer'
+import BuildingFloorPlan from '../components/ui/BuildingFloorPlan'
 
 // Import Swiper styles
 import 'swiper/css'
@@ -54,6 +55,7 @@ const ProjectDetail = () => {
     { id: 'overview', label: 'Общ преглед', icon: '🏢' },
     { id: 'gallery', label: 'Галерия', icon: '📸' },
     { id: '3d-model', label: '3D Модел', icon: '🎯' },
+    { id: 'floor-plan', label: 'План на етажите', icon: '🏗️' },
     { id: 'specifications', label: 'Спецификации', icon: '📋' }
   ]
 
@@ -128,8 +130,14 @@ const ProjectDetail = () => {
                 Разгледай галерията
               </button>
               <button
-                onClick={() => setActiveTab('3d-model')}
+                onClick={() => setActiveTab('floor-plan')}
                 className="border-2 border-gold-500/50 text-white hover:bg-gold-500 hover:text-primary-900 px-8 py-3 rounded-luxury font-semibold transition-all duration-200 backdrop-blur-sm"
+              >
+                План на етажите
+              </button>
+              <button
+                onClick={() => setActiveTab('3d-model')}
+                className="border-2 border-gold-500/50 text-white hover:bg-gold-500 hover:text-primary-900 px-6 py-3 rounded-luxury font-semibold transition-all duration-200 backdrop-blur-sm"
               >
                 3D Модел
               </button>
@@ -314,6 +322,21 @@ const ProjectDetail = () => {
                     Придвижване: Десен бутон
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Floor Plan Tab */}
+          {activeTab === 'floor-plan' && (
+            <div>
+              <div className="mb-8 text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Интерактивен план на етажите</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Разгледайте подробно всеки етаж и наличните апартаменти в сградата
+                </p>
+              </div>
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <BuildingFloorPlan />
               </div>
             </div>
           )}
