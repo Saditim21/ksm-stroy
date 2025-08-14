@@ -27,14 +27,11 @@ const Navbar = () => {
           {/* Left Section: Logo - Properly positioned to the left */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-luxury p-2">
-                <img 
-                  src={logo} 
-                  alt="KSM Stroy Logo" 
-                  className="h-10 w-auto mix-blend-multiply opacity-90 brightness-0 invert"
-                  style={{ filter: 'drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3))' }}
-                />
-              </div>
+              <img 
+                src={logo} 
+                alt="KSM Stroy Logo" 
+                className="h-12 w-auto"
+              />
             </Link>
           </div>
 
