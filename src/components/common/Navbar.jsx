@@ -10,8 +10,8 @@ const Navbar = () => {
   const navItems = [
     { path: '/', label: 'Начало' },
     { path: '/about', label: 'За нас' },
-    { path: '/projects', label: 'Проекти' },
-    { path: '/blog', label: 'Блог' },
+    { path: '/projects', label: 'Продажби' },
+    { path: '/blog', label: 'Обекти' },
     { path: '/contact', label: 'Контакти' }
   ]
 

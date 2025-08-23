@@ -6,6 +6,7 @@ import { seoData, generateStructuredData } from '../utils/seo'
 import img001 from '../assets/images/001.jpg'
 import img002 from '../assets/images/002.jpg'
 import img003 from '../assets/images/003.jpg'
+import covidDocument from '../assets/home/TABELA_Covid-19_EP_page-0001 (1).jpg'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 const Home = () => {
@@ -58,6 +59,65 @@ const Home = () => {
       >
       {/* Hero Section */}
       <HeroCarousel />
+
+      {/* COVID-19 Project Document Section */}
+      <motion.section 
+        className="py-12 bg-white"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-8" variants={staggerItem}>
+            <h2 className="text-display-2 text-primary-900 mb-6">
+              Проект и главна цел: „Подкрепа за малки предприятия с оборот над 500 000 лв. за преодоляване на икономическите последствия от пандемията COVID-19"
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <motion.div className="space-y-4 text-left" variants={staggerItem}>
+                <div>
+                  <h3 className="text-lg font-semibold text-primary-900 mb-2">Номер на АДПБФП:</h3>
+                  <p className="text-primary-700">BG16RFOP002-2.089-1852-C01</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-primary-900 mb-2">Бенефициент:</h3>
+                  <p className="text-primary-700">„КСМ СТРОЙ" ООД</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-primary-900 mb-2">Обща стойност:</h3>
+                  <p className="text-primary-700">50 000.00 лв., от които 50 000.00 лв. европейско и 00.00 лв. национално съфинансиране.</p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-primary-900 mb-2">Начало:</h3>
+                    <p className="text-primary-700">24.03.2022г.</p>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-primary-900 mb-2">Край:</h3>
+                    <p className="text-primary-700">24.06.2022 г.</p>
+                  </div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="flex justify-center lg:justify-end"
+                variants={hoverLift}
+                whileHover="hover"
+              >
+                <OptimizedImage
+                  src={covidDocument}
+                  alt="COVID-19 Project Document - EU and Bulgarian Operational Program"
+                  className="max-w-full h-auto rounded-luxury shadow-luxury hover:shadow-luxury-lg transition-shadow duration-300"
+                  loading="lazy"
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* Services Section */}
       <motion.section 

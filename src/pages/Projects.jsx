@@ -1,213 +1,850 @@
-import { useState } from 'react'
-import ProjectCard from '../components/ui/ProjectCard'
-import { projectsData, categoryConfig, statusConfig } from '../data/projectsData'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import SEO from '../components/common/SEO'
+import OptimizedImage from '../components/ui/OptimizedImage'
+import FourTowersFloorMap from '../components/FourTowersFloorMap'
+import { seoData } from '../utils/seo'
+import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
-const Projects = () => {
-  const [activeFilter, setActiveFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+// Import sales property images
+import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
+import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
+import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
 
-  // Create filter options from data
-  const categoryFilters = [
-    { id: 'all', label: 'Всички категории' },
-    ...Object.entries(categoryConfig).map(([key, value]) => ({
-      id: key,
-      label: value.label
-    }))
+const Sales = () => {
+  const [selectedFilter, setSelectedFilter] = useState('all')
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showBuildingView, setShowBuildingView] = useState(false)
+  const [hoveredFloor, setHoveredFloor] = useState(null)
+  const [selectedFloor, setSelectedFloor] = useState(null)
+  const modalRef = useRef(null)
+
+  // Sales property data
+  const properties = [
+    {
+      id: 1,
+      title: "Многофамилна жилищна сграда",
+      location: "УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София",
+      status: "За продажба",
+      type: "Жилищна сграда",
+      year: "2024",
+      description: "Модерна многофамилна жилищна сграда с два блока (А и Б), гаражи и луксозни апартаменти в жк. Връбница-1. Блок А - 10 етажа, Блок Б - 9 етажа. Част от апартаментите вече са продадени.",
+      images: [property1Image1, property1Image2],
+      features: ["Подземни гаражи", "Блок А - 10 етажа", "Блок Б - 9 етажа", "Престижен район"],
+      price: "По запитване",
+      apartments: "Блокове А и Б - различни етажи",
+      totalFloors: "Блок А: 10 етажа, Блок Б: 9 етажа",
+      buildingData: {
+        blockA: {
+          floors: [
+            { floor: 10, status: 'sold', apartments: 2, description: 'Етаж 10 - Продаден' },
+            { floor: 9, status: 'available', apartments: 2, description: 'Етаж 9 - 2 апартамента налични' },
+            { floor: 8, status: 'sold', apartments: 2, description: 'Етаж 8 - Продаден' },
+            { floor: 7, status: 'sold', apartments: 2, description: 'Етаж 7 - Продаден' },
+            { floor: 6, status: 'sold', apartments: 2, description: 'Етаж 6 - Продаден' },
+            { floor: 5, status: 'sold', apartments: 2, description: 'Етаж 5 - Продаден' },
+            { floor: 4, status: 'sold', apartments: 2, description: 'Етаж 4 - Продаден' },
+            { floor: 3, status: 'available', apartments: 2, description: 'Етаж 3 - 2 апартамента налични' },
+            { floor: 2, status: 'available', apartments: 2, description: 'Етаж 2 - 2 апартамента налични' }
+          ]
+        },
+        blockB: {
+          floors: [
+            { floor: 9, status: 'available', apartments: 2, description: 'Етаж 9 - 2 апартамента налични' },
+            { floor: 8, status: 'available', apartments: 2, description: 'Етаж 8 - 2 апартамента налични' },
+            { floor: 7, status: 'available', apartments: 2, description: 'Етаж 7 - 2 апартамента налични' },
+            { floor: 6, status: 'available', apartments: 2, description: 'Етаж 6 - 2 апартамента налични' },
+            { floor: 5, status: 'available', apartments: 2, description: 'Етаж 5 - 2 апартамента налични' },
+            { floor: 4, status: 'available', apartments: 2, description: 'Етаж 4 - 2 апартамента налични' },
+            { floor: 3, status: 'available', apartments: 2, description: 'Етаж 3 - 2 апартамента налични' },
+            { floor: 2, status: 'available', apartments: 2, description: 'Етаж 2 - 2 апартамента налични' }
+          ]
+        },
+        garage: {
+          available: true,
+          description: 'Подземни гаражи - налични места'
+        }
+      }
+    },
+    {
+      id: 2,
+      title: "Очаквайте скоро нови обекти",
+      location: "София",
+      status: "Скоро",
+      type: "Нови проекти",
+      year: "2024",
+      description: "Работим върху нови атрактивни проекти за продажба. Следете за обновления.",
+      images: [property1Image1],
+      features: ["Нови проекти", "Атрактивни локации", "Модерни решения"],
+      price: "Скоро",
+      apartments: "Различни типове",
+      totalFloors: "Различни"
+    }
   ]
 
-  const statusFilters = [
-    { id: 'all', label: 'Всички статуси' },
-    ...Object.entries(statusConfig).map(([key, value]) => ({
-      id: key,
-      label: value.label
-    }))
+  // Filter properties
+  const filteredProperties = selectedFilter === 'all' 
+    ? properties 
+    : properties.filter(property => property.status === selectedFilter)
+
+  // Property filters
+  const filters = [
+    { id: 'all', name: 'Всички имоти', count: properties.length },
+    { id: 'За продажба', name: 'За продажба', count: properties.filter(p => p.status === 'За продажба').length },
+    { id: 'Скоро', name: 'Скоро в продажба', count: properties.filter(p => p.status === 'Скоро').length }
   ]
 
-  // Filter projects based on active filters and search
-  const filteredProjects = projectsData.filter(project => {
-    const matchesCategory = activeFilter === 'all' || project.category === activeFilter
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-    const matchesSearch = searchTerm === '' || 
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    return matchesCategory && matchesStatus && matchesSearch
-  })
-
-  const clearFilters = () => {
-    setActiveFilter('all')
-    setStatusFilter('all')
-    setSearchTerm('')
+  // Modal functions
+  const openModal = (property) => {
+    setSelectedProject(property)
+    setCurrentImageIndex(0)
+    // Show building view by default if building data exists
+    setShowBuildingView(!!property.buildingData)
+    document.body.style.overflow = 'hidden'
   }
 
+  const closeModal = () => {
+    setSelectedProject(null)
+    setShowBuildingView(false)
+    setHoveredFloor(null)
+    setSelectedFloor(null)
+    document.body.style.overflow = 'unset'
+  }
+
+  const toggleBuildingView = () => {
+    setShowBuildingView(!showBuildingView)
+    setCurrentImageIndex(0)
+  }
+
+  const nextImage = () => {
+    if (selectedProject) {
+      setCurrentImageIndex((prev) => 
+        prev === selectedProject.images.length - 1 ? 0 : prev + 1
+      )
+    }
+  }
+
+  const prevImage = () => {
+    if (selectedProject) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedProject.images.length - 1 : prev - 1
+      )
+    }
+  }
+
+  // Keyboard navigation
+  const handleKeyDown = (e) => {
+    if (!selectedProject) return
+    
+    switch (e.key) {
+      case 'Escape':
+        closeModal()
+        break
+      case 'ArrowLeft':
+        prevImage()
+        break
+      case 'ArrowRight':
+        nextImage()
+        break
+      default:
+        break
+    }
+  }
+
+  // Add keyboard event listener when modal is open
+  useEffect(() => {
+    if (selectedProject) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedProject, currentImageIndex])
+
   return (
-    <div className="min-h-screen">
+    <>
+      <SEO 
+        title="Продажби - KSM Stroy"
+        description="Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София."
+        keywords="продажби, апартаменти, имоти, новостроящи се, София"
+        ogTitle="Продажби - KSM Stroy"
+        ogImage={properties[0]?.images[0]}
+      />
       
+      <motion.main 
+        className="min-h-screen bg-primary-50 pt-8"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white py-20">
-        <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-hero font-bold mb-6">
-              Нашите проекти
-            </h1>
-            <p className="text-xl md:text-2xl text-platinum-300 max-w-3xl mx-auto leading-relaxed">
-              Разгледайте нашето портфолио от завършени, текущи и предстоящи проекти
-            </p>
-            <div className="mt-8 flex items-center justify-center space-x-8 text-sm text-platinum-300">
-              <div className="flex items-center">
-                <span className="font-semibold text-2xl text-white mr-2">{projectsData.length}</span>
-                Общо проекта
-              </div>
-              <div className="flex items-center">
-                <span className="font-semibold text-2xl text-white mr-2">
-                  {projectsData.filter(p => p.status === 'completed').length}
-                </span>
-                Завършени
-              </div>
-              <div className="flex items-center">
-                <span className="font-semibold text-2xl text-white mr-2">
-                  {projectsData.filter(p => p.status === 'in-progress').length}
-                </span>
-                В процес
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Search and Filter Section */}
-      <section className="py-8 bg-primary-50 border-b border-gold-500/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative max-w-md mx-auto">
-              <input
-                type="text"
-                placeholder="Търсете проект по име, локация или описание..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 pl-12 pr-4 border border-silver-200 rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent bg-white shadow-luxury"
-              />
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            
-            {/* Category Filters */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-              {categoryFilters.map(filter => (
-                <button
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`px-4 py-2 rounded-luxury font-medium text-sm transition-all duration-200 ${
-                    activeFilter === filter.id
-                      ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-gold-glow'
-                      : 'bg-white border border-silver-200 text-primary-700 hover:border-gold-500/30 hover:bg-ivory-50 shadow-luxury'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Status Filters & Clear */}
-            <div className="flex flex-wrap justify-center lg:justify-end gap-3 items-center">
-              {statusFilters.map(filter => (
-                <button
-                  key={filter.id}
-                  onClick={() => setStatusFilter(filter.id)}
-                  className={`px-4 py-2 rounded-luxury font-medium text-sm transition-all duration-200 ${
-                    statusFilter === filter.id
-                      ? 'bg-gradient-to-r from-royal-600 to-royal-700 text-white shadow-luxury'
-                      : 'bg-white border border-silver-200 text-primary-700 hover:border-royal-500/30 hover:bg-ivory-50 shadow-luxury'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-              
-              {/* Clear Filters */}
-              {(activeFilter !== 'all' || statusFilter !== 'all' || searchTerm !== '') && (
-                <button
-                  onClick={clearFilters}
-                  className="px-4 py-2 text-sm text-primary-600 hover:text-primary-900 font-medium border border-silver-200 rounded-luxury hover:bg-ivory-50 hover:border-gold-500/30 transition-all duration-200 shadow-luxury"
-                >
-                  Изчисти филтрите
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Results Count */}
-          <div className="mt-4 text-center text-primary-600">
-            Показани {filteredProjects.length} от {projectsData.length} проекта
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Grid */}
-      <section className="py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {filteredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProjects.map(project => (
-                <div key={project.id} className="transform transition-all duration-300 hover:-translate-y-2">
-                  <ProjectCard project={project} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            // No Results State
-            <div className="text-center py-16">
-              <svg className="w-24 h-24 text-primary-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <h3 className="text-2xl font-semibold text-primary-900 mb-2">Няма намерени проекти</h3>
-              <p className="text-primary-600 mb-6">Опитайте с различни филтри или ключови думи</p>
-              <button
-                onClick={clearFilters}
-                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 py-3 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
-              >
-                Покажи всички проекти
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
-        {/* Gold accent overlay */}
+      <motion.section 
+        className="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+      >
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-display-1 font-bold mb-4">
-            Готови сте да започнете своя проект?
-          </h2>
-          <p className="text-xl text-platinum-300 mb-8 max-w-2xl mx-auto">
-            Свържете се с нас за безплатна консултация и персонализирана оферта
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200">
-              Получете оферта
-            </button>
-            <button className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
-              Свържете се с нас
-            </button>
+          <motion.div variants={staggerItem}>
+            <span className="text-gold-400 font-semibold text-sm uppercase tracking-wide">Нашите обекти</span>
+            <h1 className="text-display-1 font-bold mt-2 mb-6">
+              Продажби
+            </h1>
+            <p className="text-xl text-platinum-300 max-w-3xl mx-auto">
+              Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София.
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={viewportOptions}
+          >
+            <motion.div className="text-center" variants={staggerItem}>
+              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
+                {properties.length}
+              </div>
+              <p className="text-platinum-300">Общо обекта</p>
+            </motion.div>
+            <motion.div className="text-center" variants={staggerItem}>
+              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
+                {properties.filter(p => p.status === 'За продажба').length}
+              </div>
+              <p className="text-platinum-300">За продажба</p>
+            </motion.div>
+            <motion.div className="text-center" variants={staggerItem}>
+              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
+                {properties.filter(p => p.status === 'Скоро').length}
+              </div>
+              <p className="text-platinum-300">Очаквани</p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Property Filter */}
+      <motion.section 
+        className="py-12 bg-gradient-to-br from-ivory-50 to-primary-50"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap gap-4 justify-center">
+            {filters.map((filter) => (
+              <motion.button
+                key={filter.id}
+                onClick={() => setSelectedFilter(filter.id)}
+                className={`px-6 py-3 rounded-luxury text-sm font-medium transition-all duration-300 ${
+                  selectedFilter === filter.id
+                    ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-gold-glow scale-105'
+                    : 'bg-white text-primary-700 hover:bg-gold-50 hover:text-gold-700 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {filter.name}
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                  selectedFilter === filter.id
+                    ? 'bg-primary-900/20 text-primary-900'
+                    : 'bg-gold-100 text-gold-700'
+                }`}>
+                  {filter.count}
+                </span>
+              </motion.button>
+            ))}
           </div>
         </div>
-      </section>
+      </motion.section>
+
+      {/* Properties Grid */}
+      <motion.section 
+        className="py-20 bg-primary-50"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={selectedFilter}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {filteredProperties.map((property, index) => (
+                <PropertyCard 
+                  key={property.id} 
+                  property={property} 
+                  index={index}
+                  onClick={() => openModal(property)}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+          
+          {filteredProperties.length === 0 && (
+            <motion.div 
+              className="text-center py-16"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-primary-900 mb-2">Няма обекти</h3>
+              <p className="text-primary-600">В тази категория все още няма обекти за продажба.</p>
+            </motion.div>
+          )}
+        </div>
+      </motion.section>
+
+      {/* Call to Action */}
+      <motion.section 
+        className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div variants={staggerItem}>
+            <h2 className="text-display-1 font-bold mb-4">
+              Търсите нов дом?
+            </h2>
+            <p className="text-xl mb-8 text-platinum-300">
+              Свържете се с нас за консултация и да обсъдим наличните апартаменти и бъдещи проекти
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.button 
+                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Свържете се с нас
+              </motion.button>
+              <motion.button 
+                className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Попитайте за цени
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Enhanced Property Modal */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div
+            ref={modalRef}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+          >
+            <div className="h-full flex flex-col max-h-screen">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 bg-black/50 backdrop-blur-lg border-b border-white/10">
+                <div className="flex items-center space-x-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedProject.status === 'За продажба' 
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                      : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  }`}>
+                    {selectedProject.status}
+                  </span>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{selectedProject.title}</h2>
+                    <p className="text-gold-400 text-sm">{selectedProject.location} • {selectedProject.year}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  {/* Building View Toggle */}
+                  {selectedProject.buildingData && (
+                    <button
+                      onClick={toggleBuildingView}
+                      className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${
+                        showBuildingView 
+                          ? 'bg-gold-500/20 text-gold-400 border-gold-500/30' 
+                          : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                      }`}
+                    >
+                      <svg className="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {showBuildingView ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        )}
+                      </svg>
+                      {showBuildingView ? 'Виж снимки' : 'Виж етажи'}
+                    </button>
+                  )}
+                  
+                  {/* Image Counter */}
+                  {!showBuildingView && selectedProject.images.length > 1 && (
+                    <div className="px-3 py-1 bg-white/10 rounded-full text-white text-sm border border-white/20">
+                      {currentImageIndex + 1} / {selectedProject.images.length}
+                    </div>
+                  )}
+                  
+                  {/* Close Button */}
+                  <button
+                    onClick={closeModal}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 border border-white/20"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              {/* Main Content Area */}
+              <div className="flex-1 relative flex items-center justify-center p-4 min-h-0" onClick={(e) => e.stopPropagation()}>
+                {showBuildingView && selectedProject.buildingData ? (
+                  <div className="w-full h-full">
+                    <FourTowersFloorMap />
+                  </div>
+                ) : (
+                  <>
+                    <motion.div 
+                      className="relative max-w-7xl w-full h-full flex items-center justify-center"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <img
+                        src={selectedProject.images[currentImageIndex]}
+                        alt={`${selectedProject.title} - Снимка ${currentImageIndex + 1}`}
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                      />
+                    </motion.div>
+                    
+                    {/* Navigation Arrows - Fixed Position */}
+                    {selectedProject.images.length > 1 && (
+                      <>
+                        <motion.button
+                          onClick={prevImage}
+                          className="fixed left-8 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all duration-200 text-white border border-white/20 hover:border-gold-400 z-10"
+                          whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <motion.svg 
+                            className="w-8 h-8" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                            whileHover={{ x: -2 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </motion.svg>
+                        </motion.button>
+                        <motion.button
+                          onClick={nextImage}
+                          className="fixed right-8 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all duration-200 text-white border border-white/20 hover:border-gold-400 z-10"
+                          whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <motion.svg 
+                            className="w-8 h-8" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                            whileHover={{ x: 2 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </motion.svg>
+                        </motion.button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+              
+              {/* Thumbnail Gallery */}
+              {!showBuildingView && selectedProject.images.length > 1 && (
+                <div className="bg-black/50 backdrop-blur-lg border-t border-white/10 p-4">
+                  <div className="max-w-7xl mx-auto">
+                    <div className="flex space-x-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                      {selectedProject.images.map((image, index) => (
+                        <motion.button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                            index === currentImageIndex 
+                              ? 'border-gold-400 shadow-lg shadow-gold-400/20' 
+                              : 'border-white/20 hover:border-white/40'
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <img
+                            src={image}
+                            alt={`Миниатюра ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Building Info Panel */}
+              {showBuildingView && hoveredFloor && (
+                <div className="bg-black/60 backdrop-blur-lg border-t border-white/10 p-4">
+                  <div className="max-w-7xl mx-auto">
+                    <div className="text-center">
+                      <h4 className="text-lg font-semibold text-white mb-2">{hoveredFloor.description}</h4>
+                      <div className="flex items-center justify-center space-x-4 text-sm text-gray-300">
+                        <span className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          Етаж {hoveredFloor.floor}
+                        </span>
+                        <span className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
+                          </svg>
+                          {hoveredFloor.apartments} апартамента
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          hoveredFloor.status === 'available' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {hoveredFloor.status === 'available' ? 'Налични' : 'Продадени'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </motion.main>
+  </>)
+}
+
+// Property Card Component
+const PropertyCard = ({ property, index, onClick }) => {
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  const handleImageLoad = () => {
+    setImageLoaded(true)
+  }
+
+  const handleImageError = () => {
+    setImageError(true)
+    setImageLoaded(true)
+  }
+
+  return (
+    <motion.article 
+      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500"
+      variants={staggerItem}
+      initial="initial"
+      animate="animate"
+      whileHover={{ y: -8, scale: 1.02 }}
+      onClick={onClick}
+      style={{ 
+        animationDelay: `${index * 0.1}s` 
+      }}
+    >
+      {/* Property Image */}
+      <div className="relative h-56 overflow-hidden">
+        {!imageError ? (
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-br from-gold-100 to-gold-200 animate-pulse flex items-center justify-center">
+                <svg className="w-12 h-12 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+            )}
+            <OptimizedImage
+              src={property.images[0]}
+              alt={`${property.title} - KSM Stroy обект`}
+              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center">
+            <div className="text-center">
+              <svg className="w-16 h-16 text-gold-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span className="text-gold-700 text-sm font-medium">Проект</span>
+            </div>
+          </div>
+        )}
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
+        
+        {/* Status Badge */}
+        <div className="absolute top-4 left-4">
+          <span className={`px-3 py-1 backdrop-blur-sm rounded-full text-xs font-medium ${
+            property.status === 'За продажба' 
+              ? 'bg-green-500/90 text-white' 
+              : 'bg-blue-500/90 text-white'
+          }`}>
+            {property.status}
+          </span>
+        </div>
+
+        {/* Image Count Indicator */}
+        {property.images.length > 1 && (
+          <div className="absolute top-4 right-4">
+            <span className="px-2 py-1 bg-black/50 backdrop-blur-sm text-white rounded-full text-xs flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {property.images.length}
+            </span>
+          </div>
+        )}
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-gold-600/0 group-hover:bg-gold-600/10 transition-all duration-300"></div>
+      </div>
+
+      {/* Property Content */}
+      <div className="p-6">
+        {/* Title */}
+        <h3 className="text-xl font-bold text-primary-900 mb-2 group-hover:text-gold-700 transition-colors duration-300 leading-tight">
+          {property.title}
+        </h3>
+
+        {/* Location and Type */}
+        <div className="flex items-center text-sm text-primary-500 mb-3 space-x-2">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>{property.location}</span>
+          </div>
+          <span>•</span>
+          <span>{property.year}</span>
+        </div>
+
+        {/* Description */}
+        <p className="text-primary-600 text-sm leading-relaxed mb-4 line-clamp-2">
+          {property.description}
+        </p>
+
+        {/* Property Type */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-xs text-primary-500 flex items-center">
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            {property.type}
+          </span>
+        </div>
+
+        {/* Features Preview */}
+        {property.features && property.features.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {property.features.slice(0, 2).map((feature, index) => (
+              <span key={index} className="px-2 py-1 bg-gold-100 text-gold-700 rounded-full text-xs">
+                {feature}
+              </span>
+            ))}
+            {property.features.length > 2 && (
+              <span className="px-2 py-1 bg-primary-100 text-primary-600 rounded-full text-xs">
+                +{property.features.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* View Details Button */}
+        <motion.button 
+          className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-3 px-4 rounded-luxury font-semibold flex items-center justify-center group shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <span>Разгледай апартаментите</span>
+          <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </motion.button>
+      </div>
+
+      {/* Bottom accent line */}
+      <motion.div 
+        className="h-1 bg-gradient-to-r from-gold-500 to-gold-600 origin-left"
+        initial={{ scaleX: 0 }}
+        whileHover={{ scaleX: 1 }}
+        transition={{ duration: 0.5 }}
+      />
+    </motion.article>
+  )
+}
+
+// Simple Building View Component
+const BuildingView = ({ buildingData, hoveredFloor, setHoveredFloor, selectedFloor, setSelectedFloor, projectImages }) => {
+  const { blockA, blockB, garage } = buildingData
+  
+  // Combine all floors for easy listing
+  const allFloors = [
+    ...blockA.floors.map(f => ({ ...f, block: 'А' })),
+    ...blockB.floors.map(f => ({ ...f, block: 'Б' }))
+  ].sort((a, b) => b.floor - a.floor)
+
+  return (
+    <div className="w-full h-full flex bg-gray-900">
+      
+      {/* Left Sidebar - Floor List */}
+      <div className="w-80 bg-black/50 border-r border-white/10 p-6 overflow-y-auto">
+        <h3 className="text-xl font-bold text-white mb-4">Изберете етаж</h3>
+        
+        <div className="space-y-2">
+          {allFloors.map((floor) => {
+            const isSelected = selectedFloor?.floor === floor.floor && selectedFloor?.block === floor.block
+            const isAvailable = floor.status === 'available'
+            
+            return (
+              <button
+                key={`${floor.block}-${floor.floor}`}
+                className={`w-full p-4 rounded-lg text-left transition-all ${
+                  isSelected 
+                    ? 'bg-gold-500/20 border-2 border-gold-500' 
+                    : 'bg-gray-800 hover:bg-gray-700 border-2 border-transparent'
+                }`}
+                onClick={() => setSelectedFloor(floor)}
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="text-white font-medium">
+                      Блок {floor.block} - Етаж {floor.floor}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {floor.apartments} апартамента
+                    </div>
+                  </div>
+                  <div className={`w-3 h-3 rounded-full ${
+                    isAvailable ? 'bg-green-500' : 'bg-red-500'
+                  }`} />
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Center - Building Image */}
+      <div className="flex-1 p-8">
+        <div className="h-full bg-gray-800 rounded-lg overflow-hidden relative">
+          <img 
+            src={buildingImage}
+            alt="Сграда"
+            className="w-full h-full object-contain"
+          />
+          
+          {/* Selected Floor Info Overlay */}
+          {selectedFloor && (
+            <div className="absolute bottom-0 left-0 right-0 bg-black/80 p-6 text-white">
+              <h4 className="text-lg font-bold mb-2">
+                Блок {selectedFloor.block} - Етаж {selectedFloor.floor}
+              </h4>
+              <p className="text-sm text-gray-300">{selectedFloor.description}</p>
+              <div className="mt-3 flex gap-4">
+                <span className={`px-3 py-1 rounded text-sm ${
+                  selectedFloor.status === 'available' 
+                    ? 'bg-green-500/20 text-green-400' 
+                    : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {selectedFloor.status === 'available' ? 'Налични' : 'Продадени'}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {selectedFloor.apartments} апартамента
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Panel - Floor Details */}
+      {selectedFloor && (
+        <div className="w-96 bg-black/50 border-l border-white/10 p-6">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-white">
+              Детайли за етажа
+            </h3>
+            <p className="text-gray-400 mt-1">
+              Блок {selectedFloor.block} - Етаж {selectedFloor.floor}
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-800 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Статус</div>
+              <div className={`font-semibold ${
+                selectedFloor.status === 'available' ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {selectedFloor.status === 'available' ? 'Налични' : 'Продадени'}
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Брой апартаменти</div>
+              <div className="text-white font-semibold">{selectedFloor.apartments}</div>
+            </div>
+            
+            <div className="bg-gray-800 rounded-lg p-4">
+              <div className="text-sm text-gray-400 mb-1">Описание</div>
+              <div className="text-white text-sm">{selectedFloor.description}</div>
+            </div>
+            
+            {selectedFloor.status === 'available' && (
+              <button className="w-full bg-gold-500 hover:bg-gold-600 text-black font-semibold py-3 rounded-lg transition-colors">
+                Запитване за цена
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-export default Projects
+export default Sales
