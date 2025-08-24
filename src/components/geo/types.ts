@@ -1,56 +1,37 @@
 export interface PointPct {
-  x: number; // percent 0-100
-  y: number; // percent 0-100
+  x: number; // 0-100 percentage
+  y: number; // 0-100 percentage
 }
 
 export interface Quad {
-  LT: PointPct; // left-top
-  RT: PointPct; // right-top
-  RB: PointPct; // right-bottom
-  LB: PointPct; // left-bottom
-}
-
-export interface Band {
-  y0: number; // normalized 0-1
-  y1: number; // normalized 0-1
+  LT: PointPct; // Left-Top
+  RT: PointPct; // Right-Top
+  RB: PointPct; // Right-Bottom
+  LB: PointPct; // Left-Bottom
 }
 
 export interface TowerConfig {
   id: string;
-  nameBG: string;
+  name: string;
   quad: Quad;
   floors: number;
-  yCuts: number[]; // normalized 0-1, length = floors+1
-  padTop?: number;
-  padBottom?: number;
+  yCuts: number[]; // Normalized 0-1 positions for horizontal cuts (length: floors+1)
 }
 
-export interface FloorPolygon {
+export interface CutLines {
+  towerId: string;
+  cuts: number[]; // Y positions in normalized coordinates [0,1]
+}
+
+export interface ActiveFloor {
   towerId: string;
   floorIndex: number;
-  points: PointPct[];
 }
 
-export interface ConfigData {
-  towers: TowerConfig[];
-  polygons?: FloorPolygon[];
-}
-
-export interface HoverState {
-  tower: string | null;
-  floor: number | null;
-}
-
-export interface SelectedState {
-  tower: string | null;
-  floor: number | null;
-}
-
-export interface FloorData {
-  property: string;
-  type: string;
-  builtArea: string;
-  totalArea: string;
-  exposure: string;
-  status: 'available' | 'sold' | 'reserved';
+export interface CalibrationState {
+  isActive: boolean;
+  currentTower?: string;
+  clickedPoints: PointPct[];
+  padTop: number;
+  padBottom: number;
 }

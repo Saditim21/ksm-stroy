@@ -254,24 +254,10 @@ const Projects = () => {
         ogImage={projects[0]?.images[0]}
       />
       
-      <motion.main 
-        className="min-h-screen bg-primary-50 pt-8"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-
+      <main className="min-h-screen bg-primary-50 pt-20">
 
       {/* Project Filter */}
-      <motion.section 
-        className="py-12 bg-gradient-to-br from-ivory-50 to-primary-50"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
-      >
+      <section className="py-12 bg-gradient-to-br from-ivory-50 to-primary-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-4 justify-center">
             {filters.map((filter) => (
@@ -298,25 +284,15 @@ const Projects = () => {
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Projects Grid */}
-      <motion.section 
-        className="py-20 bg-primary-50"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
-      >
+      <section className="py-20 bg-primary-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
-            <motion.div 
+            <div 
               key={selectedFilter}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-              variants={staggerContainer}
-              initial="initial"
-              animate="animate"
-              exit="exit"
             >
               {filteredProjects.map((project, index) => (
                 <ProjectCard 
@@ -326,7 +302,7 @@ const Projects = () => {
                   onClick={() => openModal(project)}
                 />
               ))}
-            </motion.div>
+            </div>
           </AnimatePresence>
           
           {filteredProjects.length === 0 && (
@@ -346,20 +322,14 @@ const Projects = () => {
             </motion.div>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {/* Call to Action */}
-      <motion.section 
-        className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
-      >
+      <section className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div variants={staggerItem}>
+          <div>
             <h2 className="text-display-1 font-bold mb-4">
               Имате идея за проект?
             </h2>
@@ -382,9 +352,9 @@ const Projects = () => {
                 Поръчайте оферта
               </motion.button>
             </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Enhanced Project Modal */}
       <AnimatePresence>
@@ -582,7 +552,7 @@ const Projects = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.main>
+    </main>
   </>)
 }
 
@@ -601,16 +571,9 @@ const ProjectCard = ({ project, index, onClick }) => {
   }
 
   return (
-    <motion.article 
-      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500"
-      variants={staggerItem}
-      initial="initial"
-      animate="animate"
-      whileHover={{ y: -8, scale: 1.02 }}
+    <article 
+      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
       onClick={onClick}
-      style={{ 
-        animationDelay: `${index * 0.1}s` 
-      }}
     >
       {/* Project Image */}
       <div className="relative h-56 overflow-hidden">
@@ -747,7 +710,7 @@ const ProjectCard = ({ project, index, onClick }) => {
         whileHover={{ scaleX: 1 }}
         transition={{ duration: 0.5 }}
       />
-    </motion.article>
+    </article>
   )
 }
 

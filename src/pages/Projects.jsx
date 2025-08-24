@@ -1,15 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import FourTowersFloorMap from '../components/FourTowersFloorMap'
 import { seoData } from '../utils/seo'
-import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 // Import sales property images
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
+import buildingDFloor1Image from '../assets/продажби/project 1/building-D-floor-1.jpg'
 
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -18,6 +17,7 @@ const Sales = () => {
   const [showBuildingView, setShowBuildingView] = useState(false)
   const [hoveredFloor, setHoveredFloor] = useState(null)
   const [selectedFloor, setSelectedFloor] = useState(null)
+  const [isHoveringDFloor1, setIsHoveringDFloor1] = useState(false)
   const modalRef = useRef(null)
 
   // Sales property data
@@ -170,27 +170,16 @@ const Sales = () => {
         ogImage={properties[0]?.images[0]}
       />
       
-      <motion.main 
-        className="min-h-screen bg-primary-50 pt-8"
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
+      <main className="min-h-screen bg-primary-50">
 
       {/* Hero Section */}
-      <motion.section 
+      <section 
         className="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div variants={staggerItem}>
+          <div>
             <span className="text-gold-400 font-semibold text-sm uppercase tracking-wide">Нашите обекти</span>
             <h1 className="text-display-1 font-bold mt-2 mb-6">
               Продажби
@@ -198,49 +187,41 @@ const Sales = () => {
             <p className="text-xl text-platinum-300 max-w-3xl mx-auto">
               Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София.
             </p>
-          </motion.div>
+          </div>
           
-          <motion.div 
+          <div 
             className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={viewportOptions}
           >
-            <motion.div className="text-center" variants={staggerItem}>
+            <div className="text-center">
               <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
                 {properties.length}
               </div>
               <p className="text-platinum-300">Общо обекта</p>
-            </motion.div>
-            <motion.div className="text-center" variants={staggerItem}>
+            </div>
+            <div className="text-center">
               <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
                 {properties.filter(p => p.status === 'За продажба').length}
               </div>
               <p className="text-platinum-300">За продажба</p>
-            </motion.div>
-            <motion.div className="text-center" variants={staggerItem}>
+            </div>
+            <div className="text-center">
               <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
                 {properties.filter(p => p.status === 'Скоро').length}
               </div>
               <p className="text-platinum-300">Очаквани</p>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Property Filter */}
-      <motion.section 
+      <section 
         className="py-12 bg-gradient-to-br from-ivory-50 to-primary-50"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-4 justify-center">
             {filters.map((filter) => (
-              <motion.button
+              <button
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
                 className={`px-6 py-3 rounded-luxury text-sm font-medium transition-all duration-300 ${
@@ -248,8 +229,6 @@ const Sales = () => {
                     ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-gold-glow scale-105'
                     : 'bg-white text-primary-700 hover:bg-gold-50 hover:text-gold-700 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 {filter.name}
                 <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
@@ -259,29 +238,18 @@ const Sales = () => {
                 }`}>
                   {filter.count}
                 </span>
-              </motion.button>
+              </button>
             ))}
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Properties Grid */}
-      <motion.section 
+      <section 
         className="py-20 bg-primary-50"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={selectedFilter}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-              variants={staggerContainer}
-              initial="initial"
-              animate="animate"
-              exit="exit"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {filteredProperties.map((property, index) => (
                 <PropertyCard 
@@ -291,15 +259,11 @@ const Sales = () => {
                   onClick={() => openModal(property)}
                 />
               ))}
-            </motion.div>
-          </AnimatePresence>
+          </div>
           
           {filteredProperties.length === 0 && (
-            <motion.div 
+            <div 
               className="text-center py-16"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
             >
               <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,23 +272,19 @@ const Sales = () => {
               </div>
               <h3 className="text-xl font-semibold text-primary-900 mb-2">Няма обекти</h3>
               <p className="text-primary-600">В тази категория все още няма обекти за продажба.</p>
-            </motion.div>
+            </div>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {/* Call to Action */}
-      <motion.section 
+      <section 
         className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
-        initial="initial"
-        whileInView="animate"
-        viewport={viewportOptions}
-        variants={fadeInUp}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div variants={staggerItem}>
+          <div>
             <h2 className="text-display-1 font-bold mb-4">
               Търсите нов дом?
             </h2>
@@ -332,34 +292,26 @@ const Sales = () => {
               Свържете се с нас за консултация и да обсъдим наличните апартаменти и бъдещи проекти
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button 
+              <button 
                 className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 Свържете се с нас
-              </motion.button>
-              <motion.button 
+              </button>
+              <button 
                 className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 Попитайте за цени
-              </motion.button>
+              </button>
             </div>
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Enhanced Property Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
+      {selectedProject && (
+          <div
             ref={modalRef}
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             onClick={closeModal}
           >
             <div className="h-full flex flex-col max-h-screen">
@@ -424,61 +376,58 @@ const Sales = () => {
               <div className="flex-1 relative flex items-center justify-center p-4 min-h-0" onClick={(e) => e.stopPropagation()}>
                 {showBuildingView && selectedProject.buildingData ? (
                   <div className="w-full h-full">
-                    <FourTowersFloorMap />
+                    <FourTowersFloorMap 
+                      onHoverChange={(isHovering, towerId, floor) => {
+                        // Always reset first, then set if needed
+                        setIsHoveringDFloor1(false);
+                        if (isHovering && towerId === 'D' && floor === 1) {
+                          setIsHoveringDFloor1(true);
+                        }
+                      }}
+                      currentImage={isHoveringDFloor1 ? buildingDFloor1Image : buildingImage}
+                    />
                   </div>
                 ) : (
                   <>
-                    <motion.div 
+                    <div 
                       className="relative max-w-7xl w-full h-full flex items-center justify-center"
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.9, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
                     >
                       <img
                         src={selectedProject.images[currentImageIndex]}
                         alt={`${selectedProject.title} - Снимка ${currentImageIndex + 1}`}
                         className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                       />
-                    </motion.div>
+                    </div>
                     
                     {/* Navigation Arrows - Fixed Position */}
                     {selectedProject.images.length > 1 && (
                       <>
-                        <motion.button
+                        <button
                           onClick={prevImage}
                           className="fixed left-8 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all duration-200 text-white border border-white/20 hover:border-gold-400 z-10"
-                          whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
-                          transition={{ duration: 0.2 }}
                         >
-                          <motion.svg 
+                          <svg 
                             className="w-8 h-8" 
                             fill="none" 
                             stroke="currentColor" 
                             viewBox="0 0 24 24"
-                            whileHover={{ x: -2 }}
-                            transition={{ duration: 0.2 }}
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </motion.svg>
-                        </motion.button>
-                        <motion.button
+                          </svg>
+                        </button>
+                        <button
                           onClick={nextImage}
                           className="fixed right-8 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all duration-200 text-white border border-white/20 hover:border-gold-400 z-10"
-                          whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
-                          transition={{ duration: 0.2 }}
                         >
-                          <motion.svg 
+                          <svg 
                             className="w-8 h-8" 
                             fill="none" 
                             stroke="currentColor" 
                             viewBox="0 0 24 24"
-                            whileHover={{ x: 2 }}
-                            transition={{ duration: 0.2 }}
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </motion.svg>
-                        </motion.button>
+                          </svg>
+                        </button>
                       </>
                     )}
                   </>
@@ -491,7 +440,7 @@ const Sales = () => {
                   <div className="max-w-7xl mx-auto">
                     <div className="flex space-x-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {selectedProject.images.map((image, index) => (
-                        <motion.button
+                        <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
                           className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
@@ -499,15 +448,13 @@ const Sales = () => {
                               ? 'border-gold-400 shadow-lg shadow-gold-400/20' 
                               : 'border-white/20 hover:border-white/40'
                           }`}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           <img
                             src={image}
                             alt={`Миниатюра ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
-                        </motion.button>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -546,11 +493,10 @@ const Sales = () => {
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
 
-    </motion.main>
+    </main>
   </>)
 }
 
@@ -569,16 +515,9 @@ const PropertyCard = ({ property, index, onClick }) => {
   }
 
   return (
-    <motion.article 
+    <article 
       className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500"
-      variants={staggerItem}
-      initial="initial"
-      animate="animate"
-      whileHover={{ y: -8, scale: 1.02 }}
       onClick={onClick}
-      style={{ 
-        animationDelay: `${index * 0.1}s` 
-      }}
     >
       {/* Property Image */}
       <div className="relative h-56 overflow-hidden">
@@ -695,27 +634,20 @@ const PropertyCard = ({ property, index, onClick }) => {
         )}
 
         {/* View Details Button */}
-        <motion.button 
+        <button 
           className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-3 px-4 rounded-luxury font-semibold flex items-center justify-center group shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           <span>Разгледай апартаментите</span>
           <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-        </motion.button>
+        </button>
       </div>
 
       {/* Bottom accent line */}
-      <motion.div 
-        className="h-1 bg-gradient-to-r from-gold-500 to-gold-600 origin-left"
-        initial={{ scaleX: 0 }}
-        whileHover={{ scaleX: 1 }}
-        transition={{ duration: 0.5 }}
-      />
-    </motion.article>
+      <div className="h-1 bg-gradient-to-r from-gold-500 to-gold-600 origin-left" />
+    </article>
   )
 }
 

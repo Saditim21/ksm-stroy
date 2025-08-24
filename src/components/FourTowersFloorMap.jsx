@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg';
 
 // Simple floor data
@@ -50,54 +49,17 @@ const FLOOR_DATA = {
   },
 };
 
-// Tower configurations - adjusted for the actual building image
+// Tower configurations
 const TOWERS = [
-  {
-    id: 'A',
-    name: 'Блок A',
-    floors: 9,
-    // Approximate positions for leftmost tower
-    x: 12,
-    width: 12,
-    yTop: 28,
-    yBottom: 75
-  },
-  {
-    id: 'B', 
-    name: 'Блок B',
-    floors: 9,
-    // Approximate positions for left-center tower
-    x: 29.5,
-    width: 12,
-    yTop: 28,
-    yBottom: 75
-  },
-  {
-    id: 'C',
-    name: 'Блок C', 
-    floors: 9,
-    // Approximate positions for right-center tower
-    x: 58.5,
-    width: 12,
-    yTop: 28,
-    yBottom: 75
-  },
-  {
-    id: 'D',
-    name: 'Блок D',
-    floors: 9,
-    // Approximate positions for rightmost tower
-    x: 76,
-    width: 12,
-    yTop: 28,
-    yBottom: 75
-  }
+  { id: 'A', name: 'Блок A', floors: 9 },
+  { id: 'B', name: 'Блок B', floors: 9 },
+  { id: 'C', name: 'Блок C', floors: 9 },
+  { id: 'D', name: 'Блок D', floors: 9 }
 ];
 
-const FourTowersFloorMap = () => {
-  const [hover, setHover] = useState({ tower: null, floor: null });
+const FourTowersFloorMap = ({ onHoverChange, currentImage }) => {
   const [selected, setSelected] = useState({ tower: null, floor: null });
-  const [expandedTowers, setExpandedTowers] = useState(new Set(['A']));
+  const [expandedTowers, setExpandedTowers] = useState(new Set(['A', 'D']));
 
   const toggleTowerExpansion = (towerId) => {
     setExpandedTowers(prev => {
@@ -114,9 +76,11 @@ const FourTowersFloorMap = () => {
   const handleFloorClick = (towerId, floorIndex) => {
     setSelected({ tower: towerId, floor: floorIndex });
   };
-
   const handleFloorHover = (towerId, floorIndex) => {
-    setHover({ tower: towerId, floor: floorIndex });
+    if (onHoverChange) {
+      const isHovering = towerId !== null && floorIndex !== null;
+      onHoverChange(isHovering, towerId, floorIndex);
+    }
   };
 
   const getFloorName = (floorIndex) => {
@@ -151,26 +115,6 @@ const FourTowersFloorMap = () => {
     }
   };
 
-  // Generate floor rectangles for each tower
-  const generateFloorRects = (tower) => {
-    const rects = [];
-    const floorHeight = (tower.yBottom - tower.yTop) / tower.floors;
-    
-    for (let i = 0; i < tower.floors; i++) {
-      const y = tower.yTop + (i * floorHeight);
-      rects.push({
-        towerId: tower.id,
-        floorIndex: tower.floors - 1 - i, // Reverse order (top floor = highest index)
-        x: tower.x,
-        y: y,
-        width: tower.width,
-        height: floorHeight * 0.95 // Small gap between floors
-      });
-    }
-    return rects;
-  };
-
-  const allFloorRects = TOWERS.flatMap(tower => generateFloorRects(tower));
 
   return (
     <div className="w-full h-screen bg-gray-50 flex">
@@ -178,6 +122,7 @@ const FourTowersFloorMap = () => {
       <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">Етажи по блокове</h2>
+          <p className="text-sm text-gray-600 mt-1">Кликнете на етаж за детайли</p>
         </div>
         
         <div className="p-2">
@@ -198,52 +143,49 @@ const FourTowersFloorMap = () => {
                 </svg>
               </button>
               
-              <AnimatePresence>
-                {expandedTowers.has(tower.id) && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="ml-4 mt-1 space-y-1">
-                      {Array.from({ length: tower.floors }, (_, i) => tower.floors - 1 - i).map(floorIndex => {
-                        const isHovered = hover.tower === tower.id && hover.floor === floorIndex;
-                        const isSelected = selected.tower === tower.id && selected.floor === floorIndex;
-                        const floorData = FLOOR_DATA[tower.id]?.[floorIndex];
-                        
-                        return (
-                          <button
-                            key={floorIndex}
-                            onClick={() => handleFloorClick(tower.id, floorIndex)}
-                            onMouseEnter={() => handleFloorHover(tower.id, floorIndex)}
-                            onMouseLeave={() => handleFloorHover(null, null)}
-                            className={`w-full px-3 py-2 text-left rounded-md transition-all ${
-                              isSelected 
-                                ? 'bg-blue-500 text-white shadow-md' 
-                                : isHovered 
-                                  ? 'bg-blue-50 text-blue-700' 
-                                  : 'hover:bg-gray-100'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">{getFloorName(floorIndex)}</span>
-                              {floorData && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                  isSelected ? 'bg-white/20' : getStatusBg(floorData.status)
-                                } ${isSelected ? 'text-white' : getStatusColor(floorData.status)}`}>
-                                  {getStatusLabel(floorData.status)}
-                                </span>
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {expandedTowers.has(tower.id) && (
+                <div className="ml-4 mt-1 space-y-1">
+                  {Array.from({ length: tower.floors }, (_, i) => tower.floors - 1 - i).map(floorIndex => {
+                    const isSelected = selected.tower === tower.id && selected.floor === floorIndex;
+                    const floorData = FLOOR_DATA[tower.id]?.[floorIndex];
+                    
+                    return (
+                      <button
+                        key={floorIndex}
+                        onClick={() => handleFloorClick(tower.id, floorIndex)}
+                        onMouseEnter={() => {
+                          // Only trigger hover for Block D floor 1
+                          if (tower.id === 'D' && floorIndex === 1) {
+                            handleFloorHover(tower.id, floorIndex);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          // Only trigger hover leave for Block D floor 1
+                          if (tower.id === 'D' && floorIndex === 1) {
+                            handleFloorHover(null, null);
+                          }
+                        }}
+                        className={`w-full px-3 py-2 text-left rounded-md transition-all ${
+                          isSelected 
+                            ? 'bg-blue-500 text-white shadow-md' 
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{getFloorName(floorIndex)}</span>
+                          {floorData && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              isSelected ? 'bg-white/20 text-white' : getStatusBg(floorData.status) + ' ' + getStatusColor(floorData.status)
+                            }`}>
+                              {getStatusLabel(floorData.status)}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -255,53 +197,30 @@ const FourTowersFloorMap = () => {
           <div className="relative w-full h-full p-8">
             <div className="relative w-full h-full">
               <img 
-                src={buildingImage} 
+                src={currentImage || buildingImage} 
                 alt="Building" 
                 className="w-full h-full object-contain"
               />
               
-              {/* SVG Overlay */}
+              {/* Only Block D Floor 1 hover and click area */}
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
-                {/* Render floor rectangles */}
-                {allFloorRects.map((rect, index) => {
-                  const isHovered = hover.tower === rect.towerId && hover.floor === rect.floorIndex;
-                  const isSelected = selected.tower === rect.towerId && selected.floor === rect.floorIndex;
-                  
-                  return (
-                    <g key={`${rect.towerId}-${rect.floorIndex}`}>
-                      <rect
-                        x={rect.x}
-                        y={rect.y}
-                        width={rect.width}
-                        height={rect.height}
-                        fill={isHovered || isSelected ? 'rgba(59, 130, 246, 0.3)' : 'transparent'}
-                        stroke={isHovered || isSelected ? 'rgba(59, 130, 246, 0.8)' : 'transparent'}
-                        strokeWidth="0.5"
-                        className="cursor-pointer transition-all duration-200"
-                        style={{ pointerEvents: 'auto' }}
-                        onMouseEnter={() => handleFloorHover(rect.towerId, rect.floorIndex)}
-                        onMouseLeave={() => handleFloorHover(null, null)}
-                        onClick={() => handleFloorClick(rect.towerId, rect.floorIndex)}
-                      />
-                      {isSelected && (
-                        <rect
-                          x={rect.x}
-                          y={rect.y}
-                          width={rect.width}
-                          height={rect.height}
-                          fill="none"
-                          stroke="rgba(59, 130, 246, 1)"
-                          strokeWidth="1"
-                          className="animate-pulse"
-                        />
-                      )}
-                    </g>
-                  );
-                })}
+                <rect
+                  x={76}
+                  y={28 + (6 * (75 - 28) / 9)}
+                  width={12}
+                  height={(75 - 28) / 9 * 0.95}
+                  fill="transparent"
+                  stroke="transparent"
+                  className="cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                  onMouseEnter={() => handleFloorHover('D', 1)}
+                  onMouseLeave={() => handleFloorHover(null, null)}
+                  onClick={() => handleFloorClick('D', 1)}
+                />
               </svg>
             </div>
           </div>
@@ -312,6 +231,9 @@ const FourTowersFloorMap = () => {
       <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto">
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">Детайли</h2>
+          {selected.tower && (
+            <p className="text-xs text-gray-500">Избрано: {selected.tower} - Етаж {selected.floor}</p>
+          )}
         </div>
         
         {selected.tower && selected.floor !== null ? (
@@ -375,13 +297,85 @@ const FourTowersFloorMap = () => {
                       </table>
                     </div>
                     
-                    <div className="bg-blue-50 rounded-lg p-4">
+                    {selected.tower === 'D' && selected.floor === 1 && (
+                      <div className="bg-green-50 rounded-lg p-4 mb-4">
+                          <h4 className="font-semibold text-gray-900 mb-3">Информация за апартаментите</h4>
+                          <div className="space-y-3">
+                            <div className="bg-white rounded p-3 border border-green-200">
+                              <div className="flex justify-between items-center mb-2">
+                                <h5 className="font-medium text-gray-900">Апартамент Г-201А</h5>
+                                <span className="text-green-600 text-sm font-medium">Наличен</span>
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Застроена площ:</span>
+                                  <span className="font-medium">62 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Тераса:</span>
+                                  <span className="font-medium">8 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Изложение:</span>
+                                  <span className="font-medium">Север/Изток</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-white rounded p-3 border border-green-200">
+                              <div className="flex justify-between items-center mb-2">
+                                <h5 className="font-medium text-gray-900">Апартамент Г-201Б</h5>
+                                <span className="text-green-600 text-sm font-medium">Наличен</span>
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Застроена площ:</span>
+                                  <span className="font-medium">65 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Тераса:</span>
+                                  <span className="font-medium">10 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Изложение:</span>
+                                  <span className="font-medium">Юг/Запад</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    )}
+                    
+                    <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-900 mb-2">Архитектурен план</h4>
-                      <div className="h-48 bg-white rounded border border-gray-200 flex items-center justify-center text-gray-400">
-                        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
+                      {selected.tower === 'D' && selected.floor === 1 ? (
+                        <div className="space-y-3">
+                          <div className="h-64 bg-white rounded border border-gray-200 flex items-center justify-center">
+                            <div className="text-center text-gray-500">
+                              <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <p className="text-sm">Архитектурен план ще бъде добавен скоро</p>
+                            </div>
+                          </div>
+                          <div className="bg-blue-50 rounded p-3">
+                            <h5 className="font-medium text-gray-900 mb-2">Характеристики на етажа</h5>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                              <li>• Входна врата с домофон</li>
+                              <li>• Асансьор и стълбище</li>
+                              <li>• Общи части с луксозна довършителна работа</li>
+                              <li>• Енергийна ефективност клас А</li>
+                              <li>• Звукоизолация и топлоизолация</li>
+                            </ul>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-white rounded border border-gray-200 flex items-center justify-center text-gray-400">
+                          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                     
                     {floorData.status === 'available' && (
@@ -396,7 +390,20 @@ const FourTowersFloorMap = () => {
           </div>
         ) : (
           <div className="p-4 text-center text-gray-500">
-            <p>Изберете етаж за да видите детайли</p>
+            <div className="mb-4">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <p className="text-lg font-medium">Изберете етаж</p>
+            </div>
+            <p className="text-sm">Кликнете на етаж от левия панел за да видите детайлите</p>
+            
+            <div className="mt-6 bg-blue-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-2">Специална функция</h4>
+              <p className="text-sm text-gray-600">
+                При преминаване с мишката над <strong>Блок D - Етаж 1</strong> в левия панел се активира специална визуализация на сградата.
+              </p>
+            </div>
           </div>
         )}
       </div>
