@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg';
+// Note: Make sure to add building-D-floor-2.jpg to the assets folder
+// import buildingDFloor2Image from '../assets/продажби/project 1/building-D-floor-2.jpg';
 
 // Simple floor data
 const FLOOR_DATA = {
@@ -42,7 +44,7 @@ const FLOOR_DATA = {
     6: { property: 'Г-701', type: '4-стаен', builtArea: '98 м²', totalArea: '115 м²', exposure: 'Запад/Юг', status: 'sold' },
     5: { property: 'Г-601', type: '2-стаен', builtArea: '62 м²', totalArea: '75 м²', exposure: 'Север', status: 'available' },
     4: { property: 'Г-501', type: '4-стаен', builtArea: '98 м²', totalArea: '115 м²', exposure: 'Запад/Юг', status: 'available' },
-    3: { property: 'Г-401', type: '2-стаен', builtArea: '62 м²', totalArea: '75 м²', exposure: 'Север', status: 'reserved' },
+    3: { property: 'Г-401', type: '2-стаен', builtArea: '62 м²', totalArea: '75 м²', exposure: 'Север', status: 'sold' },
     2: { property: 'Г-301', type: '4-стаен', builtArea: '98 м²', totalArea: '115 м²', exposure: 'Запад/Юг', status: 'available' },
     1: { property: 'Г-201', type: '2-стаен', builtArea: '62 м²', totalArea: '75 м²', exposure: 'Север', status: 'available' },
     0: { property: 'Гараж Г', type: 'Паркомясто', builtArea: '15 м²', totalArea: '15 м²', exposure: '-', status: 'available' },
@@ -154,14 +156,14 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage }) => {
                         key={floorIndex}
                         onClick={() => handleFloorClick(tower.id, floorIndex)}
                         onMouseEnter={() => {
-                          // Only trigger hover for Block D floor 1
-                          if (tower.id === 'D' && floorIndex === 1) {
+                          // Only trigger hover for Block D floor 1, 2, and 3
+                          if (tower.id === 'D' && (floorIndex === 1 || floorIndex === 2 || floorIndex === 3)) {
                             handleFloorHover(tower.id, floorIndex);
                           }
                         }}
                         onMouseLeave={() => {
-                          // Only trigger hover leave for Block D floor 1
-                          if (tower.id === 'D' && floorIndex === 1) {
+                          // Only trigger hover leave for Block D floor 1, 2, and 3
+                          if (tower.id === 'D' && (floorIndex === 1 || floorIndex === 2 || floorIndex === 3)) {
                             handleFloorHover(null, null);
                           }
                         }}
@@ -202,12 +204,13 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage }) => {
                 className="w-full h-full object-contain"
               />
               
-              {/* Only Block D Floor 1 hover and click area */}
+              {/* Block D Floor 1, 2, and 3 hover and click areas */}
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
+                {/* Block D Floor 1 */}
                 <rect
                   x={76}
                   y={28 + (6 * (75 - 28) / 9)}
@@ -220,6 +223,34 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage }) => {
                   onMouseEnter={() => handleFloorHover('D', 1)}
                   onMouseLeave={() => handleFloorHover(null, null)}
                   onClick={() => handleFloorClick('D', 1)}
+                />
+                {/* Block D Floor 2 */}
+                <rect
+                  x={76}
+                  y={28 + (5 * (75 - 28) / 9)}
+                  width={12}
+                  height={(75 - 28) / 9 * 0.95}
+                  fill="transparent"
+                  stroke="transparent"
+                  className="cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                  onMouseEnter={() => handleFloorHover('D', 2)}
+                  onMouseLeave={() => handleFloorHover(null, null)}
+                  onClick={() => handleFloorClick('D', 2)}
+                />
+                {/* Block D Floor 3 */}
+                <rect
+                  x={76}
+                  y={28 + (4 * (75 - 28) / 9)}
+                  width={12}
+                  height={(75 - 28) / 9 * 0.95}
+                  fill="transparent"
+                  stroke="transparent"
+                  className="cursor-pointer"
+                  style={{ pointerEvents: 'auto' }}
+                  onMouseEnter={() => handleFloorHover('D', 3)}
+                  onMouseLeave={() => handleFloorHover(null, null)}
+                  onClick={() => handleFloorClick('D', 3)}
                 />
               </svg>
             </div>
@@ -345,21 +376,97 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage }) => {
                           </div>
                         </div>
                     )}
+
+                    {selected.tower === 'D' && selected.floor === 2 && (
+                      <div className="bg-green-50 rounded-lg p-4 mb-4">
+                          <h4 className="font-semibold text-gray-900 mb-3">Информация за апартаментите</h4>
+                          <div className="space-y-3">
+                            <div className="bg-white rounded p-3 border border-green-200">
+                              <div className="flex justify-between items-center mb-2">
+                                <h5 className="font-medium text-gray-900">Апартамент Г-301А</h5>
+                                <span className="text-green-600 text-sm font-medium">Наличен</span>
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Застроена площ:</span>
+                                  <span className="font-medium">98 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Тераса:</span>
+                                  <span className="font-medium">12 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Изложение:</span>
+                                  <span className="font-medium">Запад/Юг</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-white rounded p-3 border border-green-200">
+                              <div className="flex justify-between items-center mb-2">
+                                <h5 className="font-medium text-gray-900">Апартамент Г-301Б</h5>
+                                <span className="text-green-600 text-sm font-medium">Наличен</span>
+                              </div>
+                              <div className="text-sm text-gray-600 space-y-1">
+                                <div className="flex justify-between">
+                                  <span>Застроена площ:</span>
+                                  <span className="font-medium">98 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Тераса:</span>
+                                  <span className="font-medium">15 м²</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Изложение:</span>
+                                  <span className="font-medium">Запад/Юг</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    )}
+
+                    {selected.tower === 'D' && selected.floor === 3 && (
+                      <div className="bg-red-50 rounded-lg p-3 mb-3">
+                          <h4 className="font-semibold text-gray-900 mb-2">Информация за апартаментите</h4>
+                          <div className="bg-white rounded p-2 border border-red-200">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="font-medium text-gray-900">Г-401</span>
+                              <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
+                                ПРОДАДЕН
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-gray-600">Тип:</span>
+                                <span className="ml-2 font-medium">2-стаен</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Застроена:</span>
+                                <span className="ml-2 font-medium">62 м²</span>
+                              </div>
+                            </div>
+                            <div className="mt-2 p-2 bg-red-50 rounded text-xs text-red-700">
+                              <strong>Статус:</strong> Продаден апартамент
+                            </div>
+                          </div>
+                        </div>
+                    )}
                     
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-900 mb-2">Архитектурен план</h4>
-                      {selected.tower === 'D' && selected.floor === 1 ? (
+                      {selected.tower === 'D' && (selected.floor === 1 || selected.floor === 2 || selected.floor === 3) ? (
                         <div className="space-y-3">
-                          <div className="h-64 bg-white rounded border border-gray-200 flex items-center justify-center">
+                          <div className="h-24 bg-white rounded border border-gray-200 flex items-center justify-center">
                             <div className="text-center text-gray-500">
-                              <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
-                              <p className="text-sm">Архитектурен план ще бъде добавен скоро</p>
+                              <p className="text-xs">Архитектурен план ще бъде добавен скоро</p>
                             </div>
                           </div>
-                          <div className="bg-blue-50 rounded p-3">
-                            <h5 className="font-medium text-gray-900 mb-2">Характеристики на етажа</h5>
+                          <div className={`rounded p-2 ${selected.floor === 3 ? 'bg-red-50' : 'bg-blue-50'}`}>
+                            <h5 className="font-medium text-gray-900 mb-1">Характеристики на етажа</h5>
                             <ul className="text-sm text-gray-600 space-y-1">
                               <li>• Входна врата с домофон</li>
                               <li>• Асансьор и стълбище</li>

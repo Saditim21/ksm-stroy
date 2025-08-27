@@ -101,6 +101,20 @@ import sanirane9 from '../assets/projects/Саниране 2017 г. - гр. Бу
 import sanirane10 from '../assets/projects/Саниране 2017 г. - гр. Бургас/45478369_106987820307749_1447067042862596096_n.jpg'
 import sanirane11 from '../assets/projects/Саниране 2017 г. - гр. Бургас/45520479_106987863641078_3977651113556967424_n.jpg'
 
+// Add ЧИТАЛИЩЕ images
+import chitalishte1 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-36-13-125.jpg'
+import chitalishte2 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-36-13-253.jpg'
+import chitalishte3 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-015.jpg'
+import chitalishte4 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-041.jpg'
+import chitalishte5 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-080.jpg'
+import chitalishte6 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-129.jpg'
+import chitalishte7 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-168.jpg'
+import chitalishte8 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-207.jpg'
+import chitalishte9 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-263.jpg'
+import chitalishte10 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-329.jpg'
+import chitalishte11 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-392.jpg'
+import chitalishte12 from '../assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-455.jpg'
+
 const Projects = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [selectedProject, setSelectedProject] = useState(null)
@@ -174,6 +188,17 @@ const Projects = () => {
       description: "Хотелски комплекс с минерални басейни в Огняново",
       images: [hotelParadise1, hotelParadise2, hotelParadise3, hotelParadise4, hotelParadise5, hotelParadise6, hotelParadise7, hotelParadise8],
       features: ["Минерални басейни", "СПА център", "Ресторант", "Конферентна зала"]
+    },
+    {
+      id: 7,
+      title: 'Читалище "Асен Златаров-1924"',
+      location: "с. Огняново, община Гърмен",
+      status: "Завършен Проект",
+      type: "Обществена сграда",
+      year: "2024",
+      description: "Инженеринг: проектиране, изпълнение на мерки за енергийна ефективност и последващо упражняване на авторски надзор по време на строителството",
+      images: [chitalishte1, chitalishte2, chitalishte3, chitalishte4, chitalishte5, chitalishte6, chitalishte7, chitalishte8, chitalishte9, chitalishte10, chitalishte11, chitalishte12],
+      features: ["Енергийна ефективност", "Топлоизолация", "Модернизация", "Авторски надзор"]
     }
   ]
 

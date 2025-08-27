@@ -9,6 +9,8 @@ import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingDFloor1Image from '../assets/продажби/project 1/building-D-floor-1.jpg'
+import buildingDFloor2Image from '../assets/продажби/project 1/building-D-floor-2.jpg'
+import buildingDFloor3Image from '../assets/продажби/project 1/building-D-floor-3.jpg'
 
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -18,6 +20,8 @@ const Sales = () => {
   const [hoveredFloor, setHoveredFloor] = useState(null)
   const [selectedFloor, setSelectedFloor] = useState(null)
   const [isHoveringDFloor1, setIsHoveringDFloor1] = useState(false)
+  const [isHoveringDFloor2, setIsHoveringDFloor2] = useState(false)
+  const [isHoveringDFloor3, setIsHoveringDFloor3] = useState(false)
   const modalRef = useRef(null)
 
   // Sales property data
@@ -378,13 +382,26 @@ const Sales = () => {
                   <div className="w-full h-full">
                     <FourTowersFloorMap 
                       onHoverChange={(isHovering, towerId, floor) => {
-                        // Always reset first, then set if needed
+                        // Always reset all floors first, then set if needed
                         setIsHoveringDFloor1(false);
-                        if (isHovering && towerId === 'D' && floor === 1) {
-                          setIsHoveringDFloor1(true);
+                        setIsHoveringDFloor2(false);
+                        setIsHoveringDFloor3(false);
+                        if (isHovering && towerId === 'D') {
+                          if (floor === 1) {
+                            setIsHoveringDFloor1(true);
+                          } else if (floor === 2) {
+                            setIsHoveringDFloor2(true);
+                          } else if (floor === 3) {
+                            setIsHoveringDFloor3(true);
+                          }
                         }
                       }}
-                      currentImage={isHoveringDFloor1 ? buildingDFloor1Image : buildingImage}
+                      currentImage={
+                        isHoveringDFloor1 ? buildingDFloor1Image :
+                        isHoveringDFloor2 ? buildingDFloor2Image :
+                        isHoveringDFloor3 ? buildingDFloor3Image :
+                        buildingImage
+                      }
                     />
                   </div>
                 ) : (
