@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import Home from './pages/Home'
@@ -12,6 +13,11 @@ import BuildingPlan from './pages/BuildingPlan'
 
 function AnimatedRoutes() {
   const location = useLocation()
+  
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
   
   return (
     <AnimatePresence mode="wait">

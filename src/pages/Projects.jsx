@@ -8,9 +8,9 @@ import { seoData } from '../utils/seo'
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
-import buildingDFloor1Image from '../assets/продажби/project 1/building-D-floor-1.jpg'
-import buildingDFloor2Image from '../assets/продажби/project 1/building-D-floor-2.jpg'
-import buildingDFloor3Image from '../assets/продажби/project 1/building-D-floor-3.jpg'
+import buildingBFloor1Image from '../assets/продажби/project 1/building-D-floor-1.jpg'
+import buildingBFloor2Image from '../assets/продажби/project 1/building-D-floor-2.jpg'
+import buildingBFloor3Image from '../assets/продажби/project 1/building-D-floor-3.jpg'
 
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -19,9 +19,9 @@ const Sales = () => {
   const [showBuildingView, setShowBuildingView] = useState(false)
   const [hoveredFloor, setHoveredFloor] = useState(null)
   const [selectedFloor, setSelectedFloor] = useState(null)
-  const [isHoveringDFloor1, setIsHoveringDFloor1] = useState(false)
-  const [isHoveringDFloor2, setIsHoveringDFloor2] = useState(false)
-  const [isHoveringDFloor3, setIsHoveringDFloor3] = useState(false)
+  const [isHoveringBFloor1, setIsHoveringBFloor1] = useState(false)
+  const [isHoveringBFloor2, setIsHoveringBFloor2] = useState(false)
+  const [isHoveringBFloor3, setIsHoveringBFloor3] = useState(false)
   const modalRef = useRef(null)
 
   // Sales property data
@@ -383,23 +383,23 @@ const Sales = () => {
                     <FourTowersFloorMap 
                       onHoverChange={(isHovering, towerId, floor) => {
                         // Always reset all floors first, then set if needed
-                        setIsHoveringDFloor1(false);
-                        setIsHoveringDFloor2(false);
-                        setIsHoveringDFloor3(false);
-                        if (isHovering && towerId === 'D') {
+                        setIsHoveringBFloor1(false);
+                        setIsHoveringBFloor2(false);
+                        setIsHoveringBFloor3(false);
+                        if (isHovering && towerId === 'B') {
                           if (floor === 1) {
-                            setIsHoveringDFloor1(true);
+                            setIsHoveringBFloor1(true);
                           } else if (floor === 2) {
-                            setIsHoveringDFloor2(true);
+                            setIsHoveringBFloor2(true);
                           } else if (floor === 3) {
-                            setIsHoveringDFloor3(true);
+                            setIsHoveringBFloor3(true);
                           }
                         }
                       }}
                       currentImage={
-                        isHoveringDFloor1 ? buildingDFloor1Image :
-                        isHoveringDFloor2 ? buildingDFloor2Image :
-                        isHoveringDFloor3 ? buildingDFloor3Image :
+                        isHoveringBFloor1 ? buildingBFloor1Image :
+                        isHoveringBFloor2 ? buildingBFloor2Image :
+                        isHoveringBFloor3 ? buildingBFloor3Image :
                         buildingImage
                       }
                     />
