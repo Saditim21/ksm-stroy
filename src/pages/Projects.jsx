@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
-import FourTowersFloorMap from '../components/FourTowersFloorMap'
+import FourTowersFloorMap, { FLOOR_DATA } from '../components/FourTowersFloorMap'
 import { seoData } from '../utils/seo'
 
 // Import sales property images
@@ -22,7 +22,9 @@ const Sales = () => {
   const [isHoveringBFloor1, setIsHoveringBFloor1] = useState(false)
   const [isHoveringBFloor2, setIsHoveringBFloor2] = useState(false)
   const [isHoveringBFloor3, setIsHoveringBFloor3] = useState(false)
+  const [selectedFloorDetails, setSelectedFloorDetails] = useState(null)
   const modalRef = useRef(null)
+  const floorDetailsRef = useRef(null)
 
   // Sales property data
   const properties = [
@@ -113,7 +115,23 @@ const Sales = () => {
     setShowBuildingView(false)
     setHoveredFloor(null)
     setSelectedFloor(null)
+    setSelectedFloorDetails(null)
     document.body.style.overflow = 'unset'
+  }
+
+  const handleFloorSelect = (towerId, floorIndex, floorData) => {
+    if (towerId === 'B' && [1, 2, 3].includes(floorIndex)) {
+      setSelectedFloorDetails({
+        tower: towerId,
+        floor: floorIndex,
+        data: floorData
+      });
+      // Don't close modal - keep it open and show details section below
+      // Scroll to details section after a short delay
+      setTimeout(() => {
+        floorDetailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
   }
 
   const toggleBuildingView = () => {
@@ -402,6 +420,7 @@ const Sales = () => {
                         isHoveringBFloor3 ? buildingBFloor3Image :
                         buildingImage
                       }
+                      onFloorSelect={handleFloorSelect}
                     />
                   </div>
                 ) : (
@@ -509,8 +528,274 @@ const Sales = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Floor Details Section - Inside Modal, Below Building Content */}
+              {selectedFloorDetails && selectedFloorDetails.data?.apartments && (
+                <div
+                  ref={floorDetailsRef}
+                  className="bg-white border-t-4 border-blue-500 animate-in slide-in-from-bottom-4 duration-300"
+                >
+                  <div className="p-6">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                          Блок {selectedFloorDetails.tower} - Етаж {selectedFloorDetails.floor}
+                        </h2>
+                        <p className="text-gray-600">Детайлна информация за апартаментите на етажа</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedFloorDetails(null)}
+                        className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                        aria-label="Затвори детайли"
+                      >
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left Side - Apartments Table with Bulgarian Headers */}
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Списък на апартаментите</h3>
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
+                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {selectedFloorDetails.data.apartments.map((apt, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+                                    {apt.имот}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                    {apt.вид}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                    {apt.застроенаПлощ}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                    {apt.общаПлощ}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                    {apt.изложение}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap">
+                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
+                                      apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
+                                      apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
+                                      'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                      {apt.статус}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        
+                        {/* Summary Stats */}
+                        <div className="mt-4 grid grid-cols-3 gap-3">
+                          {(() => {
+                            const available = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Свободен').length;
+                            const sold = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Продаден').length;
+                            const reserved = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Резервиран').length;
+                            
+                            return (
+                              <>
+                                <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center">
+                                  <div className="text-xl font-bold text-green-800">{available}</div>
+                                  <div className="text-xs text-green-600">Свободни</div>
+                                </div>
+                                <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-center">
+                                  <div className="text-xl font-bold text-red-800">{sold}</div>
+                                  <div className="text-xs text-red-600">Продадени</div>
+                                </div>
+                                <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-center">
+                                  <div className="text-xl font-bold text-yellow-800">{reserved}</div>
+                                  <div className="text-xs text-yellow-600">Резервирани</div>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                      
+                      {/* Right Side - Architecture Plan */}
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
+                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                          {selectedFloorDetails.data.planImage ? (
+                            <img 
+                              src={selectedFloorDetails.data.planImage}
+                              alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
+                              className="w-full h-auto"
+                            />
+                          ) : (
+                            <div className="h-64 flex items-center justify-center bg-gray-100">
+                              <div className="text-center">
+                                <svg className="w-16 h-16 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p className="text-sm font-medium text-gray-600">План Етаж {selectedFloorDetails.floor}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+      )}
+
+      {/* OLD Floor Details Section - Remove this */}
+      {false && selectedFloorDetails && selectedFloorDetails.data?.apartments && (
+        <section
+          ref={floorDetailsRef}
+          className="py-16 bg-white border-t border-gray-200 animate-in slide-in-from-bottom-4 duration-500"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8">
+              <div className="text-center w-full">
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Блок {selectedFloorDetails.tower} - Етаж {selectedFloorDetails.floor}
+                </h2>
+                <p className="text-lg text-gray-600 mt-2">Детайлна информация за апартаментите на етажа</p>
+              </div>
+              <button
+                onClick={() => setSelectedFloorDetails(null)}
+                className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors ml-4"
+                aria-label="Затвори детайли"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Side - Apartments Table with Bulgarian Headers */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Списък на апартаментите</h3>
+                <div className="bg-gray-50 rounded-lg overflow-hidden shadow-lg">
+                  <table className="w-full">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {selectedFloorDetails.data.apartments.map((apt, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+                            {apt.имот}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                            {apt.вид}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                            {apt.застроенаПлощ}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                            {apt.общаПлощ}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                            {apt.изложение}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
+                              apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
+                              apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {apt.статус}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Summary Stats */}
+                <div className="mt-6 grid grid-cols-3 gap-4">
+                  {(() => {
+                    const available = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Свободен').length;
+                    const sold = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Продаден').length;
+                    const reserved = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Резервиран').length;
+                    
+                    return (
+                      <>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                          <div className="text-2xl font-bold text-green-700">{available}</div>
+                          <div className="text-sm text-green-600">Свободни</div>
+                        </div>
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                          <div className="text-2xl font-bold text-red-700">{sold}</div>
+                          <div className="text-sm text-red-600">Продадени</div>
+                        </div>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                          <div className="text-2xl font-bold text-yellow-700">{reserved}</div>
+                          <div className="text-sm text-yellow-600">Резервирани</div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+              
+              {/* Right Side - Architecture Plan */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Архитектурен план на етажа</h3>
+                <div className="bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+                  {selectedFloorDetails.data.planImage ? (
+                    <img 
+                      src={selectedFloorDetails.data.planImage}
+                      alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
+                      className="w-full h-auto"
+                    />
+                  ) : (
+                    <div className="h-96 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                      <div className="text-center">
+                        <svg className="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-lg font-medium text-gray-600">Архитектурен план</p>
+                        <p className="text-sm text-gray-500 mt-2">Етаж {selectedFloorDetails.floor}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Забележка:</strong> Планът показва разположението на всички апартаменти на етажа. 
+                    Зелените маркери означават свободни апартаменти, червените - продадени.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
     </main>
