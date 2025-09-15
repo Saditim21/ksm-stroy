@@ -8,9 +8,15 @@ import { seoData } from '../utils/seo'
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
-import buildingBFloor1Image from '../assets/продажби/project 1/building-D-floor-1.jpg'
-import buildingBFloor2Image from '../assets/продажби/project 1/building-D-floor-2.jpg'
-import buildingBFloor3Image from '../assets/продажби/project 1/building-D-floor-3.jpg'
+import buildingBFloor1Image from '../assets/продажби/project 1/building-B-floor-1.jpg'
+import buildingBFloor2Image from '../assets/продажби/project 1/building-B-floor-2.jpg'
+import buildingBFloor3Image from '../assets/продажби/project 1/building-B-floor-3.jpg'
+import buildingBFloor4Image from '../assets/продажби/project 1/building-B-floor-4.jpg'
+import buildingBFloor5Image from '../assets/продажби/project 1/building-B-floor-5.jpg'
+import buildingBFloor6Image from '../assets/продажби/project 1/building-B-floor-6.jpg'
+import buildingBFloor7Image from '../assets/продажби/project 1/building-B-floor-7.jpg'
+import buildingBFloor8Image from '../assets/продажби/project 1/building-B-floor-8.jpg'
+import buildingBFloor9Image from '../assets/продажби/project 1/building-B-floor-9.jpg'
 
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -22,6 +28,12 @@ const Sales = () => {
   const [isHoveringBFloor1, setIsHoveringBFloor1] = useState(false)
   const [isHoveringBFloor2, setIsHoveringBFloor2] = useState(false)
   const [isHoveringBFloor3, setIsHoveringBFloor3] = useState(false)
+  const [isHoveringBFloor4, setIsHoveringBFloor4] = useState(false)
+  const [isHoveringBFloor5, setIsHoveringBFloor5] = useState(false)
+  const [isHoveringBFloor6, setIsHoveringBFloor6] = useState(false)
+  const [isHoveringBFloor7, setIsHoveringBFloor7] = useState(false)
+  const [isHoveringBFloor8, setIsHoveringBFloor8] = useState(false)
+  const [isHoveringBFloor9, setIsHoveringBFloor9] = useState(false)
   const [selectedFloorDetails, setSelectedFloorDetails] = useState(null)
   const modalRef = useRef(null)
   const floorDetailsRef = useRef(null)
@@ -120,7 +132,7 @@ const Sales = () => {
   }
 
   const handleFloorSelect = (towerId, floorIndex, floorData) => {
-    if (towerId === 'B' && [1, 2, 3].includes(floorIndex)) {
+    if (floorData?.apartments) {
       setSelectedFloorDetails({
         tower: towerId,
         floor: floorIndex,
@@ -194,47 +206,6 @@ const Sales = () => {
       
       <main className="min-h-screen bg-primary-50">
 
-      {/* Hero Section */}
-      <section 
-        className="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div>
-            <span className="text-gold-400 font-semibold text-sm uppercase tracking-wide">Нашите обекти</span>
-            <h1 className="text-display-1 font-bold mt-2 mb-6">
-              Продажби
-            </h1>
-            <p className="text-xl text-platinum-300 max-w-3xl mx-auto">
-              Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София.
-            </p>
-          </div>
-          
-          <div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12"
-          >
-            <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
-                {properties.length}
-              </div>
-              <p className="text-platinum-300">Общо обекта</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
-                {properties.filter(p => p.status === 'За продажба').length}
-              </div>
-              <p className="text-platinum-300">За продажба</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2">
-                {properties.filter(p => p.status === 'Скоро').length}
-              </div>
-              <p className="text-platinum-300">Очаквани</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Property Filter */}
       <section 
@@ -358,7 +329,7 @@ const Sales = () => {
                   {selectedProject.buildingData && (
                     <button
                       onClick={toggleBuildingView}
-                      className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border ${
+                      className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border w-24 h-8 flex items-center justify-center ${
                         showBuildingView 
                           ? 'bg-gold-500/20 text-gold-400 border-gold-500/30' 
                           : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
@@ -404,6 +375,12 @@ const Sales = () => {
                         setIsHoveringBFloor1(false);
                         setIsHoveringBFloor2(false);
                         setIsHoveringBFloor3(false);
+                        setIsHoveringBFloor4(false);
+                        setIsHoveringBFloor5(false);
+                        setIsHoveringBFloor6(false);
+                        setIsHoveringBFloor7(false);
+                        setIsHoveringBFloor8(false);
+                        setIsHoveringBFloor9(false);
                         if (isHovering && towerId === 'B') {
                           if (floor === 1) {
                             setIsHoveringBFloor1(true);
@@ -411,6 +388,18 @@ const Sales = () => {
                             setIsHoveringBFloor2(true);
                           } else if (floor === 3) {
                             setIsHoveringBFloor3(true);
+                          } else if (floor === 4) {
+                            setIsHoveringBFloor4(true);
+                          } else if (floor === 5) {
+                            setIsHoveringBFloor5(true);
+                          } else if (floor === 6) {
+                            setIsHoveringBFloor6(true);
+                          } else if (floor === 7) {
+                            setIsHoveringBFloor7(true);
+                          } else if (floor === 8) {
+                            setIsHoveringBFloor8(true);
+                          } else if (floor === 9) {
+                            setIsHoveringBFloor9(true);
                           }
                         }
                       }}
@@ -418,6 +407,12 @@ const Sales = () => {
                         isHoveringBFloor1 ? buildingBFloor1Image :
                         isHoveringBFloor2 ? buildingBFloor2Image :
                         isHoveringBFloor3 ? buildingBFloor3Image :
+                        isHoveringBFloor4 ? buildingBFloor4Image :
+                        isHoveringBFloor5 ? buildingBFloor5Image :
+                        isHoveringBFloor6 ? buildingBFloor6Image :
+                        isHoveringBFloor7 ? buildingBFloor7Image :
+                        isHoveringBFloor8 ? buildingBFloor8Image :
+                        isHoveringBFloor9 ? buildingBFloor9Image :
                         buildingImage
                       }
                       onFloorSelect={handleFloorSelect}
@@ -529,27 +524,27 @@ const Sales = () => {
                 </div>
               )}
               
-              {/* Floor Details Section - Inside Modal, Below Building Content */}
+              {/* Floor Details Section - Replace entire modal content when shown */}
               {selectedFloorDetails && selectedFloorDetails.data?.apartments && (
                 <div
                   ref={floorDetailsRef}
-                  className="bg-white border-t-4 border-blue-500 animate-in slide-in-from-bottom-4 duration-300"
+                  className="absolute inset-0 bg-white z-50 overflow-y-auto"
                 >
-                  <div className="p-6">
+                  <div className="max-w-7xl mx-auto p-8">
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                          Блок {selectedFloorDetails.tower} - Етаж {selectedFloorDetails.floor}
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                          Блок {selectedFloorDetails.tower} - Етаж {selectedFloorDetails.floor === 0 ? 'Партер/Гаражи' : selectedFloorDetails.floor}
                         </h2>
-                        <p className="text-gray-600">Детайлна информация за апартаментите на етажа</p>
+                        <p className="text-lg text-gray-600">Детайлна информация за апартаментите на етажа</p>
                       </div>
                       <button
                         onClick={() => setSelectedFloorDetails(null)}
-                        className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                        className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
                         aria-label="Затвори детайли"
                       >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -557,39 +552,39 @@ const Sales = () => {
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Left Side - Apartments Table with Bulgarian Headers */}
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Списък на апартаментите</h3>
+                      <div className="lg:col-span-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Списък на апартаментите</h3>
                         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-                          <table className="w-full text-sm">
+                          <table className="w-full text-xs lg:text-sm">
                             <thead className="bg-gray-100">
                               <tr>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
-                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
+                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                               {selectedFloorDetails.data.apartments.map((apt, idx) => (
                                 <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+                                  <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200">
                                     {apt.имот}
                                   </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.вид}
                                   </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.застроенаПлощ}
                                   </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.общаПлощ}
                                   </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
+                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.изложение}
                                   </td>
-                                  <td className="px-3 py-2 whitespace-nowrap">
+                                  <td className="px-2 py-2 whitespace-nowrap">
                                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
                                       apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
                                       apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
@@ -632,15 +627,18 @@ const Sales = () => {
                       </div>
                       
                       {/* Right Side - Architecture Plan */}
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
+                      <div className="lg:col-span-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
                         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
                           {selectedFloorDetails.data.planImage ? (
-                            <img 
-                              src={selectedFloorDetails.data.planImage}
-                              alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
-                              className="w-full h-auto"
-                            />
+                            <div className="p-4 bg-gray-50">
+                              <img 
+                                src={selectedFloorDetails.data.planImage}
+                                alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
+                                className="w-full h-auto object-contain"
+                                style={{ maxHeight: '500px' }}
+                              />
+                            </div>
                           ) : (
                             <div className="h-64 flex items-center justify-center bg-gray-100">
                               <div className="text-center">
@@ -799,7 +797,8 @@ const Sales = () => {
       )}
 
     </main>
-  </>)
+  </>
+  )
 }
 
 // Property Card Component
