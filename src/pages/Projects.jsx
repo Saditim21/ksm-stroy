@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import FourTowersFloorMap, { FLOOR_DATA } from '../components/FourTowersFloorMap'
+import ApartmentDetailsModal from '../components/ApartmentDetailsModal'
 import { seoData } from '../utils/seo'
 
 // Import sales property images
@@ -17,6 +18,37 @@ import buildingBFloor6Image from '../assets/продажби/project 1/building-
 import buildingBFloor7Image from '../assets/продажби/project 1/building-B-floor-7.jpg'
 import buildingBFloor8Image from '../assets/продажби/project 1/building-B-floor-8.jpg'
 import buildingBFloor9Image from '../assets/продажби/project 1/building-B-floor-9.jpg'
+import buildingAFloor1Image from '../assets/продажби/project 1/building-A-floor-1.jpg'
+import buildingAFloor2Image from '../assets/продажби/project 1/building-A-floor-2.jpg'
+import buildingAFloor3Image from '../assets/продажби/project 1/building-A-floor-3.jpg'
+import buildingAFloor4Image from '../assets/продажби/project 1/building-A-floor-4.jpg'
+import buildingAFloor5Image from '../assets/продажби/project 1/building-A-floor-5.jpg'
+import buildingAFloor6Image from '../assets/продажби/project 1/building-A-floor-6.jpg'
+import buildingAFloor7Image from '../assets/продажби/project 1/building-A-floor-7.jpg'
+import buildingAFloor8Image from '../assets/продажби/project 1/building-A-floor-8.jpg'
+import buildingAFloor9Image from '../assets/продажби/project 1/building-A-floor-9.jpg'
+
+// Import the apartment images
+import apartmentB2Image from '../assets/продажби/project 1/apartment-b2.jpg'
+import apartmentB2FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.png'
+
+// Map apartment IDs to their images
+const getApartmentImage = (apartmentId) => {
+  // Map specific apartments to their images
+  switch(apartmentId) {
+    case 'Б-102':
+    case 'Б-202':
+      return apartmentB2FloorPlanImage; // Use the PNG image which is the actual floor plan
+    case 'Б-101':
+    case 'Б-103':
+    case 'Б-201':
+    case 'Б-203':
+      // Add more apartment images as they become available
+      return null;
+    default:
+      return null;
+  }
+};
 
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -34,7 +66,19 @@ const Sales = () => {
   const [isHoveringBFloor7, setIsHoveringBFloor7] = useState(false)
   const [isHoveringBFloor8, setIsHoveringBFloor8] = useState(false)
   const [isHoveringBFloor9, setIsHoveringBFloor9] = useState(false)
+  const [isHoveringAFloor1, setIsHoveringAFloor1] = useState(false)
+  const [isHoveringAFloor2, setIsHoveringAFloor2] = useState(false)
+  const [isHoveringAFloor3, setIsHoveringAFloor3] = useState(false)
+  const [isHoveringAFloor4, setIsHoveringAFloor4] = useState(false)
+  const [isHoveringAFloor5, setIsHoveringAFloor5] = useState(false)
+  const [isHoveringAFloor6, setIsHoveringAFloor6] = useState(false)
+  const [isHoveringAFloor7, setIsHoveringAFloor7] = useState(false)
+  const [isHoveringAFloor8, setIsHoveringAFloor8] = useState(false)
+  const [isHoveringAFloor9, setIsHoveringAFloor9] = useState(false)
   const [selectedFloorDetails, setSelectedFloorDetails] = useState(null)
+  const [selectedApartment, setSelectedApartment] = useState(null)
+  const [showApartmentModal, setShowApartmentModal] = useState(false)
+  const [clearFloorSelection, setClearFloorSelection] = useState(false)
   const modalRef = useRef(null)
   const floorDetailsRef = useRef(null)
 
@@ -144,6 +188,16 @@ const Sales = () => {
         floorDetailsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
+  }
+
+  const handleApartmentSelect = (apartmentData) => {
+    setSelectedApartment(apartmentData);
+    setShowApartmentModal(true);
+  }
+
+  const closeApartmentModal = () => {
+    setSelectedApartment(null);
+    setShowApartmentModal(false);
   }
 
   const toggleBuildingView = () => {
@@ -370,6 +424,7 @@ const Sales = () => {
                 {showBuildingView && selectedProject.buildingData ? (
                   <div className="w-full h-full">
                     <FourTowersFloorMap 
+                      clearFloorSelection={clearFloorSelection}
                       onHoverChange={(isHovering, towerId, floor) => {
                         // Always reset all floors first, then set if needed
                         setIsHoveringBFloor1(false);
@@ -381,7 +436,36 @@ const Sales = () => {
                         setIsHoveringBFloor7(false);
                         setIsHoveringBFloor8(false);
                         setIsHoveringBFloor9(false);
-                        if (isHovering && towerId === 'B') {
+                        setIsHoveringAFloor1(false);
+                        setIsHoveringAFloor2(false);
+                        setIsHoveringAFloor3(false);
+                        setIsHoveringAFloor4(false);
+                        setIsHoveringAFloor5(false);
+                        setIsHoveringAFloor6(false);
+                        setIsHoveringAFloor7(false);
+                        setIsHoveringAFloor8(false);
+                        setIsHoveringAFloor9(false);
+                        if (isHovering && towerId === 'A') {
+                          if (floor === 1) {
+                            setIsHoveringAFloor1(true);
+                          } else if (floor === 2) {
+                            setIsHoveringAFloor2(true);
+                          } else if (floor === 3) {
+                            setIsHoveringAFloor3(true);
+                          } else if (floor === 4) {
+                            setIsHoveringAFloor4(true);
+                          } else if (floor === 5) {
+                            setIsHoveringAFloor5(true);
+                          } else if (floor === 6) {
+                            setIsHoveringAFloor6(true);
+                          } else if (floor === 7) {
+                            setIsHoveringAFloor7(true);
+                          } else if (floor === 8) {
+                            setIsHoveringAFloor8(true);
+                          } else if (floor === 9) {
+                            setIsHoveringAFloor9(true);
+                          }
+                        } else if (isHovering && towerId === 'B') {
                           if (floor === 1) {
                             setIsHoveringBFloor1(true);
                           } else if (floor === 2) {
@@ -404,6 +488,15 @@ const Sales = () => {
                         }
                       }}
                       currentImage={
+                        isHoveringAFloor1 ? buildingAFloor1Image :
+                        isHoveringAFloor2 ? buildingAFloor2Image :
+                        isHoveringAFloor3 ? buildingAFloor3Image :
+                        isHoveringAFloor4 ? buildingAFloor4Image :
+                        isHoveringAFloor5 ? buildingAFloor5Image :
+                        isHoveringAFloor6 ? buildingAFloor6Image :
+                        isHoveringAFloor7 ? buildingAFloor7Image :
+                        isHoveringAFloor8 ? buildingAFloor8Image :
+                        isHoveringAFloor9 ? buildingAFloor9Image :
                         isHoveringBFloor1 ? buildingBFloor1Image :
                         isHoveringBFloor2 ? buildingBFloor2Image :
                         isHoveringBFloor3 ? buildingBFloor3Image :
@@ -416,6 +509,7 @@ const Sales = () => {
                         buildingImage
                       }
                       onFloorSelect={handleFloorSelect}
+                      onApartmentSelect={handleApartmentSelect}
                     />
                   </div>
                 ) : (
@@ -529,6 +623,7 @@ const Sales = () => {
                 <div
                   ref={floorDetailsRef}
                   className="absolute inset-0 bg-white z-50 overflow-y-auto"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="max-w-7xl mx-auto p-8">
                     {/* Header */}
@@ -540,7 +635,13 @@ const Sales = () => {
                         <p className="text-lg text-gray-600">Детайлна информация за апартаментите на етажа</p>
                       </div>
                       <button
-                        onClick={() => setSelectedFloorDetails(null)}
+                        onClick={() => {
+                          setSelectedFloorDetails(null);
+                          // Clear the floor selection to go back to building view
+                          setClearFloorSelection(true);
+                          // Reset the clear flag after a short delay
+                          setTimeout(() => setClearFloorSelection(false), 100);
+                        }}
                         className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
                         aria-label="Затвори детайли"
                       >
@@ -553,14 +654,16 @@ const Sales = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Left Side - Apartments Table with Bulgarian Headers */}
                       <div className="lg:col-span-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">Списък на апартаментите</h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-gray-900">Списък на апартаментите</h3>
+                          <p className="text-sm text-gray-600">Кликнете за детайли</p>
+                        </div>
                         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
                           <table className="w-full text-xs lg:text-sm">
                             <thead className="bg-gray-100">
                               <tr>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
                                 <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
@@ -568,15 +671,28 @@ const Sales = () => {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                               {selectedFloorDetails.data.apartments.map((apt, idx) => (
-                                <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                  <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200">
-                                    {apt.имот}
+                                <tr 
+                                  key={idx} 
+                                  className="hover:bg-blue-50 transition-colors cursor-pointer group"
+                                  onClick={() => handleApartmentSelect({
+                                    name: `Апартамент ${apt.имот}`,
+                                    floor: selectedFloorDetails.floor.toString(),
+                                    type: apt.вид === '2-стаен' ? 'Двустаен' : apt.вид === '3-стаен' ? 'Тристаен' : apt.вид === '4-стаен' ? 'Четиристаен' : apt.вид === '1-стаен' ? 'Едностаен' : apt.вид,
+                                    totalArea: apt.общаПлощ,
+                                    status: apt.статус,
+                                    ...apt
+                                  })}
+                                >
+                                  <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
+                                    <div className="flex items-center">
+                                      {apt.имот}
+                                      <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                      </svg>
+                                    </div>
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.вид}
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                    {apt.застроенаПлощ}
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
                                     {apt.общаПлощ}
@@ -631,7 +747,7 @@ const Sales = () => {
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
                         <div className="bg-white rounded-lg overflow-hidden shadow-lg">
                           {selectedFloorDetails.data.planImage ? (
-                            <div className="p-4 bg-gray-50">
+                            <div className=" bg-gray-50">
                               <img 
                                 src={selectedFloorDetails.data.planImage}
                                 alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
@@ -695,7 +811,6 @@ const Sales = () => {
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Застроена площ</th>
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
@@ -709,9 +824,6 @@ const Sales = () => {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
                             {apt.вид}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
-                            {apt.застроенаПлощ}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 border-r border-gray-200">
                             {apt.общаПлощ}
@@ -795,6 +907,14 @@ const Sales = () => {
           </div>
         </section>
       )}
+
+      {/* Apartment Details Modal */}
+      <ApartmentDetailsModal
+        isOpen={showApartmentModal}
+        onClose={closeApartmentModal}
+        apartmentData={selectedApartment}
+        apartmentImage={selectedApartment ? getApartmentImage(selectedApartment.имот) : null}
+      />
 
     </main>
   </>
