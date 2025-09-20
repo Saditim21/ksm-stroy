@@ -96,12 +96,9 @@ const ApartmentDetailsModal = ({ isOpen, onClose, apartmentData, apartmentImage 
                 </div>
                 
                 {apartmentData.status === 'Свободен' && (
-                  <div className="mt-6 space-y-3">
+                  <div className="mt-6">
                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
                       Запитване за апартамента
-                    </button>
-                    <button className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                      Резервирай оглед
                     </button>
                   </div>
                 )}

@@ -31,6 +31,8 @@ import buildingAFloor9Image from '../assets/продажби/project 1/building-
 // Import the apartment images
 import apartmentB2Image from '../assets/продажби/project 1/apartment-b2.jpg'
 import apartmentB2FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.png'
+import apartmentB6FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B6.png'
+import apartmentB7FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B7.png'
 
 // Map apartment IDs to their images
 const getApartmentImage = (apartmentId) => {
@@ -39,6 +41,10 @@ const getApartmentImage = (apartmentId) => {
     case 'Б-102':
     case 'Б-202':
       return apartmentB2FloorPlanImage; // Use the PNG image which is the actual floor plan
+    case 'Б-106':
+      return apartmentB6FloorPlanImage; // Apartment B6 floor plan
+    case 'Б-107':
+      return apartmentB7FloorPlanImage; // Apartment B7 floor plan
     case 'Б-101':
     case 'Б-103':
     case 'Б-201':
