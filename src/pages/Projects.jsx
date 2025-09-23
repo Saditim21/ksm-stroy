@@ -33,6 +33,15 @@ import apartmentB2Image from '../assets/продажби/project 1/apartment-b2.
 import apartmentB2FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.png'
 import apartmentB6FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B6.png'
 import apartmentB7FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment B7.png'
+import apartmentB15FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-207-floor2.png'
+import apartmentB23FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b23-floor3.png'
+import apartmentB31FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b31-floor4.png'
+import apartmentB47FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b47-floor6.png'
+import apartmentB50FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b50-floor7.png'
+import apartmentB55FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b55-floor7.png'
+import apartmentB57FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.png'
+import apartmentB59FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.png'
+import apartmentB63FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.png'
 
 // Map apartment IDs to their images
 const getApartmentImage = (apartmentId) => {
@@ -45,6 +54,24 @@ const getApartmentImage = (apartmentId) => {
       return apartmentB6FloorPlanImage; // Apartment B6 floor plan
     case 'Б-107':
       return apartmentB7FloorPlanImage; // Apartment B7 floor plan
+    case 'Б-207':
+      return apartmentB15FloorPlanImage; // Apartment B15 floor plan
+    case 'Б-307':
+      return apartmentB23FloorPlanImage; // Apartment B23 floor plan
+    case 'Б-407':
+      return apartmentB31FloorPlanImage; // Apartment B31 floor plan
+    case 'Б-607':
+      return apartmentB47FloorPlanImage; // Apartment B47 floor plan
+    case 'Б-702':
+      return apartmentB50FloorPlanImage; // Apartment B50 floor plan
+    case 'Б-707':
+      return apartmentB55FloorPlanImage; // Apartment B55 floor plan
+    case 'Б-801':
+      return apartmentB57FloorPlanImage; // Apartment B57 floor plan
+    case 'Б-803':
+      return apartmentB59FloorPlanImage; // Apartment B59 floor plan
+    case 'Б-807':
+      return apartmentB63FloorPlanImage; // Apartment B63 floor plan
     case 'Б-101':
     case 'Б-103':
     case 'Б-201':
@@ -679,22 +706,39 @@ const Sales = () => {
                               {selectedFloorDetails.data.apartments.map((apt, idx) => (
                                 <tr 
                                   key={idx} 
-                                  className="hover:bg-blue-50 transition-colors cursor-pointer group"
-                                  onClick={() => handleApartmentSelect({
-                                    name: `Апартамент ${apt.имот}`,
+                                  className={`transition-colors ${
+                                    apt.статус === 'Свободен' 
+                                      ? 'hover:bg-blue-50 cursor-pointer group' 
+                                      : 'cursor-not-allowed opacity-75'
+                                  }`}
+                                  onClick={apt.статус === 'Свободен' ? () => handleApartmentSelect({
+                                    name: apt.имот === 'Б-307' ? 'Апартамент Б23' : 
+                                          apt.имот === 'Б-106' ? 'Апартамент Б6' : 
+                                          apt.имот === 'Б-107' ? 'Апартамент Б7' : 
+                                          apt.имот === 'Б-207' ? 'Апартамент Б15' : 
+                                          apt.имот === 'Б-407' ? 'Апартамент Б31' : 
+                                          apt.имот === 'Б-607' ? 'Апартамент Б47' : 
+                                          apt.имот === 'Б-702' ? 'Апартамент Б50' : 
+                                          apt.имот === 'Б-707' ? 'Апартамент Б55' : 
+                                          apt.имот === 'Б-801' ? 'Апартамент Б57' : 
+                                          apt.имот === 'Б-803' ? 'Апартамент Б59' : 
+                                          apt.имот === 'Б-807' ? 'Апартамент Б63' : 
+                                          `Апартамент ${apt.имот}`,
                                     floor: selectedFloorDetails.floor.toString(),
                                     type: apt.вид === '2-стаен' ? 'Двустаен' : apt.вид === '3-стаен' ? 'Тристаен' : apt.вид === '4-стаен' ? 'Четиристаен' : apt.вид === '1-стаен' ? 'Едностаен' : apt.вид,
                                     totalArea: apt.общаПлощ,
                                     status: apt.статус,
                                     ...apt
-                                  })}
+                                  }) : undefined}
                                 >
                                   <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
                                     <div className="flex items-center">
                                       {apt.имот}
-                                      <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                      </svg>
+                                      {apt.статус === 'Свободен' && (
+                                        <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                      )}
                                     </div>
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
