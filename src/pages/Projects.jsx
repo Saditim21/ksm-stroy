@@ -27,6 +27,9 @@ import buildingAFloor6Image from '../assets/продажби/project 1/building-
 import buildingAFloor7Image from '../assets/продажби/project 1/building-A-floor-7.jpg'
 import buildingAFloor8Image from '../assets/продажби/project 1/building-A-floor-8.jpg'
 import buildingAFloor9Image from '../assets/продажби/project 1/building-A-floor-9.jpg'
+import buildingAFloor0Image from '../assets/продажби/project 1/building-garages.png'
+import buildingBFloor0Image from '../assets/продажби/project 1/building-garages.png'
+import garageFloorImage from '../assets/продажби/project 1/garage-floor.jpg'
 
 // Import the apartment images
 import apartmentB2Image from '../assets/продажби/project 1/apartment-b2.jpg'
@@ -42,6 +45,10 @@ import apartmentB55FloorPlanImage from '../assets/продажби/project 1/apa
 import apartmentB57FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.png'
 import apartmentB59FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.png'
 import apartmentB63FloorPlanImage from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.png'
+import apartmentA2FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a2-floor1.png'
+import apartmentA6FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a6-floor1.png'
+import apartmentA58FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a58-floor8.png'
+import apartmentA64FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.png'
 
 // Map apartment IDs to their images
 const getApartmentImage = (apartmentId) => {
@@ -72,6 +79,14 @@ const getApartmentImage = (apartmentId) => {
       return apartmentB59FloorPlanImage; // Apartment B59 floor plan
     case 'Б-807':
       return apartmentB63FloorPlanImage; // Apartment B63 floor plan
+    case 'А-102':
+      return apartmentA2FloorPlanImage; // Apartment A2 floor plan
+    case 'А-106':
+      return apartmentA6FloorPlanImage; // Apartment A6 floor plan
+    case 'А-802':
+      return apartmentA58FloorPlanImage; // Apartment A58 floor plan
+    case 'А-808':
+      return apartmentA64FloorPlanImage; // Apartment A64 floor plan
     case 'Б-101':
     case 'Б-103':
     case 'Б-201':
@@ -108,6 +123,8 @@ const Sales = () => {
   const [isHoveringAFloor7, setIsHoveringAFloor7] = useState(false)
   const [isHoveringAFloor8, setIsHoveringAFloor8] = useState(false)
   const [isHoveringAFloor9, setIsHoveringAFloor9] = useState(false)
+  const [isHoveringAFloor0, setIsHoveringAFloor0] = useState(false)
+  const [isHoveringBFloor0, setIsHoveringBFloor0] = useState(false)
   const [selectedFloorDetails, setSelectedFloorDetails] = useState(null)
   const [selectedApartment, setSelectedApartment] = useState(null)
   const [showApartmentModal, setShowApartmentModal] = useState(false)
@@ -478,49 +495,56 @@ const Sales = () => {
                         setIsHoveringAFloor7(false);
                         setIsHoveringAFloor8(false);
                         setIsHoveringAFloor9(false);
+                        setIsHoveringAFloor0(false);
+                        setIsHoveringBFloor0(false);
                         if (isHovering && towerId === 'A') {
-                          if (floor === 1) {
+                          if (floor === 2) {
                             setIsHoveringAFloor1(true);
-                          } else if (floor === 2) {
-                            setIsHoveringAFloor2(true);
                           } else if (floor === 3) {
-                            setIsHoveringAFloor3(true);
+                            setIsHoveringAFloor2(true);
                           } else if (floor === 4) {
-                            setIsHoveringAFloor4(true);
+                            setIsHoveringAFloor3(true);
                           } else if (floor === 5) {
-                            setIsHoveringAFloor5(true);
+                            setIsHoveringAFloor4(true);
                           } else if (floor === 6) {
-                            setIsHoveringAFloor6(true);
+                            setIsHoveringAFloor5(true);
                           } else if (floor === 7) {
-                            setIsHoveringAFloor7(true);
+                            setIsHoveringAFloor6(true);
                           } else if (floor === 8) {
-                            setIsHoveringAFloor8(true);
+                            setIsHoveringAFloor7(true);
                           } else if (floor === 9) {
+                            setIsHoveringAFloor8(true);
+                          } else if (floor === 10) {
                             setIsHoveringAFloor9(true);
+                          } else if (floor === 0) {
+                            setIsHoveringAFloor0(true);
                           }
                         } else if (isHovering && towerId === 'B') {
-                          if (floor === 1) {
+                          if (floor === 2) {
                             setIsHoveringBFloor1(true);
-                          } else if (floor === 2) {
-                            setIsHoveringBFloor2(true);
                           } else if (floor === 3) {
-                            setIsHoveringBFloor3(true);
+                            setIsHoveringBFloor2(true);
                           } else if (floor === 4) {
-                            setIsHoveringBFloor4(true);
+                            setIsHoveringBFloor3(true);
                           } else if (floor === 5) {
-                            setIsHoveringBFloor5(true);
+                            setIsHoveringBFloor4(true);
                           } else if (floor === 6) {
-                            setIsHoveringBFloor6(true);
+                            setIsHoveringBFloor5(true);
                           } else if (floor === 7) {
-                            setIsHoveringBFloor7(true);
+                            setIsHoveringBFloor6(true);
                           } else if (floor === 8) {
-                            setIsHoveringBFloor8(true);
+                            setIsHoveringBFloor7(true);
                           } else if (floor === 9) {
+                            setIsHoveringBFloor8(true);
+                          } else if (floor === 10) {
                             setIsHoveringBFloor9(true);
+                          } else if (floor === 0) {
+                            setIsHoveringBFloor0(true);
                           }
                         }
                       }}
                       currentImage={
+                        isHoveringAFloor0 ? garageFloorImage :
                         isHoveringAFloor1 ? buildingAFloor1Image :
                         isHoveringAFloor2 ? buildingAFloor2Image :
                         isHoveringAFloor3 ? buildingAFloor3Image :
@@ -539,6 +563,7 @@ const Sales = () => {
                         isHoveringBFloor7 ? buildingBFloor7Image :
                         isHoveringBFloor8 ? buildingBFloor8Image :
                         isHoveringBFloor9 ? buildingBFloor9Image :
+                        isHoveringBFloor0 ? garageFloorImage :
                         buildingImage
                       }
                       onFloorSelect={handleFloorSelect}
@@ -662,10 +687,21 @@ const Sales = () => {
                     {/* Header */}
                     <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
                       <div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                          Блок {selectedFloorDetails.tower} - Етаж {selectedFloorDetails.floor === 0 ? 'Партер/Гаражи' : selectedFloorDetails.floor}
-                        </h2>
-                        <p className="text-lg text-gray-600">Детайлна информация за апартаментите на етажа</p>
+                        {selectedFloorDetails.floor === 0 ? (
+                          <>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                              Блок А и Б – Надземни и Подземни Гаражи
+                            </h2>
+                            <p className="text-lg text-gray-600">КОТА +0.00</p>
+                          </>
+                        ) : (
+                          <>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                              Блок {selectedFloorDetails.tower} - {selectedFloorDetails.floor === 10 ? 'Тавански Етаж' : `Етаж ${selectedFloorDetails.floor}`}
+                            </h2>
+                            <p className="text-lg text-gray-600">Детайлна информация за апартаментите на етажа</p>
+                          </>
+                        )}
                       </div>
                       <button
                         onClick={() => {
@@ -684,140 +720,173 @@ const Sales = () => {
                       </button>
                     </div>
                     
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left Side - Apartments Table with Bulgarian Headers */}
-                      <div className="lg:col-span-1">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xl font-bold text-gray-900">Списък на апартаментите</h3>
-                          <p className="text-sm text-gray-600">Кликнете за детайли</p>
+                    {selectedFloorDetails.floor === 0 ? (
+                      // Garage Floor Layout
+                      <div className="w-full">
+                        {/* Architecture Plan - Full Width and Bigger */}
+                        <div className="w-full">
+                          <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                            {selectedFloorDetails.data.planImage ? (
+                              <div className="bg-gray-50">
+                                <img 
+                                  src={selectedFloorDetails.data.planImage}
+                                  alt="План на гаражите - Блок А и Б"
+                                  className="w-full h-auto object-contain"
+                                  style={{ maxHeight: '800px' }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="h-64 flex items-center justify-center bg-gray-100">
+                                <div className="text-center">
+                                  <svg className="w-16 h-16 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <p className="text-sm font-medium text-gray-600">План на гаражите</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-                          <table className="w-full text-xs lg:text-sm">
-                            <thead className="bg-gray-100">
-                              <tr>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
-                                <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {selectedFloorDetails.data.apartments.map((apt, idx) => (
-                                <tr 
-                                  key={idx} 
-                                  className={`transition-colors ${
-                                    apt.статус === 'Свободен' 
-                                      ? 'hover:bg-blue-50 cursor-pointer group' 
-                                      : 'cursor-not-allowed opacity-75'
-                                  }`}
-                                  onClick={apt.статус === 'Свободен' ? () => handleApartmentSelect({
-                                    name: apt.имот === 'Б-307' ? 'Апартамент Б23' : 
-                                          apt.имот === 'Б-106' ? 'Апартамент Б6' : 
-                                          apt.имот === 'Б-107' ? 'Апартамент Б7' : 
-                                          apt.имот === 'Б-207' ? 'Апартамент Б15' : 
-                                          apt.имот === 'Б-407' ? 'Апартамент Б31' : 
-                                          apt.имот === 'Б-607' ? 'Апартамент Б47' : 
-                                          apt.имот === 'Б-702' ? 'Апартамент Б50' : 
-                                          apt.имот === 'Б-707' ? 'Апартамент Б55' : 
-                                          apt.имот === 'Б-801' ? 'Апартамент Б57' : 
-                                          apt.имот === 'Б-803' ? 'Апартамент Б59' : 
-                                          apt.имот === 'Б-807' ? 'Апартамент Б63' : 
-                                          `Апартамент ${apt.имот}`,
-                                    floor: selectedFloorDetails.floor.toString(),
-                                    type: apt.вид === '2-стаен' ? 'Двустаен' : apt.вид === '3-стаен' ? 'Тристаен' : apt.вид === '4-стаен' ? 'Четиристаен' : apt.вид === '1-стаен' ? 'Едностаен' : apt.вид,
-                                    totalArea: apt.общаПлощ,
-                                    status: apt.статус,
-                                    ...apt
-                                  }) : undefined}
-                                >
-                                  <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
-                                    <div className="flex items-center">
-                                      {apt.имот}
-                                      {apt.статус === 'Свободен' && (
-                                        <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                    {apt.вид}
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                    {apt.общаПлощ}
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                    {apt.изложение}
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap">
-                                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
-                                      apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
-                                      apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
-                                      'bg-yellow-100 text-yellow-700'
-                                    }`}>
-                                      {apt.статус}
-                                    </span>
-                                  </td>
+                      </div>
+                    ) : (
+                      // Regular Floor Layout
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Left Side - Apartments Table with Bulgarian Headers */}
+                        <div className="lg:col-span-1">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-xl font-bold text-gray-900">Списък на апартаментите</h3>
+                            <p className="text-sm text-gray-600">Кликнете за детайли</p>
+                          </div>
+                          <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                            <table className="w-full text-xs lg:text-sm">
+                              <thead className="bg-gray-100">
+                                <tr>
+                                  <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Имот</th>
+                                  <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Вид</th>
+                                  <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Обща площ</th>
+                                  <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300">Изложение</th>
+                                  <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Статус</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {selectedFloorDetails.data.apartments.map((apt, idx) => (
+                                  <tr 
+                                    key={idx} 
+                                    className={`transition-colors ${
+                                      apt.статус === 'Свободен' 
+                                        ? 'hover:bg-blue-50 cursor-pointer group' 
+                                        : 'cursor-not-allowed opacity-75'
+                                    }`}
+                                    onClick={apt.статус === 'Свободен' ? () => handleApartmentSelect({
+                                      name: apt.имот === 'Б-307' ? 'Апартамент Б23' : 
+                                            apt.имот === 'Б-106' ? 'Апартамент Б6' : 
+                                            apt.имот === 'Б-107' ? 'Апартамент Б7' : 
+                                            apt.имот === 'Б-207' ? 'Апартамент Б15' : 
+                                            apt.имот === 'Б-407' ? 'Апартамент Б31' : 
+                                            apt.имот === 'Б-607' ? 'Апартамент Б47' : 
+                                            apt.имот === 'Б-702' ? 'Апартамент Б50' : 
+                                            apt.имот === 'Б-707' ? 'Апартамент Б55' : 
+                                            apt.имот === 'Б-801' ? 'Апартамент Б57' : 
+                                            apt.имот === 'Б-803' ? 'Апартамент Б59' : 
+                                            apt.имот === 'Б-807' ? 'Апартамент Б63' : 
+                                            apt.имот === 'А-102' ? 'Апартамент А2' : 
+                                            apt.имот === 'А-106' ? 'Апартамент А6' : 
+                                            `Апартамент ${apt.имот}`,
+                                      floor: selectedFloorDetails.floor.toString(),
+                                      type: apt.вид === '2-стаен' ? 'Двустаен' : apt.вид === '3-стаен' ? 'Тристаен' : apt.вид === '4-стаен' ? 'Четиристаен' : apt.вид === '1-стаен' ? 'Едностаен' : apt.вид,
+                                      totalArea: apt.общаПлощ,
+                                      status: apt.статус,
+                                      ...apt
+                                    }) : undefined}
+                                  >
+                                    <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
+                                      <div className="flex items-center">
+                                        {apt.имот}
+                                        {apt.статус === 'Свободен' && (
+                                          <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                          </svg>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                      {apt.вид}
+                                    </td>
+                                    <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                      {apt.общаПлощ}
+                                    </td>
+                                    <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                      {apt.изложение}
+                                    </td>
+                                    <td className="px-2 py-2 whitespace-nowrap">
+                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
+                                        apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
+                                        apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
+                                        'bg-yellow-100 text-yellow-700'
+                                      }`}>
+                                        {apt.статус}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          
+                          {/* Summary Stats */}
+                          <div className="mt-4 grid grid-cols-3 gap-3">
+                            {(() => {
+                              const available = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Свободен').length;
+                              const sold = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Продаден').length;
+                              const reserved = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Резервиран').length;
+                              
+                              return (
+                                <>
+                                  <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center">
+                                    <div className="text-xl font-bold text-green-800">{available}</div>
+                                    <div className="text-xs text-green-600">Свободни</div>
+                                  </div>
+                                  <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-center">
+                                    <div className="text-xl font-bold text-red-800">{sold}</div>
+                                    <div className="text-xs text-red-600">Продадени</div>
+                                  </div>
+                                  <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-center">
+                                    <div className="text-xl font-bold text-yellow-800">{reserved}</div>
+                                    <div className="text-xs text-yellow-600">Резервирани</div>
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
                         </div>
                         
-                        {/* Summary Stats */}
-                        <div className="mt-4 grid grid-cols-3 gap-3">
-                          {(() => {
-                            const available = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Свободен').length;
-                            const sold = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Продаден').length;
-                            const reserved = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Резервиран').length;
-                            
-                            return (
-                              <>
-                                <div className="bg-green-100 border border-green-300 rounded-lg p-3 text-center">
-                                  <div className="text-xl font-bold text-green-800">{available}</div>
-                                  <div className="text-xs text-green-600">Свободни</div>
-                                </div>
-                                <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-center">
-                                  <div className="text-xl font-bold text-red-800">{sold}</div>
-                                  <div className="text-xs text-red-600">Продадени</div>
-                                </div>
-                                <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-center">
-                                  <div className="text-xl font-bold text-yellow-800">{reserved}</div>
-                                  <div className="text-xs text-yellow-600">Резервирани</div>
-                                </div>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                      
-                      {/* Right Side - Architecture Plan */}
-                      <div className="lg:col-span-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
-                        <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-                          {selectedFloorDetails.data.planImage ? (
-                            <div className=" bg-gray-50">
-                              <img 
-                                src={selectedFloorDetails.data.planImage}
-                                alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
-                                className="w-full h-auto object-contain"
-                                style={{ maxHeight: '500px' }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="h-64 flex items-center justify-center bg-gray-100">
-                              <div className="text-center">
-                                <svg className="w-16 h-16 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p className="text-sm font-medium text-gray-600">План Етаж {selectedFloorDetails.floor}</p>
+                        {/* Right Side - Architecture Plan */}
+                        <div className="lg:col-span-1">
+                          <h3 className="text-xl font-bold text-gray-900 mb-4">Архитектурен план на етажа</h3>
+                          <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+                            {selectedFloorDetails.data.planImage ? (
+                              <div className="bg-gray-50">
+                                <img 
+                                  src={selectedFloorDetails.data.planImage}
+                                  alt={`План на Блок ${selectedFloorDetails.tower} - Етаж ${selectedFloorDetails.floor}`}
+                                  className="w-full h-auto object-contain"
+                                  style={{ maxHeight: '500px' }}
+                                />
                               </div>
-                            </div>
-                          )}
+                            ) : (
+                              <div className="h-64 flex items-center justify-center bg-gray-100">
+                                <div className="text-center">
+                                  <svg className="w-16 h-16 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <p className="text-sm font-medium text-gray-600">План Етаж {selectedFloorDetails.floor}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}

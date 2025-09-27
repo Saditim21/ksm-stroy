@@ -19,11 +19,14 @@ import buildingAFloor6Image from '../assets/продажби/project 1/building-
 import buildingAFloor7Image from '../assets/продажби/project 1/building-A-floor-7.jpg';
 import buildingAFloor8Image from '../assets/продажби/project 1/building-A-floor-8.jpg';
 import buildingAFloor9Image from '../assets/продажби/project 1/building-A-floor-9.jpg';
+import garageFloorImage from '../assets/продажби/project 1/garage-floor.jpg';
+import buildingAFloor0Image from '../assets/продажби/project 1/building-garages.png';
+import buildingBFloor0Image from '../assets/продажби/project 1/building-garages.png';
 
 // Simple floor data
 export const FLOOR_DATA = {
   'A': {
-    8: { 
+    10: { 
       property: 'А-801', 
       type: '3-стаен', 
       // removed builtArea: '78 м²', 
@@ -31,109 +34,14 @@ export const FLOOR_DATA = {
       exposure: 'Юг/Изток', 
       status: 'available',
       apartments: [
-        { имот: 'А-801', вид: '3-стаен', общаПлощ: '95 м²', изложение: 'Юг/Изток', статус: 'Свободен' },
-        { имот: 'А-802', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Запад', статус: 'Резервиран' },
-        { имот: 'А-803', вид: '4-стаен', общаПлощ: '115 м²', изложение: 'Север/Изток', статус: 'Свободен' },
-        { имот: 'А-804', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Север', статус: 'Резервиран' },
+        { имот: 'А-801', вид: '3-стаен', общаПлощ: '95 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
+        { имот: 'А-802', вид: 'Двустаен', общаПлощ: '69.15 м²', изложение: 'Запад', статус: 'Свободен' },
+        { имот: 'А-803', вид: '4-стаен', общаПлощ: '115 м²', изложение: 'Север/Изток', статус: 'Продаден' },
+        { имот: 'А-804', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Север', статус: 'Продаден' },
         { имот: 'А-805', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-806', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-807', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
-        { имот: 'А-808', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    7: { 
-      property: 'А-701', 
-      type: '2-стаен', 
-      // removed builtArea: '62 м²', 
-      totalArea: '75 м²', 
-      exposure: 'Запад', 
-      status: 'sold',
-      apartments: [
-        { имот: 'А-701', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Запад', статус: 'Продаден' },
-        { имот: 'А-702', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
-        { имот: 'А-703', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Север', статус: 'Резервиран' },
-        { имот: 'А-704', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
-        { имот: 'А-705', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-706', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-707', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
-        { имот: 'А-708', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Север/Запад', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    6: { 
-      property: 'А-601', 
-      type: '4-стаен', 
-      // removed builtArea: '98 м²', 
-      totalArea: '115 м²', 
-      exposure: 'Север/Изток', 
-      status: 'sold',
-      apartments: [
-        { имот: 'А-601', вид: '4-стаен', общаПлощ: '115 м²', изложение: 'Север/Изток', статус: 'Резервиран' },
-        { имот: 'А-602', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Север', статус: 'Продаден' },
-        { имот: 'А-603', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-604', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
-        { имот: 'А-605', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-606', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Запад', статус: 'Продаден' },
-        { имот: 'А-607', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Север/Запад', статус: 'Продаден' },
-        { имот: 'А-608', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    5: { 
-      property: 'А-501', 
-      type: '2-стаен', 
-      // removed builtArea: '62 м²', 
-      totalArea: '75 м²', 
-      exposure: 'Север', 
-      status: 'sold',
-      apartments: [
-        { имот: 'А-501', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
-        { имот: 'А-502', вид: '3-стаен', общаПлощ: '94 м²', изложение: 'Юг/Запад', статус: 'Продаден' },
-        { имот: 'А-503', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
-        { имот: 'А-504', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
-        { имот: 'А-505', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Запад', статус: 'Продаден' },
-        { имот: 'А-506', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-507', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-508', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Запад', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    4: { 
-      property: 'А-401', 
-      type: '3-стаен', 
-      // removed builtArea: '78 м²', 
-      totalArea: '95 м²', 
-      exposure: 'Юг/Изток', 
-      status: 'sold',
-      apartments: [
-        { имот: 'А-401', вид: '3-стаен', общаПлощ: '95 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
-        { имот: 'А-402', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
-        { имот: 'А-403', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
-        { имот: 'А-404', вид: '1-стаен', общаПлощ: '50 м²', изложение: 'Запад', статус: 'Продаден' },
-        { имот: 'А-405', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Изток', статус: 'Продаден' },
-        { имот: 'А-406', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-407', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-408', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Север/Запад', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    3: { 
-      property: 'А-301', 
-      type: '2-стаен', 
-      // removed builtArea: '62 м²', 
-      totalArea: '75 м²', 
-      exposure: 'Север', 
-      status: 'sold',
-      apartments: [
-        { имот: 'А-301', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
-        { имот: 'А-302', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
-        { имот: 'А-303', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
-        { имот: 'А-304', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Изток', статус: 'Продаден' },
-        { имот: 'А-305', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Запад', статус: 'Продаден' },
-        { имот: 'А-306', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
-        { имот: 'А-307', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'А-308', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'А-806', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Резервиран' },
+        { имот: 'А-807', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Резервиран' },
+        { имот: 'А-808', вид: 'Двустаен', общаПлощ: '63.87 м²', изложение: 'Запад/Юг', статус: 'Свободен' },
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
@@ -156,7 +64,102 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    2: { 
+    8: { 
+      property: 'А-701', 
+      type: '2-стаен', 
+      // removed builtArea: '62 м²', 
+      totalArea: '75 м²', 
+      exposure: 'Запад', 
+      status: 'sold',
+      apartments: [
+        { имот: 'А-701', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'А-702', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
+        { имот: 'А-703', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Север', статус: 'Резервиран' },
+        { имот: 'А-704', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
+        { имот: 'А-705', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'А-706', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
+        { имот: 'А-707', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
+        { имот: 'А-708', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Север/Запад', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    7: { 
+      property: 'А-601', 
+      type: '4-стаен', 
+      // removed builtArea: '98 м²', 
+      totalArea: '115 м²', 
+      exposure: 'Север/Изток', 
+      status: 'sold',
+      apartments: [
+        { имот: 'А-601', вид: '4-стаен', общаПлощ: '115 м²', изложение: 'Север/Изток', статус: 'Резервиран' },
+        { имот: 'А-602', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Север', статус: 'Продаден' },
+        { имот: 'А-603', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
+        { имот: 'А-604', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
+        { имот: 'А-605', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'А-606', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'А-607', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Север/Запад', статус: 'Продаден' },
+        { имот: 'А-608', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    6: { 
+      property: 'А-501', 
+      type: '2-стаен', 
+      // removed builtArea: '62 м²', 
+      totalArea: '75 м²', 
+      exposure: 'Север', 
+      status: 'sold',
+      apartments: [
+        { имот: 'А-501', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
+        { имот: 'А-502', вид: '3-стаен', общаПлощ: '94 м²', изложение: 'Юг/Запад', статус: 'Продаден' },
+        { имот: 'А-503', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
+        { имот: 'А-504', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
+        { имот: 'А-505', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Запад', статус: 'Продаден' },
+        { имот: 'А-506', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
+        { имот: 'А-507', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'А-508', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Запад', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    5: { 
+      property: 'А-401', 
+      type: '3-стаен', 
+      // removed builtArea: '78 м²', 
+      totalArea: '95 м²', 
+      exposure: 'Юг/Изток', 
+      status: 'sold',
+      apartments: [
+        { имот: 'А-401', вид: '3-стаен', общаПлощ: '95 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
+        { имот: 'А-402', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
+        { имот: 'А-403', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
+        { имот: 'А-404', вид: '1-стаен', общаПлощ: '50 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'А-405', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Изток', статус: 'Продаден' },
+        { имот: 'А-406', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
+        { имот: 'А-407', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'А-408', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Север/Запад', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    4: { 
+      property: 'А-301', 
+      type: '2-стаен', 
+      // removed builtArea: '62 м²', 
+      totalArea: '75 м²', 
+      exposure: 'Север', 
+      status: 'sold',
+      apartments: [
+        { имот: 'А-301', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
+        { имот: 'А-302', вид: '3-стаен', общаПлощ: '98 м²', изложение: 'Юг/Изток', статус: 'Продаден' },
+        { имот: 'А-303', вид: '4-стаен', общаПлощ: '125 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
+        { имот: 'А-304', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Изток', статус: 'Продаден' },
+        { имот: 'А-305', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Запад', статус: 'Продаден' },
+        { имот: 'А-306', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Юг', статус: 'Продаден' },
+        { имот: 'А-307', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'А-308', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Запад', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    3: { 
       property: 'А-201', 
       type: '4-стаен', 
       // removed builtArea: '98 м²', 
@@ -175,7 +178,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    1: { 
+    2: { 
       property: 'А-101', 
       type: '2-стаен', 
       // removed builtArea: '62 м²', 
@@ -183,12 +186,12 @@ export const FLOOR_DATA = {
       exposure: 'Север', 
       status: 'available',
       apartments: [
-        { имот: 'А-101', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Свободен' },
-        { имот: 'А-102', вид: '3-стаен', общаПлощ: '94 м²', изложение: 'Юг/Запад', статус: 'Продаден' },
-        { имот: 'А-103', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Свободен' },
+        { имот: 'А-101', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Север', статус: 'Продаден' },
+        { имот: 'А-102', вид: '2-стаен', общаПлощ: '69.15 м²', изложение: 'Юг/Запад', статус: 'Свободен' },
+        { имот: 'А-103', вид: '1-стаен', общаПлощ: '52 м²', изложение: 'Изток', статус: 'Продаден' },
         { имот: 'А-104', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
         { имот: 'А-105', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Север/Изток', статус: 'Продаден' },
-        { имот: 'А-106', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'А-106', вид: '3-стаен', общаПлощ: '100.75 м²', изложение: 'Запад', статус: 'Свободен' },
         { имот: 'А-107', вид: '1-стаен', общаПлощ: '55 м²', изложение: 'Юг', статус: 'Продаден' },
         { имот: 'А-108', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
       ],
@@ -205,30 +208,12 @@ export const FLOOR_DATA = {
         { имот: 'Гараж А-1', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Свободен' },
         { имот: 'Гараж А-2', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Свободен' },
         { имот: 'Гараж А-3', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Продаден' },
-      ]
+      ],
+      planImage: buildingAFloor0Image
     },
   },
   'B': {
-    8: { 
-      property: 'Б-801', 
-      type: '3-стаен', 
-      // removed builtArea: '78 м²', 
-      totalArea: '95 м²', 
-      exposure: 'Юг/Изток', 
-      status: 'available',
-      apartments: [
-        { имот: 'Б-801', вид: '2-стаен', общаПлощ: '63.84 м²', изложение: 'Юг/Изток', статус: 'Свободен' },
-        { имот: 'Б-802', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Запад', статус: 'Продаден' },
-        { имот: 'Б-803', вид: '3-стаен', общаПлощ: '87.17 м²', изложение: 'Север', статус: 'Свободен' },
-        { имот: 'Б-804', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
-        { имот: 'Б-805', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
-        { имот: 'Б-806', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
-        { имот: 'Б-807', вид: '3-стаен', общаПлощ: '107.71 м²', изложение: 'Север/Запад', статус: 'Свободен' },
-        { имот: 'Б-808', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Изток', статус: 'Продаден' },
-      ],
-      planImage: buildingAllFloorsArchitectureImage
-    },
-    9: { 
+    10: { 
       property: 'Б-901', 
       type: '3-стаен', 
       // removed builtArea: '78 м²', 
@@ -247,7 +232,26 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    7: { 
+    9: { 
+      property: 'Б-801', 
+      type: '3-стаен', 
+      // removed builtArea: '78 м²', 
+      totalArea: '95 м²', 
+      exposure: 'Юг/Изток', 
+      status: 'available',
+      apartments: [
+        { имот: 'Б-801', вид: '2-стаен', общаПлощ: '63.84 м²', изложение: 'Юг/Изток', статус: 'Свободен' },
+        { имот: 'Б-802', вид: '2-стаен', общаПлощ: '75 м²', изложение: 'Запад', статус: 'Продаден' },
+        { имот: 'Б-803', вид: '3-стаен', общаПлощ: '87.17 м²', изложение: 'Север', статус: 'Свободен' },
+        { имот: 'Б-804', вид: '4-стаен', общаПлощ: '130 м²', изложение: 'Юг/Изток/Запад', статус: 'Продаден' },
+        { имот: 'Б-805', вид: '2-стаен', общаПлощ: '82 м²', изложение: 'Изток/Юг', статус: 'Продаден' },
+        { имот: 'Б-806', вид: '3-стаен', общаПлощ: '102 м²', изложение: 'Запад/Юг', статус: 'Продаден' },
+        { имот: 'Б-807', вид: '3-стаен', общаПлощ: '107.71 м²', изложение: 'Север/Запад', статус: 'Свободен' },
+        { имот: 'Б-808', вид: '2-стаен', общаПлощ: '78 м²', изложение: 'Изток', статус: 'Продаден' },
+      ],
+      planImage: buildingAllFloorsArchitectureImage
+    },
+    8: { 
       property: 'Б-701', 
       type: '2-стаен', 
       // removed builtArea: '62 м²', 
@@ -266,7 +270,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    6: { 
+    7: { 
       property: 'Б-602', 
       type: '2-стаен', 
       // removed builtArea: '65 м²', 
@@ -285,7 +289,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    5: { 
+    6: { 
       property: 'Б-501', 
       type: '2-стаен', 
       // removed builtArea: '62 м²', 
@@ -304,7 +308,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    4: { 
+    5: { 
       property: 'Б-401', 
       type: '3-стаен', 
       // removed builtArea: '78 м²', 
@@ -323,7 +327,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    3: { 
+    4: { 
       property: 'Б-301', 
       type: '2-стаен', 
       // removed builtArea: '62 м²', 
@@ -342,7 +346,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    2: { 
+    3: { 
       property: 'Б-201', 
       type: '4-стаен', 
       // removed builtArea: '98 м²', 
@@ -361,7 +365,7 @@ export const FLOOR_DATA = {
       ],
       planImage: buildingAllFloorsArchitectureImage
     },
-    1: { 
+    2: { 
       property: 'Б-101', 
       type: '2-стаен', 
       // removed builtArea: '62 м²', 
@@ -392,15 +396,16 @@ export const FLOOR_DATA = {
         { имот: 'Гараж Б-2', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Свободен' },
         { имот: 'Гараж Б-3', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Свободен' },
         { имот: 'Гараж Б-4', вид: 'Паркомясто', общаПлощ: '15 м²', изложение: '-', статус: 'Продаден' },
-      ]
+      ],
+      planImage: buildingAFloor0Image
     },
   },
 };
 
 // Tower configurations
 const TOWERS = [
-  { id: 'A', name: 'Блок A', floors: 10 },
-  { id: 'B', name: 'Блок B', floors: 10 }
+  { id: 'A', name: 'Блок A', floors: 11 },
+  { id: 'B', name: 'Блок B', floors: 11 }
 ];
 
 const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApartmentSelect, clearFloorSelection }) => {
@@ -457,6 +462,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
 
   const getFloorName = (floorIndex) => {
     if (floorIndex === 0) return 'Партер/Гаражи';
+    if (floorIndex === 10) return 'Тавански Етаж';
     return `Етаж ${floorIndex}`;
   };
 
@@ -529,12 +535,12 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                           key={floorIndex}
                           onClick={() => handleFloorClick(tower.id, floorIndex)}
                           onMouseEnter={() => {
-                            if ((tower.id === 'A' && floorIndex >= 1 && floorIndex <= 9) || (tower.id === 'B' && floorIndex >= 1 && floorIndex <= 9)) {
+                            if ((tower.id === 'A' && floorIndex >= 0 && floorIndex <= 10) || (tower.id === 'B' && floorIndex >= 0 && floorIndex <= 10)) {
                               handleFloorHover(tower.id, floorIndex);
                             }
                           }}
                           onMouseLeave={() => {
-                            if ((tower.id === 'A' && floorIndex >= 1 && floorIndex <= 9) || (tower.id === 'B' && floorIndex >= 1 && floorIndex <= 9)) {
+                            if ((tower.id === 'A' && floorIndex >= 0 && floorIndex <= 10) || (tower.id === 'B' && floorIndex >= 0 && floorIndex <= 10)) {
                               handleFloorHover(null, null);
                             }
                           }}
@@ -585,20 +591,78 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                   className="max-w-4xl max-h-[530px] object-contain"
                 />
                 
-                {/* Back button when viewing floor plan */}
+                {/* Floor Indicator Overlay */}
+                {!selectedFloorImage && currentImage && currentImage !== buildingImage && (
+                  <div className="absolute inset-x-0 top-0 flex justify-center pt-8">
+                    <div className="bg-white/90 backdrop-blur-md text-gray-800 px-8 py-4 rounded-2xl shadow-2xl border border-gray-200/50 pointer-events-none font-medium text-lg tracking-wide transition-all duration-500 ease-out transform animate-in slide-in-from-top-4 fade-in">
+                      <div className="flex items-center justify-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-sm"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/60 animate-pulse"></div>
+                          <div className="w-1 h-1 rounded-full bg-emerald-400/40"></div>
+                        </div>
+                        <span className="text-gray-700 font-semibold">
+                          {(() => {
+                            if (currentImage === buildingAFloor1Image) return "Етаж 2 - Блок А";
+                            if (currentImage === buildingAFloor2Image) return "Етаж 3 - Блок А";
+                            if (currentImage === buildingAFloor3Image) return "Етаж 4 - Блок А";
+                            if (currentImage === buildingAFloor4Image) return "Етаж 5 - Блок А";
+                            if (currentImage === buildingAFloor5Image) return "Етаж 6 - Блок А";
+                            if (currentImage === buildingAFloor6Image) return "Етаж 7 - Блок А";
+                            if (currentImage === buildingAFloor7Image) return "Етаж 8 - Блок А";
+                            if (currentImage === buildingAFloor8Image) return "Етаж 9 - Блок А";
+                            if (currentImage === buildingAFloor9Image) return "Тавански Етаж - Блок А";
+                            if (currentImage === garageFloorImage) return "Партер/Гаражи";
+                            if (currentImage === buildingBFloor1Image) return "Етаж 2 - Блок Б";
+                            if (currentImage === buildingBFloor2Image) return "Етаж 3 - Блок Б";
+                            if (currentImage === buildingBFloor3Image) return "Етаж 4 - Блок Б";
+                            if (currentImage === buildingBFloor4Image) return "Етаж 5 - Блок Б";
+                            if (currentImage === buildingBFloor5Image) return "Етаж 6 - Блок Б";
+                            if (currentImage === buildingBFloor6Image) return "Етаж 7 - Блок Б";
+                            if (currentImage === buildingBFloor7Image) return "Етаж 8 - Блок Б";
+                            if (currentImage === buildingBFloor8Image) return "Етаж 9 - Блок Б";
+                            if (currentImage === buildingBFloor9Image) return "Тавански Етаж - Блок Б";
+                            return null;
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Floor plan title and back button when viewing floor plan */}
                 {selectedFloorImage && (
-                  <button
-                    onClick={() => {
-                      setSelectedFloorImage(null);
-                      setSelected({ tower: null, floor: null });
-                    }}
-                    className="absolute top-6 left-6 bg-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center space-x-2 text-gray-700 hover:text-gray-900"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span>Обратно към сградата</span>
-                  </button>
+                  <>
+                    {/* Floor plan title */}
+                    <div className="absolute inset-x-0 top-0 flex justify-center pt-8">
+                      <div className="bg-white/90 backdrop-blur-md text-gray-800 px-8 py-4 rounded-2xl shadow-2xl border border-gray-200/50 pointer-events-none font-medium text-lg tracking-wide transition-all duration-500 ease-out transform animate-in slide-in-from-top-4 fade-in">
+                        <div className="flex items-center justify-center space-x-3">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-sm"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400/60 animate-pulse"></div>
+                            <div className="w-1 h-1 rounded-full bg-emerald-400/40"></div>
+                          </div>
+                          <span className="text-gray-700 font-semibold">
+                            {selected.floor === 0 ? "Блок А и Б – Надземни и Подземни Гаражи" : "Архитектурен план на етажа"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Back button */}
+                    <button
+                      onClick={() => {
+                        setSelectedFloorImage(null);
+                        setSelected({ tower: null, floor: null });
+                      }}
+                      className="absolute top-6 left-6 bg-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      <span>Обратно към сградата</span>
+                    </button>
+                  </>
                 )}
                 
                 {/* Building floor hover and click areas covering entire width */}
@@ -608,17 +672,18 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                     viewBox="0 0 100 100"
                     preserveAspectRatio="none"
                   >
-                  {/* Block A Floors 1-9 - Left side hover areas */}
+                  {/* Block A Floors 0,2-10 - Left side hover areas */}
                   {[
-                    { floor: 9, y: 32 },
-                    { floor: 8, y: 36 },
-                    { floor: 7, y: 38 },
-                    { floor: 6, y: 42 },
-                    { floor: 5, y: 45 },
-                    { floor: 4, y: 48 },
-                    { floor: 3, y: 50 },
-                    { floor: 2, y: 55 },
-                    { floor: 1, y: 60.5 }
+                    { floor: 10, y: 32 },
+                    { floor: 9, y: 36 },
+                    { floor: 8, y: 38 },
+                    { floor: 7, y: 42 },
+                    { floor: 6, y: 45 },
+                    { floor: 5, y: 48 },
+                    { floor: 4, y: 50 },
+                    { floor: 3, y: 55 },
+                    { floor: 2, y: 60.5 },
+                    { floor: 0, y: 65 }
                   ].map(({ floor, y }) => (
                     <rect
                       key={`floor-A-${floor}`}
@@ -640,17 +705,18 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                     />
                   ))}
                   
-                  {/* Block B Floors 1-9 - Right side hover areas */}
+                  {/* Block B Floors 0,2-10 - Right side hover areas */}
                   {[
-                    { floor: 9, y: 32 },
-                    { floor: 8, y: 36 },
-                    { floor: 7, y: 38 },
-                    { floor: 6, y: 42 },
-                    { floor: 5, y: 45 },
-                    { floor: 4, y: 48 },
-                    { floor: 3, y: 50 },
-                    { floor: 2, y: 55 },
-                    { floor: 1, y: 60.5 }
+                    { floor: 10, y: 32 },
+                    { floor: 9, y: 36 },
+                    { floor: 8, y: 38 },
+                    { floor: 7, y: 42 },
+                    { floor: 6, y: 45 },
+                    { floor: 5, y: 48 },
+                    { floor: 4, y: 50 },
+                    { floor: 3, y: 55 },
+                    { floor: 2, y: 60.5 },
+                    { floor: 0, y: 65 }
                   ].map(({ floor, y }) => (
                     <rect
                       key={`floor-B-${floor}`}
