@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import img001 from '../../assets/images/001.jpg'
-import img002 from '../../assets/images/002.jpg'
-import img003 from '../../assets/images/003.jpg'
-import slider01 from '../../assets/images/slider01.jpg'
+import slider01 from '../../assets/home/slider01.jpg'
+import slider02 from '../../assets/home/slider02.jpg'
+import slider03 from '../../assets/home/slider03.jpg'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -21,24 +20,17 @@ const HeroCarousel = () => {
     },
     {
       id: 2,
-      image: img001,
+      image: slider02,
       title: "Модерна архитектура",
       subtitle: "Иновативни дизайнерски решения",
       description: "Комбинираме функционалност с естетика"
     },
     {
       id: 3,
-      image: img002,
+      image: slider03,
       title: "Качествено строителство",
       subtitle: "15+ години доказан опит",
       description: "Реализираме проекти с гарантирано качество"
-    },
-    {
-      id: 4,
-      image: img003,
-      title: "Индивидуален подход",
-      subtitle: "Всеки проект е уникален",
-      description: "Превръщаме вашите идеи в реалност"
     }
   ]
 
@@ -61,12 +53,6 @@ const HeroCarousel = () => {
       location: "София, кв. Драгалевци",
       apartments: { total: 18, available: 14, reserved: 2, sold: 2 },
       garages: { total: 15, available: 10, reserved: 3, sold: 2 }
-    },
-    {
-      name: "Премиум Тауърс",
-      location: "София, Център",
-      apartments: { total: 48, available: 35, reserved: 8, sold: 5 },
-      garages: { total: 24, available: 16, reserved: 4, sold: 4 }
     }
   ]
 
@@ -130,11 +116,11 @@ const HeroCarousel = () => {
 
       {/* Hero Content */}
       <div className="relative z-10 h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-center">
             
             {/* Left Content - Text */}
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7 text-center lg:text-left px-2 sm:px-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
@@ -145,12 +131,12 @@ const HeroCarousel = () => {
                   className="text-white"
                 >
                   <motion.h1 
-                    className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+                    className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4 sm:mb-6"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.8 }}
                   >
-                    <span className="block text-white mb-2">
+                    <span className="block text-white mb-1 sm:mb-2">
                       {slides[currentSlide].title}
                     </span>
                     <span className="block bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
@@ -159,7 +145,7 @@ const HeroCarousel = () => {
                   </motion.h1>
 
                   <motion.p 
-                    className="text-xl md:text-2xl text-platinum-300 mb-8 max-w-2xl"
+                    className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-platinum-300 mb-4 sm:mb-6 lg:mb-8 max-w-2xl mx-auto lg:mx-0"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.8 }}
@@ -168,23 +154,23 @@ const HeroCarousel = () => {
                   </motion.p>
 
                   <motion.div 
-                    className="flex flex-col sm:flex-row gap-4"
+                    className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.8 }}
                   >
                     <Link
                       to="/projects"
-                      className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 px-8 py-4 rounded-luxury font-semibold text-lg shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300 text-center"
+                      className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base lg:text-lg shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300 text-center"
                     >
                       Разгледай проектите
-                      <svg className="inline-block ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="inline-block ml-1 sm:ml-2 w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </Link>
                     <Link
                       to="/contact"
-                      className="border-2 border-gold-500/50 hover:border-gold-500 text-white hover:bg-gold-500 hover:text-primary-900 px-8 py-4 rounded-luxury font-semibold text-lg backdrop-blur-sm transition-all duration-300 text-center"
+                      className="border-2 border-gold-500/50 hover:border-gold-500 text-white hover:bg-gold-500 hover:text-primary-900 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base lg:text-lg backdrop-blur-sm transition-all duration-300 text-center"
                     >
                       Свържи се с нас
                     </Link>
@@ -194,23 +180,23 @@ const HeroCarousel = () => {
             </div>
 
             {/* Right Content - Apartment Availability Box */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="lg:col-span-5 flex justify-center lg:justify-end mt-6 lg:mt-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  className="bg-white/95 backdrop-blur-md rounded-luxury-lg p-8 shadow-luxury-lg border border-silver-200 max-w-md w-full"
+                  className="bg-white/95 backdrop-blur-md rounded-luxury-lg p-4 sm:p-6 lg:p-8 shadow-luxury-lg border border-silver-200 max-w-sm sm:max-w-md w-full mx-2 sm:mx-0"
                   initial={{ opacity: 0, x: 50, scale: 0.9 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: -50, scale: 0.9 }}
                   transition={{ duration: 0.8 }}
                 >
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-bold text-primary-900 mb-2">{currentBuilding.name}</h3>
-                    <p className="text-primary-600">{currentBuilding.location}</p>
+                  <div className="text-center mb-4 sm:mb-6">
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-900 mb-1 sm:mb-2">{currentBuilding.name}</h3>
+                    <p className="text-sm sm:text-base text-primary-600">{currentBuilding.location}</p>
                   </div>
 
                   {/* Apartments Section */}
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-6">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-lg font-semibold text-primary-900 flex items-center">
                         <svg className="w-5 h-5 text-gold-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,43 +250,43 @@ const HeroCarousel = () => {
                   </div>
 
                   {/* Garages Section */}
-                  <div className="mb-6 pb-6 border-b border-silver-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-lg font-semibold text-primary-900 flex items-center">
-                        <svg className="w-5 h-5 text-gold-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-silver-200">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <h4 className="text-base sm:text-lg font-semibold text-primary-900 flex items-center">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-600 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                         </svg>
                         Гаражи
                       </h4>
-                      <span className="text-primary-600 text-sm">Общо {currentBuilding.garages.total}</span>
+                      <span className="text-primary-600 text-xs sm:text-sm">Общо {currentBuilding.garages.total}</span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
                       <motion.div 
-                        className="py-2 px-2 bg-green-50 rounded border border-green-200"
+                        className="py-1 sm:py-2 px-1 sm:px-2 bg-green-50 rounded border border-green-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
                       >
-                        <div className="text-lg font-bold text-green-800">{currentBuilding.garages.available}</div>
+                        <div className="text-sm sm:text-lg font-bold text-green-800">{currentBuilding.garages.available}</div>
                         <div className="text-xs text-green-600">Свободни</div>
                       </motion.div>
                       <motion.div 
-                        className="py-2 px-2 bg-yellow-50 rounded border border-yellow-200"
+                        className="py-1 sm:py-2 px-1 sm:px-2 bg-yellow-50 rounded border border-yellow-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6 }}
                       >
-                        <div className="text-lg font-bold text-yellow-800">{currentBuilding.garages.reserved}</div>
+                        <div className="text-sm sm:text-lg font-bold text-yellow-800">{currentBuilding.garages.reserved}</div>
                         <div className="text-xs text-yellow-600">Резерв.</div>
                       </motion.div>
                       <motion.div 
-                        className="py-2 px-2 bg-red-50 rounded border border-red-200"
+                        className="py-1 sm:py-2 px-1 sm:px-2 bg-red-50 rounded border border-red-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.7 }}
                       >
-                        <div className="text-lg font-bold text-red-800">{currentBuilding.garages.sold}</div>
+                        <div className="text-sm sm:text-lg font-bold text-red-800">{currentBuilding.garages.sold}</div>
                         <div className="text-xs text-red-600">Продаден</div>
                       </motion.div>
                     </div>
@@ -308,10 +294,10 @@ const HeroCarousel = () => {
 
                   {/* Action Button */}
                   <Link
-                    to="/building-plan"
-                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-3 px-6 rounded-luxury font-semibold text-center block transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-lg"
+                    to="/projects"
+                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-2 sm:py-3 px-4 sm:px-6 rounded-luxury font-semibold text-sm sm:text-base text-center block transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-lg"
                   >
-                    Виж етажните планове
+                    Виж проектите
                   </Link>
                 </motion.div>
               </AnimatePresence>
@@ -321,15 +307,15 @@ const HeroCarousel = () => {
       </div>
 
       {/* Carousel Controls */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex space-x-3">
+      <div className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex space-x-2 sm:space-x-3">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'bg-gold-500 w-8' 
+                  ? 'bg-gold-500 w-6 sm:w-8' 
                   : 'bg-white/50 hover:bg-white/70'
               }`}
               aria-label={`Слайд ${index + 1}`}
@@ -341,20 +327,20 @@ const HeroCarousel = () => {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
+        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
         aria-label="Предишен слайд"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
+        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
         aria-label="Следващ слайд"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>

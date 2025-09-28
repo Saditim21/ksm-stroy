@@ -4,7 +4,6 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Thumbs, Autoplay } from 'swiper/modules'
 import { projectsData, statusConfig, categoryConfig } from '../data/projectsData'
 import ThreeDModelViewer from '../components/ui/ThreeDModelViewer'
-import BuildingFloorPlan from '../components/ui/BuildingFloorPlan'
 
 // Import Swiper styles
 import 'swiper/css'
@@ -55,7 +54,6 @@ const ProjectDetail = () => {
     { id: 'overview', label: 'Общ преглед', icon: '🏢' },
     { id: 'gallery', label: 'Галерия', icon: '📸' },
     { id: '3d-model', label: '3D Модел', icon: '🎯' },
-    { id: 'floor-plan', label: 'План на етажите', icon: '🏗️' },
     { id: 'specifications', label: 'Спецификации', icon: '📋' }
   ]
 
@@ -74,7 +72,7 @@ const ProjectDetail = () => {
     <div className="min-h-screen bg-gray-50">
       
       {/* Hero Image Section */}
-      <section className="relative h-screen">
+      <section className="relative h-64 sm:h-80 md:h-96 lg:h-screen">
         <div className="absolute inset-0">
           <img
             src={project.image}
@@ -98,34 +96,34 @@ const ProjectDetail = () => {
         <div className="absolute inset-0 bg-black/40"></div>
         
         {/* Content Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white px-4">
-            <div className="mb-4">
-              <span className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${statusConfig[project.status]?.className} bg-opacity-90`}>
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div className="text-center text-white max-w-4xl">
+            <div className="mb-2 sm:mb-4">
+              <span className={`inline-block px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold ${statusConfig[project.status]?.className} bg-opacity-90`}>
                 {statusConfig[project.status]?.label}
               </span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-6 leading-tight">
               {project.name}
             </h1>
             
-            <div className="flex items-center justify-center text-xl mb-8">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center justify-center text-sm sm:text-base lg:text-xl mb-4 sm:mb-6 lg:mb-8">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               {project.location}
             </div>
             
-            <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-8">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl max-w-3xl mx-auto leading-relaxed mb-4 sm:mb-6 lg:mb-8 px-2">
               {project.description}
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center">
               <button
                 onClick={() => setActiveTab('gallery')}
-                className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 px-8 py-3 rounded-luxury font-semibold transition-all duration-200 shadow-gold-glow hover:shadow-gold-glow-lg"
+                className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded-luxury font-semibold text-sm sm:text-base transition-all duration-200 shadow-gold-glow hover:shadow-gold-glow-lg"
               >
                 Разгледай галерията
               </button>
@@ -148,23 +146,23 @@ const ProjectDetail = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate('/projects')}
-          className="absolute top-8 left-8 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-3 rounded-lg transition-colors"
+          className="absolute top-4 sm:top-6 lg:top-8 left-4 sm:left-6 lg:left-8 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-2 sm:p-3 rounded-lg transition-colors"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
       </section>
 
       {/* Navigation Tabs */}
-      <section className="sticky top-20 bg-white border-b border-gray-200 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex overflow-x-auto">
+      <section className="sticky top-16 sm:top-18 lg:top-20 bg-white border-b border-gray-200 z-30">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex overflow-x-auto scrollbar-hide">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={`flex items-center px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-gold-600 text-gold-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -326,20 +324,6 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {/* Floor Plan Tab */}
-          {activeTab === 'floor-plan' && (
-            <div>
-              <div className="mb-8 text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Интерактивен план на етажите</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
-                  Разгледайте подробно всеки етаж и наличните апартаменти в сградата
-                </p>
-              </div>
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <BuildingFloorPlan />
-              </div>
-            </div>
-          )}
 
           {/* Specifications Tab */}
           {activeTab === 'specifications' && (

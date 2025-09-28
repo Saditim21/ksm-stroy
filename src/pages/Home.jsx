@@ -63,22 +63,22 @@ const Home = () => {
       {/* Services Section */}
       <motion.section 
         id="services-section" 
-        className="py-8 bg-primary-50"
+        className="py-6 sm:py-8 lg:py-12 bg-primary-50"
         initial="initial"
         whileInView="animate"
         viewport={viewportOptions}
         variants={fadeInUp}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.header className="text-center mb-8" variants={staggerItem}>
-            <h2 className="text-display-2 text-primary-900 mb-2">Нашите Услуги</h2>
-            <p className="text-base text-primary-600 max-w-2xl mx-auto">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <motion.header className="text-center mb-6 sm:mb-8 lg:mb-12" variants={staggerItem}>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-primary-900 mb-2 sm:mb-4">Нашите Услуги</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-primary-600 max-w-2xl mx-auto px-2 sm:px-0">
               Предлагаме пълен спектър от строителни услуги за жилищни и комерсиални проекти
             </p>
           </motion.header>
           
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -87,7 +87,7 @@ const Home = () => {
             {services.map((service, index) => (
               <motion.article 
                 key={index}
-                className="text-center p-6 rounded-luxury-lg bg-gradient-to-br from-white to-ivory-50 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg cursor-pointer group transition-all duration-300"
+                className="text-center p-4 sm:p-6 rounded-luxury-lg bg-gradient-to-br from-white to-ivory-50 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg cursor-pointer group transition-all duration-300"
                 variants={hoverLift}
                 initial="initial"
                 whileHover="hover"
@@ -95,16 +95,16 @@ const Home = () => {
                 viewport={{ once: true, amount: 0.3 }}
               >
                 <motion.div 
-                  className="w-14 h-14 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
+                  className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300"
                   whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <svg className="w-7 h-7 text-primary-900" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary-900" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                 </motion.div>
-                <h3 className="text-xl font-bold text-primary-900 mb-3 group-hover:text-gold-700 transition-colors duration-300">{service.title}</h3>
-                <p className="text-sm text-primary-600 leading-relaxed">{service.description}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-primary-900 mb-2 sm:mb-3 group-hover:text-gold-700 transition-colors duration-300">{service.title}</h3>
+                <p className="text-xs sm:text-sm text-primary-600 leading-relaxed">{service.description}</p>
               </motion.article>
             ))}
           </motion.div>
@@ -113,7 +113,7 @@ const Home = () => {
 
       {/* Statistics Section */}
       <motion.section 
-        className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 relative overflow-hidden"
+        className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 relative overflow-hidden"
         initial="initial"
         whileInView="animate"
         viewport={viewportOptions}
@@ -123,16 +123,16 @@ const Home = () => {
         {/* Gold accent overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.header className="text-center mb-12" variants={staggerItem}>
-            <h2 id="stats-heading" className="text-display-1 text-white mb-4">Защо да изберете нас?</h2>
-            <p className="text-lg text-platinum-300 max-w-2xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <motion.header className="text-center mb-6 sm:mb-8 lg:mb-12" variants={staggerItem}>
+            <h2 id="stats-heading" className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-4">Защо да изберете нас?</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-platinum-300 max-w-2xl mx-auto px-2 sm:px-0">
               Доказани резултати и непрекъсната традиция в строителството
             </p>
           </motion.header>
           
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -142,14 +142,14 @@ const Home = () => {
             {stats.map((stat, index) => (
               <motion.div 
                 key={index}
-                className="text-center p-6 rounded-luxury border border-gold-500/20 hover:border-gold-500/40 bg-gradient-to-b from-white/5 to-white/2 backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300"
+                className="text-center p-4 sm:p-6 rounded-luxury border border-gold-500/20 hover:border-gold-500/40 bg-gradient-to-b from-white/5 to-white/2 backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300"
                 variants={staggerItem}
-                whileHover={{ scale: 1.05, y: -5 }}
+                whileHover={{ scale: 1.02, y: -2 }}
                 transition={{ duration: 0.2 }}
                 role="listitem"
               >
                 <motion.div 
-                  className="text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-3"
+                  className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2 sm:mb-3"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
@@ -163,7 +163,7 @@ const Home = () => {
                 >
                   {stat.number}
                 </motion.div>
-                <p className="text-platinum-300 font-medium">{stat.label}</p>
+                <p className="text-platinum-300 font-medium text-sm sm:text-base">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>

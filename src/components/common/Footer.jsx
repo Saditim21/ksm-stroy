@@ -4,66 +4,66 @@ import logo from '../../assets/images/logo.jpg'
 const Footer = () => {
   return (
     <footer className="bg-primary-900 text-white relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Main Footer Content */}
         {/* Luxury accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-500 via-gold-400 to-gold-500"></div>
         
-        <div className="py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+        <div className="py-8 sm:py-12 lg:py-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
             
             {/* Company Info */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center mb-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-luxury p-3">
+            <div className="sm:col-span-2 lg:col-span-2">
+              <div className="flex items-center mb-4 sm:mb-6">
+                <div className="bg-white/5 backdrop-blur-sm rounded-luxury p-2 sm:p-3">
                   <img 
                     src={logo} 
                     alt="KSM Stroy Logo" 
-                    className="h-12 w-auto mix-blend-multiply opacity-90 brightness-0 invert"
+                    className="h-8 sm:h-10 lg:h-12 w-auto mix-blend-multiply opacity-90 brightness-0 invert"
                     style={{ filter: 'drop-shadow(0 2px 6px rgba(212, 175, 55, 0.4))' }}
                   />
                 </div>
               </div>
               
-              <p className="text-platinum-300 text-lg leading-relaxed mb-8 max-w-xl">
+              <p className="text-platinum-300 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 lg:mb-8 max-w-xl">
                 Водеща строителна компания в България с над 15 години опит. 
                 Специализираме се в жилищно и комерсиално строителство, 
                 предлагайки иновативни решения и високо качество на изпълнение.
               </p>
               
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-gold-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-platinum-300">гр. София, ул. Строителна 123, 1000</span>
+                  <span className="text-platinum-300 text-sm sm:text-base">гр. София, ул. Строителна 123, 1000</span>
                 </div>
                 
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-gold-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <span className="text-platinum-300">+359 888 123 456</span>
+                  <span className="text-platinum-300 text-sm sm:text-base">+359 888 123 456</span>
                 </div>
                 
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-gold-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 7.89a2 2 0 002.82 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-platinum-300">info@ksmstroy.bg</span>
+                  <span className="text-platinum-300 text-sm sm:text-base">info@ksmstroy.bg</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h4 className="text-lg font-semibold mb-6 text-gold-400">Бързи връзки</h4>
-              <ul className="space-y-4">
+              <h4 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-gold-400">Бързи връзки</h4>
+              <ul className="space-y-2 sm:space-y-3 lg:space-y-4">
                 <li>
                   <Link 
                     to="/" 
-                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm"
+                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm sm:text-base"
                   >
                     Начало
                   </Link>
@@ -71,7 +71,7 @@ const Footer = () => {
                 <li>
                   <Link 
                     to="/about" 
-                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm"
+                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm sm:text-base"
                   >
                     За нас
                   </Link>
@@ -79,7 +79,7 @@ const Footer = () => {
                 <li>
                   <Link 
                     to="/projects" 
-                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm"
+                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm sm:text-base"
                   >
                     Проекти
                   </Link>
@@ -87,7 +87,7 @@ const Footer = () => {
                 <li>
                   <Link 
                     to="/blog" 
-                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm"
+                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm sm:text-base"
                   >
                     Блог и новини
                   </Link>
@@ -95,7 +95,7 @@ const Footer = () => {
                 <li>
                   <Link 
                     to="/contact" 
-                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm"
+                    className="text-platinum-300 hover:text-gold-400 transition-colors duration-200 text-sm sm:text-base"
                   >
                     Контакти
                   </Link>

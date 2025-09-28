@@ -21,8 +21,8 @@ const Navbar = () => {
 
   return (
     <nav className="bg-primary-900/95 backdrop-blur-lg border-b border-gold-500/20 sticky top-0 z-50 shadow-luxury">
-      <div className="w-full px-6 lg:px-12 xl:px-20">
-        <div className="flex justify-between items-center h-20">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-12 xl:px-20">
+        <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20">
           
           {/* Left Section: Logo - Properly positioned to the left */}
           <div className="flex items-center">
@@ -30,7 +30,7 @@ const Navbar = () => {
               <img 
                 src={logo} 
                 alt="KSM Stroy Logo" 
-                className="h-12 w-auto"
+                className="h-8 sm:h-10 lg:h-12 w-auto"
               />
             </Link>
           </div>
@@ -115,41 +115,34 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu - Full width dropdown */}
+        {/* Mobile menu - Simple dropdown */}
         {isOpen && (
-          <div className="lg:hidden absolute left-0 right-0 top-full bg-primary-900/98 backdrop-blur-lg border-t border-gold-500/20 shadow-2xl">
-            <div className="px-6 pt-4 pb-6 space-y-1">
+          <div className="lg:hidden absolute left-0 right-0 top-full bg-white shadow-lg border-t border-gray-200 z-50">
+            <div className="py-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-4 py-3 text-base font-medium rounded-luxury transition-all duration-200 ${
+                  className={`block px-4 py-3 text-base font-medium border-l-4 ${
                     location.pathname === item.path
-                      ? 'text-gold-400 bg-gold-500/10'
-                      : 'text-platinum-300 hover:text-gold-400 hover:bg-white/5'
+                      ? 'bg-gold-50 text-gold-700 border-gold-500'
+                      : 'text-gray-900 hover:bg-gray-50 border-transparent hover:border-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    {item.label}
-                    {location.pathname === item.path && (
-                      <div className="w-2 h-2 bg-gold-400 rounded-full"></div>
-                    )}
-                  </div>
+                  {item.label}
                 </Link>
               ))}
               
-              {/* Mobile Contact Button */}
-              <div className="pt-4 border-t border-gold-500/20 mt-4">
+              <div className="border-t border-gray-200 mt-2 pt-2">
                 <Link
                   to="/contact"
                   onClick={() => setIsOpen(false)}
-                  className="block w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 text-center px-4 py-3 rounded-luxury font-semibold transition-all duration-200 shadow-gold-glow hover:shadow-gold-glow-lg"
+                  className="block mx-4 mb-2 bg-gold-500 hover:bg-gold-600 text-white text-center px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Свържете се с нас
                 </Link>
               </div>
-
             </div>
           </div>
         )}
