@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { useDocumentHead } from '../../hooks/useDocumentHead'
 import { defaultSEO } from '../../utils/seo'
 
 const SEO = ({ 
@@ -19,43 +19,20 @@ const SEO = ({
   const canonicalUrl = canonical || `${defaultSEO.siteUrl}${typeof window !== 'undefined' ? window.location.pathname : ''}`
   const ogImageUrl = ogImage?.startsWith('http') ? ogImage : `${defaultSEO.siteUrl}${ogImage || '/assets/images/slider01.jpg'}`
 
-  return (
-    <Helmet>
-      {/* Basic Meta Tags */}
-      <title>{fullTitle}</title>
-      {description && <meta name="description" content={description} />}
-      {keywords && <meta name="keywords" content={keywords} />}
-      <link rel="canonical" href={canonicalUrl} />
-      
-      {/* Robots Meta Tag */}
-      <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
-      
-      {/* Open Graph Meta Tags */}
-      <meta property="og:title" content={ogTitleFinal} />
-      {ogDescriptionFinal && <meta property="og:description" content={ogDescriptionFinal} />}
-      <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:image" content={ogImageUrl} />
-      <meta property="og:locale" content={defaultSEO.locale} />
-      <meta property="og:site_name" content={defaultSEO.siteName} />
-      
-      {/* Twitter Card Meta Tags */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={ogTitleFinal} />
-      {ogDescriptionFinal && <meta name="twitter:description" content={ogDescriptionFinal} />}
-      <meta name="twitter:image" content={ogImageUrl} />
-      {defaultSEO.twitterHandle && (
-        <meta name="twitter:site" content={defaultSEO.twitterHandle} />
-      )}
-      
-      {/* Structured Data */}
-      {structuredData && (
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
-      )}
-    </Helmet>
-  )
+  useDocumentHead({
+    title: fullTitle,
+    description,
+    keywords,
+    ogTitle: ogTitleFinal,
+    ogDescription: ogDescriptionFinal,
+    ogImage: ogImageUrl,
+    ogType,
+    canonical: canonicalUrl,
+    structuredData,
+    noindex
+  })
+
+  return null
 }
 
 export default SEO

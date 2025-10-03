@@ -11,7 +11,7 @@ export default defineConfig({
           vendor: ['react', 'react-dom', 'react-router-dom'],
           animations: ['framer-motion'],
           three: ['three', '@react-three/fiber', '@react-three/drei'],
-          ui: ['swiper', 'react-hook-form', 'react-helmet-async']
+          ui: ['swiper', 'react-hook-form']
         }
       }
     },
