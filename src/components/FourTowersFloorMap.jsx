@@ -495,24 +495,24 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
 
   return (
     <div className="w-full h-full bg-gray-50">
-      <div className="flex h-full">
+      <div className="flex flex-col sm:flex-row h-full">
         {/* Left Panel - Tower/Floor List */}
-        <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Етажи по блокове</h2>
-            <p className="text-sm text-gray-600 mt-1">Кликнете на етаж за детайли</p>
+        <div className="w-full sm:w-80 bg-white border-b sm:border-b-0 sm:border-r border-gray-200 overflow-y-auto flex-shrink-0 max-h-60 sm:max-h-none">
+          <div className="p-2 sm:p-4 border-b border-gray-200">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Етажи по блокове</h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">Кликнете на етаж за детайли</p>
           </div>
           
-          <div className="p-2">
+          <div className="p-1 sm:p-2">
             {TOWERS.map(tower => (
-              <div key={tower.id} className="mb-2">
+              <div key={tower.id} className="mb-1 sm:mb-2">
                 <button
                   onClick={() => toggleTowerExpansion(tower.id)}
-                  className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="w-full px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
                 >
-                  <span className="font-semibold text-gray-800">{tower.name}</span>
+                  <span className="text-sm sm:text-base font-semibold text-gray-800">{tower.name}</span>
                   <svg
-                    className={`w-5 h-5 text-gray-600 transition-transform ${expandedTowers.has(tower.id) ? 'rotate-90' : ''}`}
+                    className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-600 transition-transform ${expandedTowers.has(tower.id) ? 'rotate-90' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -522,7 +522,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                 </button>
                 
                 {expandedTowers.has(tower.id) && (
-                  <div className="mt-1 ml-2 space-y-1">
+                  <div className="mt-1 ml-1 sm:ml-2 space-y-1">
                     {Array.from({ length: tower.floors }, (_, i) => {
                       const floorIndex = tower.floors - 1 - i;
                       const floorData = FLOOR_DATA[tower.id]?.[floorIndex];
@@ -544,7 +544,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                               handleFloorHover(null, null);
                             }
                           }}
-                          className={`w-full px-3 py-2 text-left text-sm rounded transition-colors ${
+                          className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 text-left text-xs sm:text-sm rounded transition-colors touch-manipulation ${
                             isSelected 
                               ? 'bg-blue-500 text-white' 
                               : 'bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300'
@@ -552,7 +552,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                         >
                           <div className="flex justify-between items-center">
                             <span>{getFloorName(floorIndex)}</span>
-                            <span className="px-2 py-1 rounded-full text-xs bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 font-semibold">
+                            <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 font-semibold hidden sm:inline">
                               {(() => {
                                 const availableCount = floorData.apartments ? 
                                   floorData.apartments.filter(apt => apt.статус === 'Свободен').length : 0;
@@ -582,19 +582,19 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
 
         {/* Center - Building Image with SVG Overlay */}
         <div className="flex-1 bg-gray-100 relative overflow-auto">
-          <div className="w-full h-full p-4">
+          <div className="w-full h-full p-2 sm:p-4">
             <div className="bg-gray-100 h-full">
               <div className="relative w-full h-full flex items-center justify-center">
                 <img 
                   src={selectedFloorImage || currentImage || buildingImage} 
                   alt="Building Complex Floor Map" 
-                  className="max-w-4xl max-h-[530px] object-contain"
+                  className="max-w-full max-h-full sm:max-w-4xl sm:max-h-[530px] object-contain touch-manipulation"
                 />
                 
                 {/* Floor Indicator Overlay */}
                 {!selectedFloorImage && currentImage && currentImage !== buildingImage && (
-                  <div className="absolute inset-x-0 top-0 flex justify-center pt-8">
-                    <div className="bg-white/90 backdrop-blur-md text-gray-800 px-8 py-4 rounded-2xl shadow-2xl border border-gray-200/50 pointer-events-none font-medium text-lg tracking-wide transition-all duration-500 ease-out transform animate-in slide-in-from-top-4 fade-in">
+                  <div className="absolute inset-x-0 top-0 flex justify-center pt-2 sm:pt-8">
+                    <div className="bg-white/90 backdrop-blur-md text-gray-800 px-3 sm:px-8 py-2 sm:py-4 rounded-lg sm:rounded-2xl shadow-2xl border border-gray-200/50 pointer-events-none font-medium text-sm sm:text-lg tracking-wide transition-all duration-500 ease-out transform animate-in slide-in-from-top-4 fade-in">
                       <div className="flex items-center justify-center space-x-3">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-sm"></div>
@@ -655,12 +655,12 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                         setSelectedFloorImage(null);
                         setSelected({ tower: null, floor: null });
                       }}
-                      className="absolute top-6 left-6 bg-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                      className="absolute top-2 sm:top-6 left-2 sm:left-6 bg-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center space-x-1 sm:space-x-2 text-gray-700 hover:text-gray-900 touch-manipulation"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      <span>Обратно към сградата</span>
+                      <span className="text-xs sm:text-sm">Обратно към сградата</span>
                     </button>
                   </>
                 )}
