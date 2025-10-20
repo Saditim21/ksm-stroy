@@ -37,13 +37,13 @@ const HeroCarousel = () => {
   // Building data for different slides
   const buildingData = [
     {
-      name: "Резиденс Витоша",
-      location: "София, кв. Витоша",
-      apartments: { total: 24, available: 18, reserved: 4, sold: 2 },
-      garages: { total: 12, available: 8, reserved: 2, sold: 2 }
+      name: "Многофамилна жилищна сграда",
+      location: "София, ж.к. Връбница-1",
+      apartments: { total: 144, available: 16, reserved: 6, sold: 122 },
+      garages: { total: 7, available: 5, reserved: 0, sold: 2 }
     },
     {
-      name: "Комплекс Бояна Хилс",
+      name: "Golden Residence",
       location: "София, кв. Бояна",
       apartments: { total: 32, available: 22, reserved: 6, sold: 4 },
       garages: { total: 18, available: 12, reserved: 3, sold: 3 }

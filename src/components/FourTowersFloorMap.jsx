@@ -408,11 +408,24 @@ const TOWERS = [
   { id: 'B', name: 'Блок B', floors: 11 }
 ];
 
-const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApartmentSelect, clearFloorSelection }) => {
+const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApartmentSelect, clearFloorSelection, projectType, buildingData }) => {
   const [selected, setSelected] = useState({ tower: null, floor: null });
-  const [expandedTowers, setExpandedTowers] = useState(new Set(['A', 'B']));
+  const [expandedTowers, setExpandedTowers] = useState(new Set(projectType === 'golden-residence' ? ['А', 'Б'] : ['A', 'B']));
   const [selectedFloorImage, setSelectedFloorImage] = useState(null);
   const [hoveredApartment, setHoveredApartment] = useState(null);
+  
+  // Dynamic tower configuration based on project type
+  const getTowers = () => {
+    if (projectType === 'golden-residence' && buildingData) {
+      return [
+        { id: 'А', name: 'Блок А', floors: buildingData.blockA?.floors?.length || 8 },
+        { id: 'Б', name: 'Блок Б', floors: buildingData.blockB?.floors?.length || 8 }
+      ];
+    }
+    return TOWERS; // Default Four Towers configuration
+  };
+  
+  const towers = getTowers();
   
   // Allow parent component to clear the floor selection
   useEffect(() => {
@@ -437,8 +450,32 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
   const handleFloorClick = (towerId, floorIndex) => {
     setSelected({ tower: towerId, floor: floorIndex });
     
-    // Check if this floor has a plan image
-    const floorData = FLOOR_DATA[towerId]?.[floorIndex];
+    let floorData;
+    
+    if (projectType === 'golden-residence' && buildingData) {
+      // Handle Golden Residence data structure
+      const blockKey = towerId === 'А' ? 'blockA' : 'blockB';
+      const blockData = buildingData[blockKey];
+      floorData = blockData?.floors?.find(f => f.floor === floorIndex);
+      
+      if (floorData) {
+        // Convert Golden Residence data format to expected format
+        floorData = {
+          ...floorData,
+          apartments: floorData.apartmentList?.map(apt => ({
+            имот: apt.number,
+            вид: apt.type,
+            общаПлощ: apt.area,
+            изложение: 'Юг/Север', // Default for Golden Residence
+            статус: apt.status === 'Скоро' ? 'Свободен' : apt.status
+          })) || []
+        };
+      }
+    } else {
+      // Handle Four Towers data structure
+      floorData = FLOOR_DATA[towerId]?.[floorIndex];
+    }
+    
     if (floorData?.planImage) {
       setSelectedFloorImage(floorData.planImage);
     } else {
@@ -461,6 +498,10 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
   };
 
   const getFloorName = (floorIndex) => {
+    if (projectType === 'golden-residence') {
+      if (floorIndex === 0) return 'Партер/Гаражи';
+      return `Етаж ${floorIndex}`;
+    }
     if (floorIndex === 0) return 'Партер/Гаражи';
     if (floorIndex === 10) return 'Тавански Етаж';
     return `Етаж ${floorIndex}`;
@@ -471,6 +512,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
       case 'available': return 'text-green-600';
       case 'sold': return 'text-red-600';
       case 'reserved': return 'text-yellow-600';
+      case 'coming-soon': return 'text-blue-600';
       default: return 'text-gray-600';
     }
   };
@@ -480,6 +522,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
       case 'available': return 'bg-green-100';
       case 'sold': return 'bg-red-100';
       case 'reserved': return 'bg-yellow-100';
+      case 'coming-soon': return 'bg-blue-100';
       default: return 'bg-gray-100';
     }
   };
@@ -489,6 +532,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
       case 'available': return 'Свободен';
       case 'sold': return 'Продаден';
       case 'reserved': return 'Резервиран';
+      case 'coming-soon': return 'Скоро';
       default: return status;
     }
   };
@@ -504,7 +548,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
           </div>
           
           <div className="p-1 sm:p-2">
-            {TOWERS.map(tower => (
+            {towers.map(tower => (
               <div key={tower.id} className="mb-1 sm:mb-2">
                 <button
                   onClick={() => toggleTowerExpansion(tower.id)}
@@ -525,7 +569,16 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                   <div className="mt-1 ml-1 sm:ml-2 space-y-1">
                     {Array.from({ length: tower.floors }, (_, i) => {
                       const floorIndex = tower.floors - 1 - i;
-                      const floorData = FLOOR_DATA[tower.id]?.[floorIndex];
+                      
+                      let floorData;
+                      if (projectType === 'golden-residence' && buildingData) {
+                        const blockKey = tower.id === 'А' ? 'blockA' : 'blockB';
+                        const blockData = buildingData[blockKey];
+                        floorData = blockData?.floors?.find(f => f.floor === floorIndex);
+                      } else {
+                        floorData = FLOOR_DATA[tower.id]?.[floorIndex];
+                      }
+                      
                       if (!floorData) return null;
                       
                       const isSelected = selected.tower === tower.id && selected.floor === floorIndex;
@@ -535,12 +588,18 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                           key={floorIndex}
                           onClick={() => handleFloorClick(tower.id, floorIndex)}
                           onMouseEnter={() => {
-                            if ((tower.id === 'A' && floorIndex >= 0 && floorIndex <= 10) || (tower.id === 'B' && floorIndex >= 0 && floorIndex <= 10)) {
+                            const isValidFloor = projectType === 'golden-residence' 
+                              ? ((tower.id === 'А' || tower.id === 'Б') && floorIndex >= 1 && floorIndex <= 8)
+                              : ((tower.id === 'A' || tower.id === 'B') && floorIndex >= 0 && floorIndex <= 10);
+                            if (isValidFloor) {
                               handleFloorHover(tower.id, floorIndex);
                             }
                           }}
                           onMouseLeave={() => {
-                            if ((tower.id === 'A' && floorIndex >= 0 && floorIndex <= 10) || (tower.id === 'B' && floorIndex >= 0 && floorIndex <= 10)) {
+                            const isValidFloor = projectType === 'golden-residence' 
+                              ? ((tower.id === 'А' || tower.id === 'Б') && floorIndex >= 1 && floorIndex <= 8)
+                              : ((tower.id === 'A' || tower.id === 'B') && floorIndex >= 0 && floorIndex <= 10);
+                            if (isValidFloor) {
                               handleFloorHover(null, null);
                             }
                           }}
@@ -552,22 +611,30 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                         >
                           <div className="flex justify-between items-center">
                             <span>{getFloorName(floorIndex)}</span>
-                            <span className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 font-semibold hidden sm:inline">
+                            <span className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-semibold hidden sm:inline ${getStatusBg(floorData.status)} ${getStatusColor(floorData.status)}`}>
                               {(() => {
-                                const availableCount = floorData.apartments ? 
-                                  floorData.apartments.filter(apt => apt.статус === 'Свободен').length : 0;
-                                const totalCount = floorData.apartments ? floorData.apartments.length : 0;
-                                return `${availableCount}/${totalCount} апартамента`;
+                                if (projectType === 'golden-residence') {
+                                  return `${floorData.apartments || 4} апартамента - ${getStatusLabel(floorData.status)}`;
+                                } else {
+                                  const availableCount = floorData.apartments ? 
+                                    floorData.apartments.filter(apt => apt.статус === 'Свободен').length : 0;
+                                  const totalCount = floorData.apartments ? floorData.apartments.length : 0;
+                                  return `${availableCount}/${totalCount} апартамента`;
+                                }
                               })()}
                             </span>
                           </div>
                           <div className="text-xs opacity-75 mt-1">
                             {(() => {
-                              const availableCount = floorData.apartments ? 
-                                floorData.apartments.filter(apt => apt.статус === 'Свободен').length : 0;
-                              return availableCount > 0 ? 
-                                `${availableCount} свободни апартамента` : 
-                                'Няма свободни апартаменти';
+                              if (projectType === 'golden-residence') {
+                                return `${getStatusLabel(floorData.status)} - ${floorData.description || 'Подробности скоро'}`;
+                              } else {
+                                const availableCount = floorData.apartments ? 
+                                  floorData.apartments.filter(apt => apt.статус === 'Свободен').length : 0;
+                                return availableCount > 0 ? 
+                                  `${availableCount} свободни апартамента` : 
+                                  'Няма свободни апартаменти';
+                              }
                             })()}
                           </div>
                         </button>

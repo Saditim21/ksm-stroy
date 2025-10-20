@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
+import PropertyCard from '../components/ui/PropertyCard'
 import FourTowersFloorMap, { FLOOR_DATA } from '../components/FourTowersFloorMap'
 import ApartmentDetailsModal from '../components/ApartmentDetailsModal'
 import { seoData } from '../utils/seo'
+import { properties, filters } from '../constants/properties'
+import { buildingImages, getBuildingImage, getGoldenResidenceImage } from '../constants/buildingImages'
+import GoldenResidenceFloorMap from '../components/GoldenResidenceFloorMap'
+import { getApartmentImage } from '../constants/apartmentImages'
 
 // Import sales property images
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
+import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
 import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
 import buildingBFloor1Image from '../assets/продажби/project 1/building-B-floor-1.jpg'
 import buildingBFloor2Image from '../assets/продажби/project 1/building-B-floor-2.jpg'
@@ -50,54 +56,6 @@ import apartmentA6FloorPlanImage from '../assets/продажби/project 1/apar
 import apartmentA58FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a58-floor8.png'
 import apartmentA64FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.png'
 
-// Map apartment IDs to their images
-const getApartmentImage = (apartmentId) => {
-  // Map specific apartments to their images
-  switch(apartmentId) {
-    case 'Б-102':
-    case 'Б-202':
-      return apartmentB2FloorPlanImage; // Use the PNG image which is the actual floor plan
-    case 'Б-106':
-      return apartmentB6FloorPlanImage; // Apartment B6 floor plan
-    case 'Б-107':
-      return apartmentB7FloorPlanImage; // Apartment B7 floor plan
-    case 'Б-207':
-      return apartmentB15FloorPlanImage; // Apartment B15 floor plan
-    case 'Б-307':
-      return apartmentB23FloorPlanImage; // Apartment B23 floor plan
-    case 'Б-407':
-      return apartmentB31FloorPlanImage; // Apartment B31 floor plan
-    case 'Б-607':
-      return apartmentB47FloorPlanImage; // Apartment B47 floor plan
-    case 'Б-702':
-      return apartmentB50FloorPlanImage; // Apartment B50 floor plan
-    case 'Б-707':
-      return apartmentB55FloorPlanImage; // Apartment B55 floor plan
-    case 'Б-801':
-      return apartmentB57FloorPlanImage; // Apartment B57 floor plan
-    case 'Б-803':
-      return apartmentB59FloorPlanImage; // Apartment B59 floor plan
-    case 'Б-807':
-      return apartmentB63FloorPlanImage; // Apartment B63 floor plan
-    case 'А-102':
-      return apartmentA2FloorPlanImage; // Apartment A2 floor plan
-    case 'А-106':
-      return apartmentA6FloorPlanImage; // Apartment A6 floor plan
-    case 'А-802':
-      return apartmentA58FloorPlanImage; // Apartment A58 floor plan
-    case 'А-808':
-      return apartmentA64FloorPlanImage; // Apartment A64 floor plan
-    case 'Б-101':
-    case 'Б-103':
-    case 'Б-201':
-    case 'Б-203':
-      // Add more apartment images as they become available
-      return null;
-    default:
-      return null;
-  }
-};
-
 const Sales = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [selectedProject, setSelectedProject] = useState(null)
@@ -132,80 +90,16 @@ const Sales = () => {
   const modalRef = useRef(null)
   const floorDetailsRef = useRef(null)
 
-  // Sales property data
-  const properties = [
-    {
-      id: 1,
-      title: "Многофамилна жилищна сграда",
-      location: "УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София",
-      status: "За продажба",
-      type: "Жилищна сграда",
-      year: "2024",
-      description: "Модерна многофамилна жилищна сграда с два блока (А и Б), гаражи и луксозни апартаменти в жк. Връбница-1. Блок А - 10 етажа, Блок Б - 9 етажа. Част от апартаментите вече са продадени.",
-      images: [property1Image1, property1Image2],
-      features: ["Подземни гаражи", "Блок А - 10 етажа", "Блок Б - 9 етажа", "Престижен район"],
-      price: "По запитване",
-      apartments: "Блокове А и Б - различни етажи",
-      totalFloors: "Блок А: 10 етажа, Блок Б: 9 етажа",
-      buildingData: {
-        blockA: {
-          floors: [
-            { floor: 10, status: 'sold', apartments: 2, description: 'Етаж 10 - Продаден' },
-            { floor: 9, status: 'available', apartments: 2, description: 'Етаж 9 - 2 апартамента налични' },
-            { floor: 8, status: 'sold', apartments: 2, description: 'Етаж 8 - Продаден' },
-            { floor: 7, status: 'sold', apartments: 2, description: 'Етаж 7 - Продаден' },
-            { floor: 6, status: 'sold', apartments: 2, description: 'Етаж 6 - Продаден' },
-            { floor: 5, status: 'sold', apartments: 2, description: 'Етаж 5 - Продаден' },
-            { floor: 4, status: 'sold', apartments: 2, description: 'Етаж 4 - Продаден' },
-            { floor: 3, status: 'available', apartments: 2, description: 'Етаж 3 - 2 апартамента налични' },
-            { floor: 2, status: 'available', apartments: 2, description: 'Етаж 2 - 2 апартамента налични' }
-          ]
-        },
-        blockB: {
-          floors: [
-            { floor: 9, status: 'available', apartments: 2, description: 'Етаж 9 - 2 апартамента налични' },
-            { floor: 8, status: 'available', apartments: 2, description: 'Етаж 8 - 2 апартамента налични' },
-            { floor: 7, status: 'available', apartments: 2, description: 'Етаж 7 - 2 апартамента налични' },
-            { floor: 6, status: 'available', apartments: 2, description: 'Етаж 6 - 2 апартамента налични' },
-            { floor: 5, status: 'available', apartments: 2, description: 'Етаж 5 - 2 апартамента налични' },
-            { floor: 4, status: 'available', apartments: 2, description: 'Етаж 4 - 2 апартамента налични' },
-            { floor: 3, status: 'available', apartments: 2, description: 'Етаж 3 - 2 апартамента налични' },
-            { floor: 2, status: 'available', apartments: 2, description: 'Етаж 2 - 2 апартамента налични' }
-          ]
-        },
-        garage: {
-          available: true,
-          description: 'Подземни гаражи - налични места'
-        }
-      }
-    },
-    {
-      id: 2,
-      title: "Очаквайте скоро нови обекти",
-      location: "София",
-      status: "Скоро",
-      type: "Нови проекти",
-      year: "2024",
-      description: "Работим върху нови атрактивни проекти за продажба. Следете за обновления.",
-      images: [property1Image1],
-      features: ["Нови проекти", "Атрактивни локации", "Модерни решения"],
-      price: "Скоро",
-      apartments: "Различни типове",
-      totalFloors: "Различни"
-    }
-  ]
 
   // Filter properties
   const filteredProperties = selectedFilter === 'all' 
     ? properties 
-    : properties.filter(property => property.status === selectedFilter)
+    : selectedFilter === 'for-sale' 
+      ? properties.filter(property => property.status === 'За продажба')
+      : selectedFilter === 'coming-soon'
+        ? properties.filter(property => property.status === 'Скоро')
+        : properties.filter(property => property.status === selectedFilter)
 
-  // Property filters
-  const filters = [
-    { id: 'all', name: 'Всички имоти', count: properties.length },
-    { id: 'За продажба', name: 'За продажба', count: properties.filter(p => p.status === 'За продажба').length },
-    { id: 'Скоро', name: 'Скоро в продажба', count: properties.filter(p => p.status === 'Скоро').length }
-  ]
 
   // Modal functions
   const openModal = (property) => {
@@ -509,7 +403,15 @@ const Sales = () => {
                     
                     {/* Desktop Layout for larger devices */}
                     <div className="hidden md:block w-full h-full">
-                      <FourTowersFloorMap 
+                      {selectedProject.projectType === 'golden-residence' ? (
+                        <GoldenResidenceFloorMap 
+                          onHoverChange={(isHovering, floorNumber) => {
+                            // Handle hover change if needed
+                          }}
+                          onFloorSelect={handleFloorSelect}
+                        />
+                      ) : (
+                        <FourTowersFloorMap 
                         clearFloorSelection={clearFloorSelection}
                         onHoverChange={(isHovering, towerId, floor) => {
                           // Always reset all floors first, then set if needed
@@ -605,6 +507,7 @@ const Sales = () => {
                         onFloorSelect={handleFloorSelect}
                         onApartmentSelect={handleApartmentSelect}
                       />
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -825,12 +728,12 @@ const Sales = () => {
                                   <tr 
                                     key={idx} 
                                     className={`transition-colors ${
-                                      apt.статус === 'Свободен' 
+                                      (apt.статус === 'Свободен' || apt.статус === 'Скоро')
                                         ? 'hover:bg-blue-50 cursor-pointer group active:bg-blue-100' 
                                         : 'cursor-not-allowed opacity-75'
                                     }`}
                                     style={{ minHeight: '48px' }} // Touch-friendly height
-                                    onClick={apt.статус === 'Свободен' ? () => handleApartmentSelect({
+                                    onClick={(apt.статус === 'Свободен' || apt.статус === 'Скоро') ? () => handleApartmentSelect({
                                       name: apt.имот === 'Б-307' ? 'Апартамент Б23' : 
                                             apt.имот === 'Б-106' ? 'Апартамент Б6' : 
                                             apt.имот === 'Б-107' ? 'Апартамент Б7' : 
@@ -855,7 +758,7 @@ const Sales = () => {
                                     <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
                                       <div className="flex items-center">
                                         {apt.имот}
-                                        {apt.статус === 'Свободен' && (
+                                        {(apt.статус === 'Свободен' || apt.статус === 'Скоро') && (
                                           <svg className="w-4 h-4 ml-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                           </svg>
@@ -875,6 +778,7 @@ const Sales = () => {
                                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
                                         apt.статус === 'Свободен' ? 'bg-green-100 text-green-700' :
                                         apt.статус === 'Продаден' ? 'bg-red-100 text-red-700' :
+                                        apt.статус === 'Скоро' ? 'bg-blue-100 text-blue-700' :
                                         'bg-yellow-100 text-yellow-700'
                                       }`}>
                                         {apt.статус}
@@ -893,21 +797,41 @@ const Sales = () => {
                               const available = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Свободен').length;
                               const sold = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Продаден').length;
                               const reserved = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Резервиран').length;
+                              const comingSoon = selectedFloorDetails.data.apartments.filter(a => a.статус === 'Скоро').length;
                               
                               return (
                                 <>
-                                  <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
-                                    <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
-                                    <div className="text-xs text-green-600">Свободни</div>
-                                  </div>
-                                  <div className="bg-red-100 border border-red-300 rounded-lg p-2 sm:p-3 text-center">
-                                    <div className="text-lg sm:text-xl font-bold text-red-800">{sold}</div>
-                                    <div className="text-xs text-red-600">Продадени</div>
-                                  </div>
-                                  <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
-                                    <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
-                                    <div className="text-xs text-yellow-600">Резервирани</div>
-                                  </div>
+                                  {comingSoon > 0 ? (
+                                    <>
+                                      <div className="bg-blue-100 border border-blue-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-blue-800">{comingSoon}</div>
+                                        <div className="text-xs text-blue-600">Скоро</div>
+                                      </div>
+                                      <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-gray-800">{selectedFloorDetails.data.apartments.length}</div>
+                                        <div className="text-xs text-gray-600">Общо</div>
+                                      </div>
+                                      <div className="bg-gold-100 border border-gold-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-gold-800">2024</div>
+                                        <div className="text-xs text-gold-600">Година</div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
+                                        <div className="text-xs text-green-600">Свободни</div>
+                                      </div>
+                                      <div className="bg-red-100 border border-red-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-red-800">{sold}</div>
+                                        <div className="text-xs text-red-600">Продадени</div>
+                                      </div>
+                                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
+                                        <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
+                                        <div className="text-xs text-yellow-600">Резервирани</div>
+                                      </div>
+                                    </>
+                                  )}
                                 </>
                               );
                             })()}
@@ -1095,155 +1019,6 @@ const Sales = () => {
 }
 
 // Property Card Component
-const PropertyCard = ({ property, index, onClick }) => {
-  const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
-
-  const handleImageLoad = () => {
-    setImageLoaded(true)
-  }
-
-  const handleImageError = () => {
-    setImageError(true)
-    setImageLoaded(true)
-  }
-
-  return (
-    <article 
-      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500"
-      onClick={onClick}
-    >
-      {/* Property Image */}
-      <div className="relative h-48 sm:h-56 lg:h-64 overflow-hidden">
-        {!imageError ? (
-          <>
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-br from-gold-100 to-gold-200 animate-pulse flex items-center justify-center">
-                <svg className="w-12 h-12 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-            )}
-            <OptimizedImage
-              src={property.images[0]}
-              alt={`${property.title} - KSM Stroy обект`}
-              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </>
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gold-100 to-gold-200 flex items-center justify-center">
-            <div className="text-center">
-              <svg className="w-16 h-16 text-gold-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span className="text-gold-700 text-sm font-medium">Проект</span>
-            </div>
-          </div>
-        )}
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
-        
-        {/* Status Badge */}
-        <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
-          <span className={`px-2 sm:px-3 py-1 backdrop-blur-sm rounded-full text-xs font-medium ${
-            property.status === 'За продажба' 
-              ? 'bg-green-500/90 text-white' 
-              : 'bg-blue-500/90 text-white'
-          }`}>
-            {property.status}
-          </span>
-        </div>
-
-        {/* Image Count Indicator */}
-        {property.images.length > 1 && (
-          <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
-            <span className="px-1.5 sm:px-2 py-1 bg-black/50 backdrop-blur-sm text-white rounded-full text-xs flex items-center">
-              <svg className="w-3 h-3 mr-0.5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {property.images.length}
-            </span>
-          </div>
-        )}
-        
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gold-600/0 group-hover:bg-gold-600/10 transition-all duration-300"></div>
-      </div>
-
-      {/* Property Content */}
-      <div className="p-4 sm:p-5 lg:p-6">
-        {/* Title */}
-        <h3 className="text-lg sm:text-xl font-bold text-primary-900 mb-2 group-hover:text-gold-700 transition-colors duration-300 leading-tight">
-          {property.title}
-        </h3>
-
-        {/* Location and Type */}
-        <div className="flex items-center text-xs sm:text-sm text-primary-500 mb-3 space-x-2">
-          <div className="flex items-center">
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span>{property.location}</span>
-          </div>
-          <span>•</span>
-          <span>{property.year}</span>
-        </div>
-
-        {/* Description */}
-        <p className="text-primary-600 text-sm leading-relaxed mb-4 line-clamp-2">
-          {property.description}
-        </p>
-
-        {/* Property Type */}
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs text-primary-500 flex items-center">
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            {property.type}
-          </span>
-        </div>
-
-        {/* Features Preview */}
-        {property.features && property.features.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            {property.features.slice(0, 2).map((feature, index) => (
-              <span key={index} className="px-2 py-1 bg-gold-100 text-gold-700 rounded-full text-xs">
-                {feature}
-              </span>
-            ))}
-            {property.features.length > 2 && (
-              <span className="px-2 py-1 bg-primary-100 text-primary-600 rounded-full text-xs">
-                +{property.features.length - 2}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* View Details Button */}
-        <button 
-          className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-3 px-4 rounded-luxury font-semibold flex items-center justify-center group shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300"
-        >
-          <span>Разгледай апартаментите</span>
-          <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Bottom accent line */}
-      <div className="h-1 bg-gradient-to-r from-gold-500 to-gold-600 origin-left" />
-    </article>
-  )
-}
 
 // Simple Building View Component
 const BuildingView = ({ buildingData, hoveredFloor, setHoveredFloor, selectedFloor, setSelectedFloor, projectImages }) => {
