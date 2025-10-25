@@ -26,6 +26,246 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
     { apartment: 'А 111', built: '51.88', ideal: '7.43', total: '59.31', status: 'Свободен' },
     { apartment: 'А 112', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
   ];
+
+  // Block A Floor 2 apartment data
+  const blockAFloor2Data = [
+    { apartment: 'А 201', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 202', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 203', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 204', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 205', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 206', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 207', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 208', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 209', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 210', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 211', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 212', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 3 apartment data
+  const blockAFloor3Data = [
+    { apartment: 'А 301', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 302', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 303', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 304', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 305', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 306', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 307', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 308', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 309', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 310', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 311', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 312', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 4 apartment data
+  const blockAFloor4Data = [
+    { apartment: 'А 401', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 402', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 403', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 404', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 405', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 406', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 407', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 408', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 409', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 410', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 411', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 412', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 5 apartment data
+  const blockAFloor5Data = [
+    { apartment: 'А 501', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 502', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 503', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 504', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 505', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 506', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 507', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 508', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 509', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 510', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 511', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 512', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 6 apartment data
+  const blockAFloor6Data = [
+    { apartment: 'А 601', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 602', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 603', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 604', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 605', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 606', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 607', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 608', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 609', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 610', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 611', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 612', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 7 apartment data
+  const blockAFloor7Data = [
+    { apartment: 'А 701', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 702', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 703', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 704', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 705', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 706', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 707', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 708', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 709', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 710', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 711', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 712', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block A Floor 8 apartment data
+  const blockAFloor8Data = [
+    { apartment: 'А 801', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'А 802', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'А 803', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'А 804', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 805', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'А 806', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 807', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 808', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 809', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 810', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'А 811', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'А 812', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 1 apartment data
+  const blockBFloor1Data = [
+    { apartment: 'Б 101', built: '57.46', ideal: '8.22', total: '65.68', status: 'Свободен' },
+    { apartment: 'Б 102', built: '97.74', ideal: '14.00', total: '111.74', status: 'Свободен' },
+    { apartment: 'Б 103', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 104', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 105', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 106', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 107', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 108', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 109', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 110', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 111', built: '51.88', ideal: '7.43', total: '59.31', status: 'Свободен' },
+    { apartment: 'Б 112', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 2 apartment data
+  const blockBFloor2Data = [
+    { apartment: 'Б 201', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 202', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 203', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 204', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 205', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 206', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 207', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 208', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 209', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 210', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 211', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 212', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 3 apartment data
+  const blockBFloor3Data = [
+    { apartment: 'Б 301', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 302', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 303', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 304', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 305', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 306', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 307', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 308', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 309', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 310', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 311', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 312', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 4 apartment data
+  const blockBFloor4Data = [
+    { apartment: 'Б 401', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 402', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 403', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 404', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 405', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 406', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 407', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 408', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 409', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 410', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 411', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 412', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 5 apartment data
+  const blockBFloor5Data = [
+    { apartment: 'Б 501', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 502', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 503', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 504', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 505', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 506', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 507', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 508', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 509', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 510', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 511', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 512', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 6 apartment data
+  const blockBFloor6Data = [
+    { apartment: 'Б 601', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 602', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 603', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 604', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 605', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 606', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 607', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 608', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 609', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 610', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 611', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 612', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 7 apartment data
+  const blockBFloor7Data = [
+    { apartment: 'Б 701', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 702', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 703', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 704', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 705', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 706', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 707', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 708', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 709', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 710', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 711', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 712', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
+
+  // Block B Floor 8 apartment data
+  const blockBFloor8Data = [
+    { apartment: 'Б 801', built: '54.38', ideal: '7.80', total: '62.18', status: 'Свободен' },
+    { apartment: 'Б 802', built: '88.75', ideal: '12.73', total: '101.48', status: 'Свободен' },
+    { apartment: 'Б 803', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
+    { apartment: 'Б 804', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 805', built: '59.36', ideal: '8.52', total: '67.88', status: 'Свободен' },
+    { apartment: 'Б 806', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'Б 807', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 808', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 809', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'Б 810', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
+    { apartment: 'Б 811', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
+    { apartment: 'Б 812', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
+  ];
   
   const handleBlockAFloorHover = (floorNumber) => {
     if (onHoverChange) {
@@ -56,10 +296,43 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
   };
 
   const handleFloorClick = (block, floor) => {
+    console.log(`Floor clicked: Block ${block}, Floor ${floor}`);
+    // Clear selected apartment when switching floors
+    setSelectedApartment(null);
+    
     if (block === 'A' && floor === 1) {
       setSelectedFloor({ block: 'A', floor: 1, data: blockAFloor1Data });
+    } else if (block === 'A' && floor === 2) {
+      setSelectedFloor({ block: 'A', floor: 2, data: blockAFloor2Data });
+    } else if (block === 'A' && floor === 3) {
+      setSelectedFloor({ block: 'A', floor: 3, data: blockAFloor3Data });
+    } else if (block === 'A' && floor === 4) {
+      setSelectedFloor({ block: 'A', floor: 4, data: blockAFloor4Data });
+    } else if (block === 'A' && floor === 5) {
+      setSelectedFloor({ block: 'A', floor: 5, data: blockAFloor5Data });
+    } else if (block === 'A' && floor === 6) {
+      setSelectedFloor({ block: 'A', floor: 6, data: blockAFloor6Data });
+    } else if (block === 'A' && floor === 7) {
+      setSelectedFloor({ block: 'A', floor: 7, data: blockAFloor7Data });
+    } else if (block === 'A' && floor === 8) {
+      setSelectedFloor({ block: 'A', floor: 8, data: blockAFloor8Data });
+    } else if (block === 'B' && floor === 1) {
+      setSelectedFloor({ block: 'B', floor: 1, data: blockBFloor1Data });
+    } else if (block === 'B' && floor === 2) {
+      setSelectedFloor({ block: 'B', floor: 2, data: blockBFloor2Data });
+    } else if (block === 'B' && floor === 3) {
+      setSelectedFloor({ block: 'B', floor: 3, data: blockBFloor3Data });
+    } else if (block === 'B' && floor === 4) {
+      setSelectedFloor({ block: 'B', floor: 4, data: blockBFloor4Data });
+    } else if (block === 'B' && floor === 5) {
+      setSelectedFloor({ block: 'B', floor: 5, data: blockBFloor5Data });
+    } else if (block === 'B' && floor === 6) {
+      setSelectedFloor({ block: 'B', floor: 6, data: blockBFloor6Data });
+    } else if (block === 'B' && floor === 7) {
+      setSelectedFloor({ block: 'B', floor: 7, data: blockBFloor7Data });
+    } else if (block === 'B' && floor === 8) {
+      setSelectedFloor({ block: 'B', floor: 8, data: blockBFloor8Data });
     }
-    // Add more floor data as needed
   };
 
   const closeFloorDetails = () => {
@@ -228,11 +501,23 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               onClick={openArchitecturePlanFullscreen}
             >
               <img
-                src="/src/assets/продажби/project 2/architecture-a-floor-1.png"
-                alt="Block A Floor 1 Architecture Plan"
+                src={
+                  selectedFloor.block === 'B' ? 
+                    `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
+                  selectedFloor.floor === 1 ? 
+                    '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
+                    `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
+                }
+                alt={`Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan`}
                 className="w-full h-full object-contain"
               />
               
+              {/* Selected Apartment Info - Regular View */}
+              {selectedApartment && (
+                <div className="absolute bottom-4 left-4 bg-red-500 text-white px-3 py-2 rounded-lg font-medium text-sm animate-pulse">
+                  Selected: {selectedApartment}
+                </div>
+              )}
             </div>
             
             {/* Fullscreen Button */}
@@ -318,8 +603,14 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   }}
                 >
                   <img
-                    src="/src/assets/продажби/project 2/architecture-a-floor-1.png"
-                    alt="Block A Floor 1 Architecture Plan - Fullscreen"
+                    src={
+                      selectedFloor.block === 'B' ? 
+                        `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
+                      selectedFloor.floor === 1 ? 
+                        '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
+                        `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
+                    }
+                    alt={`Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan - Fullscreen`}
                     className="w-full h-full object-contain select-none"
                     draggable={false}
                   />
