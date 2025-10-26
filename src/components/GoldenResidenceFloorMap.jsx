@@ -266,6 +266,181 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
     { apartment: 'Б 811', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
     { apartment: 'Б 812', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
   ];
+
+  // Ground Floor data - Garages and Storage
+  const groundFloorData = [
+    // Garages Г-001 to Г-017
+    { apartment: 'Г-001', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-002', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-003', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-004', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-005', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-006', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-007', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-008', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-009', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-010', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-011', built: '21.82', ideal: '13.40', total: '35.22', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-012', built: '26.39', ideal: '16.21', total: '42.60', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-013', built: '22.37', ideal: '13.74', total: '36.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-014', built: '28.24', ideal: '17.34', total: '45.58', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-015', built: '28.77', ideal: '17.67', total: '46.44', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-016', built: '33.85', ideal: '20.80', total: '54.65', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-017', built: '33.93', ideal: '20.85', total: '54.78', type: 'ГАРАЖ', status: 'Свободен' },
+    
+    // Garages Г-018 to Г-034
+    { apartment: 'Г-018', built: '24.31', ideal: '14.93', total: '39.24', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-019', built: '23.87', ideal: '14.66', total: '38.53', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-020', built: '23.87', ideal: '14.66', total: '38.53', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-021', built: '24.31', ideal: '14.93', total: '39.24', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-022', built: '33.93', ideal: '20.85', total: '54.78', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-023', built: '33.85', ideal: '20.80', total: '54.65', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-024', built: '28.77', ideal: '17.67', total: '46.44', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-025', built: '28.25', ideal: '17.35', total: '45.60', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-026', built: '22.37', ideal: '13.74', total: '36.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-027', built: '26.39', ideal: '16.21', total: '42.60', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-028', built: '21.82', ideal: '13.40', total: '35.22', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-029', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-030', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-031', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-032', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-033', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-034', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    
+    // Garages Г-035 to Г-052
+    { apartment: 'Г-035', built: '21.07', ideal: '14.81', total: '38.92', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-036', built: '27.24', ideal: '11.55', total: '30.35', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-037', built: '24.11', ideal: '12.38', total: '32.53', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-038', built: '18.80', ideal: '12.15', total: '31.94', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-039', built: '20.15', ideal: '19.44', total: '51.08', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-040', built: '19.79', ideal: '19.91', total: '52.32', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-041', built: '31.64', ideal: '19.91', total: '52.32', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-042', built: '32.41', ideal: '19.44', total: '51.08', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-043', built: '32.41', ideal: '12.15', total: '31.94', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-044', built: '31.64', ideal: '12.38', total: '32.53', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-045', built: '19.79', ideal: '11.55', total: '30.35', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-046', built: '20.15', ideal: '14.81', total: '38.92', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-047', built: '18.80', ideal: '16.73', total: '43.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-048', built: '24.11', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-049', built: '27.24', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-050', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-051', built: '21.07', ideal: '16.73', total: '43.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-052', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
+    
+    // Storage units ПМ-01 to ПМ-34
+    { apartment: 'ПМ-01', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-02', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    
+    // Entrances
+    { apartment: 'А 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Общо' },
+    { apartment: 'Б 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Общо' }
+  ];
+
+  // Underground Floor data - Block B
+  const undergroundFloorData = [
+    // Garages Г-053 to Г-069
+    { apartment: 'Г-053', built: '27.15', ideal: '16.67', total: '43.82', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-054', built: '18.80', ideal: '11.55', total: '30.35', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-055', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-056', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-057', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-058', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-059', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-060', built: '24.76', ideal: '15.21', total: '39.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-061', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-062', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-063', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-064', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-065', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-066', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-067', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-068', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-069', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+
+    // Garages Г-070 to Г-086
+    { apartment: 'Г-070', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-071', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-072', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-073', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-074', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-075', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-076', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-077', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-078', built: '21.12', ideal: '12.97', total: '34.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-079', built: '24.77', ideal: '15.21', total: '39.98', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-080', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-081', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-082', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-083', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-084', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-085', built: '18.20', ideal: '11.18', total: '29.38', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-086', built: '22.46', ideal: '13.79', total: '36.25', type: 'ГАРАЖ', status: 'Свободен' },
+
+    // Garages Г-087 to Г-113
+    { apartment: 'Г-087', built: '25.34', ideal: '15.56', total: '40.90', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-088', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-089', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-090', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-091', built: '25.38', ideal: '15.59', total: '40.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-092', built: '25.38', ideal: '15.59', total: '40.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-093', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-094', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-095', built: '33.49', ideal: '20.57', total: '54.06', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-096', built: '33.49', ideal: '20.57', total: '54.06', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-097', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-098', built: '34.13', ideal: '20.96', total: '55.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-099', built: '34.13', ideal: '20.96', total: '55.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-100', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-101', built: '33.49', ideal: '20.57', total: '54.06', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-102', built: '33.49', ideal: '20.57', total: '54.06', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-103', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-104', built: '34.76', ideal: '21.35', total: '56.11', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-105', built: '25.38', ideal: '15.59', total: '40.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-106', built: '25.38', ideal: '15.59', total: '40.97', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-107', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-108', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-109', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-110', built: '26.44', ideal: '16.24', total: '42.68', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-111', built: '27.15', ideal: '16.67', total: '43.82', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-112', built: '18.64', ideal: '11.45', total: '30.09', type: 'ГАРАЖ', status: 'Свободен' },
+    { apartment: 'Г-113', built: '26.13', ideal: '16.05', total: '42.18', type: 'ГАРАЖ', status: 'Свободен' },
+
+    // Storage units ПМ-35 to ПМ-68
+    { apartment: 'ПМ-35', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-36', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-37', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-38', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-39', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-40', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-41', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-42', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-43', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-44', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-45', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-46', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-47', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-48', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-49', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-50', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-51', built: '24.23', ideal: '14.88', total: '39.11', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-52', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-53', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-54', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-55', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-56', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-57', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-58', built: '15.68', ideal: '9.63', total: '25.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-59', built: '15.68', ideal: '9.63', total: '25.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-60', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-61', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-62', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-63', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-64', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-65', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-66', built: '24.23', ideal: '14.88', total: '39.11', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-67', built: '18.53', ideal: '11.38', total: '29.91', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-68', built: '18.53', ideal: '11.38', total: '29.91', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' }
+  ];
   
   const handleBlockAFloorHover = (floorNumber) => {
     if (onHoverChange) {
@@ -332,6 +507,10 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
       setSelectedFloor({ block: 'B', floor: 7, data: blockBFloor7Data });
     } else if (block === 'B' && floor === 8) {
       setSelectedFloor({ block: 'B', floor: 8, data: blockBFloor8Data });
+    } else if ((block === 'A' || block === 'B') && floor === 0) {
+      setSelectedFloor({ block: 'GROUND', floor: 0, data: groundFloorData });
+    } else if ((block === 'A' || block === 'B') && floor === -1) {
+      setSelectedFloor({ block: 'UNDERGROUND', floor: -1, data: undergroundFloorData });
     }
   };
 
@@ -399,7 +578,9 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                Блок {selectedFloor.block} - Етаж {selectedFloor.floor}
+                {selectedFloor.block === 'GROUND' ? 'Приземен етаж - Гаражи и складове' : 
+                 selectedFloor.block === 'UNDERGROUND' ? 'Подземен етаж - Гаражи и складове' :
+                 `Блок ${selectedFloor.block} - Етаж ${selectedFloor.floor}`}
               </h2>
               <button
                 onClick={closeFloorDetails}
@@ -502,13 +683,19 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
             >
               <img
                 src={
+                  selectedFloor.block === 'GROUND' ?
+                    '/src/assets/продажби/project 2/architectures-b/приземен-b.png' :
+                  selectedFloor.block === 'UNDERGROUND' ?
+                    '/src/assets/продажби/project 2/architectures-b/подземен-b.png' :
                   selectedFloor.block === 'B' ? 
                     `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
                   selectedFloor.floor === 1 ? 
                     '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
                     `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
                 }
-                alt={`Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan`}
+                alt={selectedFloor.block === 'GROUND' ? 'Ground Floor Architecture Plan' : 
+                     selectedFloor.block === 'UNDERGROUND' ? 'Underground Floor Architecture Plan' :
+                     `Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan`}
                 className="w-full h-full object-contain"
               />
               
@@ -604,13 +791,19 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                 >
                   <img
                     src={
+                      selectedFloor.block === 'GROUND' ?
+                        '/src/assets/продажби/project 2/architectures-b/приземен-b.png' :
+                      selectedFloor.block === 'UNDERGROUND' ?
+                        '/src/assets/продажби/project 2/architectures-b/подземен-b.png' :
                       selectedFloor.block === 'B' ? 
                         `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
                       selectedFloor.floor === 1 ? 
                         '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
                         `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
                     }
-                    alt={`Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan - Fullscreen`}
+                    alt={selectedFloor.block === 'GROUND' ? 'Ground Floor Architecture Plan - Fullscreen' : 
+                         selectedFloor.block === 'UNDERGROUND' ? 'Underground Floor Architecture Plan - Fullscreen' :
+                         `Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan - Fullscreen`}
                     className="w-full h-full object-contain select-none"
                     draggable={false}
                   />
@@ -704,6 +897,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               className="bg-gray-800 rounded-lg p-2 hover:bg-gray-700 transition-colors cursor-pointer"
               onMouseEnter={() => handleBlockAFloorHover(0)}
               onMouseLeave={() => handleBlockAFloorHover(null)}
+              onClick={() => handleFloorClick('A', 0)}
             >
               <div className="flex justify-between items-center">
                 <span className="text-white font-medium">Приземен етаж</span>
@@ -716,6 +910,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               className="bg-gray-800 rounded-lg p-2 hover:bg-gray-700 transition-colors cursor-pointer"
               onMouseEnter={() => handleBlockAFloorHover(-1)}
               onMouseLeave={() => handleBlockAFloorHover(null)}
+              onClick={() => handleFloorClick('A', -1)}
             >
               <div className="flex justify-between items-center">
                 <span className="text-white font-medium">Подземен етаж</span>
@@ -804,6 +999,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               className="bg-gray-800 rounded-lg p-2 hover:bg-gray-700 transition-colors cursor-pointer"
               onMouseEnter={() => handleBlockBFloorHover(0)}
               onMouseLeave={() => handleBlockBFloorHover(null)}
+              onClick={() => handleFloorClick('B', 0)}
             >
               <div className="flex justify-between items-center">
                 <span className="text-white font-medium">Приземен етаж</span>
@@ -816,6 +1012,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               className="bg-gray-800 rounded-lg p-2 hover:bg-gray-700 transition-colors cursor-pointer"
               onMouseEnter={() => handleBlockBFloorHover(-1)}
               onMouseLeave={() => handleBlockBFloorHover(null)}
+              onClick={() => handleFloorClick('B', -1)}
             >
               <div className="flex justify-between items-center">
                 <span className="text-white font-medium">Подземен етаж</span>

@@ -326,7 +326,10 @@ const Sales = () => {
                   {/* Building View Toggle */}
                   {selectedProject.buildingData && (
                     <button
-                      onClick={toggleBuildingView}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleBuildingView();
+                      }}
                       className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 border w-24 h-8 flex items-center justify-center ${
                         showBuildingView 
                           ? 'bg-gold-500/20 text-gold-400 border-gold-500/30' 

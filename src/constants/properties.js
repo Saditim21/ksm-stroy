@@ -3,6 +3,16 @@ import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
 
+// Import Golden Residence photos
+import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.png'
+import goldenResidencePhoto2 from '../assets/продажби/project 2/photos/golden-residence-2.png'
+import goldenResidencePhoto3 from '../assets/продажби/project 2/photos/golden-residence-3.png'
+import goldenResidencePhoto4 from '../assets/продажби/project 2/photos/golden-residence-4.png'
+import goldenResidencePhoto5 from '../assets/продажби/project 2/photos/golden-residence-5.png'
+import goldenResidencePhoto6 from '../assets/продажби/project 2/photos/golden-residence-6.png'
+import goldenResidencePhoto7 from '../assets/продажби/project 2/photos/golden-residence-7.png'
+import goldenResidencePhoto8 from '../assets/продажби/project 2/photos/golden-residence-8.png'
+
 // Properties data for sales page
 export const properties = [
   {
@@ -53,12 +63,22 @@ export const properties = [
   {
     id: 2,
     title: "Golden Residence",
-    location: "София",
-    status: "Скоро",
+    location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
+    status: "За продажба",
     type: "Жилищна сграда",
-    year: "2024",
+    year: "2025",
     description: "Модерна жилищна сграда с луксозни апартаменти в сърцето на София. Очаквайте скоро отваряне за продажба.",
-    images: [goldenResidenceImage],
+    images: [
+      goldenResidenceImage,
+      goldenResidencePhoto1,
+      goldenResidencePhoto2,
+      goldenResidencePhoto3,
+      goldenResidencePhoto4,
+      goldenResidencePhoto5,
+      goldenResidencePhoto6,
+      goldenResidencePhoto7,
+      goldenResidencePhoto8
+    ],
     features: ["Луксозни апартаменти", "Централна локация", "Модерна архитектура"],
     price: "Скоро",
     apartments: "1-стайни до 4-стайни",
