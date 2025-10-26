@@ -15,14 +15,14 @@ const Footer = () => {
             {/* Company Info */}
             <div className="sm:col-span-2 lg:col-span-2">
               <div className="flex items-center mb-4 sm:mb-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-luxury p-2 sm:p-3">
-                  <img 
-                    src={logo} 
-                    alt="KSM Stroy Logo" 
-                    className="h-8 sm:h-10 lg:h-12 w-auto mix-blend-multiply opacity-90 brightness-0 invert"
-                    style={{ filter: 'drop-shadow(0 2px 6px rgba(212, 175, 55, 0.4))' }}
-                  />
-                </div>
+                <img 
+                  src={logo} 
+                  alt="KSM Stroy Logo" 
+                  className="h-16 sm:h-18 lg:h-20 w-16 sm:w-18 lg:w-20 object-cover rounded-full transition-all duration-300 hover:scale-105 border-2 border-gold-500/40 hover:border-gold-500/70"
+                  style={{ 
+                    filter: 'drop-shadow(0 3px 10px rgba(212, 175, 55, 0.5))'
+                  }}
+                />
               </div>
               
               <p className="text-platinum-300 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 lg:mb-8 max-w-xl">

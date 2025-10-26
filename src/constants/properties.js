@@ -1,7 +1,12 @@
 // Import property images
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
-import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
 import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
+
+// Import Многофамилна жилищна сграда photos
+import property1Photo1 from '../assets/продажби/project 1/photos/photo-1.png'
+import property1Photo2 from '../assets/продажби/project 1/photos/photo-2.png'
+import property1Photo3 from '../assets/продажби/project 1/photos/photo-3.png'
+import property1Photo4 from '../assets/продажби/project 1/photos/photo-4.png'
 
 // Import Golden Residence photos
 import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.png'
@@ -23,7 +28,13 @@ export const properties = [
     type: "Жилищна сграда",
     year: "2024",
     description: "Модерна многофамилна жилищна сграда с два блока (А и Б), гаражи и луксозни апартаменти в жк. Връбница-1. Блок А - 10 етажа, Блок Б - 9 етажа. Част от апартаментите вече са продадени.",
-    images: [property1Image1, property1Image2],
+    images: [
+      property1Image1,
+      property1Photo1,
+      property1Photo2,
+      property1Photo3,
+      property1Photo4
+    ],
     features: ["Подземни гаражи", "Блок А - 10 етажа", "Блок Б - 9 етажа", "Престижен район"],
     price: "По запитване",
     apartments: "Блокове А и Б - различни етажи",

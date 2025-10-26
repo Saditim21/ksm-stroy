@@ -30,7 +30,10 @@ const Navbar = () => {
               <img 
                 src={logo} 
                 alt="KSM Stroy Logo" 
-                className="h-8 sm:h-10 lg:h-12 w-auto"
+                className="h-12 sm:h-14 lg:h-16 w-12 sm:w-14 lg:w-16 object-cover rounded-full transition-all duration-300 hover:scale-105 border-2 border-gold-500/30 hover:border-gold-500/60"
+                style={{ 
+                  filter: 'drop-shadow(0 2px 8px rgba(212, 175, 55, 0.3))'
+                }}
               />
             </Link>
           </div>
