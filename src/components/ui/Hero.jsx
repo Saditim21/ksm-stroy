@@ -81,7 +81,7 @@ const Hero = () => {
             whileHover="hover"
             whileTap="tap"
           >
-            <span className="relative z-10">Виж проектите</span>
+            <span className="relative z-10">Виж проектите в продажба</span>
             
             {/* Arrow Icon */}
             <svg 

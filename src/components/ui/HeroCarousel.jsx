@@ -24,13 +24,6 @@ const HeroCarousel = () => {
       title: "Модерна архитектура",
       subtitle: "Иновативни дизайнерски решения",
       description: "Комбинираме функционалност с естетика"
-    },
-    {
-      id: 3,
-      image: slider03,
-      title: "Качествено строителство",
-      subtitle: "15+ години доказан опит",
-      description: "Реализираме проекти с гарантирано качество"
     }
   ]
 
@@ -38,21 +31,15 @@ const HeroCarousel = () => {
   const buildingData = [
     {
       name: "Многофамилна жилищна сграда",
-      location: "София, ж.к. Връбница-1",
+      location: "УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София",
       apartments: { total: 144, available: 16, reserved: 6, sold: 122 },
       garages: { total: 7, available: 5, reserved: 0, sold: 2 }
     },
     {
       name: "Golden Residence",
-      location: "София, кв. Бояна",
-      apartments: { total: 32, available: 22, reserved: 6, sold: 4 },
-      garages: { total: 18, available: 12, reserved: 3, sold: 3 }
-    },
-    {
-      name: "Парк Резиденс",
-      location: "София, кв. Драгалевци",
-      apartments: { total: 18, available: 14, reserved: 2, sold: 2 },
-      garages: { total: 15, available: 10, reserved: 3, sold: 2 }
+      location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
+      apartments: { total: 192, available: 192, reserved: 0, sold: 0 },
+      garages: { total: 113, available: 113, reserved: 0, sold: 0 }
     }
   ]
 
@@ -297,7 +284,7 @@ const HeroCarousel = () => {
                     to="/projects"
                     className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-2 sm:py-3 px-4 sm:px-6 rounded-luxury font-semibold text-sm sm:text-base text-center block transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-lg"
                   >
-                    Виж проектите
+                    Виж проектите в продажба
                   </Link>
                 </motion.div>
               </AnimatePresence>
