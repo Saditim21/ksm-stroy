@@ -2,18 +2,16 @@
 import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
 import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
 
-// Import Многофамилна жилищна сграда photos
-import property1Photo1 from '../assets/продажби/project 1/photos/photo-1.png'
-import property1Photo2 from '../assets/продажби/project 1/photos/photo-2.png'
-import property1Photo3 from '../assets/продажби/project 1/photos/photo-3.png'
-import property1Photo4 from '../assets/продажби/project 1/photos/photo-4.png'
+// Import Многофамилна жилищна сграда photos (use existing files)
+import property1Photo1 from '../assets/продажби/project 1/2_page-0001.jpg'
+import property1Photo2 from '../assets/продажби/project 1/apartment-b2.jpg'
+import property1Photo3 from '../assets/продажби/project 1/building-all-floors-architecture.png'
+import property1Photo4 from '../assets/продажби/project 1/building-garages.png'
 
-// Import Golden Residence photos
+// Import Golden Residence photos (only existing files)
 import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.png'
 import goldenResidencePhoto2 from '../assets/продажби/project 2/photos/golden-residence-2.png'
-import goldenResidencePhoto3 from '../assets/продажби/project 2/photos/golden-residence-3.png'
 import goldenResidencePhoto4 from '../assets/продажби/project 2/photos/golden-residence-4.png'
-import goldenResidencePhoto5 from '../assets/продажби/project 2/photos/golden-residence-5.png'
 import goldenResidencePhoto6 from '../assets/продажби/project 2/photos/golden-residence-6.png'
 import goldenResidencePhoto7 from '../assets/продажби/project 2/photos/golden-residence-7.png'
 import goldenResidencePhoto8 from '../assets/продажби/project 2/photos/golden-residence-8.png'
@@ -83,9 +81,7 @@ export const properties = [
       goldenResidenceImage,
       goldenResidencePhoto1,
       goldenResidencePhoto2,
-      goldenResidencePhoto3,
       goldenResidencePhoto4,
-      goldenResidencePhoto5,
       goldenResidencePhoto6,
       goldenResidencePhoto7,
       goldenResidencePhoto8

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import slider01 from '../../assets/home/slider01.jpg'
-import slider02 from '../../assets/home/slider02.jpg'
-import slider03 from '../../assets/home/slider03.jpg'
+import goldenResidence from '../../assets/home/001.jpg'
+import mnogoamilna from '../../assets/home/photo-4.png'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -13,14 +12,14 @@ const HeroCarousel = () => {
   const slides = [
     {
       id: 1,
-      image: slider01,
+      image: mnogoamilna,
       title: "Луксозни жилищни комплекси",
       subtitle: "Създаваме пространства за мечтания живот",
       description: "Съвременни решения с висок клас довършителни работи"
     },
     {
       id: 2,
-      image: slider02,
+      image: goldenResidence,
       title: "Модерна архитектура",
       subtitle: "Иновативни дизайнерски решения",
       description: "Комбинираме функционалност с естетика"

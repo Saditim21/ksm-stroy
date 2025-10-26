@@ -3,9 +3,9 @@ import HeroCarousel from '../components/ui/HeroCarousel'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { seoData, generateStructuredData } from '../utils/seo'
-import img001 from '../assets/images/001.jpg'
-import img002 from '../assets/images/002.jpg'
+import img001 from '../assets/home/001.jpg'
 import img003 from '../assets/images/003.jpg'
+import imgPhoto4 from '../assets/home/photo-4.png'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 const Home = () => {
@@ -16,7 +16,7 @@ const Home = () => {
       description: "Строителство на къщи, апартаменти и жилищни комплекси с висок стандарт"
     },
     {
-      image: img002,
+      image: imgPhoto4,
       title: "Ремонти и Реновация", 
       description: "Цялостни ремонти и модернизация на съществуващи сгради"
     },

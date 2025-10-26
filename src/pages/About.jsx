@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { seoData } from '../utils/seo'
-import img001 from '../assets/images/001.jpg'
-import img002 from '../assets/images/002.jpg'
-import img003 from '../assets/images/003.jpg'
 import slider01 from '../assets/images/slider01.jpg'
+import slider02 from '../assets/images/slider02.jpg'
+import slider03 from '../assets/images/slider03.jpg'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 // Move AnimatedCounter outside the component to prevent re-renders
@@ -54,7 +53,7 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
 const About = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   
-  const heroImages = [slider01, img001, img002, img003]
+  const heroImages = [slider01, slider02, slider03]
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -153,7 +152,7 @@ const About = () => {
               <OptimizedImage
                 src={heroImages[currentImageIndex]}
                 alt="KSM Stroy строителни проекти"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 loading="eager"
               />
             </motion.div>
