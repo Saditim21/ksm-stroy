@@ -1408,12 +1408,10 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
             
             <button
               onClick={() => setViewMode('explore')}
-              className="w-full mt-6 py-3 bg-gold-500 hover:bg-gold-600 text-black font-semibold rounded-xl transition-all duration-300 flex items-center justify-center group shadow-lg hover:shadow-xl"
+              className="w-full mt-6 py-3 bg-gold-500 hover:bg-gold-600 text-black font-semibold rounded-xl transition-all duration-300 flex items-center justify-center group shadow-lg hover:shadow-xl touch-manipulation min-h-[44px]"
             >
-              <svg className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Назад към сградата
+              <span className="text-xl sm:text-lg font-bold mr-2 transition-transform group-hover:-translate-x-1">←</span>
+              <span className="hidden sm:inline">Назад към сградата</span>
             </button>
           </div>
         </div>

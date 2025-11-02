@@ -380,19 +380,23 @@ const GoldenResidenceSingleBlock = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="relative mb-2">
+          <div className="flex items-center justify-between mb-4">
             <button 
               onClick={() => navigate('/projects/golden-residence')}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 text-black hover:text-gray-700 flex items-center transition-colors"
+              className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
             >
-              <span className="mr-2">←</span>
-              Назад към избор на блок
+              <span className="text-2xl sm:text-xl font-bold">←</span>
+              <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към избор на блок</span>
             </button>
-            <h1 className="text-4xl font-bold text-center">
+            
+            <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4">
               <span className="text-gold-600">Golden Residence</span> - <span className="text-gold-600">{blockTitle}</span>
             </h1>
+            
+            {/* Empty space for layout balance */}
+            <div className="w-[44px] sm:w-auto"></div>
           </div>
-          <p className="text-lg text-gray-600 text-center">
+          <p className="text-base sm:text-lg text-gray-600 text-center">
             {isBlockA ? '96 апартамента • 8 етажа' : '96 апартамента • 8 етажа'}
           </p>
         </div>
@@ -464,18 +468,21 @@ const GoldenResidenceSingleBlock = () => {
               <div className="container mx-auto px-4 max-w-7xl">
                 {/* Header */}
                 <div className="mb-8">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-4">
                     <button 
                       onClick={closeFloorPlan}
-                      className="text-black hover:text-gray-700 flex items-center transition-colors"
+                      className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
                     >
-                      <span className="mr-2">←</span>
-                      Назад към {blockTitle}
+                      <span className="text-2xl sm:text-xl font-bold">←</span>
+                      <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към {blockTitle}</span>
                     </button>
-                    <h1 className="text-4xl font-bold">
+                    
+                    <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4">
                       <span className="text-gold-600">{blockTitle}</span> - <span className="text-gold-600">{selectedFloor} етаж</span>
                     </h1>
-                    <div></div> {/* Spacer for centering */}
+                    
+                    {/* Empty space for layout balance */}
+                    <div className="w-[44px] sm:w-auto"></div>
                   </div>
                   <p className="text-lg text-gray-600 text-center">
                     Архитектурен план и списък на апартаментите
