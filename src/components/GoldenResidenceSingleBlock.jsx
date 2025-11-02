@@ -380,7 +380,7 @@ const GoldenResidenceSingleBlock = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 relative">
             <button 
               onClick={() => navigate('/projects/golden-residence')}
               className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
@@ -389,7 +389,7 @@ const GoldenResidenceSingleBlock = () => {
               <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към избор на блок</span>
             </button>
             
-            <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4">
+            <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2">
               <span className="text-gold-600">Golden Residence</span> - <span className="text-gold-600">{blockTitle}</span>
             </h1>
             
@@ -468,7 +468,7 @@ const GoldenResidenceSingleBlock = () => {
               <div className="container mx-auto px-4 max-w-7xl">
                 {/* Header */}
                 <div className="mb-8">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 relative">
                     <button 
                       onClick={closeFloorPlan}
                       className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
@@ -477,7 +477,7 @@ const GoldenResidenceSingleBlock = () => {
                       <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към {blockTitle}</span>
                     </button>
                     
-                    <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4">
+                    <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2">
                       <span className="text-gold-600">{blockTitle}</span> - <span className="text-gold-600">{selectedFloor} етаж</span>
                     </h1>
                     

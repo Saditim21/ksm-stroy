@@ -21,26 +21,30 @@ const GoldenResidenceBlockSelection = () => {
           {/* Enhanced mobile-first header layout */}
           <div className="mb-6 sm:mb-8">
             {/* Back button and title on same level */}
-            <div className="flex items-center justify-between mb-6 sm:mb-8">
-              <button 
-                onClick={() => navigate('/projects')}
-                className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
-              >
-                <span className="text-2xl sm:text-xl font-bold">←</span>
-                <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
-              </button>
+            <div className="grid grid-cols-3 items-center mb-6 sm:mb-8">
+              <div className="flex justify-start">
+                <button 
+                  onClick={() => navigate('/projects')}
+                  className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
+                >
+                  <span className="text-2xl sm:text-xl font-bold">←</span>
+                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
+                </button>
+              </div>
               
-              <motion.h1 
-                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 bg-clip-text text-transparent leading-tight text-center flex-1 mx-4"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.7 }}
-              >
-                Golden Residence
-              </motion.h1>
+              <div className="flex justify-center">
+                <motion.h1 
+                  className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 bg-clip-text text-transparent leading-tight text-center"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.7 }}
+                >
+                  Golden Residence
+                </motion.h1>
+              </div>
               
-              {/* Empty space for layout balance */}
-              <div className="w-[44px] sm:w-auto"></div>
+              {/* Empty space for balance */}
+              <div></div>
             </div>
             
             {/* Centered decorative line */}
