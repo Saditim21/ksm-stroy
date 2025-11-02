@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import PropertyCard from '../components/ui/PropertyCard'
@@ -57,6 +58,7 @@ import apartmentA58FloorPlanImage from '../assets/продажби/project 1/apa
 import apartmentA64FloorPlanImage from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.png'
 
 const Sales = () => {
+  const navigate = useNavigate()
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [selectedProject, setSelectedProject] = useState(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -103,6 +105,12 @@ const Sales = () => {
 
   // Modal functions
   const openModal = (property) => {
+    // Check if this is Golden Residence - redirect to block selection instead of modal
+    if (property.projectType === 'golden-residence') {
+      navigate('/projects/golden-residence')
+      return
+    }
+    
     setSelectedProject(property)
     setCurrentImageIndex(0)
     // Show building view by default if building data exists

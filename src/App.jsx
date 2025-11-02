@@ -7,6 +7,8 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Projects from './pages/Projects'
 import ProjectDetail from './pages/ProjectDetail'
+import GoldenResidenceBlockSelection from './components/GoldenResidenceBlockSelection'
+import GoldenResidenceSingleBlock from './components/GoldenResidenceSingleBlock'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 
@@ -24,6 +26,8 @@ function AnimatedRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/golden-residence" element={<GoldenResidenceBlockSelection />} />
+        <Route path="/projects/golden-residence/:block" element={<GoldenResidenceSingleBlock />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
