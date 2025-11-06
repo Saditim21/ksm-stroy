@@ -619,13 +619,47 @@ const GoldenResidenceSingleBlock = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Building Image */}
           <div className="lg:w-2/3">
-            <div className="bg-white rounded-lg shadow-lg p-4">
+            <div className="bg-white rounded-lg shadow-lg p-4 relative">
               <img
                 src={currentImage}
                 alt={`${blockTitle} Floor Plan`}
                 className="w-full h-auto rounded-lg"
                 style={{ maxHeight: '80vh', objectFit: 'contain' }}
               />
+              {/* SVG Interactive floor hotspots with precise polygon coordinates */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="xMidYMid meet"
+                style={{ pointerEvents: 'none' }}
+              >
+                {/* Floor hover areas - simple x, y, width, height format */}
+                {[
+                  { floor: 8, x: 20, y: 28, width: 100, height: 5 },
+                  { floor: 7, x: 20, y: 31, width: 100, height: 5 },
+                  { floor: 6, x: 20, y: 38, width: 100, height: 5 },
+                  { floor: 5, x: 20, y: 44, width: 100, height: 5 },
+                  { floor: 4, x: 20, y: 50, width: 100, height: 5 },
+                  { floor: 3, x: 20, y: 59, width: 100, height: 5 },
+                  { floor: 2, x: 20, y: 64, width: 100, height: 5 },
+                  { floor: 1, x: 20, y: 68, width: 100, height: 5 },
+                ].map((area) => (
+                  <rect
+                    key={area.floor}
+                    x={area.x}
+                    y={area.y}
+                    width={area.width}
+                    height={area.height}
+                    fill="transparent"
+                    stroke="transparent"
+                    className="cursor-pointer"
+                    style={{ pointerEvents: 'auto' }}
+                    onMouseEnter={() => handleFloorHover(area.floor)}
+                    onMouseLeave={() => handleFloorHover(null)}
+                    onClick={() => handleFloorClick(area.floor)}
+                  />
+                ))}
+              </svg>
             </div>
           </div>
 
