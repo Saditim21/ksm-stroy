@@ -909,7 +909,7 @@ const FourTowersFloorMap = ({ onHoverChange, currentImage, onFloorSelect, onApar
                 </svg>
                 <div>
                   <p className="text-sm font-medium text-gray-900">Телефон:</p>
-                  <p className="text-sm text-gray-600">+359 88 888 8888</p>
+                  <p className="text-sm text-gray-600">+359885762224</p>
                 </div>
               </div>
             </div>

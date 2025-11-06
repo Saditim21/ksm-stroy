@@ -37,8 +37,8 @@ const HeroCarousel = () => {
     {
       name: "Golden Residence",
       location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
-      apartments: { total: 192, available: 192, reserved: 0, sold: 0 },
-      garages: { total: 113, available: 113, reserved: 0, sold: 0 }
+      apartments: { total: 192, available: 100, reserved: 5, sold: 87 },
+      garages: { total: 113, available: 78, reserved: 0, sold: 35 }
     }
   ]
 

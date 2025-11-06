@@ -68,8 +68,7 @@ const Contact = () => {
       ),
       title: "Телефон",
       details: [
-        "+359 888 123 456",
-        "+359 2 123 4567"
+        "+359885762224"
       ]
     },
     {
@@ -80,8 +79,7 @@ const Contact = () => {
       ),
       title: "Имейл",
       details: [
-        "info@ksmstroy.bg",
-        "office@ksmstroy.bg"
+        "ksm_str@abv.bg"
       ]
     },
     {
@@ -252,7 +250,7 @@ const Contact = () => {
                         className={`w-full px-4 py-3 border rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury ${
                           errors.phone ? 'border-red-300' : 'border-silver-200'
                         }`}
-                        placeholder="+359 888 123 456"
+                        placeholder="+359885762224"
                       />
                       {errors.phone && (
                         <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>

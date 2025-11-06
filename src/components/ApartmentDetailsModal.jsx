@@ -92,7 +92,7 @@ const ApartmentDetailsModal = ({ isOpen, onClose, apartmentData, apartmentImage 
                   <p className="font-semibold">СВЪРЖЕТЕ СЕ С НАС</p>
                   <p>София, бул"Христо Смирненски"23</p>
                   <p>Мобилен телефон</p>
-                  <p>info@ksm.com</p>
+                  <p>ksm_str@abv.bg</p>
                 </div>
                 
                 {apartmentData.status === 'Свободен' && (
