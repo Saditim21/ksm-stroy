@@ -110,7 +110,13 @@ const Sales = () => {
       navigate('/projects/golden-residence')
       return
     }
-    
+
+    // Check if this is Mnogofamilna sgrada - redirect to block selection instead of modal
+    if (property.projectType === 'mnogofamilna-sgrada') {
+      navigate('/projects/mnogofamilna-sgrada')
+      return
+    }
+
     setSelectedProject(property)
     setCurrentImageIndex(0)
     // Show building view by default if building data exists

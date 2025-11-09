@@ -9,6 +9,8 @@ import Projects from './pages/Projects'
 import ProjectDetail from './pages/ProjectDetail'
 import GoldenResidenceBlockSelection from './components/GoldenResidenceBlockSelection'
 import GoldenResidenceSingleBlock from './components/GoldenResidenceSingleBlock'
+import MnogofamilnaBlockSelection from './components/MnogofamilnaBlockSelection'
+import MnogofamilnaSingleBlock from './components/MnogofamilnaSingleBlock'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 
@@ -28,6 +30,8 @@ function AnimatedRoutes() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/golden-residence" element={<GoldenResidenceBlockSelection />} />
         <Route path="/projects/golden-residence/:block" element={<GoldenResidenceSingleBlock />} />
+        <Route path="/projects/mnogofamilna-sgrada" element={<MnogofamilnaBlockSelection />} />
+        <Route path="/projects/mnogofamilna-sgrada/:block" element={<MnogofamilnaSingleBlock />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
