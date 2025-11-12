@@ -6,6 +6,7 @@ import { seoData } from '../utils/seo'
 import slider01 from '../assets/images/slider01.jpg'
 import slider02 from '../assets/images/slider02.jpg'
 import slider03 from '../assets/images/slider03.jpg'
+import traditions from '../assets/images/traditions.jpg'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 // Move AnimatedCounter outside the component to prevent re-renders
@@ -104,12 +105,12 @@ const About = () => {
 
   const mission = {
     title: "Нашата мисия",
-    content: "Да създаваме пространства, които вдъхновяват и служат на хората, използвайки най-добрите практики в строителството и архитектурата. Стремим се да бъдем партньорът, на който нашите клиенти могат винаги да разчитат."
+    content: "Да предоставяме цялостни строителни услуги, които обединяват професионализъм, отговорност и иновации, като същевременно гарантираме удовлетворението на нашите клиенти."
   }
 
   const vision = {
     title: "Нашата визия",
-    content: "Да бъдем водеща строителна компания в България, призната за своето качество, иновативност и отговорност към клиентите и обществото. Искаме да променим начина, по който се възприема строителството в страната."
+    content: "Вярваме, че строителството не е просто изграждане на сгради, а създаване на пространства за живот, работа и бъдеще. Ето защо в КСМ Строй ООД винаги поставяме клиента и качеството на първо място."
   }
 
 
@@ -168,28 +169,23 @@ const About = () => {
             initial="initial"
             animate="animate"
           >
-            <motion.span 
-              variants={staggerItem}
-              className="text-gold-400 font-semibold text-lg uppercase tracking-widest mb-4 block"
-            >
-              За нас
-            </motion.span>
-            <motion.h1 
+            <motion.h1
               variants={staggerItem}
               className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight"
             >
-              Изграждаме
+              Добре дошли в
               <br />
               <span className="bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
-                Бъдещето
+                КСМ Строй ООД
               </span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               variants={staggerItem}
               className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed"
             >
-              От 2008 година създаваме пространства, които вдъхновяват и служат на хората. 
-              Нашата мисия е да превърнем всяка визия в реалност с непревъзходно качество.
+              Вашият доверен партньор в строителството! С дългогодишен опит и професионален екип,
+              ние изграждаме жилищни, обществени и индустриални обекти с високо качество и прецизност.
+              От идеята до завършената сграда – ние сме до вас във всяка стъпка.
             </motion.p>
             
             <motion.div 
@@ -260,16 +256,20 @@ const About = () => {
                   className="text-5xl font-bold text-primary-900 mt-4 mb-6 leading-tight"
                 >
                   Традиция и иновации 
-                  <span className="text-gold-600">от 2008</span>
+                  <span className="text-gold-600"> от 2008</span>
                 </motion.h2>
               </div>
               
               <motion.div variants={fadeInUp} className="space-y-6">
                 <p className="text-lg text-primary-700 leading-relaxed">
-                  КСМ СТРОЙ ООД е основана през септември 2008 г. от двама братя Кадри и Сухат, 
-                  синове на известен в родното им село Буково строител зидар.
+                  КСМ СТРОЙ ООД е основана през месец септември 2008 г. от двама братя Кадри и Сухат,
+                  синове на известен в родното им село Буково строител зидар /дюлгерин/.
                 </p>
-                
+
+                <p className="text-lg text-primary-700 leading-relaxed">
+                  Учредителите още от самото създаване на дружеството залагат на характерните черти за региона като КОРЕКТНОСТ, БЪРЗИНА И ТОЧНОСТ ПОД МОТОТО:
+                </p>
+
                 <div className="bg-gradient-to-r from-gold-50 to-gold-100 p-6 rounded-luxury border-l-4 border-gold-500">
                   <p className="text-lg text-primary-800 font-medium italic">
                     "ДОБРАТА РАБОТА - РЕКЛАМА ЗА МАЙСТОРА"
@@ -286,11 +286,6 @@ const About = () => {
                     </div>
                   </div>
                 </div>
-                
-                <p className="text-lg text-primary-700 leading-relaxed">
-                  Всичко това получава клиентът с висока степен на сигурност, качество, 
-                  коректно отношение и внимание към детайла.
-                </p>
               </motion.div>
             </motion.div>
             
@@ -303,9 +298,9 @@ const About = () => {
                 variants={hoverLift}
                 whileHover="hover"
               >
-                <OptimizedImage 
-                  src={slider01} 
-                  alt="KSM Stroy - строителни проекти и офис" 
+                <OptimizedImage
+                  src={traditions}
+                  alt="KSM Stroy - Традиция и иновации"
                   className="w-full h-[600px] object-cover rounded-luxury-xl shadow-2xl transform group-hover:scale-105 transition-transform duration-700"
                   loading="lazy"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -380,6 +375,143 @@ const About = () => {
                 </motion.div>
               </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Who We Are Section */}
+      <motion.section
+        className="py-20 bg-white relative overflow-hidden"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={staggerContainer}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div variants={staggerItem} className="text-center mb-16">
+            <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">За компанията</span>
+            <h2 className="text-5xl font-bold text-primary-900 mt-4 mb-6">
+              Кои сме <span className="text-gold-600">ние?</span>
+            </h2>
+            <p className="text-xl text-primary-700 max-w-4xl mx-auto leading-relaxed">
+              КСМ Строй ООД е строителна компания, ориентирана към качество, надеждност и устойчиви решения.
+              Съчетаваме дългогодишен опит с модерни технологии, за да създаваме проекти, които отговарят на всички съвременни изисквания.
+            </p>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Services Section */}
+      <motion.section
+        className="py-20 bg-gradient-to-br from-primary-50 to-ivory-50 relative overflow-hidden"
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOptions}
+        variants={staggerContainer}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div variants={staggerItem} className="text-center mb-16">
+            <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Нашите услуги</span>
+            <h2 className="text-5xl font-bold text-primary-900 mt-4 mb-6">
+              Какво <span className="text-gold-600">предлагаме?</span>
+            </h2>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16"
+          >
+            <motion.div variants={staggerItem} className="bg-white rounded-luxury-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-gold-500 to-gold-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-900 mb-2">Жилищно строителство</h3>
+                  <p className="text-primary-700">Домове, в които комфортът и качеството вървят ръка за ръка.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="bg-white rounded-luxury-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-900 mb-2">Обществени и административни сгради</h3>
+                  <p className="text-primary-700">Модерни, функционални и устойчиви решения.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="bg-white rounded-luxury-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-900 mb-2">Ремонти и реконструкции</h3>
+                  <p className="text-primary-700">Обновяване и модернизация на съществуващи сгради.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={staggerItem} className="bg-white rounded-luxury-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-900 mb-2">Проектиране и консултации</h3>
+                  <p className="text-primary-700">Съдействие от първата идея до последния детайл.</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          <motion.div variants={staggerItem} className="bg-gradient-to-r from-gold-50 to-gold-100 rounded-luxury-xl p-8 border-l-4 border-gold-500">
+            <h3 className="text-2xl font-bold text-primary-900 mb-6">Защо да изберете КСМ Строй ООД?</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start">
+                <svg className="w-6 h-6 text-gold-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-primary-700 text-lg">Опитен и квалифициран екип</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="w-6 h-6 text-gold-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-primary-700 text-lg">Съвременни материали и технологии</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="w-6 h-6 text-gold-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-primary-700 text-lg">Стриктно спазване на срокове и бюджет</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="w-6 h-6 text-gold-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-primary-700 text-lg">Индивидуален подход към всеки проект</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="w-6 h-6 text-gold-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-primary-700 text-lg">Дългосрочно доверие и надеждно партньорство</span>
+              </li>
+            </ul>
           </motion.div>
         </div>
       </motion.section>

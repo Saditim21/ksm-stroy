@@ -114,7 +114,7 @@ const MnogofamilnaBlockSelection = () => {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.6 }}
                     >
-                      18 апартамента • 10 етажа
+                      72 апартамента • 9 етажа
                     </motion.p>
                     <motion.div
                       className="bg-white/25 backdrop-blur-lg px-6 sm:px-8 lg:px-10 py-4 sm:py-5 rounded-2xl border-2 border-white/90 group-hover:bg-white/35 group-hover:border-white group-active:bg-white/20 transition-all duration-300 shadow-2xl min-h-[56px] flex items-center justify-center touch-manipulation"
@@ -173,7 +173,7 @@ const MnogofamilnaBlockSelection = () => {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.8, duration: 0.6 }}
                     >
-                      16 апартамента • 9 етажа
+                      72 апартамента • 9 етажа
                     </motion.p>
                     <motion.div
                       className="bg-white/25 backdrop-blur-lg px-6 sm:px-8 lg:px-10 py-4 sm:py-5 rounded-2xl border-2 border-white/90 group-hover:bg-white/35 group-hover:border-white group-active:bg-white/20 transition-all duration-300 shadow-2xl min-h-[56px] flex items-center justify-center touch-manipulation"

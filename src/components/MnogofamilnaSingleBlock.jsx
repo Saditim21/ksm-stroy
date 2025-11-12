@@ -29,6 +29,34 @@ import blockBFloor8Image from '../assets/продажби/project 1/block-B/buil
 import blockBFloor9Image from '../assets/продажби/project 1/block-B/building-B-floor-9.png';
 import blockBTavanImage from '../assets/продажби/project 1/block-B/building-B-Tavan.png';
 
+// Apartment A Images
+import apartmentA2Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a2-floor1.png';
+import apartmentA6Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a6-floor1.png';
+import apartmentA58Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a58-floor8.png';
+import apartmentA64Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.png';
+
+// Apartment B Images
+import apartmentB2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.png';
+import apartmentB6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B6.png';
+import apartmentB7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B7.png';
+import apartmentB207Floor2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-207-floor2.png';
+import apartmentB23Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b23-floor3.png';
+import apartmentB307Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b307-floor8.png';
+import apartmentB31Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b31-floor4.png';
+import apartmentB407Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b407-floor8.png';
+import apartmentB47Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b47-floor6.png';
+import apartmentB607Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b607-floor8.png';
+import apartmentB50Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b50-floor7.png';
+import apartmentB55Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b55-floor7.png';
+import apartmentB702Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b702-floor8.png';
+import apartmentB707Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b707-floor8.png';
+import apartmentB57Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.png';
+import apartmentB59Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.png';
+import apartmentB63Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.png';
+import apartmentB801Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b801-floor8.png';
+import apartmentB803Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b803-floor8.png';
+import apartmentB807Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b807-floor8.png';
+
 const MnogofamilnaSingleBlock = () => {
   const { block } = useParams();
   const navigate = useNavigate();
@@ -84,6 +112,65 @@ const MnogofamilnaSingleBlock = () => {
         'tavan': blockBTavanImage
       };
       return imageMap[floorKey] || blockBImage;
+    }
+  };
+
+  // Check if apartment has a specific image
+  const hasSpecificApartmentImage = (apartmentName) => {
+    if (!apartmentName) return false;
+
+    const aptNumber = apartmentName.split('-')[1];
+
+    if (isBlockA) {
+      const apartmentAImages = ['2', '6', '58', '64', '102', '106'];
+      return apartmentAImages.includes(aptNumber);
+    } else {
+      const apartmentBImages = ['102', '106', '107', '207', '23', '307', '31', '407', '47', '607', '50', '55', '702', '707', '57', '59', '63', '801', '803', '807'];
+      return apartmentBImages.includes(aptNumber);
+    }
+  };
+
+  // Get apartment architecture image based on apartment number
+  const getApartmentImage = (apartmentName) => {
+    if (!apartmentName) return buildingAllFloorsArchitectureImage;
+
+    // Extract apartment number from name (e.g., "А-2" -> "2", "B-207" -> "207")
+    const aptNumber = apartmentName.split('-')[1];
+
+    if (isBlockA) {
+      const apartmentAImages = {
+        '2': apartmentA2Floor1,
+        '6': apartmentA6Floor1,
+        '58': apartmentA58Floor8,
+        '64': apartmentA64Floor8,
+        '102': apartmentA2Floor1,  // A-102 uses apartment-a2-floor1.png
+        '106': apartmentA6Floor1   // A-106 uses apartment-a6-floor1.png
+      };
+      return apartmentAImages[aptNumber];
+    } else {
+      const apartmentBImages = {
+        '102': apartmentB2,  // B-102 uses apartment B2.png
+        '106': apartmentB6,  // B-106 uses apartment B6.png
+        '107': apartmentB7,  // B-107 uses apartment B7.png
+        '207': apartmentB207Floor2,
+        '23': apartmentB23Floor3,
+        '307': apartmentB307Floor3,
+        '31': apartmentB31Floor4,
+        '407': apartmentB407Floor4,
+        '47': apartmentB47Floor6,
+        '607': apartmentB607Floor6,
+        '50': apartmentB50Floor7,
+        '55': apartmentB55Floor7,
+        '702': apartmentB702Floor7,
+        '707': apartmentB707Floor7,
+        '57': apartmentB57Floor8,
+        '59': apartmentB59Floor8,
+        '63': apartmentB63Floor8,
+        '801': apartmentB801Floor8,
+        '803': apartmentB803Floor8,
+        '807': apartmentB807Floor8
+      };
+      return apartmentBImages[aptNumber];
     }
   };
 
@@ -147,6 +234,7 @@ const MnogofamilnaSingleBlock = () => {
         setIsArchitecturePlanFullscreen(false);
         setFullscreenZoom(1);
         setFullscreenPan({ x: 0, y: 0 });
+        setSelectedApartment(null);
       }
     };
 
@@ -208,7 +296,7 @@ const MnogofamilnaSingleBlock = () => {
             <div className="w-[44px] sm:w-auto"></div>
           </div>
           <p className="text-base sm:text-lg text-gray-600 text-center">
-            {isBlockA ? '10 етажа • Етажи 2-9 + Таван + Гаражи' : '9 етажа • Етажи 2-9 + Таван + Гаражи'}
+            {isBlockA ? '72 апартамента • 9 етажа (2-10)' : '72 апартамента • 9 етажа (2-10)'}
           </p>
         </div>
 
@@ -378,7 +466,7 @@ const MnogofamilnaSingleBlock = () => {
                     </button>
 
                     <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2">
-                      <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{blockTitle}</span> - <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">{selectedFloor === 10 ? 'Тавански етаж' : `Етаж ${selectedFloor}`}</span>
+                      <span className="bg-gradient-to-r from-gold-600 to-gold-800 bg-clip-text text-transparent">{blockTitle}</span> - <span className="bg-gradient-to-r from-gold-600 to-gold-800 bg-clip-text text-transparent">{selectedFloor === 10 ? 'Тавански етаж' : `Етаж ${selectedFloor}`}</span>
                     </h1>
 
                     {/* Empty space for layout balance */}
@@ -389,9 +477,9 @@ const MnogofamilnaSingleBlock = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
+                <div className="flex flex-col lg:flex-row gap-6">
                   {/* Left Side - Apartments Table (50%) */}
-                  <div className="lg:w-1/2">
+                  <div className="lg:w-1/2 flex flex-col">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                       <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-0">Списък на апартаментите</h3>
                       <p className="text-xs sm:text-sm text-gray-600">
@@ -399,15 +487,15 @@ const MnogofamilnaSingleBlock = () => {
                         <span className="sm:hidden">Скролирайте и кликнете</span>
                       </p>
                     </div>
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg relative">
+                    <div className="bg-white rounded-lg overflow-hidden shadow-lg relative flex-1">
                       {/* Scroll indicator for mobile */}
                       <div className="absolute top-2 right-2 z-20 sm:hidden">
-                        <div className="bg-blue-500/80 text-white text-xs px-2 py-1 rounded-full animate-pulse font-semibold">
+                        <div className="bg-gold-500/80 text-primary-900 text-xs px-2 py-1 rounded-full animate-pulse font-semibold">
                           ↕ Scroll
                         </div>
                       </div>
 
-                      <div className="overflow-x-auto overflow-y-auto max-h-96 relative" style={{
+                      <div className="overflow-x-auto overflow-y-auto h-full relative" style={{
                         scrollbarWidth: 'thin',
                         scrollbarColor: '#CBD5E0 #F7FAFC',
                         WebkitOverflowScrolling: 'touch'
@@ -428,7 +516,7 @@ const MnogofamilnaSingleBlock = () => {
                                 key={idx}
                                 className={`transition-colors ${
                                   selectedApartment && selectedApartment.имот === apt.имот
-                                    ? 'bg-blue-100 border-l-4 border-blue-500'
+                                    ? 'bg-gold-100 border-l-4 border-gold-500'
                                     : (apt.статус === 'Свободен')
                                       ? 'hover:bg-gray-50 cursor-pointer group active:bg-gray-100'
                                       : 'cursor-not-allowed opacity-75'
@@ -510,22 +598,25 @@ const MnogofamilnaSingleBlock = () => {
                           Архитектурен план - {selectedFloor === 10 ? 'Тавански етаж' : `Етаж ${selectedFloor}`}
                         </h3>
                         {selectedApartment && (
-                          <div className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                          <div className="text-sm bg-gold-100 text-gold-800 px-3 py-1 rounded-full">
                             Избран: {selectedApartment.имот}
                           </div>
                         )}
                       </div>
 
                       <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden relative">
+
                         <div
-                          className="w-full h-full overflow-auto cursor-move relative"
+                          className="w-full h-full overflow-hidden cursor-move relative flex items-center justify-center"
                           style={{
                             transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-                            transformOrigin: 'top left'
+                            transformOrigin: 'center center',
+                            transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                           }}
                           onMouseDown={(e) => {
                             setIsDragging(true);
                             setLastMousePosition({ x: e.clientX, y: e.clientY });
+                            document.body.style.cursor = 'grabbing';
                           }}
                           onMouseMove={(e) => {
                             if (isDragging) {
@@ -538,15 +629,22 @@ const MnogofamilnaSingleBlock = () => {
                               setLastMousePosition({ x: e.clientX, y: e.clientY });
                             }
                           }}
-                          onMouseUp={() => setIsDragging(false)}
-                          onMouseLeave={() => setIsDragging(false)}
+                          onMouseUp={() => {
+                            setIsDragging(false);
+                            document.body.style.cursor = '';
+                          }}
+                          onMouseLeave={() => {
+                            setIsDragging(false);
+                            document.body.style.cursor = '';
+                          }}
                         >
-                          <div className="relative">
+                          <div className="relative w-full h-full flex items-center justify-center p-1">
                             <img
-                              src={buildingAllFloorsArchitectureImage}
-                              alt={`${blockTitle} - ${selectedFloor} етаж план`}
-                              className="w-full h-auto cursor-pointer"
+                              src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : buildingAllFloorsArchitectureImage}
+                              alt={selectedApartment ? `${selectedApartment.имот} план` : `${blockTitle} - ${selectedFloor} етаж план`}
+                              className="max-w-full max-h-full object-contain cursor-pointer rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300"
                               onClick={() => setIsArchitecturePlanFullscreen(true)}
+                              draggable={false}
                             />
                           </div>
                         </div>
@@ -584,6 +682,11 @@ const MnogofamilnaSingleBlock = () => {
                             </svg>
                           </button>
                         </div>
+
+                        {/* Zoom level indicator */}
+                        <div className="absolute bottom-3 left-3 bg-gray-900/80 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg backdrop-blur-sm">
+                          {Math.round(zoomLevel * 100)}%
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -604,7 +707,7 @@ const MnogofamilnaSingleBlock = () => {
                     {blockTitle} - {selectedFloor === 10 ? 'Тавански етаж' : `Етаж ${selectedFloor}`} - Архитектурен план
                   </h3>
                   {selectedApartment && (
-                    <div className="text-sm bg-blue-600 text-white px-3 py-1 rounded-full font-semibold">
+                    <div className="text-sm bg-gold-600 text-primary-900 px-3 py-1 rounded-full font-semibold">
                       Избран: {selectedApartment.имот}
                     </div>
                   )}
@@ -614,6 +717,7 @@ const MnogofamilnaSingleBlock = () => {
                     setIsArchitecturePlanFullscreen(false);
                     setFullscreenZoom(1);
                     setFullscreenPan({ x: 0, y: 0 });
+                    setSelectedApartment(null);
                   }}
                   className="text-white hover:text-gray-300 text-2xl"
                 >
@@ -644,8 +748,8 @@ const MnogofamilnaSingleBlock = () => {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <img
-                    src={buildingAllFloorsArchitectureImage}
-                    alt={`${blockTitle} - ${selectedFloor} етаж план`}
+                    src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : buildingAllFloorsArchitectureImage}
+                    alt={selectedApartment ? `${selectedApartment.имот} план` : `${blockTitle} - ${selectedFloor} етаж план`}
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
@@ -687,10 +791,10 @@ const MnogofamilnaSingleBlock = () => {
 
               {/* Selected Apartment Info - Top Left */}
               {selectedApartment && (
-                <div className="absolute top-20 left-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-lg shadow-2xl z-20">
+                <div className="absolute top-20 left-4 bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-4 py-3 rounded-lg shadow-2xl z-20">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                      <div className="w-3 h-3 bg-primary-900 rounded-full animate-pulse"></div>
                       <div className="font-bold">Избран апартамент</div>
                     </div>
                     <div className="text-lg font-semibold">{selectedApartment.имот}</div>
@@ -704,7 +808,7 @@ const MnogofamilnaSingleBlock = () => {
                       Статус: {selectedApartment.статус}
                     </div>
                     <button
-                      className="bg-white text-blue-600 px-3 py-2 rounded text-sm font-bold hover:bg-blue-50 transition-colors mt-1"
+                      className="bg-primary-900 text-gold-100 px-3 py-2 rounded text-sm font-bold hover:bg-primary-800 transition-colors mt-1"
                       onClick={() => setShowContactModal(true)}
                     >
                       Контакт
@@ -738,7 +842,7 @@ const MnogofamilnaSingleBlock = () => {
               </div>
 
               {selectedApartment && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="bg-gold-50 border border-gold-200 rounded-lg p-4 mb-4">
                   <p className="text-sm text-gray-600 mb-1">Интерес за:</p>
                   <p className="font-bold text-gray-900">{selectedApartment.имот}</p>
                   <p className="text-sm text-gray-700">{selectedApartment.вид} • {selectedApartment.общаПлощ}</p>
@@ -747,31 +851,31 @@ const MnogofamilnaSingleBlock = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   <div>
                     <p className="text-sm text-gray-600">Телефон:</p>
-                    <a href="tel:+359885762224" className="text-blue-600 hover:text-blue-800 font-medium">
+                    <a href="tel:+359885762224" className="text-gold-600 hover:text-gold-800 font-medium">
                       +359 885 762 224
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <div>
                     <p className="text-sm text-gray-600">Email:</p>
-                    <a href="mailto:info@ksm-stroy.com" className="text-blue-600 hover:text-blue-800 font-medium">
+                    <a href="mailto:info@ksm-stroy.com" className="text-gold-600 hover:text-gold-800 font-medium">
                       info@ksm-stroy.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
@@ -783,7 +887,7 @@ const MnogofamilnaSingleBlock = () => {
 
               <button
                 onClick={() => setShowContactModal(false)}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-semibold"
+                className="w-full mt-6 bg-gradient-to-r from-gold-600 to-gold-700 text-white py-3 rounded-lg hover:from-gold-700 hover:to-gold-800 transition-all font-semibold"
               >
                 Затвори
               </button>

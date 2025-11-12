@@ -740,9 +740,9 @@ const GoldenResidenceSingleBlock = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
+                <div className="flex flex-col lg:flex-row gap-6">
                   {/* Left Side - Apartments Table (50%) */}
-                  <div className="lg:w-1/2">
+                  <div className="lg:w-1/2 flex flex-col">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                       <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-0">Списък на апартаментите</h3>
                       <p className="text-xs sm:text-sm text-gray-600">
@@ -750,15 +750,15 @@ const GoldenResidenceSingleBlock = () => {
                         <span className="sm:hidden">Скролирайте и кликнете</span>
                       </p>
                     </div>
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg relative">
+                    <div className="bg-white rounded-lg overflow-hidden shadow-lg relative flex-1">
                       {/* Scroll indicator for mobile */}
                       <div className="absolute top-2 right-2 z-20 sm:hidden">
                         <div className="bg-gold-500/80 text-primary-900 text-xs px-2 py-1 rounded-full animate-pulse font-semibold">
                           ↕ Scroll
                         </div>
                       </div>
-                      
-                      <div className="overflow-x-auto overflow-y-auto max-h-96 relative" style={{
+
+                      <div className="overflow-x-auto overflow-y-auto h-full relative" style={{
                         scrollbarWidth: 'thin',
                         scrollbarColor: '#CBD5E0 #F7FAFC',
                         WebkitOverflowScrolling: 'touch'
@@ -825,32 +825,33 @@ const GoldenResidenceSingleBlock = () => {
                         </table>
                       </div>
                     </div>
-                    
+
+
                     {/* Summary Stats */}
                     <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-                      {(() => {
-                        const floorData = getFloorData(selectedFloor);
-                        const available = floorData.filter(a => a.status === 'Свободен').length;
-                        const sold = floorData.filter(a => a.status === 'Продадени').length;
-                        const reserved = floorData.filter(a => a.status === 'Резервиран').length;
-                        
-                        return (
-                          <>
-                            <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
-                              <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
-                              <div className="text-xs text-green-600">Свободни</div>
-                            </div>
-                            <div className="bg-red-100 border border-red-300 rounded-lg p-2 sm:p-3 text-center">
-                              <div className="text-lg sm:text-xl font-bold text-red-800">{sold}</div>
-                              <div className="text-xs text-red-600">Продадени</div>
-                            </div>
-                            <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
-                              <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
-                              <div className="text-xs text-yellow-600">Резервирани</div>
-                            </div>
-                          </>
-                        );
-                      })()}
+                        {(() => {
+                          const floorData = getFloorData(selectedFloor);
+                          const available = floorData.filter(a => a.status === 'Свободен').length;
+                          const sold = floorData.filter(a => a.status === 'Продадени').length;
+                          const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+
+                          return (
+                            <>
+                              <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
+                                <div className="text-xs text-green-600">Свободни</div>
+                              </div>
+                              <div className="bg-red-100 border border-red-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-red-800">{sold}</div>
+                                <div className="text-xs text-red-600">Продадени</div>
+                              </div>
+                              <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
+                                <div className="text-xs text-yellow-600">Резервирани</div>
+                              </div>
+                            </>
+                          );
+                        })()}
                     </div>
                   </div>
 
@@ -867,92 +868,91 @@ const GoldenResidenceSingleBlock = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden relative">
-                        <div 
-                          className="w-full h-full overflow-auto cursor-move relative"
+
+                        <div
+                          className="w-full h-full overflow-hidden cursor-move relative flex items-center justify-center"
                           style={{
-                            transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-                            transformOrigin: 'top left'
-                          }}
-                          onMouseDown={(e) => {
-                            setIsDragging(true);
-                            setLastMousePosition({ x: e.clientX, y: e.clientY });
-                          }}
-                          onMouseMove={(e) => {
-                            if (isDragging) {
-                              const deltaX = e.clientX - lastMousePosition.x;
-                              const deltaY = e.clientY - lastMousePosition.y;
-                              setPanPosition({
-                                x: panPosition.x + deltaX / zoomLevel,
-                                y: panPosition.y + deltaY / zoomLevel
-                              });
-                              setLastMousePosition({ x: e.clientX, y: e.clientY });
-                            }
-                          }}
-                          onMouseUp={() => setIsDragging(false)}
-                          onMouseLeave={() => setIsDragging(false)}
-                        >
-                          <div className="relative">
-                            <img
-                              src={
-                                selectedFloor === 'ground'
-                                  ? `/src/assets/продажби/project 2/architectures-b/приземен-b.png`
-                                  : selectedFloor === 'underground'
-                                  ? `/src/assets/продажби/project 2/architectures-b/подземен-b.png`
-                                  : `/src/assets/продажби/project 2/architectures-${isBlockA ? 'a' : 'b'}/architecture-${isBlockA ? 'a' : 'b'}-floor-${selectedFloor}.png`
-                              }
-                              alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
-                              className="w-full h-auto cursor-pointer"
-                              onClick={() => setIsArchitecturePlanFullscreen(true)}
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'block';
-                              }}
-                            />
-                            
-                          </div>
-                          <div className="text-center p-8 hidden">
-                            <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <p className="text-lg font-medium text-gray-600">План на {selectedFloor} етаж</p>
-                            <p className="text-sm text-gray-500 mt-2">{blockTitle}</p>
-                          </div>
-                        </div>
-                        
-                        {/* Zoom Controls */}
-                        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
-                          <button
-                            onClick={() => setZoomLevel(Math.min(zoomLevel + 0.2, 3))}
-                            className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
-                            title="Увеличи"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => setZoomLevel(Math.max(zoomLevel - 0.2, 0.5))}
-                            className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
-                            title="Намали"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setZoomLevel(1);
-                              setPanPosition({ x: 0, y: 0 });
+                              transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
+                              transformOrigin: 'center center',
+                              transition: isDragging ? 'none' : 'transform 0.1s ease-out'
                             }}
-                            className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
-                            title="Нулирай"
+                            onMouseDown={(e) => {
+                              setIsDragging(true);
+                              setLastMousePosition({ x: e.clientX, y: e.clientY });
+                              document.body.style.cursor = 'grabbing';
+                            }}
+                            onMouseMove={(e) => {
+                              if (isDragging) {
+                                const deltaX = e.clientX - lastMousePosition.x;
+                                const deltaY = e.clientY - lastMousePosition.y;
+                                setPanPosition({
+                                  x: panPosition.x + deltaX / zoomLevel,
+                                  y: panPosition.y + deltaY / zoomLevel
+                                });
+                                setLastMousePosition({ x: e.clientX, y: e.clientY });
+                              }
+                            }}
+                            onMouseUp={() => {
+                              setIsDragging(false);
+                              document.body.style.cursor = '';
+                            }}
+                            onMouseLeave={() => {
+                              setIsDragging(false);
+                              document.body.style.cursor = '';
+                            }}
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                          </button>
+                            <div className="relative w-full h-full flex items-center justify-center p-1">
+                              <img
+                                src={
+                                  selectedFloor === 'ground'
+                                    ? `/src/assets/продажби/project 2/architectures-b/приземен-b.png`
+                                    : selectedFloor === 'underground'
+                                    ? `/src/assets/продажби/project 2/architectures-b/подземен-b.png`
+                                    : `/src/assets/продажби/project 2/architectures-${isBlockA ? 'a' : 'b'}/architecture-${isBlockA ? 'a' : 'b'}-floor-${selectedFloor}.png`
+                                }
+                                alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
+                                className="max-w-full max-h-full object-contain cursor-pointer rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300"
+                                onClick={() => setIsArchitecturePlanFullscreen(true)}
+                                draggable={false}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Zoom Controls */}
+                          <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+                            <button
+                              onClick={() => setZoomLevel(Math.min(zoomLevel + 0.2, 3))}
+                              className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
+                              title="Увеличи"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setZoomLevel(Math.max(zoomLevel - 0.2, 0.5))}
+                              className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
+                              title="Намали"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setZoomLevel(1);
+                                setPanPosition({ x: 0, y: 0 });
+                              }}
+                              className="bg-white/90 hover:bg-white p-2 rounded-lg shadow-lg transition-colors"
+                              title="Нулирай"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -960,7 +960,6 @@ const GoldenResidenceSingleBlock = () => {
                 </div>
               </div>
             </div>
-          </div>
         )}
 
         {/* Fullscreen Architecture Plan Modal */}
