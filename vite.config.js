@@ -12,10 +12,27 @@ export default defineConfig({
           animations: ['framer-motion'],
           three: ['three', '@react-three/fiber', '@react-three/drei'],
           ui: ['swiper', 'react-hook-form']
-        }
+        },
+        // Optimize asset file naming
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.')
+          let extType = info[info.length - 1]
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            extType = 'images'
+          } else if (/woff|woff2/.test(extType)) {
+            extType = 'fonts'
+          }
+          return `assets/${extType}/[name]-[hash][extname]`
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js'
       }
     },
-    chunkSizeWarningLimit: 1000
+    // Increase chunk size limit for three.js
+    chunkSizeWarningLimit: 1100,
+    // Enable minification (esbuild is faster than terser)
+    minify: 'esbuild',
+    target: 'es2015'
   },
   server: {
     host: true,

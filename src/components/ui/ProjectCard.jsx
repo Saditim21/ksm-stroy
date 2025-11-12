@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { statusConfig, categoryConfig } from '../../data/projectsData'
 import { hoverLift, fadeInUp, buttonExpand } from '../../utils/animations'
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = memo(({ project }) => {
   const navigate = useNavigate()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -153,6 +153,8 @@ const ProjectCard = ({ project }) => {
       />
     </motion.div>
   )
-}
+})
+
+ProjectCard.displayName = 'ProjectCard'
 
 export default ProjectCard

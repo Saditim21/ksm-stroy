@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import OptimizedImage from './OptimizedImage'
 
-const PropertyCard = ({ property, index, onClick }) => {
+const PropertyCard = memo(({ property, index, onClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
 
@@ -149,6 +149,8 @@ const PropertyCard = ({ property, index, onClick }) => {
       <div className="h-1 bg-gradient-to-r from-gold-500 to-gold-600 origin-left" />
     </article>
   )
-}
+})
+
+PropertyCard.displayName = 'PropertyCard'
 
 export default PropertyCard

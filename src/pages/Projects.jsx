@@ -1185,12 +1185,10 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
   
   // Safety checks
   if (!project?.buildingData) {
-    console.error('MobileProjectView: No project or buildingData');
     return null;
   }
-  
+
   if (!FLOOR_DATA) {
-    console.error('MobileProjectView: FLOOR_DATA not available');
     return null;
   }
   
@@ -1198,14 +1196,6 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
   
   // Get floors for selected block
   const currentFloors = selectedBlock === 'А' ? blockA.floors : blockB.floors
-  
-  // Debug logging for component initialization
-  console.log('MobileProjectView initialized with:', {
-    selectedBlock,
-    projectBlocks: { blockA: blockA?.floors?.length, blockB: blockB?.floors?.length },
-    floorDataKeys: Object.keys(FLOOR_DATA),
-    currentFloorsCount: currentFloors?.length
-  });
   
   // Auto-hide controls after 3 seconds
   useEffect(() => {
@@ -1221,36 +1211,24 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
   
   const handleFloorClick = (floor) => {
     setSelectedFloor(floor)
-    
-    // Debug logging
-    console.log('handleFloorClick called with:', { selectedBlock, floor: floor.floor });
-    console.log('FLOOR_DATA:', FLOOR_DATA);
-    console.log('FLOOR_DATA[selectedBlock]:', FLOOR_DATA?.[selectedBlock]);
-    
+
     // Get the actual floor data from FLOOR_DATA with apartments
     if (!FLOOR_DATA) {
-      console.error('FLOOR_DATA is not available');
       return;
     }
-    
+
     // Convert Cyrillic block names to Latin for FLOOR_DATA lookup
     const blockKey = selectedBlock === 'А' ? 'A' : selectedBlock === 'Б' ? 'B' : selectedBlock;
-    console.log('Converting block name:', selectedBlock, 'to', blockKey);
-    
+
     const blockData = FLOOR_DATA[blockKey];
     if (!blockData) {
-      console.error('No block data found for:', blockKey, 'Available blocks:', Object.keys(FLOOR_DATA));
       return;
     }
-    
+
     const floorData = blockData[floor.floor];
     if (floorData && floorData.apartments) {
-      console.log('Floor data found:', floorData); // Debug log
       // Call the parent's floor select function which will show the apartment details
       onFloorSelect(blockKey, floor.floor, floorData)
-    } else {
-      console.log('No floor data found for block', selectedBlock, 'floor', floor.floor); // Debug log
-      console.log('Available floors in block:', blockData ? Object.keys(blockData) : 'none');
     }
     // Don't change view mode - let the parent component handle the apartment view
   }
@@ -1284,8 +1262,7 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Block A clicked'); // Debug log
-                  setSelectedBlock('А'); 
+                  setSelectedBlock('А');
                   setViewMode('floors');
                 }}
                 className={`w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-2xl flex items-center justify-center text-white font-bold text-lg transform transition-all duration-300 hover:scale-110 z-10 relative ${
@@ -1309,8 +1286,7 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Block B clicked'); // Debug log
-                  setSelectedBlock('Б'); 
+                  setSelectedBlock('Б');
                   setViewMode('floors');
                 }}
                 className={`w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 shadow-2xl flex items-center justify-center text-white font-bold text-lg transform transition-all duration-300 hover:scale-110 z-10 relative ${
@@ -1335,27 +1311,18 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Garage clicked'); // Debug log
-                    console.log('FLOOR_DATA available:', !!FLOOR_DATA);
-                    
+
                     if (!FLOOR_DATA) {
-                      console.error('FLOOR_DATA not available for garage');
                       return;
                     }
-                    
+
                     // Get garage data from FLOOR_DATA (floor 0 from either block A or B should work)
                     const garageDataA = FLOOR_DATA['A']?.[0];
                     const garageDataB = FLOOR_DATA['B']?.[0];
                     const garageData = garageDataA || garageDataB;
-                    
-                    console.log('Garage data A:', garageDataA);
-                    console.log('Garage data B:', garageDataB);
-                    
+
                     if (garageData && garageData.apartments) {
-                      console.log('Using garage data:', garageData);
                       onFloorSelect('A', 0, garageData);
-                    } else {
-                      console.log('No valid garage data found');
                     }
                   }}
                   className={`w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 shadow-2xl flex items-center justify-center text-white transform transition-all duration-300 hover:scale-110 z-10 relative ${
