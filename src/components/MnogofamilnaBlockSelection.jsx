@@ -1,11 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.png';
 import blockBImage from '../assets/продажби/project 1/block-B/blockB.png';
 
+// Gallery Photos
+import photo1 from '../assets/продажби/project 1/photos/photo-1.png';
+import photo2 from '../assets/продажби/project 1/photos/photo-2.png';
+import photo3 from '../assets/продажби/project 1/photos/photo-3.png';
+import photo4 from '../assets/продажби/project 1/photos/photo-4.png';
+
 const MnogofamilnaBlockSelection = () => {
   const navigate = useNavigate();
+  const [showGallery, setShowGallery] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
+
+  // Gallery images array
+  const galleryImages = [
+    { id: 1, src: photo1, size: 'large' },
+    { id: 2, src: photo2, size: 'medium' },
+    { id: 3, src: photo3, size: 'medium' },
+    { id: 4, src: photo4, size: 'large' }
+  ];
 
   const handleBlockSelect = (block) => {
     navigate(`/projects/mnogofamilna-sgrada/${block}`);
@@ -45,8 +61,24 @@ const MnogofamilnaBlockSelection = () => {
                 </motion.h1>
               </div>
 
-              {/* Empty space for balance */}
-              <div></div>
+              {/* Gallery Button - Top Right */}
+              <div className="flex justify-end">
+                <motion.button
+                  onClick={() => setShowGallery(true)}
+                  className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group text-sm sm:text-base"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="font-bold">Снимки</span>
+                  <span className="hidden sm:inline text-xs bg-white/20 px-2 py-0.5 rounded-full">({galleryImages.length})</span>
+                </motion.button>
+              </div>
             </div>
 
             {/* Centered decorative line */}
@@ -190,6 +222,191 @@ const MnogofamilnaBlockSelection = () => {
         </div>
 
       </div>
+
+      {/* Creative Full-Page Gallery */}
+      <AnimatePresence>
+        {showGallery && (
+          <motion.div
+            className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-50 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Close button */}
+            <motion.button
+              onClick={() => setShowGallery(false)}
+              className="fixed top-6 right-6 z-50 text-white hover:text-gold-400 transition-colors p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0, rotate: 180 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
+
+            {/* Gallery Title */}
+            <motion.div
+              className="text-center pt-8 pb-6"
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 bg-clip-text text-transparent mb-2">
+                Многофамилна жилищна сграда
+              </h2>
+              <p className="text-gray-400 text-sm sm:text-base">Галерия със снимки</p>
+            </motion.div>
+
+            {/* Creative Bento Box Grid */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-7xl mx-auto">
+
+                {/* Image 1 - Large */}
+                <motion.div
+                  className="md:col-span-2 lg:col-span-2 lg:row-span-2 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50, rotate: -2 }}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  whileHover={{ scale: 1.03, rotate: 0.5, transition: { duration: 0.2 } }}
+                  onClick={() => setFullscreenImage(photo1)}
+                >
+                  <div className="relative aspect-[16/10] lg:aspect-auto lg:h-full">
+                    <img
+                      src={photo1}
+                      alt="Многофамилна сграда - Снимка 1"
+                      className="w-full h-full object-cover transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                  </div>
+                </motion.div>
+
+                {/* Image 2 - Medium */}
+                <motion.div
+                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50, rotate: 2 }}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                  whileHover={{ scale: 1.03, rotate: -0.5, transition: { duration: 0.2 } }}
+                  onClick={() => setFullscreenImage(photo2)}
+                >
+                  <div className="relative aspect-[4/3]">
+                    <img
+                      src={photo2}
+                      alt="Многофамилна сграда - Снимка 2"
+                      className="w-full h-full object-cover transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                  </div>
+                </motion.div>
+
+                {/* Image 3 - Medium */}
+                <motion.div
+                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50, rotate: -2 }}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                  whileHover={{ scale: 1.03, rotate: 0.5, transition: { duration: 0.2 } }}
+                  onClick={() => setFullscreenImage(photo3)}
+                >
+                  <div className="relative aspect-[4/3]">
+                    <img
+                      src={photo3}
+                      alt="Многофамилна сграда - Снимка 3"
+                      className="w-full h-full object-cover transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                  </div>
+                </motion.div>
+
+                {/* Image 4 - Large */}
+                <motion.div
+                  className="md:col-span-2 lg:col-span-2 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50, rotate: 2 }}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  whileHover={{ scale: 1.03, rotate: -0.5, transition: { duration: 0.2 } }}
+                  onClick={() => setFullscreenImage(photo4)}
+                >
+                  <div className="relative aspect-[16/9]">
+                    <img
+                      src={photo4}
+                      alt="Многофамилна сграда - Снимка 4"
+                      className="w-full h-full object-cover transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                  </div>
+                </motion.div>
+
+              </div>
+
+              {/* Decorative elements */}
+              <motion.div
+                className="text-center mt-12 mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <p className="text-gray-500 text-sm">
+                  Натиснете ESC или X за затваряне
+                </p>
+              </motion.div>
+            </div>
+
+            {/* ESC key handler */}
+            {showGallery && (
+              <div
+                onKeyDown={(e) => e.key === 'Escape' && setShowGallery(false)}
+                tabIndex={0}
+                className="fixed inset-0 -z-10"
+              />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Image Viewer */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setFullscreenImage(null)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-4 right-4 text-white hover:text-gold-400 transition-colors p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm z-10"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Fullscreen Image */}
+            <motion.img
+              src={fullscreenImage}
+              alt="Многофамилна сграда - Fullscreen"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Hint */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/60 text-sm">
+              Кликнете навсякъде за затваряне
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };

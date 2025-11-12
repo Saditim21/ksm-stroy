@@ -32,7 +32,7 @@ const HeroCarousel = () => {
       name: "Многофамилна жилищна сграда",
       location: "УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София",
       apartments: { total: 144, available: 16, reserved: 6, sold: 122 },
-      garages: { total: 7, available: 5, reserved: 0, sold: 2 }
+      garages: { total: 72, available: 0, reserved: 0, sold: 72 }
     },
     {
       name: "Golden Residence",

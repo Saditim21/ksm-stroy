@@ -289,26 +289,102 @@ const About = () => {
               </motion.div>
             </motion.div>
             
-            <motion.div 
+            <motion.div
               variants={staggerItem}
-              className="order-1 lg:order-2"
+              className="order-1 lg:order-2 relative h-[700px]"
             >
-              <motion.div 
-                className="relative group"
+              {/* Large decorative "2008" text background */}
+              <div className="absolute -top-10 -right-10 text-[200px] font-black text-gold-500/5 leading-none select-none pointer-events-none">
+                2008
+              </div>
+
+              <motion.div
+                className="relative h-full group"
                 variants={hoverLift}
                 whileHover="hover"
               >
-                <OptimizedImage
-                  src={traditions}
-                  alt="KSM Stroy - Традиция и иновации"
-                  className="w-full h-[600px] object-cover rounded-luxury-xl shadow-2xl transform group-hover:scale-105 transition-transform duration-700"
-                  loading="lazy"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                {/* Main image - asymmetric clipped */}
+                <motion.div
+                  className="absolute top-0 left-0 w-[85%] h-[75%] overflow-hidden shadow-2xl z-10"
+                  style={{
+                    clipPath: 'polygon(0 0, 100% 5%, 95% 100%, 0 95%)'
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <OptimizedImage
+                    src={traditions}
+                    alt="KSM Stroy - Традиция и иновации"
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    loading="lazy"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary-900/10 to-primary-900/30"></div>
+                </motion.div>
+
+                {/* Secondary accent frame - gold */}
+                <motion.div
+                  className="absolute top-[15%] right-0 w-[60%] h-[50%] bg-gradient-to-br from-gold-500 via-gold-600 to-gold-700 shadow-xl z-0"
+                  style={{
+                    clipPath: 'polygon(10% 0, 100% 0, 100% 100%, 0 90%)'
+                  }}
+                  initial={{ x: 50, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-white/20 text-6xl font-black transform -rotate-6">
+                      КСМ
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Floating project card - creative positioning */}
+                <motion.div
+                  className="absolute bottom-[5%] right-[5%] bg-white p-6 shadow-2xl z-20 w-64"
+                  style={{
+                    clipPath: 'polygon(5% 0, 100% 0, 100% 95%, 0 100%)'
+                  }}
+                  initial={{ y: 30, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
+                  whileHover={{ y: -10, rotate: 2 }}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 bg-gold-500"></div>
+                      <span className="text-xs text-primary-600 font-bold uppercase tracking-widest">Проект</span>
+                    </div>
+                    <h3 className="text-2xl font-black text-primary-900 leading-tight">
+                      Хотел<br/>Парадайс
+                    </h3>
+                    <div className="flex items-center gap-2 pt-2">
+                      <div className="w-3 h-3 bg-gold-500 rotate-45"></div>
+                      <span className="text-xs text-primary-600 font-semibold">Завършен проект</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Decorative circles */}
+                <motion.div
+                  className="absolute top-[60%] left-[70%] w-20 h-20 rounded-full border-4 border-gold-400 opacity-40"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360]
+                  }}
+                  transition={{
+                    duration: 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-900/40 via-transparent to-gold-500/20 rounded-luxury-xl"></div>
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury-xl shadow-xl flex items-center justify-center">
-                  <span className="text-primary-900 font-bold text-lg">2008</span>
-                </div>
+
+                <div className="absolute top-[10%] left-[75%] w-12 h-12 bg-primary-900/20 rounded-full blur-sm"></div>
+                <div className="absolute bottom-[25%] left-[5%] w-16 h-16 bg-gold-400/10 rounded-full blur-md"></div>
+
+                {/* Bold accent lines */}
+                <div className="absolute top-[5%] left-[-2%] w-1 h-32 bg-gradient-to-b from-gold-500 to-transparent"></div>
+                <div className="absolute bottom-[20%] right-[10%] w-24 h-1 bg-gradient-to-r from-transparent to-primary-900"></div>
               </motion.div>
             </motion.div>
           </motion.div>

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// Gallery Images
+import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.png';
+import galleryImage2 from '../assets/продажби/project 2/photos/golden-residence-2.png';
+import galleryImage4 from '../assets/продажби/project 2/photos/golden-residence-4.png';
+import galleryImage6 from '../assets/продажби/project 2/photos/golden-residence-6.png';
+import galleryImage7 from '../assets/продажби/project 2/photos/golden-residence-7.png';
+import galleryImage8 from '../assets/продажби/project 2/photos/golden-residence-8.png';
+
 const GoldenResidenceSingleBlock = () => {
   const { block } = useParams();
   const navigate = useNavigate();
@@ -17,11 +25,23 @@ const GoldenResidenceSingleBlock = () => {
   const [isFullscreenDragging, setIsFullscreenDragging] = useState(false);
   const [lastFullscreenMouse, setLastFullscreenMouse] = useState({ x: 0, y: 0 });
   const [showContactModal, setShowContactModal] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const [currentImage, setCurrentImage] = useState(
-    block === 'block-a' 
+    block === 'block-a'
       ? '/src/assets/продажби/project 2/golden-residence.jpg'
       : '/src/assets/продажби/project 2/golden-residence.jpg'
   );
+
+  // Gallery images array
+  const galleryImages = [
+    galleryImage1,
+    galleryImage2,
+    galleryImage4,
+    galleryImage6,
+    galleryImage7,
+    galleryImage8
+  ];
 
   const isBlockA = block === 'block-a';
   const blockLetter = isBlockA ? 'А' : 'Б';
@@ -558,6 +578,28 @@ const GoldenResidenceSingleBlock = () => {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [isArchitecturePlanFullscreen]);
 
+  // Gallery keyboard navigation
+  useEffect(() => {
+    const handleGalleryKeys = (e) => {
+      if (!showGallery) return;
+
+      if (e.key === 'Escape') {
+        setShowGallery(false);
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentGalleryIndex((prev) =>
+          prev > 0 ? prev - 1 : galleryImages.length - 1
+        );
+      } else if (e.key === 'ArrowRight') {
+        setCurrentGalleryIndex((prev) =>
+          prev < galleryImages.length - 1 ? prev + 1 : 0
+        );
+      }
+    };
+
+    document.addEventListener('keydown', handleGalleryKeys);
+    return () => document.removeEventListener('keydown', handleGalleryKeys);
+  }, [showGallery, galleryImages.length]);
+
   // Global mouse events for smooth dragging
   useEffect(() => {
     const handleGlobalMouseMove = (e) => {
@@ -741,102 +783,105 @@ const GoldenResidenceSingleBlock = () => {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-6">
-                  {/* Left Side - Apartments Table (50%) */}
+                  {/* Left Side - Apartments/Garages List (50%) */}
                   <div className="lg:w-1/2 flex flex-col">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-0">Списък на апартаментите</h3>
-                      <p className="text-xs sm:text-sm text-gray-600">
-                        <span className="hidden sm:inline">Кликнете за детайли</span>
-                        <span className="sm:hidden">Скролирайте и кликнете</span>
-                      </p>
-                    </div>
-                    <div className="bg-white rounded-lg overflow-hidden shadow-lg relative flex-1">
-                      {/* Scroll indicator for mobile */}
-                      <div className="absolute top-2 right-2 z-20 sm:hidden">
-                        <div className="bg-gold-500/80 text-primary-900 text-xs px-2 py-1 rounded-full animate-pulse font-semibold">
-                          ↕ Scroll
-                        </div>
-                      </div>
+                    {(() => {
+                      const floorData = getFloorData(selectedFloor);
+                      const isGarageFloor = selectedFloor === 'ground' || selectedFloor === 'underground';
 
-                      <div className="overflow-x-auto overflow-y-auto h-full relative" style={{
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: '#CBD5E0 #F7FAFC',
-                        WebkitOverflowScrolling: 'touch'
-                      }}>
-                        <table className="w-full text-xs lg:text-sm min-w-full">
-                          <thead className="bg-gray-100 sticky top-0 z-10">
-                            <tr>
-                              <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Имот</th>
-                              <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Застроена площ</th>
-                              <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Идеални части</th>
-                              <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Общо</th>
-                              <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">Статус</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {getFloorData(selectedFloor).map((apt, idx) => (
-                              <tr 
-                                key={idx} 
-                                className={`transition-colors ${
-                                  selectedApartment && selectedApartment.apartment === apt.apartment
-                                    ? 'bg-gold-100 border-l-4 border-gold-500'
-                                    : (apt.status === 'Свободен' || apt.status === 'Скоро')
-                                      ? 'hover:bg-gray-50 cursor-pointer group active:bg-gray-100' 
-                                      : 'cursor-not-allowed opacity-75'
-                                }`}
-                                style={{ minHeight: '48px' }}
-                                onClick={(apt.status === 'Свободен' || apt.status === 'Скоро') ? () => {
-                                  setSelectedApartment(apt);
-                                  setIsArchitecturePlanFullscreen(true);
-                                } : undefined}
+                      if (isGarageFloor) {
+                        // GARAGE GRID LAYOUT - Compact & Creative
+                        const available = floorData.filter(a => a.status === 'Свободен').length;
+                        const sold = floorData.filter(a => a.status === 'Продадени').length;
+                        const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+
+                        return (
+                          <>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                              <div>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">Списък на гаражите</h3>
+                                <p className="text-xs text-gray-600">{floorData.length} места • {sold} продадени</p>
+                              </div>
+                              <div className="flex gap-2 mt-2 sm:mt-0">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">{available}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">{sold}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">{reserved}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Compact Garage Grid with Fixed Height */}
+                            <div className="bg-white rounded-lg shadow-lg relative" style={{ maxHeight: '65vh' }}>
+                              {/* Scroll indicator */}
+                              <div className="absolute top-3 right-3 z-10 bg-gray-900/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                                ↕ {floorData.length} места
+                              </div>
+
+                              <div
+                                className="overflow-y-auto p-3 sm:p-4"
+                                style={{
+                                  maxHeight: '65vh',
+                                  scrollbarWidth: 'thin',
+                                  scrollbarColor: '#D4AF37 #F7FAFC',
+                                  WebkitOverflowScrolling: 'touch'
+                                }}
                               >
-                                <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
-                                  <div className="flex items-center">
-                                    {apt.apartment}
-                                    {(apt.status === 'Свободен' || apt.status === 'Скоро') && (
-                                      <svg className="w-4 h-4 ml-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                      </svg>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                  {apt.built || '57.46'} кв.м
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                  {apt.ideal || '8.22'} кв.м
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
-                                  {apt.total} кв.м
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap">
-                                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
-                                    apt.status === 'Свободен' ? 'bg-green-100 text-green-700' :
-                                    apt.status === 'Продадени' ? 'bg-red-100 text-red-700' :
-                                    apt.status === 'Скоро' ? 'bg-gold-100 text-gold-700' :
-                                    'bg-yellow-100 text-yellow-700'
-                                  }`}>
-                                    {apt.status}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                  {floorData.map((garage, idx) => {
+                                    const garageNumber = garage.apartment;
+                                    const statusColor =
+                                      garage.status === 'Свободен' ? 'bg-green-50 border-green-300 hover:border-green-500' :
+                                      garage.status === 'Продадени' ? 'bg-red-50 border-red-300 opacity-75' :
+                                      'bg-yellow-50 border-yellow-300 hover:border-yellow-500';
+                                    const statusDot =
+                                      garage.status === 'Свободен' ? 'bg-green-500' :
+                                      garage.status === 'Продадени' ? 'bg-red-500' :
+                                      'bg-yellow-500';
 
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className={`relative border-2 rounded-lg p-2.5 transition-all duration-200 ${statusColor} ${
+                                          garage.status === 'Свободен' ? 'cursor-pointer hover:shadow-md' : 'cursor-not-allowed'
+                                        }`}
+                                        onClick={garage.status === 'Свободен' ? () => {
+                                          setSelectedApartment(garage);
+                                          setIsArchitecturePlanFullscreen(true);
+                                        } : undefined}
+                                      >
+                                        {/* Status dot */}
+                                        <div className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${statusDot} ${
+                                          garage.status === 'Свободен' ? 'animate-pulse' : ''
+                                        }`}></div>
 
-                    {/* Summary Stats */}
-                    <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
-                        {(() => {
-                          const floorData = getFloorData(selectedFloor);
-                          const available = floorData.filter(a => a.status === 'Свободен').length;
-                          const sold = floorData.filter(a => a.status === 'Продадени').length;
-                          const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+                                        {/* Garage icon & number */}
+                                        <div className="flex flex-col items-center text-center">
+                                          <svg className="w-6 h-6 mb-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                                          </svg>
+                                          <div className="font-bold text-sm text-gray-900">{garageNumber}</div>
+                                          <div className="text-xs text-gray-600 mt-0.5">{garage.total} м²</div>
+                                          {garage.status === 'Свободен' && (
+                                            <div className="text-xs text-green-600 font-semibold mt-1">Свободен</div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
 
-                          return (
-                            <>
+                            {/* Summary Stats */}
+                            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
                               <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
                                 <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
                                 <div className="text-xs text-green-600">Свободни</div>
@@ -849,10 +894,119 @@ const GoldenResidenceSingleBlock = () => {
                                 <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
                                 <div className="text-xs text-yellow-600">Резервирани</div>
                               </div>
-                            </>
-                          );
-                        })()}
-                    </div>
+                            </div>
+                          </>
+                        );
+                      } else {
+                        // REGULAR APARTMENT TABLE LAYOUT
+                        const available = floorData.filter(a => a.status === 'Свободен').length;
+                        const sold = floorData.filter(a => a.status === 'Продадени').length;
+                        const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+
+                        return (
+                          <>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-0">Списък на апартаментите</h3>
+                              <p className="text-xs sm:text-sm text-gray-600">
+                                <span className="hidden sm:inline">Кликнете за детайли</span>
+                                <span className="sm:hidden">Скролирайте и кликнете</span>
+                              </p>
+                            </div>
+                            <div className="bg-white rounded-lg overflow-hidden shadow-lg relative flex-1">
+                              {/* Scroll indicator for mobile */}
+                              <div className="absolute top-2 right-2 z-20 sm:hidden">
+                                <div className="bg-gold-500/80 text-primary-900 text-xs px-2 py-1 rounded-full animate-pulse font-semibold">
+                                  ↕ Scroll
+                                </div>
+                              </div>
+
+                              <div className="overflow-x-auto overflow-y-auto h-full relative" style={{
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: '#CBD5E0 #F7FAFC',
+                                WebkitOverflowScrolling: 'touch'
+                              }}>
+                                <table className="w-full text-xs lg:text-sm min-w-full">
+                                  <thead className="bg-gray-100 sticky top-0 z-10">
+                                    <tr>
+                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Имот</th>
+                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Застроена площ</th>
+                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Идеални части</th>
+                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 whitespace-nowrap">Общо</th>
+                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">Статус</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {floorData.map((apt, idx) => (
+                                      <tr
+                                        key={idx}
+                                        className={`transition-colors ${
+                                          selectedApartment && selectedApartment.apartment === apt.apartment
+                                            ? 'bg-gold-100 border-l-4 border-gold-500'
+                                            : (apt.status === 'Свободен' || apt.status === 'Скоро')
+                                              ? 'hover:bg-gray-50 cursor-pointer group active:bg-gray-100'
+                                              : 'cursor-not-allowed opacity-75'
+                                        }`}
+                                        style={{ minHeight: '48px' }}
+                                        onClick={(apt.status === 'Свободен' || apt.status === 'Скоро') ? () => {
+                                          setSelectedApartment(apt);
+                                          setIsArchitecturePlanFullscreen(true);
+                                        } : undefined}
+                                      >
+                                        <td className="px-2 py-2 whitespace-nowrap font-medium text-gray-900 border-r border-gray-200 relative">
+                                          <div className="flex items-center">
+                                            {apt.apartment}
+                                            {(apt.status === 'Свободен' || apt.status === 'Скоро') && (
+                                              <svg className="w-4 h-4 ml-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                              </svg>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                          {apt.built || '57.46'} кв.м
+                                        </td>
+                                        <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                          {apt.ideal || '8.22'} кв.м
+                                        </td>
+                                        <td className="px-2 py-2 whitespace-nowrap text-gray-700 border-r border-gray-200">
+                                          {apt.total} кв.м
+                                        </td>
+                                        <td className="px-2 py-2 whitespace-nowrap">
+                                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
+                                            apt.status === 'Свободен' ? 'bg-green-100 text-green-700' :
+                                            apt.status === 'Продадени' ? 'bg-red-100 text-red-700' :
+                                            apt.status === 'Скоро' ? 'bg-gold-100 text-gold-700' :
+                                            'bg-yellow-100 text-yellow-700'
+                                          }`}>
+                                            {apt.status}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Summary Stats */}
+                            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                              <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
+                                <div className="text-xs text-green-600">Свободни</div>
+                              </div>
+                              <div className="bg-red-100 border border-red-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-red-800">{sold}</div>
+                                <div className="text-xs text-red-600">Продадени</div>
+                              </div>
+                              <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
+                                <div className="text-xs text-yellow-600">Резервирани</div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      }
+                    })()}
                   </div>
 
                   {/* Right Side - Architecture Plan (50%) */}
@@ -1184,6 +1338,83 @@ const GoldenResidenceSingleBlock = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Gallery Modal */}
+        {showGallery && (
+          <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+            {/* Close button */}
+            <button
+              onClick={() => setShowGallery(false)}
+              className="absolute top-4 right-4 z-50 text-white hover:text-gold-400 transition-colors p-2 rounded-full hover:bg-white/10"
+              aria-label="Close gallery"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full backdrop-blur-sm">
+              <span className="font-semibold">{currentGalleryIndex + 1} / {galleryImages.length}</span>
+            </div>
+
+            {/* Previous button */}
+            <button
+              onClick={() => setCurrentGalleryIndex((prev) =>
+                prev > 0 ? prev - 1 : galleryImages.length - 1
+              )}
+              className="absolute left-4 text-white hover:text-gold-400 transition-all p-3 rounded-full hover:bg-white/10 hover:scale-110"
+              aria-label="Previous image"
+            >
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Main image */}
+            <div className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4">
+              <img
+                src={galleryImages[currentGalleryIndex]}
+                alt={`Golden Residence - Снимка ${currentGalleryIndex + 1}`}
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              />
+            </div>
+
+            {/* Next button */}
+            <button
+              onClick={() => setCurrentGalleryIndex((prev) =>
+                prev < galleryImages.length - 1 ? prev + 1 : 0
+              )}
+              className="absolute right-4 text-white hover:text-gold-400 transition-all p-3 rounded-full hover:bg-white/10 hover:scale-110"
+              aria-label="Next image"
+            >
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Thumbnails */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 p-3 rounded-full backdrop-blur-sm">
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentGalleryIndex(idx)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    idx === currentGalleryIndex
+                      ? 'bg-gold-500 w-8'
+                      : 'bg-white/50 hover:bg-white/70'
+                  }`}
+                  aria-label={`Go to image ${idx + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Keyboard hints */}
+            <div className="absolute bottom-20 left-4 text-white/60 text-sm">
+              <p>← → Навигация • ESC Затвори</p>
             </div>
           </div>
         )}
