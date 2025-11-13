@@ -108,7 +108,7 @@ const GoldenResidenceBlockSelection = () => {
 
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-2 min-h-[75vh] sm:min-h-[80vh] lg:h-[75vh]">
           {/* Block A - Enhanced Mobile Experience */}
-          <motion.div 
+          <motion.div
             className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-l-2xl lg:rounded-r-none touch-manipulation active:shadow-3xl"
             onClick={() => handleBlockSelect('block-a')}
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -117,10 +117,10 @@ const GoldenResidenceBlockSelection = () => {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98, y: 0 }}
           >
-            <div 
+            <div
               className="w-full h-full bg-cover bg-center relative min-h-[45vh] sm:min-h-[50vh] lg:min-h-full"
-              style={{ 
-                backgroundImage: `url('/src/assets/продажби/project 2/photos/golden-residence-6.png')`,
+              style={{
+                backgroundImage: `url(${galleryImage6})`,
                 backgroundPosition: 'center 20%'
               }}
             >
@@ -166,7 +166,7 @@ const GoldenResidenceBlockSelection = () => {
           </motion.div>
 
           {/* Block B - Enhanced Mobile Experience */}
-          <motion.div 
+          <motion.div
             className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-r-2xl lg:rounded-l-none touch-manipulation active:shadow-3xl"
             onClick={() => handleBlockSelect('block-b')}
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -175,10 +175,10 @@ const GoldenResidenceBlockSelection = () => {
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98, y: 0 }}
           >
-            <div 
+            <div
               className="w-full h-full bg-cover bg-center relative min-h-[45vh] sm:min-h-[50vh] lg:min-h-full"
-              style={{ 
-                backgroundImage: `url('/src/assets/продажби/project 2/photos/golden-residence-6.png')`,
+              style={{
+                backgroundImage: `url(${galleryImage6})`,
                 backgroundPosition: 'center 20%'
               }}
             >
