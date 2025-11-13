@@ -22,29 +22,29 @@ import buildingAFloor0Image from '../assets/продажби/project 1/building-
 import buildingBFloor0Image from '../assets/продажби/project 1/building-garages.png'
 import garageFloorImage from '../assets/продажби/project 1/garage-floor.jpg'
 
-// Golden Residence floor images
-import goldenResidenceMainImage from '../assets/продажби/project 2/golden-residence.jpg'
-import goldenResidenceBuildingImage from '../assets/продажби/project 2/building-2.png'
+// Golden Residence floor images (served from /public/images/golden-residence)
+const publicBase = import.meta.env.BASE_URL || '/';
+const goldenResidenceMainImage = `${publicBase}images/golden-residence/building-2.png`;
 
-// Golden Residence Block A floor images
-import goldenResidenceAFloor1Image from '../assets/продажби/project 2/building-2-blog-a-floor1.png'
-import goldenResidenceAFloor2Image from '../assets/продажби/project 2/building-2-blog-a-floor2.png'
-import goldenResidenceAFloor3Image from '../assets/продажби/project 2/building-2-blog-a-floor3.png'
-import goldenResidenceAFloor4Image from '../assets/продажби/project 2/building-2-blog-a-floor4.png'
-import goldenResidenceAFloor5Image from '../assets/продажби/project 2/building-2-blog-a-floor5.png'
-import goldenResidenceAFloor6Image from '../assets/продажби/project 2/building-2-blog-a-floor6.png'
-import goldenResidenceAFloor7Image from '../assets/продажби/project 2/building-2-blog-a-floor7.png'
-import goldenResidenceAFloor8Image from '../assets/продажби/project 2/building-2-blog-a-floor8.png'
+// Golden Residence Block A floor images (public)
+const goldenResidenceAFloor1Image = `${publicBase}images/golden-residence/building-2-blog-a-floor1.png`;
+const goldenResidenceAFloor2Image = `${publicBase}images/golden-residence/building-2-blog-a-floor2.png`;
+const goldenResidenceAFloor3Image = `${publicBase}images/golden-residence/building-2-blog-a-floor3.png`;
+const goldenResidenceAFloor4Image = `${publicBase}images/golden-residence/building-2-blog-a-floor4.png`;
+const goldenResidenceAFloor5Image = `${publicBase}images/golden-residence/building-2-blog-a-floor5.png`;
+const goldenResidenceAFloor6Image = `${publicBase}images/golden-residence/building-2-blog-a-floor6.png`;
+const goldenResidenceAFloor7Image = `${publicBase}images/golden-residence/building-2-blog-a-floor7.png`;
+const goldenResidenceAFloor8Image = `${publicBase}images/golden-residence/building-2-blog-a-floor8.png`;
 
-// Golden Residence Block B floor images
-import goldenResidenceBFloor1Image from '../assets/продажби/project 2/building-2-blog-b-floor1.png'
-import goldenResidenceBFloor2Image from '../assets/продажби/project 2/building-2-blog-b-floor2.png'
-import goldenResidenceBFloor3Image from '../assets/продажби/project 2/building-2-blog-b-floor3.png'
-import goldenResidenceBFloor4Image from '../assets/продажби/project 2/building-2-blog-b-floor4.png'
-import goldenResidenceBFloor5Image from '../assets/продажби/project 2/building-2-blog-b-floor5.png'
-import goldenResidenceBFloor6Image from '../assets/продажби/project 2/building-2-blog-b-floor6.png'
-import goldenResidenceBFloor7Image from '../assets/продажби/project 2/building-2-blog-b-floor7.png'
-import goldenResidenceBFloor8Image from '../assets/продажби/project 2/building-2-blog-b-floor8.png'
+// Golden Residence Block B floor images (public)
+const goldenResidenceBFloor1Image = `${publicBase}images/golden-residence/building-2-blog-b-floor1.png`;
+const goldenResidenceBFloor2Image = `${publicBase}images/golden-residence/building-2-blog-b-floor2.png`;
+const goldenResidenceBFloor3Image = `${publicBase}images/golden-residence/building-2-blog-b-floor3.png`;
+const goldenResidenceBFloor4Image = `${publicBase}images/golden-residence/building-2-blog-b-floor4.png`;
+const goldenResidenceBFloor5Image = `${publicBase}images/golden-residence/building-2-blog-b-floor5.png`;
+const goldenResidenceBFloor6Image = `${publicBase}images/golden-residence/building-2-blog-b-floor6.png`;
+const goldenResidenceBFloor7Image = `${publicBase}images/golden-residence/building-2-blog-b-floor7.png`;
+const goldenResidenceBFloor8Image = `${publicBase}images/golden-residence/building-2-blog-b-floor8.png`;
 
 // Export all building images as a single object for easy access
 export const buildingImages = {
@@ -75,7 +75,7 @@ export const buildingImages = {
   },
   garage: garageFloorImage,
   goldenResidence: {
-    main: goldenResidenceBuildingImage,
+    main: goldenResidenceMainImage,
     blockA: {
       floor1: goldenResidenceAFloor1Image,
       floor2: goldenResidenceAFloor2Image,

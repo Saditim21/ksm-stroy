@@ -197,40 +197,12 @@ const MnogofamilnaSingleBlock = () => {
   };
 
   // Get floor architecture plan image based on floor number
-  // Note: FLOOR_DATA keys are offset by 1 (key 2 = floor 1, key 3 = floor 2, etc.)
+  // Map UI floor numbers (2-10) directly to the corresponding floor images.
   const getFloorArchitectureImage = (floor) => {
+    // Always show the consolidated architecture plan image for Mnogofamilna floors
+    // (the attached 'building-all-floors-architecture.png').
     if (!floor) return buildingAllFloorsArchitectureImage;
-
-    // Convert FLOOR_DATA key to actual floor number
-    const actualFloor = floor - 1;
-
-    if (isBlockA) {
-      const floorArchitectureMap = {
-        1: buildingAFloor1Architecture,
-        2: buildingAFloor2Architecture,
-        3: buildingAFloor3Architecture,
-        4: buildingAFloor4Architecture,
-        5: buildingAFloor5Architecture,
-        6: buildingAFloor6Architecture,
-        7: buildingAFloor7Architecture,
-        8: buildingAFloor8Architecture,
-        9: buildingAFloor9Architecture
-      };
-      return floorArchitectureMap[actualFloor] || buildingAllFloorsArchitectureImage;
-    } else {
-      const floorArchitectureMap = {
-        1: buildingBFloor1Architecture,
-        2: buildingBFloor2Architecture,
-        3: buildingBFloor3Architecture,
-        4: buildingBFloor4Architecture,
-        5: buildingBFloor5Architecture,
-        6: buildingBFloor6Architecture,
-        7: buildingBFloor7Architecture,
-        8: buildingBFloor8Architecture,
-        9: buildingBFloor9Architecture
-      };
-      return floorArchitectureMap[actualFloor] || buildingAllFloorsArchitectureImage;
-    }
+    return buildingAllFloorsArchitectureImage;
   };
 
   // Get floor data for the selected block (floors 2-10)
