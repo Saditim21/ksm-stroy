@@ -1,4 +1,26 @@
 import React, { useState } from 'react';
+// Import architecture images so Vite bundles them
+import archA2 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-2.png';
+import archA3 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-3.png';
+import archA4 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-4.png';
+import archA5 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-5.png';
+import archA6 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-6.png';
+import archA7 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-7.png';
+import archA8 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-8.png';
+
+import archB1 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-1.png';
+import archB2 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-2.png';
+import archB3 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-3.png';
+import archB4 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-4.png';
+import archB5 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-5.png';
+import archB6 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-6.png';
+import archB7 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-7.png';
+import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.png';
+import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.png';
+import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.png';
+
+const architectureA = {2: archA2,3: archA3,4: archA4,5: archA5,6: archA6,7: archA7,8: archA8};
+const architectureB = {1: archB1,2: archB2,3: archB3,4: archB4,5: archB5,6: archB6,7: archB7,8: archB8};
 
 const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect }) => {
   const [currentBlockAImage, setCurrentBlockAImage] = useState('/src/assets/продажби/project 2/golden-residence.jpg');
@@ -685,23 +707,29 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
               className="relative w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
               onClick={openArchitecturePlanFullscreen}
             >
-              <img
-                src={
-                  selectedFloor.block === 'GROUND' ?
-                    '/src/assets/продажби/project 2/architectures-b/приземен-b.png' :
-                  selectedFloor.block === 'UNDERGROUND' ?
-                    '/src/assets/продажби/project 2/architectures-b/подземен-b.png' :
-                  selectedFloor.block === 'B' ? 
-                    `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
-                  selectedFloor.floor === 1 ? 
-                    '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
-                    `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
+              {(() => {
+                let architectureSrc = archBGround;
+                if (selectedFloor.block === 'GROUND') {
+                  architectureSrc = archBGround;
+                } else if (selectedFloor.block === 'UNDERGROUND') {
+                  architectureSrc = archBUnderground;
+                } else if (selectedFloor.block === 'B') {
+                  architectureSrc = architectureB[selectedFloor.floor] || archBGround;
+                } else {
+                  const floorNum = selectedFloor.floor;
+                  architectureSrc = architectureA[floorNum] || archBGround;
                 }
-                alt={selectedFloor.block === 'GROUND' ? 'Ground Floor Architecture Plan' : 
-                     selectedFloor.block === 'UNDERGROUND' ? 'Underground Floor Architecture Plan' :
-                     `Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan`}
-                className="w-full h-full object-contain"
-              />
+
+                return (
+                  <img
+                    src={architectureSrc}
+                    alt={selectedFloor.block === 'GROUND' ? 'Ground Floor Architecture Plan' : 
+                         selectedFloor.block === 'UNDERGROUND' ? 'Underground Floor Architecture Plan' :
+                         `Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan`}
+                    className="w-full h-full object-contain"
+                  />
+                );
+              })()}
               
               {/* Selected Apartment Info - Regular View */}
               {selectedApartment && (
@@ -794,17 +822,12 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   }}
                 >
                   <img
-                    src={
-                      selectedFloor.block === 'GROUND' ?
-                        '/src/assets/продажби/project 2/architectures-b/приземен-b.png' :
-                      selectedFloor.block === 'UNDERGROUND' ?
-                        '/src/assets/продажби/project 2/architectures-b/подземен-b.png' :
-                      selectedFloor.block === 'B' ? 
-                        `/src/assets/продажби/project 2/architectures-b/architecture-b-floor-${selectedFloor.floor}.png` :
-                      selectedFloor.floor === 1 ? 
-                        '/src/assets/продажби/project 2/architecture-a-floor-1.png' : 
-                        `/src/assets/продажби/project 2/architectures-a/architecture-a-floor-${selectedFloor.floor}.png`
-                    }
+                    src={(() => {
+                      if (selectedFloor.block === 'GROUND') return archBGround;
+                      if (selectedFloor.block === 'UNDERGROUND') return archBUnderground;
+                      if (selectedFloor.block === 'B') return architectureB[selectedFloor.floor] || archBGround;
+                      return architectureA[selectedFloor.floor] || archBGround;
+                    })()}
                     alt={selectedFloor.block === 'GROUND' ? 'Ground Floor Architecture Plan - Fullscreen' : 
                          selectedFloor.block === 'UNDERGROUND' ? 'Underground Floor Architecture Plan - Fullscreen' :
                          `Block ${selectedFloor.block} Floor ${selectedFloor.floor} Architecture Plan - Fullscreen`}

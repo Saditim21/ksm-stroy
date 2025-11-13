@@ -10,6 +10,26 @@ import galleryImage6 from '../assets/продажби/project 2/photos/golden-re
 import galleryImage7 from '../assets/продажби/project 2/photos/golden-residence-7.png';
 import galleryImage8 from '../assets/продажби/project 2/photos/golden-residence-8.png';
 
+// Architecture plans (imported so Vite bundles them correctly for production)
+import archA2 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-2.png';
+import archA3 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-3.png';
+import archA4 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-4.png';
+import archA5 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-5.png';
+import archA6 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-6.png';
+import archA7 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-7.png';
+import archA8 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-8.png';
+
+import archB1 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-1.png';
+import archB2 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-2.png';
+import archB3 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-3.png';
+import archB4 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-4.png';
+import archB5 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-5.png';
+import archB6 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-6.png';
+import archB7 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-7.png';
+import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.png';
+import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.png';
+import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.png';
+
 const GoldenResidenceSingleBlock = () => {
   const { block } = useParams();
   const navigate = useNavigate();
@@ -556,6 +576,28 @@ const GoldenResidenceSingleBlock = () => {
     return positions[lastDigit] || { top: '50%', left: '50%' };
   };
 
+  // Architecture mappings for production-safe imports
+  const architectureA = {
+    2: archA2,
+    3: archA3,
+    4: archA4,
+    5: archA5,
+    6: archA6,
+    7: archA7,
+    8: archA8,
+  };
+
+  const architectureB = {
+    1: archB1,
+    2: archB2,
+    3: archB3,
+    4: archB4,
+    5: archB5,
+    6: archB6,
+    7: archB7,
+    8: archB8,
+  };
+
   // Handle ESC key for fullscreen modal
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -1016,55 +1058,70 @@ const GoldenResidenceSingleBlock = () => {
                       </div>
 
                       <div className="flex-1 bg-gray-100 rounded-lg overflow-hidden relative">
+                        {
+                          // Determine architecture image source in a production-safe way
+                        }
+                        {(() => {
+                          let architectureSrc = buildingImages.goldenResidence.main;
 
-                        <div
-                          className="w-full h-full overflow-hidden cursor-move relative flex items-center justify-center"
-                          style={{
-                              transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
-                              transformOrigin: 'center center',
-                              transition: isDragging ? 'none' : 'transform 0.1s ease-out'
-                            }}
-                            onMouseDown={(e) => {
-                              setIsDragging(true);
-                              setLastMousePosition({ x: e.clientX, y: e.clientY });
-                              document.body.style.cursor = 'grabbing';
-                            }}
-                            onMouseMove={(e) => {
-                              if (isDragging) {
-                                const deltaX = e.clientX - lastMousePosition.x;
-                                const deltaY = e.clientY - lastMousePosition.y;
-                                setPanPosition({
-                                  x: panPosition.x + deltaX / zoomLevel,
-                                  y: panPosition.y + deltaY / zoomLevel
-                                });
-                                setLastMousePosition({ x: e.clientX, y: e.clientY });
-                              }
-                            }}
-                            onMouseUp={() => {
-                              setIsDragging(false);
-                              document.body.style.cursor = '';
-                            }}
-                            onMouseLeave={() => {
-                              setIsDragging(false);
-                              document.body.style.cursor = '';
-                            }}
-                          >
-                            <div className="relative w-full h-full flex items-center justify-center p-1">
-                              <img
-                                src={
-                                  selectedFloor === 'ground'
-                                    ? `/src/assets/продажби/project 2/architectures-b/приземен-b.png`
-                                    : selectedFloor === 'underground'
-                                    ? `/src/assets/продажби/project 2/architectures-b/подземен-b.png`
-                                    : `/src/assets/продажби/project 2/architectures-${isBlockA ? 'a' : 'b'}/architecture-${isBlockA ? 'a' : 'b'}-floor-${selectedFloor}.png`
-                                }
-                                alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
-                                className="max-w-full max-h-full object-contain cursor-pointer rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300"
-                                onClick={() => setIsArchitecturePlanFullscreen(true)}
-                                draggable={false}
-                              />
-                            </div>
-                          </div>
+                          if (selectedFloor === 'ground') {
+                            architectureSrc = archBGround;
+                          } else if (selectedFloor === 'underground') {
+                            architectureSrc = archBUnderground;
+                          } else {
+                            const numericFloor = typeof selectedFloor === 'string' ? parseInt(selectedFloor, 10) : selectedFloor;
+                            if (isBlockA) {
+                              architectureSrc = architectureA[numericFloor] || (buildingImages.goldenResidence.blockA && buildingImages.goldenResidence.blockA[`floor${numericFloor}`]) || buildingImages.goldenResidence.main;
+                            } else {
+                              architectureSrc = architectureB[numericFloor] || (buildingImages.goldenResidence.blockB && buildingImages.goldenResidence.blockB[`floor${numericFloor}`]) || buildingImages.goldenResidence.main;
+                            }
+                          }
+
+                          return (
+                            <div
+                              className="w-full h-full overflow-hidden cursor-move relative flex items-center justify-center"
+                              style={{
+                                  transform: `scale(${zoomLevel}) translate(${panPosition.x}px, ${panPosition.y}px)`,
+                                  transformOrigin: 'center center',
+                                  transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                                }}
+                                onMouseDown={(e) => {
+                                  setIsDragging(true);
+                                  setLastMousePosition({ x: e.clientX, y: e.clientY });
+                                  document.body.style.cursor = 'grabbing';
+                                }}
+                                onMouseMove={(e) => {
+                                  if (isDragging) {
+                                    const deltaX = e.clientX - lastMousePosition.x;
+                                    const deltaY = e.clientY - lastMousePosition.y;
+                                    setPanPosition({
+                                      x: panPosition.x + deltaX / zoomLevel,
+                                      y: panPosition.y + deltaY / zoomLevel
+                                    });
+                                    setLastMousePosition({ x: e.clientX, y: e.clientY });
+                                  }
+                                }}
+                                onMouseUp={() => {
+                                  setIsDragging(false);
+                                  document.body.style.cursor = '';
+                                }}
+                                onMouseLeave={() => {
+                                  setIsDragging(false);
+                                  document.body.style.cursor = '';
+                                }}
+                              >
+                                <div className="relative w-full h-full flex items-center justify-center p-1">
+                                  <img
+                                    src={architectureSrc}
+                                    alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
+                                    className="max-w-full max-h-full object-contain cursor-pointer rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300"
+                                    onClick={() => setIsArchitecturePlanFullscreen(true)}
+                                    draggable={false}
+                                  />
+                                </div>
+                              </div>
+                          );
+                        })()}
 
                           {/* Zoom Controls */}
                           <div className="absolute bottom-4 right-4 flex flex-col gap-2">
@@ -1160,19 +1217,30 @@ const GoldenResidenceSingleBlock = () => {
                   setFullscreenZoom(Math.min(Math.max(fullscreenZoom + delta, 0.5), 5));
                 }}
               >
-                <div className="w-full h-full flex items-center justify-center">
-                  <img
-                    src={
-                      selectedFloor === 'ground'
-                        ? `/src/assets/продажби/project 2/architectures-b/приземен-b.png`
-                        : selectedFloor === 'underground'
-                        ? `/src/assets/продажби/project 2/architectures-b/подземен-b.png`
-                        : `/src/assets/продажби/project 2/architectures-${isBlockA ? 'a' : 'b'}/architecture-${isBlockA ? 'a' : 'b'}-floor-${selectedFloor}.png`
+                {
+                  (() => {
+                    let architectureSrc = buildingImages.goldenResidence.main;
+                    if (selectedFloor === 'ground') {
+                      architectureSrc = archBGround;
+                    } else if (selectedFloor === 'underground') {
+                      architectureSrc = archBUnderground;
+                    } else {
+                      const numericFloor = typeof selectedFloor === 'string' ? parseInt(selectedFloor, 10) : selectedFloor;
+                      architectureSrc = isBlockA ? (architectureA[numericFloor] || (buildingImages.goldenResidence.blockA && buildingImages.goldenResidence.blockA[`floor${numericFloor}`])) : (architectureB[numericFloor] || (buildingImages.goldenResidence.blockB && buildingImages.goldenResidence.blockB[`floor${numericFloor}`]));
+                      architectureSrc = architectureSrc || buildingImages.goldenResidence.main;
                     }
-                    alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
+
+                    return (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img
+                          src={architectureSrc}
+                          alt={selectedFloor === 'ground' ? 'Приземен етаж план' : selectedFloor === 'underground' ? 'Подземен етаж план' : `${blockTitle} - ${selectedFloor} етаж план`}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    );
+                  })()
+                }
               </div>
 
               {/* Fullscreen Zoom Controls */}
