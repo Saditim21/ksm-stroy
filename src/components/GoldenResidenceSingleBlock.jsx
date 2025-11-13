@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
 
 // Gallery Images
 import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.png';
@@ -27,11 +28,7 @@ const GoldenResidenceSingleBlock = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
-  const [currentImage, setCurrentImage] = useState(
-    block === 'block-a'
-      ? '/src/assets/продажби/project 2/golden-residence.jpg'
-      : '/src/assets/продажби/project 2/golden-residence.jpg'
-  );
+  const [currentImage, setCurrentImage] = useState(buildingImages.goldenResidence.main);
 
   // Gallery images array
   const galleryImages = [
@@ -497,16 +494,11 @@ const GoldenResidenceSingleBlock = () => {
 
   const handleFloorHover = (floor) => {
     if (floor && floor !== 'ground' && floor !== 'underground') {
-      const floorImagePath = isBlockA
-        ? `/src/assets/продажби/project 2/building-2-blog-a-floor${floor}.png`
-        : `/src/assets/продажби/project 2/building-2-blog-b-floor${floor}.png`;
-      setCurrentImage(floorImagePath);
+      const blockLetter = isBlockA ? 'А' : 'Б';
+      const floorImage = getGoldenResidenceImage(blockLetter, floor);
+      setCurrentImage(floorImage);
     } else if (!floor) {
-      setCurrentImage(
-        isBlockA
-          ? '/src/assets/продажби/project 2/golden-residence.jpg'
-          : '/src/assets/продажби/project 2/golden-residence.jpg'
-      );
+      setCurrentImage(buildingImages.goldenResidence.main);
     }
     // For garage floors (ground/underground), keep current image (don't change it)
   };
