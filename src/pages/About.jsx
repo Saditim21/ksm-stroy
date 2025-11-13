@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, EffectFade } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/effect-fade'
 import { seoData } from '../utils/seo'
 import slider01 from '../assets/images/slider01.jpg'
 import slider02 from '../assets/images/slider02.jpg'
@@ -52,16 +56,8 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
 })
 
 const About = () => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  
+  const [activeSlide, setActiveSlide] = useState(0)
   const heroImages = [slider01, slider02, slider03]
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [heroImages.length])
 
   const stats = [
     { number: 15, suffix: "+", label: "Години опит" },
@@ -132,94 +128,252 @@ const About = () => {
       
       <main className="min-h-screen">
 
-      {/* Hero Section with Dynamic Background */}
-      <motion.section 
-        className="relative h-screen flex items-center justify-center overflow-hidden"
+      {/* Hero Section - Eye-catching & Smooth */}
+      <motion.section
+        className="relative min-h-[calc(100svh-var(--header-h))] md:h-screen flex items-center justify-center overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
       >
-        {/* Dynamic Background Images */}
+        {/* Enhanced Swiper with Zoom Effect */}
         <div className="absolute inset-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentImageIndex}
-              initial={{ scale: 1.1, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0"
-            >
-              <OptimizedImage
-                src={heroImages[currentImageIndex]}
-                alt="KSM Stroy строителни проекти"
-                className="w-full h-full object-contain"
-                loading="eager"
-              />
-            </motion.div>
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-900/80 via-primary-900/60 to-primary-900/80"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20"></div>
+          <Swiper
+            modules={[Autoplay, EffectFade]}
+            effect="fade"
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            loop={true}
+            speed={1800}
+            slidesPerView={1}
+            onSlideChange={(swiper) => setActiveSlide(swiper.realIndex)}
+            className="w-full h-full"
+          >
+            {heroImages.map((image, index) => (
+              <SwiperSlide key={index}>
+                <div className="relative w-full h-full">
+                  {/* Image with enhanced zoom effect */}
+                  <div className="w-full h-full overflow-hidden">
+                    <img
+                      src={image}
+                      alt={`KSM Stroy строителни проекти ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      style={{
+                        animation: 'smoothZoom 12s ease-in-out infinite alternate',
+                        transformOrigin: 'center center'
+                      }}
+                    />
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+
+          {/* Enhanced overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60 z-10" />
+
+          {/* Vignette effect for focus */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{
+              background: 'radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.4) 100%)'
+            }}
+          />
+
+          {/* Subtle animated accent */}
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent z-10"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scaleX: [0.8, 1, 0.8]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        {/* Eye-catching Hero Content with Better Readability */}
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white safe-x safe-b">
           <motion.div
             variants={staggerContainer}
             initial="initial"
             animate="animate"
           >
+            {/* Enhanced Title with Text Shadow */}
             <motion.h1
               variants={staggerItem}
-              className="text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-6 sm:mb-8 leading-tight"
+              style={{
+                textShadow: '0 4px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.5)'
+              }}
             >
-              Добре дошли в
-              <br />
-              <span className="bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
-                КСМ Строй ООД
-              </span>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="block"
+              >
+                Добре дошли в
+              </motion.span>
+              <motion.span
+                className="block mt-2 relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <span className="bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 bg-clip-text text-transparent">
+                  КСМ Строй ООД
+                </span>
+                {/* Animated underline */}
+                <motion.div
+                  className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent rounded-full"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: '80%', opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                />
+              </motion.span>
             </motion.h1>
-            <motion.p
-              variants={staggerItem}
-              className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed"
+
+            {/* Enhanced Description with Better Contrast */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="relative"
             >
-              Вашият доверен партньор в строителството! С дългогодишен опит и професионален екип,
-              ние изграждаме жилищни, обществени и индустриални обекти с високо качество и прецизност.
-              От идеята до завършената сграда – ние сме до вас във всяка стъпка.
-            </motion.p>
-            
-            <motion.div 
+              {/* Subtle background for better readability - less blur */}
+              <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px] rounded-2xl" />
+
+              <motion.p
+                variants={staggerItem}
+                className="relative text-base sm:text-lg md:text-xl lg:text-2xl text-white mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed px-4 sm:px-6 py-4"
+                style={{
+                  textShadow: '0 2px 10px rgba(0,0,0,0.8)'
+                }}
+              >
+                Вашият доверен партньор в строителството! С дългогодишен опит и професионален екип,
+                ние изграждаме жилищни, обществени и индустриални обекти с високо качество и прецизност.
+                От идеята до завършената сграда – ние сме до вас във всяка стъпка.
+              </motion.p>
+            </motion.div>
+
+            {/* Enhanced Stats with Cards */}
+            <motion.div
               variants={staggerItem}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 md:mt-16"
             >
               {stats.map((stat, index) => (
                 <motion.div
                   key={`stat-${stat.label}-${stat.number}`}
-                  variants={hoverLift}
-                  whileHover="hover"
-                  className="text-center"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
+                  whileHover={{
+                    y: -8,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="relative group"
                 >
-                  <AnimatedCounter 
-                    end={stat.number} 
-                    suffix={stat.suffix}
-                    label={stat.label}
-                    duration={2000 + index * 500}
+                  {/* Card background */}
+                  <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 group-hover:bg-white/15 group-hover:border-gold-400/50 transition-all duration-300" />
+
+                  {/* Hover glow effect */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{
+                      background: 'radial-gradient(circle at center, rgba(217,165,64,0.2), transparent 70%)',
+                      filter: 'blur(15px)'
+                    }}
                   />
+
+                  <div className="relative p-4">
+                    <AnimatedCounter
+                      end={stat.number}
+                      suffix={stat.suffix}
+                      label={stat.label}
+                      duration={2000 + index * 300}
+                    />
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
+        {/* Enhanced Scroll Indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
         >
-          <svg className="w-6 h-6 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
+          <motion.div
+            animate={{ y: [0, 12, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="relative"
+          >
+            {/* Animated ring */}
+            <motion.div
+              className="absolute -inset-2 border-2 border-gold-400/30 rounded-full"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.5, 0, 0.5]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut"
+              }}
+            />
+            <svg className="w-6 h-6 text-gold-400 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </motion.div>
+        </motion.div>
+
+        {/* Enhanced Progress Indicators */}
+        <motion.div
+          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 flex gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          {heroImages.map((_, index) => (
+            <motion.div
+              key={index}
+              className="relative"
+              whileHover={{ scale: 1.2 }}
+            >
+              {/* Background circle */}
+              <div className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                activeSlide === index
+                  ? 'bg-gold-500 shadow-lg shadow-gold-500/50'
+                  : 'bg-white/40 backdrop-blur-sm'
+              }`} />
+
+              {/* Progress ring for active slide */}
+              {activeSlide === index && (
+                <svg className="absolute -inset-1 w-5 h-5 -rotate-90">
+                  <motion.circle
+                    cx="10"
+                    cy="10"
+                    r="9"
+                    fill="none"
+                    stroke="#d9a540"
+                    strokeWidth="2"
+                    strokeDasharray="56.5"
+                    initial={{ strokeDashoffset: 56.5 }}
+                    animate={{ strokeDashoffset: 0 }}
+                    transition={{ duration: 5, ease: "linear" }}
+                  />
+                </svg>
+              )}
+            </motion.div>
+          ))}
         </motion.div>
       </motion.section>
 

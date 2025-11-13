@@ -11,10 +11,39 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Safari and Chrome */
   }
-  
+
   /* Smooth scrolling for touch devices */
   .scroll-smooth-touch {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+  }
+}
+
+:root {
+  /* Adjusted by JS to match sticky header height */
+  --header-h: 56px;
+}
+
+/* Safe-area aware horizontal + bottom padding helpers */
+.safe-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+.safe-b {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Utility to prevent iOS overscroll whitespace flashes under fixed elements */
+html, body, #root {
+  height: 100%;
+}
+
+/* Enhanced smooth zoom animation - more noticeable */
+@keyframes smoothZoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
   }
 }

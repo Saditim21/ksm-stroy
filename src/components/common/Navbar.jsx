@@ -112,37 +112,42 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu - Simple dropdown */}
-        {isOpen && (
-          <div className="lg:hidden absolute left-0 right-0 top-full bg-white shadow-lg border-t border-gray-200 z-50">
-            <div className="py-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`block px-4 py-3 text-base font-medium border-l-4 ${
-                    location.pathname === item.path
-                      ? 'bg-gold-50 text-gold-700 border-gold-500'
-                      : 'text-gray-900 hover:bg-gray-50 border-transparent hover:border-gray-300'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <Link
-                  to="/contact"
-                  onClick={() => setIsOpen(false)}
-                  className="block mx-4 mb-2 bg-gold-500 hover:bg-gold-600 text-white text-center px-4 py-2 rounded-lg font-medium transition-colors"
-                >
-                  Свържете се с нас
-                </Link>
-              </div>
+        {/* Mobile menu - Animated dropdown */}
+        <div
+          className={`lg:hidden absolute left-0 right-0 top-full bg-white shadow-2xl border-t border-gray-200 z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="py-2">
+            {navItems.map((item, index) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={`block px-4 py-3 text-base font-medium border-l-4 transition-all duration-200 ${
+                  location.pathname === item.path
+                    ? 'bg-gold-50 text-gold-700 border-gold-500'
+                    : 'text-gray-900 hover:bg-gray-50 border-transparent hover:border-gray-300'
+                }`}
+                style={{
+                  transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+
+            <div className="border-t border-gray-200 mt-2 pt-2 px-4">
+              <Link
+                to="/contact"
+                onClick={() => setIsOpen(false)}
+                className="block bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white text-center px-4 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg mb-2"
+              >
+                Свържете се с нас
+              </Link>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   )
