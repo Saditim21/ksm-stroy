@@ -3,6 +3,28 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FLOOR_DATA } from './FourTowersFloorMap';
 import buildingAllFloorsArchitectureImage from '../assets/продажби/project 1/building-all-floors-architecture.png';
 
+// Floor Architecture Plan Images for Block A
+import buildingAFloor1Architecture from '../assets/продажби/project 1/building-A-floor-1.jpg';
+import buildingAFloor2Architecture from '../assets/продажби/project 1/building-A-floor-2.jpg';
+import buildingAFloor3Architecture from '../assets/продажби/project 1/building-A-floor-3.jpg';
+import buildingAFloor4Architecture from '../assets/продажби/project 1/building-A-floor-4.jpg';
+import buildingAFloor5Architecture from '../assets/продажби/project 1/building-A-floor-5.jpg';
+import buildingAFloor6Architecture from '../assets/продажби/project 1/building-A-floor-6.jpg';
+import buildingAFloor7Architecture from '../assets/продажби/project 1/building-A-floor-7.jpg';
+import buildingAFloor8Architecture from '../assets/продажби/project 1/building-A-floor-8.jpg';
+import buildingAFloor9Architecture from '../assets/продажби/project 1/building-A-floor-9.jpg';
+
+// Floor Architecture Plan Images for Block B
+import buildingBFloor1Architecture from '../assets/продажби/project 1/building-B-floor-1.jpg';
+import buildingBFloor2Architecture from '../assets/продажби/project 1/building-B-floor-2.jpg';
+import buildingBFloor3Architecture from '../assets/продажби/project 1/building-B-floor-3.jpg';
+import buildingBFloor4Architecture from '../assets/продажби/project 1/building-B-floor-4.jpg';
+import buildingBFloor5Architecture from '../assets/продажби/project 1/building-B-floor-5.jpg';
+import buildingBFloor6Architecture from '../assets/продажби/project 1/building-B-floor-6.jpg';
+import buildingBFloor7Architecture from '../assets/продажби/project 1/building-B-floor-7.jpg';
+import buildingBFloor8Architecture from '../assets/продажби/project 1/building-B-floor-8.jpg';
+import buildingBFloor9Architecture from '../assets/продажби/project 1/building-B-floor-9.jpg';
+
 // Block A Images
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.png';
 import blockAGarageImage from '../assets/продажби/project 1/block-A/garage-floor-A.png';
@@ -171,6 +193,43 @@ const MnogofamilnaSingleBlock = () => {
         '807': apartmentB807Floor8
       };
       return apartmentBImages[aptNumber];
+    }
+  };
+
+  // Get floor architecture plan image based on floor number
+  // Note: FLOOR_DATA keys are offset by 1 (key 2 = floor 1, key 3 = floor 2, etc.)
+  const getFloorArchitectureImage = (floor) => {
+    if (!floor) return buildingAllFloorsArchitectureImage;
+
+    // Convert FLOOR_DATA key to actual floor number
+    const actualFloor = floor - 1;
+
+    if (isBlockA) {
+      const floorArchitectureMap = {
+        1: buildingAFloor1Architecture,
+        2: buildingAFloor2Architecture,
+        3: buildingAFloor3Architecture,
+        4: buildingAFloor4Architecture,
+        5: buildingAFloor5Architecture,
+        6: buildingAFloor6Architecture,
+        7: buildingAFloor7Architecture,
+        8: buildingAFloor8Architecture,
+        9: buildingAFloor9Architecture
+      };
+      return floorArchitectureMap[actualFloor] || buildingAllFloorsArchitectureImage;
+    } else {
+      const floorArchitectureMap = {
+        1: buildingBFloor1Architecture,
+        2: buildingBFloor2Architecture,
+        3: buildingBFloor3Architecture,
+        4: buildingBFloor4Architecture,
+        5: buildingBFloor5Architecture,
+        6: buildingBFloor6Architecture,
+        7: buildingBFloor7Architecture,
+        8: buildingBFloor8Architecture,
+        9: buildingBFloor9Architecture
+      };
+      return floorArchitectureMap[actualFloor] || buildingAllFloorsArchitectureImage;
     }
   };
 
@@ -640,7 +699,7 @@ const MnogofamilnaSingleBlock = () => {
                         >
                           <div className="relative w-full h-full flex items-center justify-center p-1">
                             <img
-                              src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : buildingAllFloorsArchitectureImage}
+                              src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : getFloorArchitectureImage(selectedFloor)}
                               alt={selectedApartment ? `${selectedApartment.имот} план` : `${blockTitle} - ${selectedFloor} етаж план`}
                               className="max-w-full max-h-full object-contain cursor-pointer rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300"
                               onClick={() => setIsArchitecturePlanFullscreen(true)}
@@ -748,7 +807,7 @@ const MnogofamilnaSingleBlock = () => {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <img
-                    src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : buildingAllFloorsArchitectureImage}
+                    src={selectedApartment && hasSpecificApartmentImage(selectedApartment.имот) ? getApartmentImage(selectedApartment.имот) : getFloorArchitectureImage(selectedFloor)}
                     alt={selectedApartment ? `${selectedApartment.имот} план` : `${blockTitle} - ${selectedFloor} етаж план`}
                     className="max-w-full max-h-full object-contain"
                   />
