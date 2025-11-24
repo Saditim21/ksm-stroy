@@ -36,7 +36,9 @@ export const apartmentImages = {
   'А-102': apartmentA2FloorPlanImage,
   'А-106': apartmentA6FloorPlanImage,
   'А-858': apartmentA58FloorPlanImage,
-  'А-864': apartmentA64FloorPlanImage
+  'А-864': apartmentA64FloorPlanImage,
+  'А-802': apartmentA58FloorPlanImage,
+  'А-808': apartmentA64FloorPlanImage
 }
 
 // Function to get apartment image by ID

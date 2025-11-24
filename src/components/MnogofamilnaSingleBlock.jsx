@@ -144,7 +144,7 @@ const MnogofamilnaSingleBlock = () => {
     const aptNumber = apartmentName.split('-')[1];
 
     if (isBlockA) {
-      const apartmentAImages = ['2', '6', '58', '64', '102', '106'];
+      const apartmentAImages = ['2', '6', '58', '64', '102', '106', '802', '808'];
       return apartmentAImages.includes(aptNumber);
     } else {
       const apartmentBImages = ['102', '106', '107', '207', '23', '307', '31', '407', '47', '607', '50', '55', '702', '707', '57', '59', '63', '801', '803', '807'];
@@ -166,7 +166,9 @@ const MnogofamilnaSingleBlock = () => {
         '58': apartmentA58Floor8,
         '64': apartmentA64Floor8,
         '102': apartmentA2Floor1,  // A-102 uses apartment-a2-floor1.png
-        '106': apartmentA6Floor1   // A-106 uses apartment-a6-floor1.png
+        '106': apartmentA6Floor1,  // A-106 uses apartment-a6-floor1.png
+        '802': apartmentA58Floor8, // A-802 uses apartment-a58-floor8.png
+        '808': apartmentA64Floor8  // A-808 uses apartment-a64-floor8.png
       };
       return apartmentAImages[aptNumber];
     } else {
