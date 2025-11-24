@@ -400,44 +400,44 @@ const About = () => {
               className="order-2 lg:order-1 space-y-8"
             >
               <div>
-                <motion.span 
+                <motion.span
                   variants={fadeInUp}
-                  className="text-gold-600 font-semibold text-sm uppercase tracking-wide"
+                  className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide"
                 >
                   Нашата история
                 </motion.span>
-                <motion.h2 
+                <motion.h2
                   variants={fadeInUp}
-                  className="text-5xl font-bold text-primary-900 mt-4 mb-6 leading-tight"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 mt-3 sm:mt-4 mb-4 sm:mb-6 leading-tight"
                 >
-                  Традиция и иновации 
+                  Традиция и иновации
                   <span className="text-gold-600"> от 2008</span>
                 </motion.h2>
               </div>
               
-              <motion.div variants={fadeInUp} className="space-y-6">
-                <p className="text-lg text-primary-700 leading-relaxed">
+              <motion.div variants={fadeInUp} className="space-y-4 sm:space-y-6">
+                <p className="text-base sm:text-lg text-primary-700 leading-relaxed">
                   КСМ СТРОЙ ООД е основана през месец септември 2008 г. от двама братя Кадри и Сухат,
                   синове на известен в родното им село Буково строител зидар /дюлгерин/.
                 </p>
 
-                <p className="text-lg text-primary-700 leading-relaxed">
+                <p className="text-base sm:text-lg text-primary-700 leading-relaxed">
                   Учредителите още от самото създаване на дружеството залагат на характерните черти за региона като КОРЕКТНОСТ, БЪРЗИНА И ТОЧНОСТ ПОД МОТОТО:
                 </p>
 
-                <div className="bg-gradient-to-r from-gold-50 to-gold-100 p-6 rounded-luxury border-l-4 border-gold-500">
-                  <p className="text-lg text-primary-800 font-medium italic">
+                <div className="bg-gradient-to-r from-gold-50 to-gold-100 p-4 sm:p-6 rounded-luxury border-l-4 border-gold-500">
+                  <p className="text-base sm:text-lg text-primary-800 font-medium italic">
                     "ДОБРАТА РАБОТА - РЕКЛАМА ЗА МАЙСТОРА"
                   </p>
-                  <div className="mt-4 flex space-x-8">
+                  <div className="mt-3 sm:mt-4 flex flex-wrap gap-3 sm:gap-0 sm:space-x-8">
                     <div className="text-center">
-                      <div className="text-gold-600 font-bold text-sm">КОРЕКТНОСТ</div>
+                      <div className="text-gold-600 font-bold text-xs sm:text-sm">КОРЕКТНОСТ</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-gold-600 font-bold text-sm">БЪРЗИНА</div>
+                      <div className="text-gold-600 font-bold text-xs sm:text-sm">БЪРЗИНА</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-gold-600 font-bold text-sm">ТОЧНОСТ</div>
+                      <div className="text-gold-600 font-bold text-xs sm:text-sm">ТОЧНОСТ</div>
                     </div>
                   </div>
                 </div>
@@ -446,10 +446,10 @@ const About = () => {
             
             <motion.div
               variants={staggerItem}
-              className="order-1 lg:order-2 relative h-[700px]"
+              className="order-1 lg:order-2 relative h-[350px] sm:h-[450px] md:h-[550px] lg:h-[700px]"
             >
               {/* Large decorative "2008" text background */}
-              <div className="absolute -top-10 -right-10 text-[200px] font-black text-gold-500/5 leading-none select-none pointer-events-none">
+              <div className="absolute -top-5 sm:-top-10 -right-5 sm:-right-10 text-[80px] sm:text-[120px] md:text-[160px] lg:text-[200px] font-black text-gold-500/5 leading-none select-none pointer-events-none">
                 2008
               </div>
 
@@ -496,7 +496,7 @@ const About = () => {
 
                 {/* Floating project card - creative positioning */}
                 <motion.div
-                  className="absolute bottom-[5%] right-[5%] bg-white p-6 shadow-2xl z-20 w-64"
+                  className="absolute bottom-[5%] right-[5%] bg-white p-3 sm:p-4 lg:p-6 shadow-2xl z-20 w-36 sm:w-48 lg:w-64"
                   style={{
                     clipPath: 'polygon(5% 0, 100% 0, 100% 95%, 0 100%)'
                   }}
@@ -505,24 +505,24 @@ const About = () => {
                   transition={{ delay: 0.5, duration: 0.6 }}
                   whileHover={{ y: -10, rotate: 2 }}
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-0.5 bg-gold-500"></div>
-                      <span className="text-xs text-primary-600 font-bold uppercase tracking-widest">Проект</span>
+                  <div className="space-y-1 sm:space-y-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="w-4 sm:w-6 lg:w-8 h-0.5 bg-gold-500"></div>
+                      <span className="text-[10px] sm:text-xs text-primary-600 font-bold uppercase tracking-widest">Проект</span>
                     </div>
-                    <h3 className="text-2xl font-black text-primary-900 leading-tight">
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-primary-900 leading-tight">
                       Хотел<br/>Парадайс
                     </h3>
-                    <div className="flex items-center gap-2 pt-2">
-                      <div className="w-3 h-3 bg-gold-500 rotate-45"></div>
-                      <span className="text-xs text-primary-600 font-semibold">Завършен проект</span>
+                    <div className="flex items-center gap-1 sm:gap-2 pt-1 sm:pt-2">
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gold-500 rotate-45"></div>
+                      <span className="text-[10px] sm:text-xs text-primary-600 font-semibold">Завършен проект</span>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Decorative circles */}
+                {/* Decorative circles - hidden on mobile */}
                 <motion.div
-                  className="absolute top-[60%] left-[70%] w-20 h-20 rounded-full border-4 border-gold-400 opacity-40"
+                  className="hidden sm:block absolute top-[60%] left-[70%] w-12 sm:w-16 lg:w-20 h-12 sm:h-16 lg:h-20 rounded-full border-2 sm:border-4 border-gold-400 opacity-40"
                   animate={{
                     scale: [1, 1.2, 1],
                     rotate: [0, 180, 360]
@@ -534,12 +534,12 @@ const About = () => {
                   }}
                 />
 
-                <div className="absolute top-[10%] left-[75%] w-12 h-12 bg-primary-900/20 rounded-full blur-sm"></div>
-                <div className="absolute bottom-[25%] left-[5%] w-16 h-16 bg-gold-400/10 rounded-full blur-md"></div>
+                <div className="hidden sm:block absolute top-[10%] left-[75%] w-8 sm:w-12 h-8 sm:h-12 bg-primary-900/20 rounded-full blur-sm"></div>
+                <div className="hidden sm:block absolute bottom-[25%] left-[5%] w-10 sm:w-16 h-10 sm:h-16 bg-gold-400/10 rounded-full blur-md"></div>
 
-                {/* Bold accent lines */}
-                <div className="absolute top-[5%] left-[-2%] w-1 h-32 bg-gradient-to-b from-gold-500 to-transparent"></div>
-                <div className="absolute bottom-[20%] right-[10%] w-24 h-1 bg-gradient-to-r from-transparent to-primary-900"></div>
+                {/* Bold accent lines - hidden on mobile */}
+                <div className="hidden md:block absolute top-[5%] left-[-2%] w-1 h-20 lg:h-32 bg-gradient-to-b from-gold-500 to-transparent"></div>
+                <div className="hidden md:block absolute bottom-[20%] right-[10%] w-16 lg:w-24 h-1 bg-gradient-to-r from-transparent to-primary-900"></div>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -560,12 +560,12 @@ const About = () => {
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div variants={staggerItem} className="text-center mb-16">
-            <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Нашите ценности</span>
-            <h2 className="text-5xl font-bold text-primary-900 mt-4 mb-6">
+          <motion.div variants={staggerItem} className="text-center mb-10 sm:mb-16">
+            <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Нашите ценности</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 mt-3 sm:mt-4 mb-4 sm:mb-6">
               Какво ни прави <span className="text-gold-600">различни</span>
             </h2>
-            <p className="text-xl text-primary-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-primary-600 max-w-3xl mx-auto px-2">
               Три принципа, които ръководят всеки наш проект и гарантират изключителните резултати
             </p>
           </motion.div>
@@ -619,12 +619,12 @@ const About = () => {
         variants={staggerContainer}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div variants={staggerItem} className="text-center mb-16">
-            <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">За компанията</span>
-            <h2 className="text-5xl font-bold text-primary-900 mt-4 mb-6">
+          <motion.div variants={staggerItem} className="text-center mb-10 sm:mb-16">
+            <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">За компанията</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 mt-3 sm:mt-4 mb-4 sm:mb-6">
               Кои сме <span className="text-gold-600">ние?</span>
             </h2>
-            <p className="text-xl text-primary-700 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-primary-700 max-w-4xl mx-auto leading-relaxed px-2">
               КСМ Строй ООД е строителна компания, ориентирана към качество, надеждност и устойчиви решения.
               Съчетаваме дългогодишен опит с модерни технологии, за да създаваме проекти, които отговарят на всички съвременни изисквания.
             </p>
@@ -641,9 +641,9 @@ const About = () => {
         variants={staggerContainer}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div variants={staggerItem} className="text-center mb-16">
-            <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Нашите услуги</span>
-            <h2 className="text-5xl font-bold text-primary-900 mt-4 mb-6">
+          <motion.div variants={staggerItem} className="text-center mb-10 sm:mb-16">
+            <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Нашите услуги</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-900 mt-3 sm:mt-4 mb-4 sm:mb-6">
               Какво <span className="text-gold-600">предлагаме?</span>
             </h2>
           </motion.div>
@@ -830,21 +830,21 @@ const About = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div variants={staggerItem}>
-            <h2 className="text-6xl font-bold text-primary-900 mb-6 leading-tight">
-              Готови сте да 
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-900 mb-4 sm:mb-6 leading-tight">
+              Готови сте да
               <br />
               <span className="text-white">работите с нас?</span>
             </h2>
-            <p className="text-2xl text-primary-800 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-2xl text-primary-800 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed px-2">
               Свържете се с нашия екип за консултация и да обсъдим как можем да реализираме вашия проект
             </p>
             <motion.div
               variants={staggerItem}
-              className="flex flex-col sm:flex-row gap-6 justify-center"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center"
             >
               <Link to="/contact">
                 <motion.button
-                  className="bg-primary-900 text-gold-400 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-800 transition-all duration-300 shadow-2xl"
+                  className="bg-primary-900 text-gold-400 px-8 sm:px-12 py-4 sm:py-6 rounded-luxury-xl font-bold text-base sm:text-lg hover:bg-primary-800 transition-all duration-300 shadow-2xl w-full sm:w-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -853,7 +853,7 @@ const About = () => {
               </Link>
               <Link to="/blog">
                 <motion.button
-                  className="border-2 border-primary-900 text-primary-900 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-900 hover:text-gold-400 transition-all duration-300"
+                  className="border-2 border-primary-900 text-primary-900 px-8 sm:px-12 py-4 sm:py-6 rounded-luxury-xl font-bold text-base sm:text-lg hover:bg-primary-900 hover:text-gold-400 transition-all duration-300 w-full sm:w-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >

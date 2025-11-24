@@ -15,8 +15,8 @@ const PropertyCard = memo(({ property, index, onClick }) => {
   }
 
   return (
-    <article 
-      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg transition-all duration-500"
+    <article
+      className="bg-white rounded-luxury-lg overflow-hidden group cursor-pointer border border-silver-200 hover:border-gold-500/30 active:border-gold-500/50 shadow-luxury hover:shadow-luxury-lg active:shadow-lg transition-all duration-300 touch-manipulation select-none"
       onClick={onClick}
     >
       {/* Property Image */}
@@ -134,8 +134,8 @@ const PropertyCard = memo(({ property, index, onClick }) => {
         )}
 
         {/* View Details Button */}
-        <button 
-          className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-3 px-4 rounded-luxury font-semibold flex items-center justify-center group shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300"
+        <button
+          className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 active:from-gold-700 active:to-gold-800 text-primary-900 py-3.5 sm:py-3 px-4 rounded-luxury font-semibold text-sm sm:text-base flex items-center justify-center group shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300 min-h-[48px] touch-manipulation"
         >
           <span>Разгледай апартаментите</span>
           <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

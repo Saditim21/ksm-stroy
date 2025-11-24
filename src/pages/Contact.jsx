@@ -157,32 +157,32 @@ const Contact = () => {
       >
 
         {/* Contact Form & Info */}
-        <section className="py-20 bg-primary-50">
+        <section className="py-12 sm:py-16 lg:py-20 bg-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
               
               {/* Contact Information */}
               <div className="lg:col-span-1">
-                <div className="mb-8">
-                  <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Информация за контакт</span>
-                  <h2 className="text-display-1 text-primary-900 mt-2 mb-6">
+                <div className="mb-6 sm:mb-8">
+                  <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Информация за контакт</span>
+                  <h2 className="text-xl sm:text-2xl lg:text-display-1 text-primary-900 mt-2 mb-4 sm:mb-6 font-bold">
                     Как можете да се свържете с нас
                   </h2>
-                  <p className="text-primary-600 leading-relaxed">
+                  <p className="text-sm sm:text-base text-primary-600 leading-relaxed">
                     Нашият екип е на ваше разположение за консултации, оферти и отговори на всички ваши въпроси.
                   </p>
                 </div>
                 
-                <div className="space-y-8">
+                <div className="space-y-5 sm:space-y-6 lg:space-y-8">
                   {contactInfo.map((info, index) => (
                     <div key={index} className="flex items-start">
-                      <div className="w-14 h-14 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury flex items-center justify-center mr-4 text-primary-900 flex-shrink-0">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-gold-500 to-gold-600 rounded-luxury flex items-center justify-center mr-3 sm:mr-4 text-primary-900 flex-shrink-0">
                         {info.icon}
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-primary-900 mb-2">{info.title}</h3>
+                        <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-1 sm:mb-2">{info.title}</h3>
                         {info.details.map((detail, idx) => (
-                          <p key={idx} className="text-primary-600 mb-1">{detail}</p>
+                          <p key={idx} className="text-sm sm:text-base text-primary-600 mb-1">{detail}</p>
                         ))}
                       </div>
                     </div>
@@ -192,8 +192,8 @@ const Contact = () => {
 
               {/* Contact Form */}
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-luxury-lg p-8 shadow-luxury border border-silver-200">
-                  <h2 className="text-3xl font-bold text-primary-900 mb-8">Изпратете запитване</h2>
+                <div className="bg-white rounded-luxury-lg p-4 sm:p-6 lg:p-8 shadow-luxury border border-silver-200">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-6 sm:mb-8">Изпратете запитване</h2>
                 
                 {/* Success Message */}
                 {isSubmitted && (
@@ -385,68 +385,68 @@ const Contact = () => {
       </section>
 
         {/* Google Maps Section */}
-        <section className="py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
+        <section className="py-12 sm:py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <span className="text-gold-600 font-semibold text-sm uppercase tracking-wide">Местоположение</span>
-              <h2 className="text-display-1 text-primary-900 mt-2 mb-6">Нашият офис</h2>
-              <p className="text-primary-600 max-w-2xl mx-auto">
-                Посетете ни в нашия офис в центъра на София за лична консултация и обсъждане на вашия проект
+            <div className="text-center mb-8 sm:mb-12">
+              <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Местоположение</span>
+              <h2 className="text-xl sm:text-2xl lg:text-display-1 font-bold text-primary-900 mt-2 mb-4 sm:mb-6">Нашите офиси</h2>
+              <p className="text-sm sm:text-base text-primary-600 max-w-2xl mx-auto px-2">
+                Посетете ни в един от нашите офиси за лична консултация и обсъждане на вашия проект
               </p>
             </div>
             
-            {/* Google Maps Embed */}
+            {/* Google Maps Embed - Връбница 1, Sofia */}
             <div className="rounded-luxury-lg overflow-hidden shadow-luxury border border-silver-200">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2932.086749715398!2d23.31591831545768!3d42.69751527916949!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40aa8682cb317bf5%3A0x400a01269bf5e60!2sSofia%2C%20Bulgaria!5e0!3m2!1sen!2sbg!4v1642092876543!5m2!1sen!2sbg"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2931.4517461839307!2d23.294583315912844!3d42.71158507916295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40aa857a6f1a6f0d%3A0x8c4d46f3a9e8c0a0!2z0LYu0LouINCS0YDRitCx0L3QuNGG0LAtMSwg0KHQvtGE0LjRjw!5e0!3m2!1sbg!2sbg!4v1700000000000!5m2!1sbg!2sbg"
                 width="100%"
-                height="400"
+                height="350"
                 style={{ border: 0 }}
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="KSM Stroy Office Location"
-                className="w-full"
+                title="KSM Stroy Office - Връбница 1, София"
+                className="w-full h-[280px] sm:h-[350px] lg:h-[400px]"
               />
             </div>
             
             {/* Map Info */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
-                <svg className="w-5 h-5 text-gold-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mt-6 sm:mt-8 flex flex-col gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
+              <div className="flex items-center bg-white rounded-luxury px-4 sm:px-6 py-3 sm:py-4 shadow-luxury border border-silver-200">
+                <svg className="w-5 h-5 text-gold-600 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-primary-700 font-medium">гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38</span>
+                <span className="text-sm sm:text-base text-primary-700 font-medium">гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38</span>
               </div>
-              <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
-                <svg className="w-5 h-5 text-gold-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center bg-white rounded-luxury px-4 sm:px-6 py-3 sm:py-4 shadow-luxury border border-silver-200">
+                <svg className="w-5 h-5 text-gold-600 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-primary-700 font-medium">гр. Гоце Делчев, ул. Кирил и Методий 17, вх. Б, ет.1</span>
+                <span className="text-sm sm:text-base text-primary-700 font-medium">гр. Гоце Делчев, ул. Кирил и Методий 17, вх. Б, ет.1</span>
               </div>
             </div>
           </div>
         </section>
 
         {/* Call to Action Section */}
-        <section className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
+        <section className="py-12 sm:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
           {/* Gold accent overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
-          
+
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-display-1 font-bold mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-display-1 font-bold mb-3 sm:mb-4">
               Готови сте да започнете своя проект?
             </h2>
-            <p className="text-xl text-platinum-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-platinum-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
               Нашият екип е готов да ви помогне да реализирате мечтания проект с качество и професионализъм
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200">
                 Получете безплатна оферта
               </button>
-              <button className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
+              <button className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
                 Обадете се сега
               </button>
             </div>

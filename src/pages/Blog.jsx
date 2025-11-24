@@ -282,24 +282,58 @@ const Projects = () => {
       
       <main className="min-h-screen bg-primary-50 pt-20">
 
-      {/* Project Filter */}
-      <section className="py-12 bg-gradient-to-br from-ivory-50 to-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-4 justify-center">
+      {/* Project Filter - Compact Segmented Control */}
+      <section className="py-3 sm:py-6 lg:py-8 bg-gradient-to-br from-ivory-50 to-primary-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          {/* Mobile: Segmented control, Desktop: Separate buttons */}
+
+          {/* Mobile Version - Segmented Control */}
+          <div className="sm:hidden">
+            <div className="bg-white rounded-xl p-1 shadow-luxury border border-silver-200 flex">
+              {filters.map((filter, index) => (
+                <motion.button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id)}
+                  className={`flex-1 py-2.5 px-2 text-center transition-all duration-300 ${
+                    index === 0 ? 'rounded-l-lg' : index === filters.length - 1 ? 'rounded-r-lg' : ''
+                  } ${
+                    selectedFilter === filter.id
+                      ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-md'
+                      : 'text-primary-600 hover:bg-gray-50 active:bg-gray-100'
+                  }`}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-[11px] font-semibold leading-tight">
+                      {filter.id === 'all' ? 'Всички' : filter.id === 'Завършен Проект' ? 'Завършени' : 'Груб строеж'}
+                    </span>
+                    <span className={`text-[10px] font-bold ${
+                      selectedFilter === filter.id ? 'text-primary-800' : 'text-gold-600'
+                    }`}>
+                      {filter.count}
+                    </span>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Version - Separate Buttons */}
+          <div className="hidden sm:flex gap-3 justify-center">
             {filters.map((filter) => (
               <motion.button
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
-                className={`px-6 py-3 rounded-luxury text-sm font-medium transition-all duration-300 ${
+                className={`px-5 py-2.5 rounded-luxury text-sm font-medium transition-all duration-300 ${
                   selectedFilter === filter.id
                     ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-gold-glow scale-105'
                     : 'bg-white text-primary-700 hover:bg-gold-50 hover:text-gold-700 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 {filter.name}
-                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
                   selectedFilter === filter.id
                     ? 'bg-primary-900/20 text-primary-900'
                     : 'bg-gold-100 text-gold-700'
@@ -313,8 +347,8 @@ const Projects = () => {
       </section>
 
       {/* Projects Grid */}
-      <section className="py-20 bg-primary-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-8 sm:py-12 lg:py-20 bg-primary-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             <div 
               key={selectedFilter}

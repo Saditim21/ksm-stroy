@@ -220,8 +220,8 @@ const Sales = () => {
 
 
       {/* Property Filter */}
-      <section 
-        className="py-6 sm:py-8 lg:py-12 bg-gradient-to-br from-ivory-50 to-primary-50"
+      <section
+        className="py-4 sm:py-6 lg:py-10 bg-gradient-to-br from-ivory-50 to-primary-50"
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 justify-center">
@@ -229,14 +229,14 @@ const Sales = () => {
               <button
                 key={filter.id}
                 onClick={() => setSelectedFilter(filter.id)}
-                className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-luxury text-xs sm:text-sm font-medium transition-all duration-300 ${
+                className={`px-3 sm:px-4 lg:px-6 py-2.5 sm:py-3 rounded-luxury text-xs sm:text-sm font-medium transition-all duration-300 touch-manipulation min-h-[44px] ${
                   selectedFilter === filter.id
                     ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 shadow-gold-glow scale-105'
-                    : 'bg-white text-primary-700 hover:bg-gold-50 hover:text-gold-700 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg'
+                    : 'bg-white text-primary-700 hover:bg-gold-50 active:bg-gold-100 hover:text-gold-700 border border-silver-200 hover:border-gold-500/30 shadow-luxury hover:shadow-luxury-lg'
                 }`}
               >
                 {filter.name}
-                <span className={`ml-1 sm:ml-2 px-1 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs ${
+                <span className={`ml-1.5 sm:ml-2 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs ${
                   selectedFilter === filter.id
                     ? 'bg-primary-900/20 text-primary-900'
                     : 'bg-gold-100 text-gold-700'
@@ -283,30 +283,30 @@ const Sales = () => {
       </section>
 
       {/* Call to Action */}
-      <section 
-        className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
+      <section
+        className="py-10 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
-        
+
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div>
-            <h2 className="text-display-1 font-bold mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-display-1 font-bold mb-3 sm:mb-4">
               Търсите нов дом?
             </h2>
-            <p className="text-xl mb-8 text-platinum-300">
+            <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 text-platinum-300 px-2">
               Свържете се с нас за консултация и да обсъдим наличните апартаменти и бъдещи проекти
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link to="/contact">
                 <button
-                  className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
+                  className="w-full sm:w-auto bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200 touch-manipulation min-h-[48px]"
                 >
                   Свържете се с нас
                 </button>
               </Link>
               <Link to="/contact">
                 <button
-                  className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
+                  className="w-full sm:w-auto border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm touch-manipulation min-h-[48px]"
                 >
                   Попитайте за цени
                 </button>

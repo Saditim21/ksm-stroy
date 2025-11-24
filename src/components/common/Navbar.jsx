@@ -112,36 +112,54 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu - Animated dropdown */}
+        {/* Mobile menu - Animated dropdown with improved styling */}
         <div
-          className={`lg:hidden absolute left-0 right-0 top-full bg-white shadow-2xl border-t border-gray-200 z-50 overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          className={`lg:hidden fixed left-0 right-0 top-16 sm:top-[72px] bg-white shadow-2xl border-t border-gold-500/20 overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? 'max-h-[28rem] opacity-100 visible' : 'max-h-0 opacity-0 invisible'
           }`}
+          style={{ zIndex: 9999 }}
         >
-          <div className="py-2">
+          <div className="py-3 px-2 bg-white">
             {navItems.map((item, index) => (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={`block px-4 py-3 text-base font-medium border-l-4 transition-all duration-200 ${
+                className={`block mx-2 px-4 py-3.5 text-base font-medium rounded-xl transition-all duration-200 ${
                   location.pathname === item.path
-                    ? 'bg-gold-50 text-gold-700 border-gold-500'
-                    : 'text-gray-900 hover:bg-gray-50 border-transparent hover:border-gray-300'
+                    ? 'bg-gradient-to-r from-gold-100 to-gold-50 text-gold-700 border-l-4 border-gold-500 pl-5'
+                    : 'text-gray-800 hover:bg-gray-100 active:bg-gray-200'
                 }`}
                 style={{
                   transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
                 }}
               >
-                {item.label}
+                <span className="flex items-center justify-between">
+                  {item.label}
+                  {location.pathname === item.path && (
+                    <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
               </Link>
             ))}
 
-            <div className="border-t border-gray-200 mt-2 pt-2 px-4">
+            <div className="border-t border-gray-200 mt-3 pt-3 mx-4">
+              {/* Phone number in mobile menu */}
+              <a
+                href="tel:+359885762224"
+                className="flex items-center justify-center gap-2 py-3 text-gray-700 font-medium mb-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span>+359 885 762 224</span>
+              </a>
               <Link
                 to="/contact"
                 onClick={() => setIsOpen(false)}
-                className="block bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white text-center px-4 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg mb-2"
+                className="block bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 text-center px-4 py-3.5 rounded-xl font-semibold transition-all duration-200 shadow-lg"
               >
                 Свържете се с нас
               </Link>

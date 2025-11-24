@@ -139,7 +139,7 @@ const HeroCarousel = () => {
                     {slides[currentSlide].description}
                   </motion.p>
 
-                  <motion.div 
+                  <motion.div
                     className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -156,7 +156,7 @@ const HeroCarousel = () => {
                     </Link>
                     <Link
                       to="/contact"
-                      className="border-2 border-gold-500/50 hover:border-gold-500 text-white hover:bg-gold-500 hover:text-primary-900 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base lg:text-lg backdrop-blur-sm transition-all duration-300 text-center"
+                      className="border-2 border-gold-400 text-white bg-white/10 hover:bg-gold-500 hover:border-gold-500 hover:text-primary-900 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 text-center"
                     >
                       Свържи се с нас
                     </Link>
@@ -166,114 +166,114 @@ const HeroCarousel = () => {
             </div>
 
             {/* Right Content - Apartment Availability Box */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end mt-6 lg:mt-0">
+            <div className="lg:col-span-5 flex justify-center lg:justify-end mt-4 sm:mt-6 lg:mt-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  className="bg-white/95 backdrop-blur-md rounded-luxury-lg p-4 sm:p-6 lg:p-8 shadow-luxury-lg border border-silver-200 max-w-sm sm:max-w-md w-full mx-2 sm:mx-0"
+                  className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-luxury-lg p-3 sm:p-5 lg:p-6 shadow-luxury-lg border border-silver-200 max-w-[calc(100%-1rem)] sm:max-w-sm lg:max-w-md w-full mx-2 sm:mx-0"
                   initial={{ opacity: 0, x: 50, scale: 0.9 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: -50, scale: 0.9 }}
                   transition={{ duration: 0.8 }}
                 >
-                  <div className="text-center mb-4 sm:mb-6">
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-900 mb-1 sm:mb-2">{currentBuilding.name}</h3>
-                    <p className="text-sm sm:text-base text-primary-600">{currentBuilding.location}</p>
+                  <div className="text-center mb-3 sm:mb-4 lg:mb-5">
+                    <h3 className="text-sm sm:text-lg lg:text-xl font-bold text-primary-900 mb-0.5 sm:mb-1 leading-tight">{currentBuilding.name}</h3>
+                    <p className="text-xs sm:text-sm text-primary-600 leading-tight">{currentBuilding.location}</p>
                   </div>
 
                   {/* Apartments Section */}
-                  <div className="mb-4 sm:mb-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-lg font-semibold text-primary-900 flex items-center">
-                        <svg className="w-5 h-5 text-gold-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-3 sm:mb-4 lg:mb-5">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-primary-900 flex items-center">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-600 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         Апартаменти
                       </h4>
-                      <span className="text-primary-600 text-sm">Общо {currentBuilding.apartments.total}</span>
+                      <span className="text-primary-600 text-xs sm:text-sm">Общо {currentBuilding.apartments.total}</span>
                     </div>
 
-                    <div className="space-y-2">
-                      <motion.div 
-                        className="flex items-center justify-between py-2 px-3 bg-green-50 rounded-lg border border-green-200"
+                    <div className="space-y-1 sm:space-y-1.5">
+                      <motion.div
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-green-50 rounded-lg border border-green-200"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                       >
                         <div className="flex items-center">
-                          <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                          <span className="text-sm font-medium text-green-800">Свободни</span>
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-green-800">Свободни</span>
                         </div>
-                        <span className="text-green-800 font-semibold">{currentBuilding.apartments.available}</span>
+                        <span className="text-green-800 font-semibold text-sm sm:text-base">{currentBuilding.apartments.available}</span>
                       </motion.div>
-                      
-                      <motion.div 
-                        className="flex items-center justify-between py-2 px-3 bg-yellow-50 rounded-lg border border-yellow-200"
+
+                      <motion.div
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-yellow-50 rounded-lg border border-yellow-200"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                       >
                         <div className="flex items-center">
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                          <span className="text-sm font-medium text-yellow-800">Резервирани</span>
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-yellow-800">Резервирани</span>
                         </div>
-                        <span className="text-yellow-800 font-semibold">{currentBuilding.apartments.reserved}</span>
+                        <span className="text-yellow-800 font-semibold text-sm sm:text-base">{currentBuilding.apartments.reserved}</span>
                       </motion.div>
-                      
-                      <motion.div 
-                        className="flex items-center justify-between py-2 px-3 bg-red-50 rounded-lg border border-red-200"
+
+                      <motion.div
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-red-50 rounded-lg border border-red-200"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
                       >
                         <div className="flex items-center">
-                          <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                          <span className="text-sm font-medium text-red-800">Продадени</span>
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-red-800">Продадени</span>
                         </div>
-                        <span className="text-red-800 font-semibold">{currentBuilding.apartments.sold}</span>
+                        <span className="text-red-800 font-semibold text-sm sm:text-base">{currentBuilding.apartments.sold}</span>
                       </motion.div>
                     </div>
                   </div>
 
                   {/* Garages Section */}
-                  <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-silver-200">
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <h4 className="text-base sm:text-lg font-semibold text-primary-900 flex items-center">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-600 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-silver-200">
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <h4 className="text-sm sm:text-base font-semibold text-primary-900 flex items-center">
+                        <svg className="w-4 h-4 text-gold-600 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                         </svg>
                         Гаражи
                       </h4>
-                      <span className="text-primary-600 text-xs sm:text-sm">Общо {currentBuilding.garages.total}</span>
+                      <span className="text-primary-600 text-[10px] sm:text-xs">Общо {currentBuilding.garages.total}</span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center">
-                      <motion.div 
-                        className="py-1 sm:py-2 px-1 sm:px-2 bg-green-50 rounded border border-green-200"
+                    <div className="grid grid-cols-3 gap-1 text-center">
+                      <motion.div
+                        className="py-1 px-1 bg-green-50 rounded border border-green-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
                       >
-                        <div className="text-sm sm:text-lg font-bold text-green-800">{currentBuilding.garages.available}</div>
-                        <div className="text-xs text-green-600">Свободни</div>
+                        <div className="text-xs sm:text-sm font-bold text-green-800">{currentBuilding.garages.available}</div>
+                        <div className="text-[9px] sm:text-[10px] text-green-600">Свободни</div>
                       </motion.div>
-                      <motion.div 
-                        className="py-1 sm:py-2 px-1 sm:px-2 bg-yellow-50 rounded border border-yellow-200"
+                      <motion.div
+                        className="py-1 px-1 bg-yellow-50 rounded border border-yellow-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6 }}
                       >
-                        <div className="text-sm sm:text-lg font-bold text-yellow-800">{currentBuilding.garages.reserved}</div>
-                        <div className="text-xs text-yellow-600">Резерв.</div>
+                        <div className="text-xs sm:text-sm font-bold text-yellow-800">{currentBuilding.garages.reserved}</div>
+                        <div className="text-[9px] sm:text-[10px] text-yellow-600">Резерв.</div>
                       </motion.div>
-                      <motion.div 
-                        className="py-1 sm:py-2 px-1 sm:px-2 bg-red-50 rounded border border-red-200"
+                      <motion.div
+                        className="py-1 px-1 bg-red-50 rounded border border-red-200"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.7 }}
                       >
-                        <div className="text-sm sm:text-lg font-bold text-red-800">{currentBuilding.garages.sold}</div>
-                        <div className="text-xs text-red-600">Продаден</div>
+                        <div className="text-xs sm:text-sm font-bold text-red-800">{currentBuilding.garages.sold}</div>
+                        <div className="text-[9px] sm:text-[10px] text-red-600">Продаден</div>
                       </motion.div>
                     </div>
                   </div>
@@ -281,7 +281,7 @@ const HeroCarousel = () => {
                   {/* Action Button */}
                   <Link
                     to="/projects"
-                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-2 sm:py-3 px-4 sm:px-6 rounded-luxury font-semibold text-sm sm:text-base text-center block transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-lg"
+                    className="w-full bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 py-2.5 sm:py-3 px-4 rounded-lg sm:rounded-luxury font-semibold text-xs sm:text-sm text-center block transition-all duration-300 shadow-gold-glow hover:shadow-gold-glow-lg"
                   >
                     Виж проектите в продажба
                   </Link>
@@ -310,26 +310,28 @@ const HeroCarousel = () => {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
-        aria-label="Предишен слайд"
-      >
-        <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+      {/* Navigation Arrows - On mobile: positioned near bottom, On desktop: positioned on sides */}
+      <div className="absolute bottom-16 sm:bottom-auto sm:top-1/2 left-0 right-0 sm:left-auto sm:right-auto z-20 flex justify-center sm:justify-between sm:w-full sm:px-4 gap-4 sm:gap-0 sm:pointer-events-none">
+        <button
+          onClick={prevSlide}
+          className="p-3 sm:p-3 rounded-full bg-black/40 sm:bg-white/20 hover:bg-black/60 sm:hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400 sm:transform sm:-translate-y-1/2 pointer-events-auto border border-white/20"
+          aria-label="Предишен слайд"
+        >
+          <svg className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-      <button
-        onClick={nextSlide}
-        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 p-2 sm:p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
-        aria-label="Следващ слайд"
-      >
-        <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+        <button
+          onClick={nextSlide}
+          className="p-3 sm:p-3 rounded-full bg-black/40 sm:bg-white/20 hover:bg-black/60 sm:hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400 sm:transform sm:-translate-y-1/2 pointer-events-auto border border-white/20"
+          aria-label="Следващ слайд"
+        >
+          <svg className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     </section>
   )
 }
