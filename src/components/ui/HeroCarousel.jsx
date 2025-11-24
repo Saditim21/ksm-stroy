@@ -292,46 +292,70 @@ const HeroCarousel = () => {
         </div>
       </div>
 
-      {/* Carousel Controls */}
+      {/* Carousel Controls - Combined arrows and dots at the bottom */}
       <div className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex space-x-2 sm:space-x-3">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-gold-500 w-6 sm:w-8' 
-                  : 'bg-white/50 hover:bg-white/70'
-              }`}
-              aria-label={`Слайд ${index + 1}`}
-            />
-          ))}
+        {/* Mobile: Compact control bar with arrows + dots */}
+        <div className="flex items-center gap-3 sm:gap-4 bg-black/30 sm:bg-transparent backdrop-blur-sm sm:backdrop-blur-none rounded-full px-3 py-2 sm:p-0">
+          {/* Left Arrow - Mobile inline, Desktop hidden here */}
+          <button
+            onClick={prevSlide}
+            className="sm:hidden p-1.5 rounded-full bg-white/20 hover:bg-white/30 active:bg-white/40 transition-all duration-200 text-white"
+            aria-label="Предишен слайд"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Dots */}
+          <div className="flex space-x-2 sm:space-x-3">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`h-2 sm:h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? 'bg-gold-500 w-5 sm:w-8'
+                    : 'bg-white/50 hover:bg-white/70 w-2 sm:w-3'
+                }`}
+                aria-label={`Слайд ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Right Arrow - Mobile inline, Desktop hidden here */}
+          <button
+            onClick={nextSlide}
+            className="sm:hidden p-1.5 rounded-full bg-white/20 hover:bg-white/30 active:bg-white/40 transition-all duration-200 text-white"
+            aria-label="Следващ слайд"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {/* Navigation Arrows - On mobile: positioned near bottom, On desktop: positioned on sides */}
-      <div className="absolute bottom-16 sm:bottom-auto sm:top-1/2 left-0 right-0 sm:left-auto sm:right-auto z-20 flex justify-center sm:justify-between sm:w-full sm:px-4 gap-4 sm:gap-0 sm:pointer-events-none">
-        <button
-          onClick={prevSlide}
-          className="p-3 sm:p-3 rounded-full bg-black/40 sm:bg-white/20 hover:bg-black/60 sm:hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400 sm:transform sm:-translate-y-1/2 pointer-events-auto border border-white/20"
-          aria-label="Предишен слайд"
-        >
-          <svg className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+      {/* Desktop Navigation Arrows - Positioned on sides */}
+      <button
+        onClick={prevSlide}
+        className="hidden sm:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400"
+        aria-label="Предишен слайд"
+      >
+        <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
-        <button
-          onClick={nextSlide}
-          className="p-3 sm:p-3 rounded-full bg-black/40 sm:bg-white/20 hover:bg-black/60 sm:hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400 sm:transform sm:-translate-y-1/2 pointer-events-auto border border-white/20"
-          aria-label="Следващ слайд"
-        >
-          <svg className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      <button
+        onClick={nextSlide}
+        className="hidden sm:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-300 text-white hover:text-gold-400"
+        aria-label="Следващ слайд"
+      >
+        <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </section>
   )
 }
