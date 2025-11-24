@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
@@ -837,24 +838,28 @@ const About = () => {
             <p className="text-2xl text-primary-800 mb-12 max-w-4xl mx-auto leading-relaxed">
               Свържете се с нашия екип за консултация и да обсъдим как можем да реализираме вашия проект
             </p>
-            <motion.div 
+            <motion.div
               variants={staggerItem}
               className="flex flex-col sm:flex-row gap-6 justify-center"
             >
-              <motion.button 
-                className="bg-primary-900 text-gold-400 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-800 transition-all duration-300 shadow-2xl"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Свържете се с нас
-              </motion.button>
-              <motion.button 
-                className="border-2 border-primary-900 text-primary-900 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-900 hover:text-gold-400 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Разгледайте проектите
-              </motion.button>
+              <Link to="/contact">
+                <motion.button
+                  className="bg-primary-900 text-gold-400 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-800 transition-all duration-300 shadow-2xl"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Свържете се с нас
+                </motion.button>
+              </Link>
+              <Link to="/blog">
+                <motion.button
+                  className="border-2 border-primary-900 text-primary-900 px-12 py-6 rounded-luxury-xl font-bold text-lg hover:bg-primary-900 hover:text-gold-400 transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Разгледайте проектите
+                </motion.button>
+              </Link>
             </motion.div>
           </motion.div>
         </div>

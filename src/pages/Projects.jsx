@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import PropertyCard from '../components/ui/PropertyCard'
@@ -297,16 +297,20 @@ const Sales = () => {
               Свържете се с нас за консултация и да обсъдим наличните апартаменти и бъдещи проекти
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
-                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
-              >
-                Свържете се с нас
-              </button>
-              <button 
-                className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
-              >
-                Попитайте за цени
-              </button>
+              <Link to="/contact">
+                <button
+                  className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
+                >
+                  Свържете се с нас
+                </button>
+              </Link>
+              <Link to="/contact">
+                <button
+                  className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
+                >
+                  Попитайте за цени
+                </button>
+              </Link>
             </div>
           </div>
         </div>

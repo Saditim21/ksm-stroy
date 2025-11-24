@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
@@ -362,20 +363,24 @@ const Projects = () => {
               Свържете се с нас за консултация и да обсъдим как можем да реализираме вашия проект
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.button 
-                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Свържете се с нас
-              </motion.button>
-              <motion.button 
-                className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Поръчайте оферта
-              </motion.button>
+              <Link to="/contact">
+                <motion.button
+                  className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-8 py-4 rounded-luxury font-semibold hover:shadow-gold-glow-lg transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Свържете се с нас
+                </motion.button>
+              </Link>
+              <Link to="/contact">
+                <motion.button
+                  className="border-2 border-gold-500/50 text-white px-8 py-4 rounded-luxury font-semibold hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Поръчайте оферта
+                </motion.button>
+              </Link>
             </div>
           </div>
         </div>
