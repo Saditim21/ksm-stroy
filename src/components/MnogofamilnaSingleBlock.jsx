@@ -901,8 +901,8 @@ const MnogofamilnaSingleBlock = () => {
                   </svg>
                   <div>
                     <p className="text-sm text-gray-600">Email:</p>
-                    <a href="mailto:info@ksm-stroy.com" className="text-gold-600 hover:text-gold-800 font-medium">
-                      info@ksm-stroy.com
+                    <a href="mailto:ksm_str@abv.bg" className="text-gold-600 hover:text-gold-800 font-medium">
+                      ksm_str@abv.bg
                     </a>
                   </div>
                 </div>
