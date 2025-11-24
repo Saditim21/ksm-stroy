@@ -1,13 +1,20 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
+import emailjs from '@emailjs/browser'
 import SEO from '../components/common/SEO'
 import { seoData } from '../utils/seo'
 import { pageVariants, pageTransition, fadeInUp, buttonExpand, viewportOptions } from '../utils/animations'
 
+// EmailJS Configuration
+const EMAILJS_SERVICE_ID = 'service_qdte1vp'
+const EMAILJS_TEMPLATE_ID = 'template_zsun0cc'
+const EMAILJS_PUBLIC_KEY = 'iDCcC1JI_k69MIid0'
+
 const Contact = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   const {
     register,
@@ -28,19 +35,35 @@ const Contact = () => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
-    
+    setSubmitError(null)
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      console.log('Form submitted:', data)
+      // Send email using EmailJS
+      const templateParams = {
+        from_name: data.name,
+        from_email: data.email,
+        phone: data.phone || 'Не е посочен',
+        project_type: data.projectType || 'Не е посочен',
+        budget: data.budget || 'Не е посочен',
+        message: data.message,
+        to_email: 'ksm_str@abv.bg'
+      }
+
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      )
+
       setIsSubmitted(true)
       reset()
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => setIsSubmitted(false), 5000)
     } catch (error) {
       console.error('Form submission error:', error)
+      setSubmitError('Възникна грешка при изпращането. Моля, опитайте отново или се свържете директно с нас.')
     } finally {
       setIsSubmitting(false)
     }
@@ -54,10 +77,10 @@ const Contact = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      title: "Адрес",
+      title: "Адреси",
       details: [
-        "гр. София, ул. Строителна 123",
-        "1000 София, България"
+        "гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38",
+        "гр. Гоце Делчев, ул. Кирил и Методий 17, вх. Б, ет.1"
       ]
     },
     {
@@ -179,6 +202,16 @@ const Contact = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Вашето съобщение е изпратено успешно! Ще се свържем с вас скоро.
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {submitError && (
+                  <div className="mb-6 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {submitError}
                   </div>
                 )}
                 
@@ -378,13 +411,20 @@ const Contact = () => {
             </div>
             
             {/* Map Info */}
-            <div className="mt-8 text-center">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
               <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
-                <svg className="w-5 h-5 text-gold-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gold-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="text-primary-700 font-medium">гр. София, ул. Строителна 123, 1000</span>
+                <span className="text-primary-700 font-medium">гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38</span>
+              </div>
+              <div className="inline-flex items-center bg-white rounded-luxury px-6 py-4 shadow-luxury border border-silver-200">
+                <svg className="w-5 h-5 text-gold-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-primary-700 font-medium">гр. Гоце Делчев, ул. Кирил и Методий 17, вх. Б, ет.1</span>
               </div>
             </div>
           </div>
