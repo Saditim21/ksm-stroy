@@ -4,21 +4,40 @@
 
 /* Base layer improvements for better mobile responsiveness */
 @layer base {
-  /* Better text rendering */
+  /* Better text rendering and prevent overscroll */
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Prevent overscroll bounce/refresh effect */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    /* Enable momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Prevent horizontal overflow on mobile */
+  /* Prevent horizontal overflow and overscroll on mobile */
   body {
     overflow-x: hidden;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    /* Consistent background color to prevent flash - matches primary-50 */
+    background-color: #fafafa;
+    /* Hardware acceleration for smoother scrolling */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   /* Better touch behavior for interactive elements */
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
+    /* Hardware acceleration for touch interactions */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   /* Responsive base font size for very small screens */
@@ -28,10 +47,22 @@
     }
   }
 
-  /* Better image handling */
+  /* Better image handling with hardware acceleration */
   img {
     max-width: 100%;
     height: auto;
+    /* GPU acceleration for images */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Optimize all animated elements */
+  * {
+    /* Use GPU for animations */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
   }
 }
 
@@ -45,16 +76,37 @@
     display: none;  /* Safari and Chrome */
   }
 
-  /* Smooth scrolling for touch devices */
+  /* Smooth scrolling for touch devices with GPU acceleration */
   .scroll-smooth-touch {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    /* Hardware acceleration */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: scroll-position;
   }
 
   /* Better touch interaction - 48px minimum touch target */
   .touch-target {
     min-height: 48px;
     min-width: 48px;
+  }
+
+  /* GPU-accelerated animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+
+  /* Smooth transitions - only use transform and opacity */
+  .smooth-transition {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
   }
 
   /* Text balance for better readability on mobile */
@@ -101,6 +153,22 @@
 /* Utility to prevent iOS overscroll whitespace flashes under fixed elements */
 html, body, #root {
   height: 100%;
+  /* Prevent pull-to-refresh and overscroll effects */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+}
+
+/* Additional mobile overscroll prevention */
+#root {
+  /* Ensure consistent background - matches primary-50 */
+  background-color: #fafafa;
+  /* Prevent content from causing overscroll */
+  position: relative;
+  /* Hardware acceleration for smooth rendering */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* Optimize rendering */
+  contain: layout style paint;
 }
 
 /* Enhanced smooth zoom animation - more noticeable */

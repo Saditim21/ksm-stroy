@@ -57,9 +57,9 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
         <Navbar />
-        <main className="flex-1">
+        <main className="flex-1 overscroll-none">
           <AnimatedRoutes />
         </main>
         <Footer />
