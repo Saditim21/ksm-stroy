@@ -107,16 +107,18 @@ export const properties = [
               { number: 'А-804', type: '3-стаен', area: '90 кв.м', status: 'Скоро' }
             ]
           },
-          { 
-            floor: 7, 
-            status: 'coming-soon', 
-            apartments: 4, 
-            description: 'Етаж 7 - 4 апартамента (скоро)', 
+          {
+            floor: 7,
+            status: 'available',
+            apartments: 6,
+            description: 'Етаж 7 - 6 апартамента',
             apartmentList: [
               { number: 'А-701', type: '2-стаен', area: '65 кв.м', status: 'Скоро' },
               { number: 'А-702', type: '3-стаен', area: '85 кв.м', status: 'Скоро' },
               { number: 'А-703', type: '2-стаен', area: '70 кв.м', status: 'Скоро' },
-              { number: 'А-704', type: '3-стаен', area: '90 кв.м', status: 'Скоро' }
+              { number: 'А-704', type: '3-стаен', area: '90 кв.м', status: 'Скоро' },
+              { number: 'А-705', type: '3-стаен', area: '100 кв.м', status: 'Скоро' },
+              { number: 'А-706', type: '3-стаен', area: '114.58 кв.м', status: 'Продаден' }
             ]
           },
           { 

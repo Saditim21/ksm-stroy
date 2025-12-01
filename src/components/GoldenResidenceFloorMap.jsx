@@ -136,7 +136,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
     { apartment: 'А 703', built: '93.78', ideal: '13.46', total: '107.24', status: 'Свободен' },
     { apartment: 'А 704', built: '59.36', ideal: '8.52', total: '67.88', status: 'Продадени' },
     { apartment: 'А 705', built: '59.36', ideal: '8.52', total: '67.88', status: 'Продадени' },
-    { apartment: 'А 706', built: '100.20', ideal: '14.38', total: '114.58', status: 'Свободен' },
+    { apartment: 'А 706', built: '100.20', ideal: '14.38', total: '114.58', status: 'Продадени' },
     { apartment: 'А 707', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
     { apartment: 'А 708', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
     { apartment: 'А 709', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
