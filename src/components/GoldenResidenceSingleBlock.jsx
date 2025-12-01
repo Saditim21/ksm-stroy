@@ -805,7 +805,7 @@ const GoldenResidenceSingleBlock = () => {
                     </button>
                     
                     <h1 className="text-2xl sm:text-4xl font-bold text-center flex-1 mx-4 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2">
-                      <span className="text-gold-600">{blockTitle}</span> - <span className="text-gold-600">{selectedFloor} етаж</span>
+                      <span className="text-gold-600">{blockTitle}</span> - <span className="text-gold-600">{selectedFloor === 'ground' ? 'Приземен етаж' : selectedFloor === 'underground' ? 'Подземен етаж' : `${selectedFloor} етаж`}</span>
                     </h1>
                     
                     {/* Empty space for layout balance */}
