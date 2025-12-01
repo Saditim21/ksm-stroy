@@ -237,43 +237,54 @@ const HeroCarousel = () => {
 
                   {/* Garages Section */}
                   <div className="mb-2 sm:mb-4 pb-2 sm:pb-4 border-b border-silver-200">
-                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                      <h4 className="text-sm sm:text-base font-semibold text-primary-900 flex items-center">
-                        <svg className="w-4 h-4 text-gold-600 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-primary-900 flex items-center">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gold-600 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                         </svg>
                         Гаражи
                       </h4>
-                      <span className="text-primary-600 text-[10px] sm:text-xs">Общо {currentBuilding.garages.total}</span>
+                      <span className="text-primary-600 text-xs sm:text-sm">Общо {currentBuilding.garages.total}</span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1 text-center">
+                    <div className="space-y-1 sm:space-y-1.5">
                       <motion.div
-                        className="py-1 px-1 bg-green-50 rounded border border-green-200"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-green-50 rounded-lg border border-green-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
                       >
-                        <div className="text-xs sm:text-sm font-bold text-green-800">{currentBuilding.garages.available}</div>
-                        <div className="text-[9px] sm:text-[10px] text-green-600">Свободни</div>
+                        <div className="flex items-center">
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-green-800">Свободни</span>
+                        </div>
+                        <span className="text-green-800 font-semibold text-sm sm:text-base">{currentBuilding.garages.available}</span>
                       </motion.div>
+
                       <motion.div
-                        className="py-1 px-1 bg-yellow-50 rounded border border-yellow-200"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-yellow-50 rounded-lg border border-yellow-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 }}
                       >
-                        <div className="text-xs sm:text-sm font-bold text-yellow-800">{currentBuilding.garages.reserved}</div>
-                        <div className="text-[9px] sm:text-[10px] text-yellow-600">Резерв.</div>
+                        <div className="flex items-center">
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-yellow-800">Резервирани</span>
+                        </div>
+                        <span className="text-yellow-800 font-semibold text-sm sm:text-base">{currentBuilding.garages.reserved}</span>
                       </motion.div>
+
                       <motion.div
-                        className="py-1 px-1 bg-red-50 rounded border border-red-200"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between py-1.5 sm:py-2 px-2 sm:px-3 bg-red-50 rounded-lg border border-red-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.7 }}
                       >
-                        <div className="text-xs sm:text-sm font-bold text-red-800">{currentBuilding.garages.sold}</div>
-                        <div className="text-[9px] sm:text-[10px] text-red-600">Продаден</div>
+                        <div className="flex items-center">
+                          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full mr-1.5 sm:mr-2"></div>
+                          <span className="text-xs sm:text-sm font-medium text-red-800">Продадени</span>
+                        </div>
+                        <span className="text-red-800 font-semibold text-sm sm:text-base">{currentBuilding.garages.sold}</span>
                       </motion.div>
                     </div>
                   </div>
