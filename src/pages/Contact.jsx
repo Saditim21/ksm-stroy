@@ -60,6 +60,9 @@ const Contact = () => {
       setIsSubmitted(true)
       reset()
 
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+
       // Reset success message after 5 seconds
       setTimeout(() => setIsSubmitted(false), 5000)
     } catch (error) {
