@@ -42,6 +42,7 @@ const Contact = () => {
       const templateParams = {
         from_name: data.name,
         from_email: data.email,
+        reply_to: data.email,
         phone: data.phone || 'Не е посочен',
         project_type: data.projectType || 'Не е посочен',
         budget: data.budget || 'Не е посочен',
