@@ -58,6 +58,7 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
 })
 
 const About = () => {
+  // Force deployment trigger
   const [activeSlide, setActiveSlide] = useState(0)
   const heroImages = [slider01, slider02, slider03]
 
