@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import emailjs from '@emailjs/browser'
 import SEO from '../components/common/SEO'
 import { seoData } from '../utils/seo'
 import { pageVariants, pageTransition, fadeInUp, buttonExpand, viewportOptions } from '../utils/animations'
@@ -38,6 +37,9 @@ const Contact = () => {
     setSubmitError(null)
 
     try {
+      // Lazy load EmailJS only when needed
+      const emailjs = await import('@emailjs/browser').then(module => module.default)
+      
       // Send email using EmailJS
       const templateParams = {
         from_name: data.name,
@@ -219,7 +221,7 @@ const Contact = () => {
                   </div>
                 )}
                 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form id="contact-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {/* Name Field */}
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-primary-700 mb-2">
@@ -447,12 +449,20 @@ const Contact = () => {
               Нашият екип е готов да ви помогне да реализирате мечтания проект с качество и професионализъм
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200">
+              <a 
+                href="#contact-form" 
+                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200 text-center"
+                aria-label="Отиди до формата за безплатна оферта"
+              >
                 Получете безплатна оферта
-              </button>
-              <button className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
+              </a>
+              <a 
+                href="tel:+359885762224" 
+                className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm text-center"
+                aria-label="Обади се на +359 885 762 224"
+              >
                 Обадете се сега
-              </button>
+              </a>
             </div>
           </div>
         </section>

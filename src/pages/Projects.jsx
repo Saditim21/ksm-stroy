@@ -11,11 +11,11 @@ import { buildingImages, getBuildingImage, getGoldenResidenceImage } from '../co
 import GoldenResidenceFloorMap from '../components/GoldenResidenceFloorMap'
 import { getApartmentImage } from '../constants/apartmentImages'
 
-// Import sales property images
-import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
-import property1Image2 from '../assets/продажби/project 1/sgrada1.jpg'
-import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
-import buildingImage from '../assets/продажби/project 1/sgrada1.jpg'
+// Import optimized sales property images
+import property1Image1 from '../assets/продажби/project 1/optimized/sgrada1.webp'
+import property1Image2 from '../assets/продажби/project 1/optimized/sgrada1.webp'
+import goldenResidenceImage from '../assets/продажби/project 2/optimized/golden-residence.webp'
+import buildingImage from '../assets/продажби/project 1/optimized/sgrada1.webp'
 import buildingBFloor1Image from '../assets/продажби/project 1/building-B-floor-1.jpg'
 import buildingBFloor2Image from '../assets/продажби/project 1/building-B-floor-2.jpg'
 import buildingBFloor3Image from '../assets/продажби/project 1/building-B-floor-3.jpg'

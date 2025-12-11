@@ -3,9 +3,9 @@ import HeroCarousel from '../components/ui/HeroCarousel'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { seoData, generateStructuredData } from '../utils/seo'
-import img001 from '../assets/home/001.jpg'
+import img001 from '../assets/home/optimized/001.webp'
 import img003 from '../assets/images/003.jpg'
-import imgPhoto4 from '../assets/home/photo-4.png'
+import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 const Home = () => {
@@ -56,9 +56,11 @@ const Home = () => {
         variants={pageVariants}
         transition={pageTransition}
       >
+      {/* Main heading for semantic structure */}
+      <h1 className="sr-only">KSM Строй - Водеща строителна компания в София</h1>
+      
       {/* Hero Section */}
       <HeroCarousel />
-
 
       {/* Services Section */}
       <motion.section 

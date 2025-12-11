@@ -54,15 +54,32 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="/src/assets/images/slider01.jpg" as="image" type="image/jpeg" />
+    <link rel="preload" href="/src/assets/home/optimized/photo-4.webp" as="image" type="image/webp" fetchpriority="high">
+    <link rel="preload" href="/src/assets/images/optimized/slider01.webp" as="image" type="image/webp">
 
-    <!-- DNS Prefetch for External Resources -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <!-- Google Fonts with font-display swap for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+
+    <!-- DNS Prefetch for other External Resources -->
     <link rel="dns-prefetch" href="//www.google.com" />
-
-    <!-- Performance Optimizations -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://va.vercel-scripts.com" />
+    
     <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Critical CSS for above-the-fold content -->
+    <style>
+      /* Prevent layout shift - set initial styles */
+      html, body, #root { margin: 0; padding: 0; height: 100%; }
+      body { font-family: system-ui, -apple-system, sans-serif; background-color: #fafafa; }
+      /* Ensure hero doesn't cause layout shift */
+      .hero-section { height: 100vh; min-height: 600px; position: relative; overflow: hidden; }
+      /* Prevent flash of unstyled content */
+      .loading { opacity: 0; transition: opacity 0.3s; }
+      .loaded { opacity: 1; }
+    </style>
     
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">

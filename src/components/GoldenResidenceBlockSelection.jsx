@@ -44,11 +44,11 @@ const GoldenResidenceBlockSelection = () => {
             <div className="grid grid-cols-3 items-center mb-6 sm:mb-8">
               <div className="flex justify-start">
                 <button 
-                  onClick={() => navigate('/projects')}
+                  onClick={() => navigate(-1)}
                   className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
                 >
                   <span className="text-2xl sm:text-xl font-bold">←</span>
-                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
+                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад</span>
                 </button>
               </div>
               
