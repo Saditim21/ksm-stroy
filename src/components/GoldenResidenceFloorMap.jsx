@@ -19,12 +19,39 @@ import archB8 from '../assets/продажби/project 2/architectures-b/archite
 import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.png';
 import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.png';
 
+// Import main golden residence image
+import goldenResidenceMain from '../assets/продажби/project 2/golden-residence.jpg';
+
 const architectureA = {2: archA2,3: archA3,4: archA4,5: archA5,6: archA6,7: archA7,8: archA8};
 const architectureB = {1: archB1,2: archB2,3: archB3,4: archB4,5: archB5,6: archB6,7: archB7,8: archB8};
 
+// Building floor images mapping using public URLs
+const buildingAImages = {
+  1: '/images/golden-residence/building-2-blog-a-floor1.png',
+  2: '/images/golden-residence/building-2-blog-a-floor2.png',
+  3: '/images/golden-residence/building-2-blog-a-floor3.png',
+  4: '/images/golden-residence/building-2-blog-a-floor4.png',
+  5: '/images/golden-residence/building-2-blog-a-floor5.png',
+  6: '/images/golden-residence/building-2-blog-a-floor6.png',
+  7: '/images/golden-residence/building-2-blog-a-floor7.png',
+  8: '/images/golden-residence/building-2-blog-a-floor8.png'
+};
+const buildingBImages = {
+  1: '/images/golden-residence/building-2-blog-b-floor1.png',
+  2: '/images/golden-residence/building-2-blog-b-floor2.png',
+  3: '/images/golden-residence/building-2-blog-b-floor3.png',
+  4: '/images/golden-residence/building-2-blog-b-floor4.png',
+  5: '/images/golden-residence/building-2-blog-b-floor5.png',
+  6: '/images/golden-residence/building-2-blog-b-floor6.png',
+  7: '/images/golden-residence/building-2-blog-b-floor7.png',
+  8: '/images/golden-residence/building-2-blog-b-floor8.png'
+};
+
 const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect }) => {
-  const [currentBlockAImage, setCurrentBlockAImage] = useState('/src/assets/продажби/project 2/golden-residence.jpg');
-  const [currentBlockBImage, setCurrentBlockBImage] = useState('/src/assets/продажби/project 2/golden-residence.jpg');
+  const [currentBlockAImage, setCurrentBlockAImage] = useState(goldenResidenceMain);
+  const [currentBlockBImage, setCurrentBlockBImage] = useState(goldenResidenceMain);
+  const [hoveredFloorA, setHoveredFloorA] = useState(null);
+  const [hoveredFloorB, setHoveredFloorB] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [isArchitecturePlanFullscreen, setIsArchitecturePlanFullscreen] = useState(false);
   const [selectedApartment, setSelectedApartment] = useState(null);
@@ -497,30 +524,32 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
   ];
   
   const handleBlockAFloorHover = (floorNumber) => {
+    setHoveredFloorA(floorNumber);
+    
     if (onHoverChange) {
       const isHovering = floorNumber !== null;
       onHoverChange(isHovering, floorNumber);
     }
     
     if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
-      const imageUrl = `/src/assets/продажби/project 2/building-2-blog-a-floor${floorNumber}.png`;
-      setCurrentBlockAImage(imageUrl);
+      setCurrentBlockAImage(buildingAImages[floorNumber]);
     } else {
-      setCurrentBlockAImage('/src/assets/продажби/project 2/golden-residence.jpg');
+      setCurrentBlockAImage(goldenResidenceMain);
     }
   };
 
   const handleBlockBFloorHover = (floorNumber) => {
+    setHoveredFloorB(floorNumber);
+    
     if (onHoverChange) {
       const isHovering = floorNumber !== null;
       onHoverChange(isHovering, floorNumber);
     }
     
     if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
-      const imageUrl = `/src/assets/продажби/project 2/building-2-blog-b-floor${floorNumber}.png`;
-      setCurrentBlockBImage(imageUrl);
+      setCurrentBlockBImage(buildingBImages[floorNumber]);
     } else {
-      setCurrentBlockBImage('/src/assets/продажби/project 2/golden-residence.jpg');
+      setCurrentBlockBImage(goldenResidenceMain);
     }
   };
 
@@ -912,10 +941,10 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill="transparent"
-                  stroke="transparent"
-                  strokeWidth="0"
-                  className="cursor-pointer"
+                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.3)" : "transparent"}
+                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorA === floor ? "1" : "0"}
+                  className="cursor-pointer transition-all duration-200"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockAFloorHover(floor)}
                   onMouseLeave={() => handleBlockAFloorHover(null)}
@@ -1014,10 +1043,10 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill="transparent"
-                  stroke="transparent"
-                  strokeWidth="0"
-                  className="cursor-pointer"
+                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.3)" : "transparent"}
+                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorB === floor ? "1" : "0"}
+                  className="cursor-pointer transition-all duration-200"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockBFloorHover(floor)}
                   onMouseLeave={() => handleBlockBFloorHover(null)}
