@@ -524,33 +524,33 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
   ];
   
   const handleBlockAFloorHover = (floorNumber) => {
+    // Immediate state update for faster response
     setHoveredFloorA(floorNumber);
     
-    if (onHoverChange) {
-      const isHovering = floorNumber !== null;
-      onHoverChange(isHovering, floorNumber);
-    }
-    
-    if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
+    // Only update image if necessary
+    if (floorNumber && buildingAImages[floorNumber]) {
       setCurrentBlockAImage(buildingAImages[floorNumber]);
-    } else {
+    } else if (!floorNumber) {
       setCurrentBlockAImage(goldenResidenceMain);
     }
+    
+    // Callback for parent component
+    onHoverChange?.(floorNumber !== null, floorNumber);
   };
 
   const handleBlockBFloorHover = (floorNumber) => {
+    // Immediate state update for faster response
     setHoveredFloorB(floorNumber);
     
-    if (onHoverChange) {
-      const isHovering = floorNumber !== null;
-      onHoverChange(isHovering, floorNumber);
-    }
-    
-    if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
+    // Only update image if necessary
+    if (floorNumber && buildingBImages[floorNumber]) {
       setCurrentBlockBImage(buildingBImages[floorNumber]);
-    } else {
+    } else if (!floorNumber) {
       setCurrentBlockBImage(goldenResidenceMain);
     }
+    
+    // Callback for parent component
+    onHoverChange?.(floorNumber !== null, floorNumber);
   };
 
   const handleFloorClick = (block, floor) => {
@@ -941,10 +941,10 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 255, 255, 0.1)"}
-                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 1)" : "rgba(255, 255, 255, 0.3)"}
-                  strokeWidth="1"
-                  className="cursor-pointer transition-all duration-200"
+                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.4)" : "transparent"}
+                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorA === floor ? "2" : "0"}
+                  className="cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockAFloorHover(floor)}
                   onMouseLeave={() => handleBlockAFloorHover(null)}
@@ -1043,10 +1043,10 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.5)" : "rgba(255, 255, 255, 0.1)"}
-                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 1)" : "rgba(255, 255, 255, 0.3)"}
-                  strokeWidth="1"
-                  className="cursor-pointer transition-all duration-200"
+                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.4)" : "transparent"}
+                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorB === floor ? "2" : "0"}
+                  className="cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockBFloorHover(floor)}
                   onMouseLeave={() => handleBlockBFloorHover(null)}
