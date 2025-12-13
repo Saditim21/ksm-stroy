@@ -941,9 +941,9 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.3)" : "transparent"}
-                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.8)" : "transparent"}
-                  strokeWidth={hoveredFloorA === floor ? "1" : "0"}
+                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 255, 255, 0.1)"}
+                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 1)" : "rgba(255, 255, 255, 0.3)"}
+                  strokeWidth="1"
                   className="cursor-pointer transition-all duration-200"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockAFloorHover(floor)}
@@ -1043,9 +1043,9 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.3)" : "transparent"}
-                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.8)" : "transparent"}
-                  strokeWidth={hoveredFloorB === floor ? "1" : "0"}
+                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.5)" : "rgba(255, 255, 255, 0.1)"}
+                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 1)" : "rgba(255, 255, 255, 0.3)"}
+                  strokeWidth="1"
                   className="cursor-pointer transition-all duration-200"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockBFloorHover(floor)}
