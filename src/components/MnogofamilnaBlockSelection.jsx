@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.png';
@@ -24,8 +24,18 @@ const MnogofamilnaBlockSelection = () => {
   ];
 
   const handleBlockSelect = (block) => {
+    setShowGallery(false);
+    setFullscreenImage(null);
     navigate(`/projects/mnogofamilna-sgrada/${block}`);
   };
+
+  // Reset gallery state when component unmounts
+  useEffect(() => {
+    return () => {
+      setShowGallery(false);
+      setFullscreenImage(null);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 py-2 sm:py-6 lg:py-16">
@@ -42,11 +52,11 @@ const MnogofamilnaBlockSelection = () => {
             <div className="grid grid-cols-3 items-center mb-6 sm:mb-8">
               <div className="flex justify-start">
                 <button
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate('/projects')}
                   className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
                 >
                   <span className="text-2xl sm:text-xl font-bold">←</span>
-                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад</span>
+                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
                 </button>
               </div>
 
@@ -64,7 +74,10 @@ const MnogofamilnaBlockSelection = () => {
               {/* Gallery Button - Top Right */}
               <div className="flex justify-end">
                 <motion.button
-                  onClick={() => setShowGallery(true)}
+                  onClick={() => {
+                    setShowGallery(true);
+                    setFullscreenImage(null);
+                  }}
                   className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group text-sm sm:text-base"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -236,9 +249,10 @@ const MnogofamilnaBlockSelection = () => {
             {/* Close button */}
             <motion.button
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                setFullscreenImage(null);
                 setShowGallery(false);
+                setFullscreenImage(null);
               }}
               className="fixed top-6 right-6 z-50 text-white hover:text-gold-400 transition-colors p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"
               initial={{ scale: 0, rotate: -180 }}
@@ -381,13 +395,16 @@ const MnogofamilnaBlockSelection = () => {
 
       {/* Fullscreen Image Viewer */}
       <AnimatePresence>
-        {fullscreenImage && (
+        {fullscreenImage && showGallery && (
           <motion.div
             className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setFullscreenImage(null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setFullscreenImage(null);
+            }}
           >
             {/* Close button */}
             <button

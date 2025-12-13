@@ -154,7 +154,7 @@ const Contact = () => {
       />
       
       <motion.main 
-        className="min-h-screen pt-20"
+        className="min-h-screen pt-6"
         initial="initial"
         animate="in"
         exit="out"
@@ -163,7 +163,7 @@ const Contact = () => {
       >
 
         {/* Contact Form & Info */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-primary-50">
+        <section className="py-6 sm:py-8 lg:py-12 bg-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
               
@@ -391,7 +391,7 @@ const Contact = () => {
       </section>
 
         {/* Google Maps Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
+        <section className="py-8 sm:py-10 bg-gradient-to-br from-ivory-50 to-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8 sm:mb-12">
               <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Местоположение</span>
@@ -437,7 +437,7 @@ const Contact = () => {
         </section>
 
         {/* Call to Action Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
+        <section className="py-8 sm:py-10 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
           {/* Gold accent overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
 

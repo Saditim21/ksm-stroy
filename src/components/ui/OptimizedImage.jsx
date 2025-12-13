@@ -65,7 +65,12 @@ const OptimizedImage = ({
   const generateSrcSet = (baseSrc) => {
     if (srcSet) return srcSet
     
-    // Generate responsive sizes
+    // For static imports (Vite processed), don't add query params
+    if (baseSrc.includes('/assets/')) {
+      return baseSrc
+    }
+    
+    // Generate responsive sizes for dynamic URLs
     const sizes = [400, 800, 1200, 1600]
     return sizes
       .map(size => `${baseSrc}?w=${size} ${size}w`)
@@ -109,6 +114,44 @@ const OptimizedImage = ({
     )
   }
 
+  // For static imports (Vite processed), use simple img tag
+  if (imageSrc && imageSrc.includes('/assets/')) {
+    return (
+      <div 
+        ref={imgRef} 
+        className="relative overflow-hidden"
+        style={{ 
+          width: width || '100%', 
+          height: height || 'auto',
+          aspectRatio: width && height ? `${width}/${height}` : undefined
+        }}
+      >
+        {/* Placeholder */}
+        {!isLoaded && placeholder === 'blur' && (
+          <div 
+            className={`absolute inset-0 bg-gray-200 animate-pulse ${className}`}
+            style={{ width: '100%', height: '100%' }}
+          />
+        )}
+        
+        {/* Simple img tag for static imports */}
+        <img
+          src={imageSrc}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={loading}
+          className={`transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          } ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          {...props}
+        />
+      </div>
+    )
+  }
+
   return (
     <div 
       ref={imgRef} 
@@ -127,7 +170,7 @@ const OptimizedImage = ({
         />
       )}
       
-      {/* Main Image with WebP support */}
+      {/* Main Image with WebP support - for dynamic URLs */}
       {imageSrc && (
         <motion.picture
           initial={{ opacity: 0 }}
