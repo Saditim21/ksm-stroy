@@ -190,3 +190,4 @@ This project uses Vite for fast development and building. Available scripts:
 ## License
 
 MIT License - feel free to use in commercial real estate projects.
+# Deployment trigger Thu Dec 12 19:35:00 EET 2024 - Testing Vercel connection

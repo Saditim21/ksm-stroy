@@ -19,12 +19,39 @@ import archB8 from '../assets/продажби/project 2/architectures-b/archite
 import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.png';
 import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.png';
 
+// Import main golden residence image
+import goldenResidenceMain from '../assets/продажби/project 2/golden-residence.jpg';
+
 const architectureA = {2: archA2,3: archA3,4: archA4,5: archA5,6: archA6,7: archA7,8: archA8};
 const architectureB = {1: archB1,2: archB2,3: archB3,4: archB4,5: archB5,6: archB6,7: archB7,8: archB8};
 
+// Building floor images mapping using public URLs
+const buildingAImages = {
+  1: '/images/golden-residence/building-2-blog-a-floor1.png',
+  2: '/images/golden-residence/building-2-blog-a-floor2.png',
+  3: '/images/golden-residence/building-2-blog-a-floor3.png',
+  4: '/images/golden-residence/building-2-blog-a-floor4.png',
+  5: '/images/golden-residence/building-2-blog-a-floor5.png',
+  6: '/images/golden-residence/building-2-blog-a-floor6.png',
+  7: '/images/golden-residence/building-2-blog-a-floor7.png',
+  8: '/images/golden-residence/building-2-blog-a-floor8.png'
+};
+const buildingBImages = {
+  1: '/images/golden-residence/building-2-blog-b-floor1.png',
+  2: '/images/golden-residence/building-2-blog-b-floor2.png',
+  3: '/images/golden-residence/building-2-blog-b-floor3.png',
+  4: '/images/golden-residence/building-2-blog-b-floor4.png',
+  5: '/images/golden-residence/building-2-blog-b-floor5.png',
+  6: '/images/golden-residence/building-2-blog-b-floor6.png',
+  7: '/images/golden-residence/building-2-blog-b-floor7.png',
+  8: '/images/golden-residence/building-2-blog-b-floor8.png'
+};
+
 const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect }) => {
-  const [currentBlockAImage, setCurrentBlockAImage] = useState('/src/assets/продажби/project 2/golden-residence.jpg');
-  const [currentBlockBImage, setCurrentBlockBImage] = useState('/src/assets/продажби/project 2/golden-residence.jpg');
+  const [currentBlockAImage, setCurrentBlockAImage] = useState(goldenResidenceMain);
+  const [currentBlockBImage, setCurrentBlockBImage] = useState(goldenResidenceMain);
+  const [hoveredFloorA, setHoveredFloorA] = useState(null);
+  const [hoveredFloorB, setHoveredFloorB] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [isArchitecturePlanFullscreen, setIsArchitecturePlanFullscreen] = useState(false);
   const [selectedApartment, setSelectedApartment] = useState(null);
@@ -139,7 +166,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
     { apartment: 'А 706', built: '100.20', ideal: '14.38', total: '114.58', status: 'Продадени' },
     { apartment: 'А 707', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
     { apartment: 'А 708', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
-    { apartment: 'А 709', built: '61.11', ideal: '8.77', total: '69.88', status: 'Свободен' },
+    { apartment: 'А 709', built: '61.11', ideal: '8.77', total: '69.88', status: 'Продадени' },
     { apartment: 'А 710', built: '94.94', ideal: '13.62', total: '108.56', status: 'Свободен' },
     { apartment: 'А 711', built: '55.54', ideal: '7.97', total: '63.51', status: 'Свободен' },
     { apartment: 'А 712', built: '38.46', ideal: '5.52', total: '43.98', type: 'АТЕЛИЕ', status: 'Свободен' }
@@ -352,6 +379,38 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
     // Storage units ПМ-01 to ПМ-34
     { apartment: 'ПМ-01', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
     { apartment: 'ПМ-02', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-03', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-04', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-05', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-06', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-07', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-08', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-09', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-10', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-11', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-12', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-13', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-14', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-15', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-16', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-17', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-18', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-19', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
+    { apartment: 'ПМ-20', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-21', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-22', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-23', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-24', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-25', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-26', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-27', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-28', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-29', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-30', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-31', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-32', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-33', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    { apartment: 'ПМ-34', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
     
     // Entrances
     { apartment: 'А 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' },
@@ -465,31 +524,33 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
   ];
   
   const handleBlockAFloorHover = (floorNumber) => {
-    if (onHoverChange) {
-      const isHovering = floorNumber !== null;
-      onHoverChange(isHovering, floorNumber);
+    // Immediate state update for faster response
+    setHoveredFloorA(floorNumber);
+    
+    // Only update image if necessary
+    if (floorNumber && buildingAImages[floorNumber]) {
+      setCurrentBlockAImage(buildingAImages[floorNumber]);
+    } else if (!floorNumber) {
+      setCurrentBlockAImage(goldenResidenceMain);
     }
     
-    if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
-      const imageUrl = `/src/assets/продажби/project 2/building-2-blog-a-floor${floorNumber}.png`;
-      setCurrentBlockAImage(imageUrl);
-    } else {
-      setCurrentBlockAImage('/src/assets/продажби/project 2/golden-residence.jpg');
-    }
+    // Callback for parent component
+    onHoverChange?.(floorNumber !== null, floorNumber);
   };
 
   const handleBlockBFloorHover = (floorNumber) => {
-    if (onHoverChange) {
-      const isHovering = floorNumber !== null;
-      onHoverChange(isHovering, floorNumber);
+    // Immediate state update for faster response
+    setHoveredFloorB(floorNumber);
+    
+    // Only update image if necessary
+    if (floorNumber && buildingBImages[floorNumber]) {
+      setCurrentBlockBImage(buildingBImages[floorNumber]);
+    } else if (!floorNumber) {
+      setCurrentBlockBImage(goldenResidenceMain);
     }
     
-    if (floorNumber && floorNumber >= 1 && floorNumber <= 8) {
-      const imageUrl = `/src/assets/продажби/project 2/building-2-blog-b-floor${floorNumber}.png`;
-      setCurrentBlockBImage(imageUrl);
-    } else {
-      setCurrentBlockBImage('/src/assets/продажби/project 2/golden-residence.jpg');
-    }
+    // Callback for parent component
+    onHoverChange?.(floorNumber !== null, floorNumber);
   };
 
   const handleFloorClick = (block, floor) => {
@@ -880,9 +941,9 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill="transparent"
-                  stroke="transparent"
-                  strokeWidth="0"
+                  fill={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.4)" : "transparent"}
+                  stroke={hoveredFloorA === floor ? "rgba(0, 255, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorA === floor ? "2" : "0"}
                   className="cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockAFloorHover(floor)}
@@ -982,9 +1043,9 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   y={y}
                   width={width}
                   height={height}
-                  fill="transparent"
-                  stroke="transparent"
-                  strokeWidth="0"
+                  fill={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.4)" : "transparent"}
+                  stroke={hoveredFloorB === floor ? "rgba(255, 0, 0, 0.8)" : "transparent"}
+                  strokeWidth={hoveredFloorB === floor ? "2" : "0"}
                   className="cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
                   onMouseEnter={() => handleBlockBFloorHover(floor)}

@@ -12,6 +12,7 @@ import slider01 from '../assets/images/slider01.jpg'
 import slider02 from '../assets/images/slider02.jpg'
 import slider03 from '../assets/images/slider03.jpg'
 import traditions from '../assets/images/traditions.jpg'
+import hotelParadise from '../assets/projects/Хотел Парадайс - с.Огняново/45263613_104668413873023_2147464397956579328_n.jpg'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 // Move AnimatedCounter outside the component to prevent re-renders
@@ -57,6 +58,7 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
 })
 
 const About = () => {
+  // Updated Golden Residence data
   const [activeSlide, setActiveSlide] = useState(0)
   const heroImages = [slider01, slider02, slider03]
 
@@ -467,12 +469,11 @@ const About = () => {
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <OptimizedImage
+                  <img
                     src={traditions}
                     alt="KSM Stroy - Традиция и иновации"
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                     loading="lazy"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary-900/10 to-primary-900/30"></div>
                 </motion.div>
@@ -494,9 +495,9 @@ const About = () => {
                   </div>
                 </motion.div>
 
-                {/* Floating project card - creative positioning */}
+                {/* Floating project card - creative positioning with hotel image */}
                 <motion.div
-                  className="absolute bottom-[5%] right-[5%] bg-white p-3 sm:p-4 lg:p-6 shadow-2xl z-20 w-36 sm:w-48 lg:w-64"
+                  className="absolute bottom-[5%] right-[5%] bg-white shadow-2xl z-20 w-36 sm:w-48 lg:w-64 overflow-hidden"
                   style={{
                     clipPath: 'polygon(5% 0, 100% 0, 100% 95%, 0 100%)'
                   }}
@@ -505,17 +506,29 @@ const About = () => {
                   transition={{ delay: 0.5, duration: 0.6 }}
                   whileHover={{ y: -10, rotate: 2 }}
                 >
-                  <div className="space-y-1 sm:space-y-2">
+                  {/* Hotel Paradise Background Image */}
+                  <div className="relative h-16 sm:h-20 lg:h-24 overflow-hidden">
+                    <img
+                      src={hotelParadise}
+                      alt="Хотел Парадайс - с. Огняново"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  </div>
+                  
+                  {/* Project Info */}
+                  <div className="p-2 sm:p-3 lg:p-4 space-y-1">
                     <div className="flex items-center gap-1 sm:gap-2">
-                      <div className="w-4 sm:w-6 lg:w-8 h-0.5 bg-gold-500"></div>
-                      <span className="text-[10px] sm:text-xs text-primary-600 font-bold uppercase tracking-widest">Проект</span>
+                      <div className="w-3 sm:w-4 lg:w-6 h-0.5 bg-gold-500"></div>
+                      <span className="text-[9px] sm:text-[10px] text-primary-600 font-bold uppercase tracking-widest">Проект</span>
                     </div>
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-primary-900 leading-tight">
+                    <h3 className="text-sm sm:text-lg lg:text-xl font-black text-primary-900 leading-tight">
                       Хотел<br/>Парадайс
                     </h3>
-                    <div className="flex items-center gap-1 sm:gap-2 pt-1 sm:pt-2">
-                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gold-500 rotate-45"></div>
-                      <span className="text-[10px] sm:text-xs text-primary-600 font-semibold">Завършен проект</span>
+                    <div className="flex items-center gap-1 pt-1">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gold-500 rotate-45"></div>
+                      <span className="text-[8px] sm:text-[10px] text-primary-600 font-semibold">Завършен проект</span>
                     </div>
                   </div>
                 </motion.div>

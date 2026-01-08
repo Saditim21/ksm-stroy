@@ -1,12 +1,20 @@
-import { StrictMode } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.jsx'
+
+// Lazy load analytics for better performance
+const Analytics = lazy(() => 
+  import('@vercel/analytics/react').then(module => ({ 
+    default: module.Analytics 
+  }))
+)
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-    <Analytics />
+    <Suspense fallback={null}>
+      <Analytics />
+    </Suspense>
   </StrictMode>,
 )

@@ -145,11 +145,11 @@ const ProjectDetail = () => {
         
         {/* Back Button */}
         <button
-          onClick={() => navigate('/projects')}
+          onClick={() => navigate(-1)}
           className="absolute top-4 sm:top-6 lg:top-8 left-4 sm:left-6 lg:left-8 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white min-h-[44px] min-w-[44px] sm:px-3 rounded-lg transition-all duration-300 touch-manipulation flex items-center justify-center"
         >
           <span className="text-xl sm:text-lg font-bold sm:mr-2">←</span>
-          <span className="hidden sm:inline text-sm font-medium">Проекти</span>
+          <span className="hidden sm:inline text-sm font-medium">Назад</span>
         </button>
       </section>
 

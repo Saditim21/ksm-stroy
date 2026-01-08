@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import goldenResidence from '../../assets/home/001.jpg'
-import mnogoamilna from '../../assets/home/photo-4.png'
+import OptimizedImage from './OptimizedImage'
+import goldenResidence from '../../assets/home/optimized/001.webp'
+import mnogoamilna from '../../assets/home/optimized/photo-4.webp'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -37,8 +38,8 @@ const HeroCarousel = () => {
     {
       name: "Golden Residence",
       location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
-      apartments: { total: 192, available: 127, reserved: 5, sold: 60 },
-      garages: { total: 192, available: 149, reserved: 2, sold: 41 }
+      apartments: { total: 192, available: 126, reserved: 5, sold: 61 },
+      garages: { total: 224, available: 172, reserved: 2, sold: 50 }
     }
   ]
 
@@ -81,18 +82,24 @@ const HeroCarousel = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
-            className="absolute inset-0"
+            className="absolute inset-0 overflow-hidden"
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 1, ease: "easeInOut" }}
-            style={{
-              backgroundImage: `url(${slides[currentSlide].image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          />
+          >
+            <OptimizedImage
+              src={slides[currentSlide].image}
+              alt={slides[currentSlide].title}
+              className="w-full h-full object-cover"
+              width={1920}
+              height={1080}
+              priority={currentSlide === 0}
+              loading={currentSlide === 0 ? "eager" : "lazy"}
+              fetchPriority={currentSlide === 0 ? "high" : "auto"}
+              sizes="100vw"
+            />
+          </motion.div>
         </AnimatePresence>
 
         {/* Dark overlay */}
@@ -150,7 +157,7 @@ const HeroCarousel = () => {
                       className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-primary-900 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base lg:text-lg shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300 text-center"
                     >
                       Разгледай проектите
-                      <svg className="inline-block ml-1 sm:ml-2 w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="inline-block ml-1 sm:ml-2 w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </Link>

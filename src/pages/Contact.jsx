@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import emailjs from '@emailjs/browser'
 import SEO from '../components/common/SEO'
 import { seoData } from '../utils/seo'
 import { pageVariants, pageTransition, fadeInUp, buttonExpand, viewportOptions } from '../utils/animations'
@@ -38,10 +37,14 @@ const Contact = () => {
     setSubmitError(null)
 
     try {
+      // Lazy load EmailJS only when needed
+      const emailjs = await import('@emailjs/browser').then(module => module.default)
+      
       // Send email using EmailJS
       const templateParams = {
         from_name: data.name,
         from_email: data.email,
+        reply_to: data.email,
         phone: data.phone || 'Не е посочен',
         project_type: data.projectType || 'Не е посочен',
         budget: data.budget || 'Не е посочен',
@@ -58,6 +61,9 @@ const Contact = () => {
 
       setIsSubmitted(true)
       reset()
+
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
 
       // Reset success message after 5 seconds
       setTimeout(() => setIsSubmitted(false), 5000)
@@ -149,7 +155,7 @@ const Contact = () => {
       />
       
       <motion.main 
-        className="min-h-screen pt-20"
+        className="min-h-screen pt-6"
         initial="initial"
         animate="in"
         exit="out"
@@ -158,7 +164,7 @@ const Contact = () => {
       >
 
         {/* Contact Form & Info */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-primary-50">
+        <section className="py-6 sm:py-8 lg:py-12 bg-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
               
@@ -234,7 +240,7 @@ const Contact = () => {
                   </div>
                 )}
                 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form id="contact-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {/* Name Field */}
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-primary-700 mb-2">
@@ -404,7 +410,7 @@ const Contact = () => {
       </section>
 
         {/* Google Maps Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-ivory-50 to-primary-50">
+        <section className="py-8 sm:py-10 bg-gradient-to-br from-ivory-50 to-primary-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8 sm:mb-12">
               <span className="text-gold-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Местоположение</span>
@@ -450,7 +456,7 @@ const Contact = () => {
         </section>
 
         {/* Call to Action Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
+        <section className="py-8 sm:py-10 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
           {/* Gold accent overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
 
@@ -462,12 +468,20 @@ const Contact = () => {
               Нашият екип е готов да ви помогне да реализирате мечтания проект с качество и професионализъм
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200">
+              <a 
+                href="#contact-form" 
+                className="bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:shadow-gold-glow-lg transition-all duration-200 text-center"
+                aria-label="Отиди до формата за безплатна оферта"
+              >
                 Получете безплатна оферта
-              </button>
-              <button className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm">
+              </a>
+              <a 
+                href="tel:+359885762224" 
+                className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm text-center"
+                aria-label="Обади се на +359 885 762 224"
+              >
                 Обадете се сега
-              </button>
+              </a>
             </div>
           </div>
         </section>

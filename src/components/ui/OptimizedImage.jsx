@@ -12,6 +12,7 @@ const OptimizedImage = ({
   priority = false,
   sizes,
   srcSet,
+  fetchPriority,
   onLoad,
   onError,
   ...props
@@ -60,16 +61,31 @@ const OptimizedImage = ({
     onError?.(e)
   }
 
-  // Generate srcSet for responsive images
+  // Generate modern format srcSet and WebP support
   const generateSrcSet = (baseSrc) => {
     if (srcSet) return srcSet
     
-    // Basic responsive image logic - could be enhanced with actual image processing
+    // For static imports (Vite processed), don't add query params
+    if (baseSrc.includes('/assets/')) {
+      return baseSrc
+    }
+    
+    // Generate responsive sizes for dynamic URLs
     const sizes = [400, 800, 1200, 1600]
     return sizes
       .map(size => `${baseSrc}?w=${size} ${size}w`)
       .join(', ')
   }
+
+  // Generate WebP source for picture element
+  const generateWebPSrc = (baseSrc) => {
+    // Convert extension to webp
+    const webpSrc = baseSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp')
+    return webpSrc
+  }
+
+  // Check if image is already WebP
+  const isWebP = (src) => src.toLowerCase().includes('.webp')
 
   const imageSizes = sizes || '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
 
@@ -98,36 +114,96 @@ const OptimizedImage = ({
     )
   }
 
-  return (
-    <div ref={imgRef} className="relative overflow-hidden">
-      {/* Placeholder */}
-      {!isLoaded && imageSrc && placeholder === 'blur' && (
-        <div 
-          className={`absolute inset-0 bg-gray-200 animate-pulse ${className}`}
-          style={{ width, height }}
-        />
-      )}
-      
-      {/* Main Image */}
-      {imageSrc && (
-        <motion.img
+  // For static imports (Vite processed), use simple img tag
+  if (imageSrc && imageSrc.includes('/assets/')) {
+    return (
+      <div 
+        ref={imgRef} 
+        className="relative overflow-hidden"
+        style={{ 
+          width: width || '100%', 
+          height: height || 'auto',
+          aspectRatio: width && height ? `${width}/${height}` : undefined
+        }}
+      >
+        {/* Placeholder */}
+        {!isLoaded && placeholder === 'blur' && (
+          <div 
+            className={`absolute inset-0 bg-gray-200 animate-pulse ${className}`}
+            style={{ width: '100%', height: '100%' }}
+          />
+        )}
+        
+        {/* Simple img tag for static imports */}
+        <img
           src={imageSrc}
           alt={alt}
           width={width}
           height={height}
           loading={loading}
-          sizes={imageSizes}
-          srcSet={generateSrcSet(imageSrc)}
           className={`transition-opacity duration-300 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           } ${className}`}
           onLoad={handleLoad}
           onError={handleError}
+          {...props}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div 
+      ref={imgRef} 
+      className="relative overflow-hidden"
+      style={{ 
+        width: width || '100%', 
+        height: height || 'auto',
+        aspectRatio: width && height ? `${width}/${height}` : undefined
+      }}
+    >
+      {/* Placeholder */}
+      {!isLoaded && imageSrc && placeholder === 'blur' && (
+        <div 
+          className={`absolute inset-0 bg-gray-200 animate-pulse ${className}`}
+          style={{ width: '100%', height: '100%' }}
+        />
+      )}
+      
+      {/* Main Image with WebP support - for dynamic URLs */}
+      {imageSrc && (
+        <motion.picture
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
           transition={{ duration: 0.3 }}
-          {...props}
-        />
+        >
+          {/* WebP source for modern browsers */}
+          {!isWebP(imageSrc) && (
+            <source 
+              srcSet={generateSrcSet(generateWebPSrc(imageSrc))} 
+              sizes={imageSizes} 
+              type="image/webp" 
+            />
+          )}
+          
+          {/* Fallback for older browsers */}
+          <motion.img
+            src={imageSrc}
+            alt={alt}
+            width={width}
+            height={height}
+            loading={loading}
+            fetchPriority={fetchPriority || (priority ? 'high' : 'auto')}
+            sizes={imageSizes}
+            srcSet={generateSrcSet(imageSrc)}
+            className={`transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            } ${className}`}
+            onLoad={handleLoad}
+            onError={handleError}
+            {...props}
+          />
+        </motion.picture>
       )}
       
       {/* SEO-friendly fallback for non-JavaScript environments */}

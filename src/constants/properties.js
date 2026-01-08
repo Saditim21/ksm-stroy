@@ -1,6 +1,6 @@
-// Import property images
-import property1Image1 from '../assets/продажби/project 1/sgrada1.jpg'
-import goldenResidenceImage from '../assets/продажби/project 2/golden-residence.jpg'
+// Import optimized property images
+import property1Image1 from '../assets/продажби/project 1/optimized/sgrada1.webp'
+import goldenResidenceImage from '../assets/продажби/project 2/optimized/golden-residence.webp'
 
 // Import Многофамилна жилищна сграда photos (use existing files)
 import property1Photo1 from '../assets/продажби/project 1/2_page-0001.jpg'
