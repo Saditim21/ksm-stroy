@@ -91,7 +91,8 @@ const Contact = () => {
       ),
       title: "Телефон",
       details: [
-        "+359885762224"
+        "+359885762224",
+        "+359887886166"
       ]
     },
     {
@@ -182,7 +183,25 @@ const Contact = () => {
                       <div>
                         <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-1 sm:mb-2">{info.title}</h3>
                         {info.details.map((detail, idx) => (
-                          <p key={idx} className="text-sm sm:text-base text-primary-600 mb-1">{detail}</p>
+                          info.title === "Телефон" ? (
+                            <a
+                              key={idx}
+                              href={`tel:${detail}`}
+                              className="block text-sm sm:text-base text-primary-600 hover:text-gold-600 mb-1 transition-colors duration-200 cursor-pointer"
+                            >
+                              {detail}
+                            </a>
+                          ) : info.title === "Имейл" ? (
+                            <a
+                              key={idx}
+                              href={`mailto:${detail}`}
+                              className="block text-sm sm:text-base text-primary-600 hover:text-gold-600 mb-1 transition-colors duration-200 cursor-pointer"
+                            >
+                              {detail}
+                            </a>
+                          ) : (
+                            <p key={idx} className="text-sm sm:text-base text-primary-600 mb-1">{detail}</p>
+                          )
                         ))}
                       </div>
                     </div>
