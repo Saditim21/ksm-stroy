@@ -889,8 +889,8 @@ const MnogofamilnaSingleBlock = () => {
                   </svg>
                   <div>
                     <p className="text-sm text-gray-600">Телефон:</p>
-                    <a href="tel:+359885762224" className="text-gold-600 hover:text-gold-800 font-medium">
-                      +359 885 762 224
+                    <a href="tel:+359887886166" className="text-gold-600 hover:text-gold-800 font-medium">
+                      +359 887 886 166
                     </a>
                   </div>
                 </div>

@@ -97,8 +97,8 @@ const Contact = () => {
       ),
       title: "Телефон",
       details: [
-        "+359885762224",
-        "+359887886166"
+        "+359887886166",
+        "+359885762224"
       ]
     },
     {
@@ -308,7 +308,7 @@ const Contact = () => {
                         className={`w-full px-4 py-3 border rounded-luxury focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-all duration-200 shadow-luxury ${
                           errors.phone ? 'border-red-300' : 'border-silver-200'
                         }`}
-                        placeholder="+359885762224"
+                        placeholder="+359887886166"
                       />
                       {errors.phone && (
                         <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
@@ -475,10 +475,10 @@ const Contact = () => {
               >
                 Получете безплатна оферта
               </a>
-              <a 
-                href="tel:+359885762224" 
+              <a
+                href="tel:+359887886166"
                 className="border-2 border-gold-500/50 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-luxury font-semibold text-sm sm:text-base hover:bg-gold-500 hover:text-primary-900 transition-all duration-200 backdrop-blur-sm text-center"
-                aria-label="Обади се на +359 885 762 224"
+                aria-label="Обади се на +359 887 886 166"
               >
                 Обадете се сега
               </a>

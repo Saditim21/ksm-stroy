@@ -27,7 +27,7 @@ export const seoData = {
 
   contact: {
     title: "Контакти - KSM Stroy | Свържете се с нас за оферта",
-    description: "Свържете се с KSM Stroy за безплатна консултация и оферта. Офис в София, телефон: +359885762224, имейл: ksm_str@abv.bg. Работно време: Пн-Пт 8:00-18:00.",
+    description: "Свържете се с KSM Stroy за безплатна консултация и оферта. Офис в София, телефон: +359887886166, имейл: ksm_str@abv.bg. Работно време: Пн-Пт 8:00-18:00.",
     keywords: "контакти, телефон, имейл, адрес, оферта, консултация, София, България",
     ogTitle: "Контакти - KSM Stroy | Свържете се за оферта",
     ogImage: "/assets/images/003.jpg"
@@ -72,7 +72,7 @@ export const generateStructuredData = (type, data) => {
         },
         "contactPoint": {
           "@type": "ContactPoint",
-          "telephone": "+359885762224",
+          "telephone": "+359887886166",
           "contactType": "customer service",
           "availableLanguage": "Bulgarian"
         },

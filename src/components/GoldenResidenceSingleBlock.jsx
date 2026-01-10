@@ -145,7 +145,7 @@ const GoldenResidenceSingleBlock = () => {
       { apartment: 'А 606', built: '100.20', ideal: '14.38', вид: '3-стаен', total: '114.58', изложение: 'Север/Запад', status: 'Резервиран' },
       { apartment: 'А 607', built: '61.11', ideal: '8.77', вид: '2-стаен', total: '69.88', изложение: 'Запад', status: 'Резервиран' },
       { apartment: 'А 608', built: '61.11', ideal: '8.77', вид: '2-стаен', total: '69.88', изложение: 'Запад', status: 'Резервиран' },
-      { apartment: 'А 609', built: '61.11', ideal: '8.77', вид: '2-стаен', total: '69.88', изложение: 'Запад', status: 'Свободен' },
+      { apartment: 'А 609', built: '61.11', ideal: '8.77', вид: '2-стаен', total: '69.88', изложение: 'Запад', status: 'Резервиран' },
       { apartment: 'А 610', built: '94.94', ideal: '13.62', вид: '3-стаен', total: '108.56', изложение: 'Запад/Юг', status: 'Свободен' },
       { apartment: 'А 611', built: '55.54', ideal: '7.97', вид: '2-стаен', total: '63.51', изложение: 'Юг', status: 'Свободен' },
       { apartment: 'А 612', built: '38.46', ideal: '5.52', вид: 'Ателие', total: '43.98', изложение: 'Юг', status: 'Свободен' }
@@ -1403,7 +1403,7 @@ const GoldenResidenceSingleBlock = () => {
                         <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        +359885762224
+                        +359887886166
                       </div>
                       <p className="text-sm text-gray-500 mt-1">Работно време: 9:00 - 18:00</p>
                     </div>
@@ -1411,7 +1411,7 @@ const GoldenResidenceSingleBlock = () => {
                     {/* Action Buttons */}
                     <div className="flex gap-3">
                       <a 
-                        href="tel:+359885762224"
+                        href="tel:+359887886166"
                         className="flex-1 bg-gradient-to-r from-gold-500 to-gold-600 text-primary-900 py-3 px-4 rounded-lg font-semibold hover:from-gold-600 hover:to-gold-700 transition-all duration-200 flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
