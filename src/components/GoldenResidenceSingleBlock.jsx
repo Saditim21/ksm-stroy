@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
+import { useApartments } from '../context/ApartmentContext';
 
 // Gallery Images
 import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.png';
@@ -63,9 +64,15 @@ const GoldenResidenceSingleBlock = () => {
   const isBlockA = block === 'block-a';
   const blockLetter = isBlockA ? 'А' : 'Б';
   const blockTitle = isBlockA ? 'БЛОК А' : 'БЛОК Б';
-  
-  // Block A apartment data (complete - 12 apartments per floor)
-  const blockAFloorData = {
+
+  // Get apartment data from context (dynamic from Google Sheets or fallback)
+  const { getFloorData: getFloorDataFromContext, loading: apartmentsLoading } = useApartments();
+  const blockAFloorData = getFloorDataFromContext('block-a');
+  const blockBFloorData = getFloorDataFromContext('block-b');
+
+  // Block A apartment data - NOW LOADED FROM CONTEXT
+  // The data below is kept as a reference but is overridden by the context
+  const blockAFloorDataLegacy = {
     1: [
       { apartment: 'А 101', built: '57.46', ideal: '8.22', total: '65.68', status: 'Свободен' },
       { apartment: 'А 102', built: '97.74', ideal: '14.00', total: '111.74', status: 'Свободен' },
@@ -180,8 +187,9 @@ const GoldenResidenceSingleBlock = () => {
     ]
   };
 
-  // Block B apartment data (complete - 12 apartments per floor)
-  const blockBFloorData = {
+  // Block B apartment data - NOW LOADED FROM CONTEXT
+  // The data below is kept as a reference but is overridden by the context
+  const blockBFloorDataLegacy = {
     1: [
       { apartment: 'Б 101', built: '57.46', ideal: '8.22', вид: '2-стаен', total: '65.68', изложение: 'Юг', status: 'Свободен' },
       { apartment: 'Б 102', built: '97.74', ideal: '14.00', вид: '3-стаен', total: '111.74', изложение: 'Юг/Изток', status: 'Свободен' },

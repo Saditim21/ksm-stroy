@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
+import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
 const Home = lazy(() => import('./pages/Home'))
@@ -56,15 +57,17 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
-        <Navbar />
-        <main className="flex-1 overscroll-none">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <ApartmentProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
+          <Navbar />
+          <main className="flex-1 overscroll-none">
+            <AnimatedRoutes />
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </ApartmentProvider>
   )
 }
 

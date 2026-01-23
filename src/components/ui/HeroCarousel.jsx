@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import OptimizedImage from './OptimizedImage'
+import { useApartments } from '../../context/ApartmentContext'
 import goldenResidence from '../../assets/home/optimized/001.webp'
 import mnogoamilna from '../../assets/home/optimized/photo-4.webp'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
+
+  // Get dynamic apartment stats from context
+  const { getGoldenResidenceStats, loading } = useApartments()
+  const goldenResidenceStats = getGoldenResidenceStats()
 
   // Carousel slides data
   const slides = [
@@ -27,8 +32,8 @@ const HeroCarousel = () => {
     }
   ]
 
-  // Building data for different slides
-  const buildingData = [
+  // Building data for different slides - Golden Residence uses dynamic data
+  const buildingData = useMemo(() => [
     {
       name: "Многофамилна жилищна сграда",
       location: "УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София",
@@ -38,10 +43,10 @@ const HeroCarousel = () => {
     {
       name: "Golden Residence",
       location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
-      apartments: { total: 192, available: 127, reserved: 6, sold: 59 },
-      garages: { total: 224, available: 172, reserved: 2, sold: 50 }
+      apartments: goldenResidenceStats.apartments,
+      garages: goldenResidenceStats.garages
     }
-  ]
+  ], [goldenResidenceStats])
 
   // Get current building data
   const currentBuilding = buildingData[currentSlide]
