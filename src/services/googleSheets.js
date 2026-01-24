@@ -19,8 +19,8 @@ const SHEET_URLS = {
   parking: import.meta.env.VITE_GOOGLE_SHEET_PARKING || '',
 };
 
-// Cache duration in milliseconds (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
+// Cache duration in milliseconds (30 seconds for faster updates)
+const CACHE_DURATION = 30 * 1000;
 
 // In-memory cache
 const cache = {
@@ -129,7 +129,16 @@ export async function fetchApartmentData(block = 'blockA') {
   }
 
   try {
-    const response = await fetch(sheetUrl);
+    // Add cache-busting parameter to bypass Google's CDN cache
+    const cacheBuster = `&_cb=${Date.now()}`;
+    const urlWithCacheBuster = sheetUrl + cacheBuster;
+
+    const response = await fetch(urlWithCacheBuster, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet: ${response.status}`);
@@ -220,7 +229,16 @@ export async function fetchGarageData(type = 'garages') {
   }
 
   try {
-    const response = await fetch(sheetUrl);
+    // Add cache-busting parameter to bypass Google's CDN cache
+    const cacheBuster = `&_cb=${Date.now()}`;
+    const urlWithCacheBuster = sheetUrl + cacheBuster;
+
+    const response = await fetch(urlWithCacheBuster, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet: ${response.status}`);

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageStats } from '../services/googleSheets';
+import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageStats, clearCache } from '../services/googleSheets';
 
 // Fallback data - used when Google Sheets is not configured or unavailable
 import { getBlockAFallbackData, getBlockBFallbackData } from '../constants/apartmentFallbackData';
@@ -316,6 +316,8 @@ export function ApartmentProvider({ children }) {
   // Refresh data from Google Sheets
   const refreshData = async () => {
     setLoading(true);
+    // Clear cache to ensure fresh data is fetched
+    clearCache();
     try {
       const [blockA, blockB, garages, parking] = await Promise.all([
         fetchApartmentData('blockA'),
