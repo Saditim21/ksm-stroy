@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
 import { useApartments } from '../context/ApartmentContext';
@@ -66,7 +66,7 @@ const GoldenResidenceSingleBlock = () => {
   const blockTitle = isBlockA ? 'БЛОК А' : 'БЛОК Б';
 
   // Get apartment data from context (dynamic from Google Sheets or fallback)
-  const { getFloorData: getFloorDataFromContext, loading: apartmentsLoading } = useApartments();
+  const { getFloorData: getFloorDataFromContext, getGaragesData, getParkingData, loading: apartmentsLoading } = useApartments();
   const blockAFloorData = getFloorDataFromContext('block-a');
   const blockBFloorData = getFloorDataFromContext('block-b');
 
@@ -304,8 +304,59 @@ const GoldenResidenceSingleBlock = () => {
     ]
   };
 
-  // Ground Floor data - Garages and Storage (shared between blocks)
-  const groundFloorData = [
+  // Get dynamic garage and parking data from Google Sheets
+  const garagesFromSheet = getGaragesData();
+  const parkingFromSheet = getParkingData();
+
+  // Transform garage data from Google Sheets format to component format
+  const transformGarage = (item) => ({
+    apartment: item.number,
+    built: item.built,
+    ideal: item.ideal,
+    total: item.total,
+    type: 'ГАРАЖ',
+    status: item.status
+  });
+
+  // Transform parking data from Google Sheets format to component format
+  const transformParking = (item) => ({
+    apartment: item.number,
+    built: item.built,
+    ideal: item.ideal,
+    total: item.total,
+    type: 'СКЛАДОВО ПОМЕЩЕНИЕ',
+    status: item.status
+  });
+
+  // Ground Floor data - Garages (Г-001 to Г-052) and Storage (ПМ-01 to ПМ-34) - dynamic from Google Sheets
+  const groundFloorData = useMemo(() => {
+    // Filter garages for ground floor (Г-001 to Г-052)
+    const groundGarages = garagesFromSheet
+      .filter(g => {
+        const num = parseInt(g.number.replace('Г-', ''));
+        return num >= 1 && num <= 52;
+      })
+      .map(transformGarage);
+
+    // Filter parking for ground floor (ПМ-01 to ПМ-34)
+    const groundParking = parkingFromSheet
+      .filter(p => {
+        const num = parseInt(p.number.replace('ПМ-', ''));
+        return num >= 1 && num <= 34;
+      })
+      .map(transformParking);
+
+    return [
+      ...groundGarages,
+      ...groundParking,
+      // Entrances (static)
+      { apartment: 'А 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' },
+      { apartment: 'Б 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' }
+    ];
+  }, [garagesFromSheet, parkingFromSheet]);
+
+  // Legacy fallback data (kept for reference but replaced by dynamic data above)
+  const groundFloorDataLegacy = [
     // Garages Г-001 to Г-017
     { apartment: 'Г-001', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-002', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
@@ -416,8 +467,32 @@ const GoldenResidenceSingleBlock = () => {
     { apartment: 'Б 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' }
   ];
 
-  // Underground Floor data - Garages (shared between blocks)
-  const undergroundFloorData = [
+  // Underground Floor data - Garages (Г-053 to Г-113) and Storage (ПМ-35 to ПМ-68) - dynamic from Google Sheets
+  const undergroundFloorData = useMemo(() => {
+    // Filter garages for underground floor (Г-053 to Г-113)
+    const undergroundGarages = garagesFromSheet
+      .filter(g => {
+        const num = parseInt(g.number.replace('Г-', ''));
+        return num >= 53 && num <= 113;
+      })
+      .map(transformGarage);
+
+    // Filter parking for underground floor (ПМ-35 to ПМ-68)
+    const undergroundParking = parkingFromSheet
+      .filter(p => {
+        const num = parseInt(p.number.replace('ПМ-', ''));
+        return num >= 35 && num <= 68;
+      })
+      .map(transformParking);
+
+    return [
+      ...undergroundGarages,
+      ...undergroundParking
+    ];
+  }, [garagesFromSheet, parkingFromSheet]);
+
+  // Legacy fallback data for underground floor (kept for reference but replaced by dynamic data above)
+  const undergroundFloorDataLegacy = [
     { apartment: 'Г-053', built: '27.15', ideal: '16.67', total: '43.82', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-054', built: '18.80', ideal: '11.55', total: '30.35', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-055', built: '20.39', ideal: '12.52', total: '32.91', type: 'ГАРАЖ', status: 'Свободен' },
