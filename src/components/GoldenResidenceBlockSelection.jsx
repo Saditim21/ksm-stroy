@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Gallery Images
-import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.png';
-import galleryImage2 from '../assets/продажби/project 2/photos/golden-residence-2.png';
-import galleryImage4 from '../assets/продажби/project 2/photos/golden-residence-4.png';
-import galleryImage6 from '../assets/продажби/project 2/photos/golden-residence-6.png';
-import galleryImage7 from '../assets/продажби/project 2/photos/golden-residence-7.png';
-import galleryImage8 from '../assets/продажби/project 2/photos/golden-residence-8.png';
+import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.webp';
+import galleryImage2 from '../assets/продажби/project 2/photos/golden-residence-2.webp';
+import galleryImage4 from '../assets/продажби/project 2/photos/golden-residence-4.webp';
+import galleryImage6 from '../assets/продажби/project 2/photos/golden-residence-6.webp';
+import galleryImage7 from '../assets/продажби/project 2/photos/golden-residence-7.webp';
+import galleryImage8 from '../assets/продажби/project 2/photos/golden-residence-8.webp';
 
 const GoldenResidenceBlockSelection = () => {
   const navigate = useNavigate();

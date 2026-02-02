@@ -24,7 +24,7 @@ import garageFloorImage from '../assets/продажби/project 1/garage-floor.
 
 // Golden Residence floor images (served from /public/images/golden-residence)
 const publicBase = import.meta.env.BASE_URL || '/';
-const goldenResidenceMainImage = `${publicBase}images/golden-residence/building-2.png`;
+const goldenResidenceMainImage = `${publicBase}images/golden-residence/building-2.webp`;
 
 // Golden Residence Block A floor images (public)
 const goldenResidenceAFloor1Image = `${publicBase}images/golden-residence/building-2-blog-a-floor1.png`;

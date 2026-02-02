@@ -9,12 +9,12 @@ import property1Photo3 from '../assets/продажби/project 1/building-all-f
 import property1Photo4 from '../assets/продажби/project 1/building-garages.png'
 
 // Import Golden Residence photos (only existing files)
-import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.png'
-import goldenResidencePhoto2 from '../assets/продажби/project 2/photos/golden-residence-2.png'
-import goldenResidencePhoto4 from '../assets/продажби/project 2/photos/golden-residence-4.png'
-import goldenResidencePhoto6 from '../assets/продажби/project 2/photos/golden-residence-6.png'
-import goldenResidencePhoto7 from '../assets/продажби/project 2/photos/golden-residence-7.png'
-import goldenResidencePhoto8 from '../assets/продажби/project 2/photos/golden-residence-8.png'
+import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.webp'
+import goldenResidencePhoto2 from '../assets/продажби/project 2/photos/golden-residence-2.webp'
+import goldenResidencePhoto4 from '../assets/продажби/project 2/photos/golden-residence-4.webp'
+import goldenResidencePhoto6 from '../assets/продажби/project 2/photos/golden-residence-6.webp'
+import goldenResidencePhoto7 from '../assets/продажби/project 2/photos/golden-residence-7.webp'
+import goldenResidencePhoto8 from '../assets/продажби/project 2/photos/golden-residence-8.webp'
 
 // Properties data for sales page
 export const properties = [
