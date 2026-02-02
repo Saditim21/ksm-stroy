@@ -21,10 +21,20 @@ export default defineConfig({
     exclude: ['@react-three/fiber', '@react-three/drei', 'three']
   },
   build: {
-    // Simplified build configuration to fix deployment issues
     target: 'es2020',
     assetsInlineLimit: 4096,
-    reportCompressedSize: false
+    reportCompressedSize: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'framer': ['framer-motion'],
+          'swiper': ['swiper'],
+          // Three.js is already lazy loaded via ProjectDetail
+        }
+      }
+    }
   },
   server: {
     host: true,

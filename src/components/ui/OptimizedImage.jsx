@@ -140,7 +140,8 @@ const OptimizedImage = ({
           alt={alt}
           width={width}
           height={height}
-          loading={loading}
+          loading={priority ? 'eager' : loading}
+          fetchpriority={fetchPriority || (priority ? 'high' : undefined)}
           className={`transition-opacity duration-300 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           } ${className}`}
