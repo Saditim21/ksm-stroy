@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node scripts/prerender.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "optimize-images": "node scripts/optimize-images.js"
@@ -28,6 +29,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@prerenderer/prerenderer": "^1.2.5",
+    "@prerenderer/renderer-puppeteer": "^1.2.4",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^4.7.0",

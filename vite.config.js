@@ -5,17 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [
     react(),
-    // Temporarily disabled image optimization to fix Vercel deployment
-    // process.env.NODE_ENV === 'production' && viteImagemin({
-    //   gifsicle: { optimizationLevel: 7 },
-    //   mozjpeg: { quality: 75 },
-    //   pngquant: {
-    //     quality: [0.65, 0.8],
-    //     speed: 1
-    //   },
-    //   webp: { quality: 75 }
-    // })
-  ].filter(Boolean),
+  ],
   define: {
     __DEV__: process.env.NODE_ENV === 'development'
   },
