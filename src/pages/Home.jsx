@@ -4,7 +4,7 @@ import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { seoData, generateStructuredData } from '../utils/seo'
 import img001 from '../assets/home/optimized/001.webp'
-import img003 from '../assets/images/003.jpg'
+import img003 from '../assets/images/003.webp'
 import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 

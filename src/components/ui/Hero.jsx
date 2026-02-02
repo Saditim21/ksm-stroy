@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import heroImage from '../../assets/images/slider01.jpg'
+import heroImage from '../../assets/images/slider01.webp'
 import { fadeInUp, staggerContainer, staggerItem, buttonExpand, floatAnimation } from '../../utils/animations'
 
 const Hero = () => {

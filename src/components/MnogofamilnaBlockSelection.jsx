@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import blockAImage from '../assets/продажби/project 1/block-A/blockA.png';
-import blockBImage from '../assets/продажби/project 1/block-B/blockB.png';
+import blockAImage from '../assets/продажби/project 1/block-A/blockA.webp';
+import blockBImage from '../assets/продажби/project 1/block-B/blockB.webp';
 
 // Gallery Photos
-import photo1 from '../assets/продажби/project 1/photos/photo-1.png';
-import photo2 from '../assets/продажби/project 1/photos/photo-2.png';
-import photo3 from '../assets/продажби/project 1/photos/photo-3.png';
-import photo4 from '../assets/продажби/project 1/photos/photo-4.png';
+import photo1 from '../assets/продажби/project 1/photos/photo-1.webp';
+import photo2 from '../assets/продажби/project 1/photos/photo-2.webp';
+import photo3 from '../assets/продажби/project 1/photos/photo-3.webp';
+import photo4 from '../assets/продажби/project 1/photos/photo-4.webp';
 
 const MnogofamilnaBlockSelection = () => {
   const navigate = useNavigate();

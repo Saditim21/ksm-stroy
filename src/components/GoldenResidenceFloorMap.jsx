@@ -1,27 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { useApartments } from '../context/ApartmentContext';
 // Import architecture images so Vite bundles them
-import archA2 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-2.png';
-import archA3 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-3.png';
-import archA4 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-4.png';
-import archA5 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-5.png';
-import archA6 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-6.png';
-import archA7 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-7.png';
-import archA8 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-8.png';
+import archA2 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-2.webp';
+import archA3 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-3.webp';
+import archA4 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-4.webp';
+import archA5 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-5.webp';
+import archA6 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-6.webp';
+import archA7 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-7.webp';
+import archA8 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-8.webp';
 
-import archB1 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-1.png';
-import archB2 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-2.png';
-import archB3 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-3.png';
-import archB4 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-4.png';
-import archB5 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-5.png';
-import archB6 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-6.png';
-import archB7 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-7.png';
-import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.png';
-import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.png';
-import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.png';
+import archB1 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-1.webp';
+import archB2 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-2.webp';
+import archB3 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-3.webp';
+import archB4 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-4.webp';
+import archB5 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-5.webp';
+import archB6 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-6.webp';
+import archB7 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-7.webp';
+import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.webp';
+import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.webp';
+import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.webp';
 
 // Import main golden residence image
-import goldenResidenceMain from '../assets/продажби/project 2/golden-residence.jpg';
+import goldenResidenceMain from '../assets/продажби/project 2/golden-residence.webp';
 
 const architectureA = {2: archA2,3: archA3,4: archA4,5: archA5,6: archA6,7: archA7,8: archA8};
 const architectureB = {1: archB1,2: archB2,3: archB3,4: archB4,5: archB5,6: archB6,7: archB7,8: archB8};

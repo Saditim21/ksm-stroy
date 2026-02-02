@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import buildingImage from '../assets/продажби/project 1/sgrada1.jpg';
+import buildingImage from '../assets/продажби/project 1/sgrada1.webp';
 
 const BuildingFloorMapPrecise = ({ setSelectedFloor, floorData = {} }) => {
   const [hoveredFloor, setHoveredFloor] = useState(null);

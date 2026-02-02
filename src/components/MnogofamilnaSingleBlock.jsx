@@ -1,83 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FLOOR_DATA } from './FourTowersFloorMap';
-import buildingAllFloorsArchitectureImage from '../assets/продажби/project 1/building-all-floors-architecture.png';
+import buildingAllFloorsArchitectureImage from '../assets/продажби/project 1/building-all-floors-architecture.webp';
 
 // Floor Architecture Plan Images for Block A
-import buildingAFloor1Architecture from '../assets/продажби/project 1/building-A-floor-1.jpg';
-import buildingAFloor2Architecture from '../assets/продажби/project 1/building-A-floor-2.jpg';
-import buildingAFloor3Architecture from '../assets/продажби/project 1/building-A-floor-3.jpg';
-import buildingAFloor4Architecture from '../assets/продажби/project 1/building-A-floor-4.jpg';
-import buildingAFloor5Architecture from '../assets/продажби/project 1/building-A-floor-5.jpg';
-import buildingAFloor6Architecture from '../assets/продажби/project 1/building-A-floor-6.jpg';
-import buildingAFloor7Architecture from '../assets/продажби/project 1/building-A-floor-7.jpg';
-import buildingAFloor8Architecture from '../assets/продажби/project 1/building-A-floor-8.jpg';
-import buildingAFloor9Architecture from '../assets/продажби/project 1/building-A-floor-9.jpg';
+import buildingAFloor1Architecture from '../assets/продажби/project 1/building-A-floor-1.webp';
+import buildingAFloor2Architecture from '../assets/продажби/project 1/building-A-floor-2.webp';
+import buildingAFloor3Architecture from '../assets/продажби/project 1/building-A-floor-3.webp';
+import buildingAFloor4Architecture from '../assets/продажби/project 1/building-A-floor-4.webp';
+import buildingAFloor5Architecture from '../assets/продажби/project 1/building-A-floor-5.webp';
+import buildingAFloor6Architecture from '../assets/продажби/project 1/building-A-floor-6.webp';
+import buildingAFloor7Architecture from '../assets/продажби/project 1/building-A-floor-7.webp';
+import buildingAFloor8Architecture from '../assets/продажби/project 1/building-A-floor-8.webp';
+import buildingAFloor9Architecture from '../assets/продажби/project 1/building-A-floor-9.webp';
 
 // Floor Architecture Plan Images for Block B
-import buildingBFloor1Architecture from '../assets/продажби/project 1/building-B-floor-1.jpg';
-import buildingBFloor2Architecture from '../assets/продажби/project 1/building-B-floor-2.jpg';
-import buildingBFloor3Architecture from '../assets/продажби/project 1/building-B-floor-3.jpg';
-import buildingBFloor4Architecture from '../assets/продажби/project 1/building-B-floor-4.jpg';
-import buildingBFloor5Architecture from '../assets/продажби/project 1/building-B-floor-5.jpg';
-import buildingBFloor6Architecture from '../assets/продажби/project 1/building-B-floor-6.jpg';
-import buildingBFloor7Architecture from '../assets/продажби/project 1/building-B-floor-7.jpg';
-import buildingBFloor8Architecture from '../assets/продажби/project 1/building-B-floor-8.jpg';
-import buildingBFloor9Architecture from '../assets/продажби/project 1/building-B-floor-9.jpg';
+import buildingBFloor1Architecture from '../assets/продажби/project 1/building-B-floor-1.webp';
+import buildingBFloor2Architecture from '../assets/продажби/project 1/building-B-floor-2.webp';
+import buildingBFloor3Architecture from '../assets/продажби/project 1/building-B-floor-3.webp';
+import buildingBFloor4Architecture from '../assets/продажби/project 1/building-B-floor-4.webp';
+import buildingBFloor5Architecture from '../assets/продажби/project 1/building-B-floor-5.webp';
+import buildingBFloor6Architecture from '../assets/продажби/project 1/building-B-floor-6.webp';
+import buildingBFloor7Architecture from '../assets/продажби/project 1/building-B-floor-7.webp';
+import buildingBFloor8Architecture from '../assets/продажби/project 1/building-B-floor-8.webp';
+import buildingBFloor9Architecture from '../assets/продажби/project 1/building-B-floor-9.webp';
 
 // Block A Images
-import blockAImage from '../assets/продажби/project 1/block-A/blockA.png';
-import blockAGarageImage from '../assets/продажби/project 1/block-A/garage-floor-A.png';
-import blockAFloor2Image from '../assets/продажби/project 1/block-A/building-A-floor-2.png';
-import blockAFloor3Image from '../assets/продажби/project 1/block-A/building-A-floor-3.png';
-import blockAFloor4Image from '../assets/продажби/project 1/block-A/building-A-floor-4.png';
-import blockAFloor5Image from '../assets/продажби/project 1/block-A/building-A-floor-5.png';
-import blockAFloor6Image from '../assets/продажби/project 1/block-A/building-A-floor-6.png';
-import blockAFloor7Image from '../assets/продажби/project 1/block-A/building-A-floor-7.png';
-import blockAFloor8Image from '../assets/продажби/project 1/block-A/building-A-floor-8.png';
-import blockAFloor9Image from '../assets/продажби/project 1/block-A/building-A-floor-9.png';
-import blockATavanImage from '../assets/продажби/project 1/block-A/building-A-Tavan.png';
+import blockAImage from '../assets/продажби/project 1/block-A/blockA.webp';
+import blockAGarageImage from '../assets/продажби/project 1/block-A/garage-floor-A.webp';
+import blockAFloor2Image from '../assets/продажби/project 1/block-A/building-A-floor-2.webp';
+import blockAFloor3Image from '../assets/продажби/project 1/block-A/building-A-floor-3.webp';
+import blockAFloor4Image from '../assets/продажби/project 1/block-A/building-A-floor-4.webp';
+import blockAFloor5Image from '../assets/продажби/project 1/block-A/building-A-floor-5.webp';
+import blockAFloor6Image from '../assets/продажби/project 1/block-A/building-A-floor-6.webp';
+import blockAFloor7Image from '../assets/продажби/project 1/block-A/building-A-floor-7.webp';
+import blockAFloor8Image from '../assets/продажби/project 1/block-A/building-A-floor-8.webp';
+import blockAFloor9Image from '../assets/продажби/project 1/block-A/building-A-floor-9.webp';
+import blockATavanImage from '../assets/продажби/project 1/block-A/building-A-Tavan.webp';
 
 // Block B Images
-import blockBImage from '../assets/продажби/project 1/block-B/blockB.png';
-import blockBGarageImage from '../assets/продажби/project 1/block-B/garage-floor-B.png';
-import blockBFloor2Image from '../assets/продажби/project 1/block-B/building-B-floor-2.png';
-import blockBFloor3Image from '../assets/продажби/project 1/block-B/building-B-floor-3.png';
-import blockBFloor4Image from '../assets/продажби/project 1/block-B/building-B-floor-4.png';
-import blockBFloor5Image from '../assets/продажби/project 1/block-B/building-B-floor-5.png';
-import blockBFloor6Image from '../assets/продажби/project 1/block-B/building-B-floor-6.png';
-import blockBFloor7Image from '../assets/продажби/project 1/block-B/building-B-floor-7.png';
-import blockBFloor8Image from '../assets/продажби/project 1/block-B/building-B-floor-8.png';
-import blockBFloor9Image from '../assets/продажби/project 1/block-B/building-B-floor-9.png';
-import blockBTavanImage from '../assets/продажби/project 1/block-B/building-B-Tavan.png';
+import blockBImage from '../assets/продажби/project 1/block-B/blockB.webp';
+import blockBGarageImage from '../assets/продажби/project 1/block-B/garage-floor-B.webp';
+import blockBFloor2Image from '../assets/продажби/project 1/block-B/building-B-floor-2.webp';
+import blockBFloor3Image from '../assets/продажби/project 1/block-B/building-B-floor-3.webp';
+import blockBFloor4Image from '../assets/продажби/project 1/block-B/building-B-floor-4.webp';
+import blockBFloor5Image from '../assets/продажби/project 1/block-B/building-B-floor-5.webp';
+import blockBFloor6Image from '../assets/продажби/project 1/block-B/building-B-floor-6.webp';
+import blockBFloor7Image from '../assets/продажби/project 1/block-B/building-B-floor-7.webp';
+import blockBFloor8Image from '../assets/продажби/project 1/block-B/building-B-floor-8.webp';
+import blockBFloor9Image from '../assets/продажби/project 1/block-B/building-B-floor-9.webp';
+import blockBTavanImage from '../assets/продажби/project 1/block-B/building-B-Tavan.webp';
 
 // Apartment A Images
-import apartmentA2Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a2-floor1.png';
-import apartmentA6Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a6-floor1.png';
-import apartmentA58Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a58-floor8.png';
-import apartmentA64Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.png';
+import apartmentA2Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a2-floor1.webp';
+import apartmentA6Floor1 from '../assets/продажби/project 1/apartment-A/apartment-a6-floor1.webp';
+import apartmentA58Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a58-floor8.webp';
+import apartmentA64Floor8 from '../assets/продажби/project 1/apartment-A/apartment-a64-floor8.webp';
 
 // Apartment B Images
-import apartmentB2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.png';
-import apartmentB6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B6.png';
-import apartmentB7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B7.png';
-import apartmentB207Floor2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-207-floor2.png';
-import apartmentB23Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b23-floor3.png';
-import apartmentB307Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b307-floor8.png';
-import apartmentB31Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b31-floor4.png';
-import apartmentB407Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b407-floor8.png';
-import apartmentB47Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b47-floor6.png';
-import apartmentB607Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b607-floor8.png';
-import apartmentB50Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b50-floor7.png';
-import apartmentB55Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b55-floor7.png';
-import apartmentB702Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b702-floor8.png';
-import apartmentB707Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b707-floor8.png';
-import apartmentB57Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.png';
-import apartmentB59Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.png';
-import apartmentB63Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.png';
-import apartmentB801Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b801-floor8.png';
-import apartmentB803Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b803-floor8.png';
-import apartmentB807Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b807-floor8.png';
+import apartmentB2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B2.webp';
+import apartmentB6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B6.webp';
+import apartmentB7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment B7.webp';
+import apartmentB207Floor2 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-207-floor2.webp';
+import apartmentB23Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b23-floor3.webp';
+import apartmentB307Floor3 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b307-floor8.webp';
+import apartmentB31Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b31-floor4.webp';
+import apartmentB407Floor4 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b407-floor8.webp';
+import apartmentB47Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b47-floor6.webp';
+import apartmentB607Floor6 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b607-floor8.webp';
+import apartmentB50Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b50-floor7.webp';
+import apartmentB55Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b55-floor7.webp';
+import apartmentB702Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b702-floor8.webp';
+import apartmentB707Floor7 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b707-floor8.webp';
+import apartmentB57Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.webp';
+import apartmentB59Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.webp';
+import apartmentB63Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.webp';
+import apartmentB801Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b801-floor8.webp';
+import apartmentB803Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b803-floor8.webp';
+import apartmentB807Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b807-floor8.webp';
 
 const MnogofamilnaSingleBlock = () => {
   const { block } = useParams();

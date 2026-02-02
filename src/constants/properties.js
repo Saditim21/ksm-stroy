@@ -3,10 +3,10 @@ import property1Image1 from '../assets/продажби/project 1/optimized/sgra
 import goldenResidenceImage from '../assets/продажби/project 2/optimized/golden-residence.webp'
 
 // Import Многофамилна жилищна сграда photos (use existing files)
-import property1Photo1 from '../assets/продажби/project 1/2_page-0001.jpg'
-import property1Photo2 from '../assets/продажби/project 1/apartment-b2.jpg'
-import property1Photo3 from '../assets/продажби/project 1/building-all-floors-architecture.png'
-import property1Photo4 from '../assets/продажби/project 1/building-garages.png'
+import property1Photo1 from '../assets/продажби/project 1/2_page-0001.webp'
+import property1Photo2 from '../assets/продажби/project 1/photos/photo-1.webp'
+import property1Photo3 from '../assets/продажби/project 1/building-all-floors-architecture.webp'
+import property1Photo4 from '../assets/продажби/project 1/building-garages.webp'
 
 // Import Golden Residence photos (only existing files)
 import goldenResidencePhoto1 from '../assets/продажби/project 2/photos/golden-residence-1.webp'

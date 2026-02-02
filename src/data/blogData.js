@@ -1,7 +1,7 @@
-import img001 from '../assets/images/001.jpg'
-import img002 from '../assets/images/002.jpg'
-import img003 from '../assets/images/003.jpg'
-import slider01 from '../assets/images/slider01.jpg'
+import img001 from '../assets/images/001.webp'
+import img002 from '../assets/images/002.webp'
+import img003 from '../assets/images/003.webp'
+import slider01 from '../assets/images/slider01.webp'
 
 export const blogPosts = [
   {
