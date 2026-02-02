@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "node scripts/prerender.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "optimize-images": "node scripts/optimize-images.js"
