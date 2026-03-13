@@ -338,13 +338,23 @@ const GoldenResidenceSingleBlock = () => {
       })
       .map(transformGarage);
 
-    // Filter parking for ground floor (ПМ-01 to ПМ-34)
-    const groundParking = parkingFromSheet
+    // Filter parking for ground floor (ПМ-03 to ПМ-34) - Приземен етаж
+    // First, filter items that have ПМ- prefix (parking spots)
+    const parkingItems = parkingFromSheet.filter(p => p.number && p.number.startsWith('ПМ-'));
+
+    const groundParking = parkingItems
       .filter(p => {
         const num = parseInt(p.number.replace('ПМ-', ''));
-        return num >= 1 && num <= 34;
+        return num >= 3 && num <= 34;
       })
-      .map(transformParking);
+      .map((item) => ({
+        apartment: item.number,
+        built: item.built,
+        ideal: item.ideal,
+        total: item.total,
+        type: 'ПАРКОМЯСТО',
+        status: item.status
+      }));
 
     return [
       ...groundGarages,
@@ -426,48 +436,47 @@ const GoldenResidenceSingleBlock = () => {
     { apartment: 'Г-051', built: '21.07', ideal: '16.73', total: '43.97', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-052', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
 
-    // Storage units ПМ-01 to ПМ-34
-    { apartment: 'ПМ-01', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-02', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-03', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-04', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-05', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-06', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-07', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-08', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-09', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-10', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-11', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-12', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-13', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-14', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-15', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-16', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-17', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-18', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-19', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-20', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-21', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-22', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-23', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-24', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-25', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-26', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-27', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-28', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-29', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-30', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-31', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-32', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-33', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-34', built: '17.67', ideal: '10.85', total: '28.52', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
+    // Parking spots ПМ-03 to ПМ-34 (Ground floor - Приземен етаж)
+    { apartment: 'ПМ-03', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-04', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-05', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-06', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-07', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-08', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-09', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-10', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-11', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-12', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-13', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-14', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-15', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-16', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-17', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-18', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-19', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-20', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-21', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-22', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-23', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-24', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-25', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-26', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-27', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-28', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-29', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-30', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-31', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-32', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-33', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-34', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
 
     // Entrances
     { apartment: 'А 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' },
     { apartment: 'Б 001', built: '41.26', ideal: '5.91', total: '47.17', type: 'ВХОДНО ПОМЕЩЕНИЕ', status: 'Резервиран' }
   ];
 
-  // Underground Floor data - Garages (Г-053 to Г-113) and Storage (ПМ-35 to ПМ-68) - dynamic from Google Sheets
+  // Underground Floor data - Garages (Г-053 to Г-113) and Parking (ПМ-35 to ПМ-68) - dynamic from Google Sheets
+  // All parking spots ПМ-35 to ПМ-68 shown for both blocks
   const undergroundFloorData = useMemo(() => {
     // Filter garages for underground floor (Г-053 to Г-113)
     const undergroundGarages = garagesFromSheet
@@ -477,13 +486,24 @@ const GoldenResidenceSingleBlock = () => {
       })
       .map(transformGarage);
 
-    // Filter parking for underground floor (ПМ-35 to ПМ-68)
-    const undergroundParking = parkingFromSheet
+    // Filter parking for underground floor (ПМ-35 to ПМ-68) - all shown for both blocks
+    // First, filter items that have ПМ- prefix (parking spots)
+    const parkingItems = parkingFromSheet.filter(p => p.number && p.number.startsWith('ПМ-'));
+
+    // Filter for underground parking (ПМ-35 to ПМ-68)
+    const undergroundParking = parkingItems
       .filter(p => {
         const num = parseInt(p.number.replace('ПМ-', ''));
         return num >= 35 && num <= 68;
       })
-      .map(transformParking);
+      .map((item) => ({
+        apartment: item.number,
+        built: item.built,
+        ideal: item.ideal,
+        total: item.total,
+        type: 'ПАРКОМЯСТО',
+        status: item.status
+      }));
 
     return [
       ...undergroundGarages,
@@ -571,50 +591,41 @@ const GoldenResidenceSingleBlock = () => {
     { apartment: 'Г-112', built: '18.64', ideal: '11.45', total: '30.09', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-113', built: '26.13', ideal: '16.05', total: '42.18', type: 'ГАРАЖ', status: 'Свободен' },
 
-    // Storage units ПМ-35 to ПМ-68
-    { apartment: 'ПМ-35', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-36', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-37', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-38', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-39', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-35', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-36', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-37', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-38', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-39', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-40', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-41', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-42', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-43', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-44', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-45', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-46', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-47', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-48', built: '13.78', ideal: '8.46', total: '22.24', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-49', built: '14.44', ideal: '8.87', total: '23.31', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-50', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-51', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-52', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-53', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-54', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-55', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-56', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-57', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-58', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-59', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-60', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-61', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-62', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-63', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-64', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-65', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-66', built: '24.23', ideal: '14.88', total: '39.11', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-63', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-64', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-65', built: '14.96', ideal: '9.19', total: '24.15', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-66', built: '24.23', ideal: '14.88', total: '39.11', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Продадени' },
-    { apartment: 'ПМ-67', built: '18.53', ideal: '11.38', total: '29.91', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' },
-    { apartment: 'ПМ-68', built: '18.53', ideal: '11.38', total: '29.91', type: 'СКЛАДОВО ПОМЕЩЕНИЕ', status: 'Свободен' }
+    // Parking spots ПМ-35 to ПМ-68 (Underground floor - Block A: ПМ-35 to ПМ-50, Block B: ПМ-51 to ПМ-68)
+    { apartment: 'ПМ-35', built: '14.44', ideal: '8.87', total: '23.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-36', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-37', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-38', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-39', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-40', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-41', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-42', built: '14.44', ideal: '8.87', total: '23.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-43', built: '14.44', ideal: '8.87', total: '23.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-44', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-45', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-46', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-47', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-48', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-49', built: '13.78', ideal: '8.46', total: '22.24', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-50', built: '14.44', ideal: '8.87', total: '23.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-51', built: '24.23', ideal: '14.88', total: '39.11', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-52', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-53', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-54', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-55', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-56', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-57', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-58', built: '15.68', ideal: '9.63', total: '25.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-59', built: '15.68', ideal: '9.63', total: '25.31', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-60', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-61', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-62', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-63', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-64', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-65', built: '14.96', ideal: '9.19', total: '24.15', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-66', built: '24.23', ideal: '14.88', total: '39.11', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-67', built: '18.53', ideal: '11.38', total: '29.91', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-68', built: '18.53', ideal: '11.38', total: '29.91', type: 'ПАРКОМЯСТО', status: 'Свободен' }
   ];
 
   // Function to get floor data based on floor selection
@@ -872,7 +883,7 @@ const GoldenResidenceSingleBlock = () => {
                           {floor === 'ground' ? 'Приземен етаж' : floor === 'underground' ? 'Подземен етаж' : `${floor} етаж`}
                         </span>
                         <span className="text-gray-400 text-sm">
-                          {floor === 'ground' ? '52 гаража' : floor === 'underground' ? '61 гаража' : '12 апартамента'}
+                          {floor === 'ground' ? '52 гаража + 32 ПМ' : floor === 'underground' ? '61 гаража + 34 ПМ' : '12 апартамента'}
                         </span>
                       </div>
                     </div>
