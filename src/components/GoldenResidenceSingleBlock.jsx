@@ -31,6 +31,24 @@ import archB8 from '../assets/продажби/project 2/architectures-b/archite
 import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.webp';
 import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.webp';
 
+// Helper function to normalize status values from Google Sheets
+const normalizeStatus = (status) => {
+  if (!status) return 'Свободен';
+  const trimmed = status.trim().toLowerCase();
+
+  if (trimmed.includes('продаден') || trimmed.includes('sold')) {
+    return 'Продадени';
+  }
+  if (trimmed.includes('резервиран') || trimmed.includes('reserved')) {
+    return 'Резервиран';
+  }
+  if (trimmed.includes('свободен') || trimmed.includes('available') || trimmed.includes('free')) {
+    return 'Свободен';
+  }
+  // Default to the original value if no match
+  return status.trim();
+};
+
 const GoldenResidenceSingleBlock = () => {
   const { block } = useParams();
   const navigate = useNavigate();
@@ -315,7 +333,7 @@ const GoldenResidenceSingleBlock = () => {
     ideal: item.ideal,
     total: item.total,
     type: 'ГАРАЖ',
-    status: item.status
+    status: normalizeStatus(item.status)
   });
 
   // Transform parking data from Google Sheets format to component format
@@ -325,7 +343,7 @@ const GoldenResidenceSingleBlock = () => {
     ideal: item.ideal,
     total: item.total,
     type: 'СКЛАДОВО ПОМЕЩЕНИЕ',
-    status: item.status
+    status: normalizeStatus(item.status)
   });
 
   // Ground Floor data - Garages (Г-001 to Г-052) and Storage (ПМ-01 to ПМ-34) - dynamic from Google Sheets
@@ -353,7 +371,7 @@ const GoldenResidenceSingleBlock = () => {
         ideal: item.ideal,
         total: item.total,
         type: 'ПАРКОМЯСТО',
-        status: item.status
+        status: normalizeStatus(item.status)
       }));
 
     return [
@@ -504,7 +522,7 @@ const GoldenResidenceSingleBlock = () => {
         ideal: item.ideal,
         total: item.total,
         type: 'ПАРКОМЯСТО',
-        status: item.status
+        status: normalizeStatus(item.status)
       }));
 
     return [
