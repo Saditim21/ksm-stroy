@@ -338,14 +338,14 @@ const GoldenResidenceSingleBlock = () => {
       })
       .map(transformGarage);
 
-    // Filter parking for ground floor (ПМ-03 to ПМ-34) - Приземен етаж
+    // Filter parking for ground floor (ПМ-01 to ПМ-34) - Приземен етаж
     // First, filter items that have ПМ- prefix (parking spots)
     const parkingItems = parkingFromSheet.filter(p => p.number && p.number.startsWith('ПМ-'));
 
     const groundParking = parkingItems
       .filter(p => {
         const num = parseInt(p.number.replace('ПМ-', ''));
-        return num >= 3 && num <= 34;
+        return num >= 1 && num <= 34;
       })
       .map((item) => ({
         apartment: item.number,
@@ -436,7 +436,9 @@ const GoldenResidenceSingleBlock = () => {
     { apartment: 'Г-051', built: '21.07', ideal: '16.73', total: '43.97', type: 'ГАРАЖ', status: 'Свободен' },
     { apartment: 'Г-052', built: '21.07', ideal: '12.94', total: '34.01', type: 'ГАРАЖ', status: 'Свободен' },
 
-    // Parking spots ПМ-03 to ПМ-34 (Ground floor - Приземен етаж)
+    // Parking spots ПМ-01 to ПМ-34 (Ground floor - Приземен етаж)
+    { apartment: 'ПМ-01', built: '17.67', ideal: '10.85', total: '28.52', type: 'ПАРКОМЯСТО', status: 'Свободен' },
+    { apartment: 'ПМ-02', built: '17.67', ideal: '10.85', total: '28.52', type: 'ПАРКОМЯСТО', status: 'Свободен' },
     { apartment: 'ПМ-03', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
     { apartment: 'ПМ-04', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
     { apartment: 'ПМ-05', built: '12.50', ideal: '0', total: '12.50', type: 'ПАРКОМЯСТО', status: 'Свободен' },
@@ -883,7 +885,7 @@ const GoldenResidenceSingleBlock = () => {
                           {floor === 'ground' ? 'Приземен етаж' : floor === 'underground' ? 'Подземен етаж' : `${floor} етаж`}
                         </span>
                         <span className="text-gray-400 text-sm">
-                          {floor === 'ground' ? '52 гаража + 32 ПМ' : floor === 'underground' ? '61 гаража + 34 ПМ' : '12 апартамента'}
+                          {floor === 'ground' ? '52 гаража + 34 ПМ' : floor === 'underground' ? '61 гаража + 34 ПМ' : '12 апартамента'}
                         </span>
                       </div>
                     </div>

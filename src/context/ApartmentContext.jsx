@@ -122,7 +122,9 @@ const defaultGaragesFallback = [
 ];
 
 const defaultParkingFallback = [
-  // Ground floor parking spots (ПМ-03 to ПМ-34) - Приземен етаж
+  // Ground floor parking spots (ПМ-01 to ПМ-34) - Приземен етаж
+  { number: 'ПМ-01', built: '17.67', ideal: '10.85', total: '28.52', type: 'Паркомясто', status: 'Свободен' },
+  { number: 'ПМ-02', built: '17.67', ideal: '10.85', total: '28.52', type: 'Паркомясто', status: 'Свободен' },
   { number: 'ПМ-03', built: '12.50', ideal: '0', total: '12.50', type: 'Паркомясто', status: 'Свободен' },
   { number: 'ПМ-04', built: '12.50', ideal: '0', total: '12.50', type: 'Паркомясто', status: 'Свободен' },
   { number: 'ПМ-05', built: '12.50', ideal: '0', total: '12.50', type: 'Паркомясто', status: 'Свободен' },
