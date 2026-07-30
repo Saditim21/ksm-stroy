@@ -4,6 +4,9 @@ import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageSta
 // Fallback data - used when Google Sheets is not configured or unavailable
 import { getBlockAFallbackData, getBlockBFallbackData } from '../constants/apartmentFallbackData';
 
+// Fallback data for Многофамилна сграда
+import { getMnogoAFallbackData, getMnogoBFallbackData } from '../constants/mnogofamilnaFallbackData';
+
 // Fallback data for garages and parking
 const defaultGaragesFallback = [
   { number: 'Г-001', built: '21.07', ideal: '12.94', total: '34.01', type: 'Гараж', status: 'Свободен' },
@@ -199,6 +202,8 @@ const ApartmentContext = createContext(null);
 export function ApartmentProvider({ children }) {
   const [blockAData, setBlockAData] = useState(null);
   const [blockBData, setBlockBData] = useState(null);
+  const [mnogoAData, setMnogoAData] = useState(null);
+  const [mnogoBData, setMnogoBData] = useState(null);
   const [garagesData, setGaragesData] = useState(null);
   const [parkingData, setParkingData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -212,11 +217,13 @@ export function ApartmentProvider({ children }) {
 
       try {
         // Fetch all data in parallel
-        const [blockA, blockB, garages, parking] = await Promise.all([
+        const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
           fetchApartmentData('blockA'),
           fetchApartmentData('blockB'),
           fetchGarageData('garages'),
           fetchGarageData('parking'),
+          fetchApartmentData('mnogoA'),
+          fetchApartmentData('mnogoB'),
         ]);
 
         // Use fetched data or fallback for apartments
@@ -238,6 +245,10 @@ export function ApartmentProvider({ children }) {
         setGaragesData(garages || defaultGaragesFallback);
         setParkingData(parking || defaultParkingFallback);
 
+        // Use fetched data or fallback for Многофамилна сграда
+        setMnogoAData(mnogoA || getMnogoAFallbackData());
+        setMnogoBData(mnogoB || getMnogoBFallbackData());
+
       } catch (err) {
         console.error('Error loading data:', err);
         setError(err.message);
@@ -246,6 +257,8 @@ export function ApartmentProvider({ children }) {
         setBlockBData(getBlockBFallbackData());
         setGaragesData(defaultGaragesFallback);
         setParkingData(defaultParkingFallback);
+        setMnogoAData(getMnogoAFallbackData());
+        setMnogoBData(getMnogoBFallbackData());
         setUsingFallback(true);
       } finally {
         setLoading(false);
@@ -321,17 +334,21 @@ export function ApartmentProvider({ children }) {
     // Clear cache to ensure fresh data is fetched
     clearCache();
     try {
-      const [blockA, blockB, garages, parking] = await Promise.all([
+      const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
         fetchApartmentData('blockA'),
         fetchApartmentData('blockB'),
         fetchGarageData('garages'),
         fetchGarageData('parking'),
+        fetchApartmentData('mnogoA'),
+        fetchApartmentData('mnogoB'),
       ]);
 
       if (blockA) setBlockAData(blockA);
       if (blockB) setBlockBData(blockB);
       if (garages) setGaragesData(garages);
       if (parking) setParkingData(parking);
+      if (mnogoA) setMnogoAData(mnogoA);
+      if (mnogoB) setMnogoBData(mnogoB);
       setUsingFallback(!blockA && !blockB);
 
     } catch (err) {
@@ -339,6 +356,30 @@ export function ApartmentProvider({ children }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Get floor data scoped to a project + block
+  const getProjectFloorData = (projectId, blockId) => {
+    if (projectId === 'mnogofamilna-sgrada') {
+      if (blockId === 'block-a' || blockId === 'A') return mnogoAData || getMnogoAFallbackData();
+      return mnogoBData || getMnogoBFallbackData();
+    }
+    return getFloorData(blockId);
+  };
+
+  // Get combined stats scoped to a project
+  const getProjectStats = (projectId) => {
+    const [a, b] = projectId === 'mnogofamilna-sgrada'
+      ? [mnogoAData || getMnogoAFallbackData(), mnogoBData || getMnogoBFallbackData()]
+      : [getFloorData('block-a'), getFloorData('block-b')];
+    const sa = calculateStats(a);
+    const sb = calculateStats(b);
+    return {
+      total: sa.total + sb.total,
+      available: sa.available + sb.available,
+      reserved: sa.reserved + sb.reserved,
+      sold: sa.sold + sb.sold,
+    };
   };
 
   const value = {
@@ -353,6 +394,8 @@ export function ApartmentProvider({ children }) {
     getGaragesData,
     getParkingData,
     getGoldenResidenceStats,
+    getProjectFloorData,
+    getProjectStats,
     refreshData,
   };
 
