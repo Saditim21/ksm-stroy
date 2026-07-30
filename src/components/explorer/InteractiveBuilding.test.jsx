@@ -53,3 +53,46 @@ test('keyboard: Enter on focused floor selects it', () => {
   fireEvent.keyDown(container.querySelectorAll('polygon')[0], { key: 'Enter' })
   expect(onSelectFloor).toHaveBeenCalledWith(shapes[0])
 })
+
+test('touch: first tap arms/highlights, second tap selects (regression for armed state survival)', () => {
+  const onSelectFloor = vi.fn()
+  const onHoverFloor = vi.fn()
+  const { container } = render(
+    <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={onHoverFloor} onSelectFloor={onSelectFloor} />,
+  )
+  const poly = container.querySelectorAll('polygon')[0]
+
+  // First tap: pointerDown → pointerLeave → click (should arm, not select)
+  fireEvent.pointerDown(poly, { pointerType: 'touch' })
+  fireEvent.pointerLeave(container, { pointerType: 'touch' })
+  fireEvent.click(poly)
+  expect(onSelectFloor).not.toHaveBeenCalled()
+  expect(onHoverFloor).toHaveBeenCalledWith('А:1')
+
+  // Second tap: pointerDown → pointerLeave → click (should select)
+  fireEvent.pointerDown(poly, { pointerType: 'touch' })
+  fireEvent.pointerLeave(container, { pointerType: 'touch' })
+  fireEvent.click(poly)
+  expect(onSelectFloor).toHaveBeenCalledWith(shapes[0])
+})
+
+test('focus event on polygon triggers onHoverFloor with floor key', () => {
+  const onHoverFloor = vi.fn()
+  const { container } = render(
+    <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={onHoverFloor} onSelectFloor={() => {}} />,
+  )
+  const poly = container.querySelectorAll('polygon')[0]
+  fireEvent.focus(poly)
+  expect(onHoverFloor).toHaveBeenCalledWith('А:1')
+})
+
+test('blur event on polygon clears onHoverFloor', () => {
+  const onHoverFloor = vi.fn()
+  const { container } = render(
+    <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={onHoverFloor} onSelectFloor={() => {}} />,
+  )
+  const poly = container.querySelectorAll('polygon')[0]
+  fireEvent.focus(poly)
+  fireEvent.blur(poly)
+  expect(onHoverFloor).toHaveBeenLastCalledWith(null)
+})

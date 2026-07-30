@@ -48,7 +48,7 @@ export default function InteractiveBuilding({ image, shapes, summaries, hoveredF
   }
 
   return (
-    <div className="relative select-none" onPointerLeave={deactivate}>
+    <div className="relative select-none" onPointerLeave={(e) => { if (e.pointerType === 'touch') return; deactivate() }}>
       <img src={image.src} width={image.width} height={image.height} alt="" className="block h-auto w-full" />
       <svg viewBox={`0 0 ${image.width} ${image.height}`} className="absolute inset-0 h-full w-full" aria-label="Интерактивна фасада">
         {shapes.map((shape) => {
@@ -81,6 +81,8 @@ export default function InteractiveBuilding({ image, shapes, summaries, hoveredF
               onPointerDown={(e) => { lastPointerType.current = e.pointerType }}
               onPointerEnter={(e) => e.pointerType !== 'touch' && activate(shape, e)}
               onPointerMove={(e) => e.pointerType !== 'touch' && isHot && setTooltip({ x: e.clientX, y: e.clientY, shape })}
+              onFocus={() => onHoverFloor?.(floorKey(shape))}
+              onBlur={() => onHoverFloor?.(null)}
               onClick={(e) => handleClick(shape, e)}
               onKeyDown={(e) => e.key === 'Enter' && onSelectFloor?.(shape)}
             />
