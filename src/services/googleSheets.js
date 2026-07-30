@@ -17,6 +17,8 @@ const SHEET_URLS = {
   blockB: import.meta.env.VITE_GOOGLE_SHEET_BLOCK_B || '',
   garages: import.meta.env.VITE_GOOGLE_SHEET_GARAGES || '',
   parking: import.meta.env.VITE_GOOGLE_SHEET_PARKING || '',
+  mnogoA: import.meta.env.VITE_GOOGLE_SHEET_MNOGO_A || '',
+  mnogoB: import.meta.env.VITE_GOOGLE_SHEET_MNOGO_B || '',
 };
 
 // Cache duration in milliseconds (30 seconds for faster updates)
@@ -28,12 +30,14 @@ const cache = {
   blockB: { data: null, timestamp: 0 },
   garages: { data: null, timestamp: 0 },
   parking: { data: null, timestamp: 0 },
+  mnogoA: { data: null, timestamp: 0 },
+  mnogoB: { data: null, timestamp: 0 },
 };
 
 /**
  * Parse CSV string into array of objects
  */
-function parseCSV(csvText) {
+export function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) return [];
 
@@ -84,7 +88,7 @@ function parseCSVLine(line) {
 /**
  * Transform raw sheet data to apartment format
  */
-function transformToApartmentData(rawData) {
+export function transformToApartmentData(rawData) {
   const floorData = {};
 
   rawData.forEach(row => {
@@ -103,6 +107,7 @@ function transformToApartmentData(rawData) {
       total: row['Обща'] || row['Total'] || '',
       изложение: row['Изложение'] || row['Exposure'] || '',
       status: row['Статус'] || row['Status'] || 'Свободен',
+      цена: row['Цена'] || row['Price'] || '',
     });
   });
 
@@ -301,4 +306,6 @@ export function clearCache() {
   cache.blockB = { data: null, timestamp: 0 };
   cache.garages = { data: null, timestamp: 0 };
   cache.parking = { data: null, timestamp: 0 };
+  cache.mnogoA = { data: null, timestamp: 0 };
+  cache.mnogoB = { data: null, timestamp: 0 };
 }
