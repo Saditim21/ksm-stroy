@@ -41,9 +41,15 @@ export default defineConfig({
     port: 3000
   },
   esbuild: {
-    // Tree-shake unused imports in dev mode  
+    // Tree-shake unused imports in dev mode
     treeShaking: true,
     // Remove unused code in development for faster builds
     legalComments: 'none'
-  }
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.js',
+    css: false,
+  },
 })
