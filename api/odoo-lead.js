@@ -8,6 +8,9 @@
  * ВАЖНО: този endpoint е допълнение към EmailJS, не замяна. Ако Odoo е
  * недостъпен, формата на сайта продължава да работи и клиентът пак получава
  * имейл - виж onSubmit в src/pages/Contact.jsx.
+ *
+ * Ползва Web Handler signature (export default { fetch }), който Vercel
+ * документира за проекти без Next.js.
  */
 
 const ODOO_URL = (process.env.ODOO_URL || 'https://edu-ksmstroy.odoo.com').replace(/\/+$/, '')
@@ -24,6 +27,12 @@ const LIMITS = {
 }
 
 const EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+
+const json = (body, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+  })
 
 const clean = (value, max) =>
   typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -113,57 +122,67 @@ async function createOdooLead(payload) {
   }
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST')
-    return res.status(405).json({ ok: false, error: 'Method not allowed' })
-  }
+export default {
+  async fetch(request) {
+    // GET е health check - позволява да се провери че endpoint-ът е
+    // деплойнат и рутван правилно, без да създава Lead в Odoo.
+    if (request.method === 'GET') {
+      return json({ ok: true, service: 'odoo-lead', crmConfigured: Boolean(ODOO_URL) })
+    }
 
-  // Vercel парсва JSON автоматично, но при празно/непознато тяло идва string.
-  let raw = req.body
-  if (typeof raw === 'string') {
+    if (request.method !== 'POST') {
+      return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', Allow: 'GET, POST' }
+      })
+    }
+
+    let raw
     try {
-      raw = JSON.parse(raw)
+      raw = await request.json()
     } catch {
-      return res.status(400).json({ ok: false, error: 'Invalid JSON body' })
-    }
-  }
-  if (!raw || typeof raw !== 'object') {
-    return res.status(400).json({ ok: false, error: 'Invalid JSON body' })
-  }
-
-  // Honeypot: истинските посетители не виждат това поле. Връщаме успех,
-  // за да не разбере ботът, че е отрязан.
-  if (clean(raw.company, 200)) {
-    return res.status(200).json({ ok: true, skipped: true })
-  }
-
-  const payload = {
-    name: clean(raw.name, LIMITS.name),
-    email: clean(raw.email, LIMITS.email),
-    phone: clean(raw.phone, LIMITS.phone),
-    projectType: clean(raw.projectType, LIMITS.projectType),
-    budget: clean(raw.budget, LIMITS.budget),
-    message: clean(raw.message, LIMITS.message)
-  }
-
-  const errors = validate(payload)
-  if (errors.length > 0) {
-    return res.status(400).json({ ok: false, error: 'Validation failed', fields: errors })
-  }
-
-  try {
-    const result = await createOdooLead(payload)
-
-    if (result.ok) {
-      return res.status(200).json({ ok: true, id: result.id })
+      return json({ ok: false, error: 'Invalid JSON body' }, 400)
     }
 
-    console.error('[odoo-lead] Odoo не създаде Lead:', result.reason, result.detail)
-    return res.status(502).json({ ok: false, error: 'CRM unavailable' })
-  } catch (error) {
-    const reason = error?.name === 'AbortError' ? `timeout след ${ODOO_TIMEOUT_MS}ms` : error?.message
-    console.error('[odoo-lead] Заявката към Odoo пропадна:', reason)
-    return res.status(502).json({ ok: false, error: 'CRM unavailable' })
+    if (!raw || typeof raw !== 'object') {
+      return json({ ok: false, error: 'Invalid JSON body' }, 400)
+    }
+
+    // Honeypot: истинските посетители не виждат това поле. Връщаме успех,
+    // за да не разбере ботът, че е отрязан.
+    if (clean(raw.company, 200)) {
+      return json({ ok: true, skipped: true })
+    }
+
+    const payload = {
+      name: clean(raw.name, LIMITS.name),
+      email: clean(raw.email, LIMITS.email),
+      phone: clean(raw.phone, LIMITS.phone),
+      projectType: clean(raw.projectType, LIMITS.projectType),
+      budget: clean(raw.budget, LIMITS.budget),
+      message: clean(raw.message, LIMITS.message)
+    }
+
+    const errors = validate(payload)
+    if (errors.length > 0) {
+      return json({ ok: false, error: 'Validation failed', fields: errors }, 400)
+    }
+
+    try {
+      const result = await createOdooLead(payload)
+
+      if (result.ok) {
+        return json({ ok: true, id: result.id })
+      }
+
+      console.error('[odoo-lead] Odoo не създаде Lead:', result.reason, result.detail)
+      return json({ ok: false, error: 'CRM unavailable' }, 502)
+    } catch (error) {
+      const reason = error?.name === 'AbortError'
+        ? `timeout след ${ODOO_TIMEOUT_MS}ms`
+        : error?.message
+      console.error('[odoo-lead] Заявката към Odoo пропадна:', reason)
+      return json({ ok: false, error: 'CRM unavailable' }, 502)
+    }
   }
 }
