@@ -61,17 +61,18 @@ test('touch: first tap arms/highlights, second tap selects (regression for armed
     <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={onHoverFloor} onSelectFloor={onSelectFloor} />,
   )
   const poly = container.querySelectorAll('polygon')[0]
+  const root = container.querySelector('.relative.select-none')
 
-  // First tap: pointerDown → pointerLeave → click (should arm, not select)
+  // First tap: pointerDown → pointerLeave (on root) → click (should arm, not select)
   fireEvent.pointerDown(poly, { pointerType: 'touch' })
-  fireEvent.pointerLeave(container, { pointerType: 'touch' })
+  fireEvent.pointerLeave(root, { pointerType: 'touch' })
   fireEvent.click(poly)
   expect(onSelectFloor).not.toHaveBeenCalled()
   expect(onHoverFloor).toHaveBeenCalledWith('А:1')
 
-  // Second tap: pointerDown → pointerLeave → click (should select)
+  // Second tap: pointerDown → pointerLeave (on root) → click (should select)
   fireEvent.pointerDown(poly, { pointerType: 'touch' })
-  fireEvent.pointerLeave(container, { pointerType: 'touch' })
+  fireEvent.pointerLeave(root, { pointerType: 'touch' })
   fireEvent.click(poly)
   expect(onSelectFloor).toHaveBeenCalledWith(shapes[0])
 })
