@@ -42,6 +42,7 @@ export default function TracerPage() {
 
   const handleCanvasClick = (e) => {
     if (wasDrag()) return
+    if (e.detail > 1) return // ignore the click(s) that precede a dblclick close
     if (mode === 'draw') setDraft((d) => [...d, toImage(e)])
     if (mode === 'band') {
       setBand((b) => {
@@ -109,7 +110,7 @@ export default function TracerPage() {
                     </text>
                     {mode === 'edit' && selected === si && poly.map((pt, qi) => (
                       <circle key={qi} cx={pt[0]} cy={pt[1]} r={dims.w / 250} fill="#fbbf24"
-                        onPointerDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => { e.stopPropagation(); e.currentTarget.setPointerCapture?.(e.pointerId) }}
                         onPointerMove={(e) => e.buttons === 1 && movePoint(si, pi, qi, e)} />
                     ))}
                   </g>
