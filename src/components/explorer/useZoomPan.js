@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 export default function useZoomPan({ minScale = 1, maxScale = 8 } = {}) {
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
   const drag = useRef(null)
+  const lastMoved = useRef(false)
 
   const onWheel = (e) => {
     setTransform((t) => {
@@ -11,6 +12,7 @@ export default function useZoomPan({ minScale = 1, maxScale = 8 } = {}) {
     })
   }
   const onPointerDown = (e) => {
+    lastMoved.current = false
     drag.current = { x: e.clientX, y: e.clientY, moved: false }
     e.currentTarget.setPointerCapture?.(e.pointerId)
   }
@@ -23,9 +25,12 @@ export default function useZoomPan({ minScale = 1, maxScale = 8 } = {}) {
     drag.current.y = e.clientY
     setTransform((t) => (t.scale === 1 ? t : { ...t, x: t.x + dx, y: t.y + dy }))
   }
-  const onPointerUp = () => { drag.current = null }
+  const onPointerUp = () => {
+    lastMoved.current = Boolean(drag.current?.moved)
+    drag.current = null
+  }
   const reset = () => setTransform({ x: 0, y: 0, scale: 1 })
-  const wasDrag = () => Boolean(drag.current?.moved)
+  const wasDrag = () => lastMoved.current
 
   return { transform, reset, wasDrag, handlers: { onWheel, onPointerDown, onPointerMove, onPointerUp } }
 }

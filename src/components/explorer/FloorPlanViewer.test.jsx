@@ -44,3 +44,32 @@ test('click reports the apartment row and normalized id', () => {
   fireEvent.click(container.querySelectorAll('polygon')[0])
   expect(onSelectUnit).toHaveBeenCalledWith(unitsIndex.get('А301'), 'А301')
 })
+
+test('drag gesture does not select apartment (regression: wasDrag guard)', () => {
+  const onSelectUnit = vi.fn()
+  const { container } = render(<FloorPlanViewer {...props} onSelectUnit={onSelectUnit} />)
+  // Target the component's outer div (has handlers attached, not RTL wrapper)
+  const componentDiv = container.querySelector('div.relative.overflow-hidden.rounded-lg')
+  const polygon = container.querySelectorAll('polygon')[0]
+
+  // Simulate drag: pointerDown → pointerMove(+50px) → pointerUp → click
+  fireEvent.pointerDown(componentDiv, { clientX: 0, clientY: 0, pointerId: 1 })
+  fireEvent.pointerMove(componentDiv, { clientX: 50, clientY: 50, pointerId: 1 })
+  fireEvent.pointerUp(componentDiv)
+  fireEvent.click(polygon)
+
+  // Should NOT call onSelectUnit because wasDrag() should be true
+  expect(onSelectUnit).not.toHaveBeenCalled()
+})
+
+test('plain click without drag selects apartment (regression: wasDrag guard)', () => {
+  const onSelectUnit = vi.fn()
+  const { container } = render(<FloorPlanViewer {...props} onSelectUnit={onSelectUnit} />)
+  const polygon = container.querySelectorAll('polygon')[0]
+
+  // Plain click without drag
+  fireEvent.click(polygon)
+
+  // Should call onSelectUnit because wasDrag() should be false
+  expect(onSelectUnit).toHaveBeenCalledWith(unitsIndex.get('А301'), 'А301')
+})
