@@ -28,19 +28,45 @@ const Contact = () => {
       phone: '',
       message: '',
       projectType: '',
-      budget: ''
+      budget: '',
+      company: ''
     }
   })
+
+  // Създава Lead в Odoo CRM. Нарочно е "best effort" - ако CRM-ът е
+  // недостъпен, посетителят не вижда грешка и запитването пак стига до
+  // имейла през EmailJS.
+  const sendToOdoo = async (data) => {
+    const response = await fetch('/api/odoo-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        projectType: data.projectType,
+        budget: data.budget,
+        message: data.message,
+        company: data.company
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`CRM отговори с ${response.status}`)
+    }
+
+    return response.json()
+  }
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     setSubmitError(null)
 
-    try {
+    // Send email using EmailJS
+    const sendEmail = async () => {
       // Lazy load EmailJS only when needed
       const emailjs = await import('@emailjs/browser').then(module => module.default)
-      
-      // Send email using EmailJS
+
       const templateParams = {
         from_name: data.name,
         from_email: data.email,
@@ -52,12 +78,29 @@ const Contact = () => {
         to_email: 'ksm_str@abv.bg'
       }
 
-      await emailjs.send(
+      return emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         templateParams,
         EMAILJS_PUBLIC_KEY
       )
+    }
+
+    try {
+      // Двете изпращания вървят паралелно, но само имейлът определя какво
+      // вижда посетителят.
+      const [emailResult, odooResult] = await Promise.allSettled([
+        sendEmail(),
+        sendToOdoo(data)
+      ])
+
+      if (odooResult.status === 'rejected') {
+        console.error('CRM sync failed (запитването е изпратено по имейл):', odooResult.reason)
+      }
+
+      if (emailResult.status === 'rejected') {
+        throw emailResult.reason
+      }
 
       setIsSubmitted(true)
       reset()
@@ -241,6 +284,17 @@ const Contact = () => {
                 )}
                 
                 <form id="contact-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Honeypot - скрито от посетителите, ботовете го попълват */}
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    {...register('company')}
+                    className="absolute w-px h-px -m-px p-0 overflow-hidden border-0 opacity-0 pointer-events-none"
+                    style={{ clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)' }}
+                  />
+
                   {/* Name Field */}
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-primary-700 mb-2">
