@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router-dom'
 import SEO from '../components/common/SEO'
 import { seoData } from '../utils/seo'
 import { pageVariants, pageTransition, fadeInUp, buttonExpand, viewportOptions } from '../utils/animations'
@@ -20,7 +21,8 @@ const Contact = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    watch
+    watch,
+    setValue
   } = useForm({
     defaultValues: {
       name: '',
@@ -31,6 +33,14 @@ const Contact = () => {
       budget: ''
     }
   })
+
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    const apartment = searchParams.get('apartment')
+    if (apartment) {
+      setValue('message', `Здравейте, интересувам се от апартамент ${apartment}. Моля, свържете се с мен.`)
+    }
+  }, [searchParams, setValue])
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
