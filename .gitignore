@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Draft facade-band extraction previews (regenerable, not source)
+scripts/.preview/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
