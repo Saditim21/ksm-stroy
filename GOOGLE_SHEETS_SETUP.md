@@ -101,3 +101,26 @@ The website has built-in fallback data. If Google Sheets is unavailable:
 - If that fails, it shows the default apartment data from the code
 
 This ensures the website never breaks even if Google Sheets has issues.
+
+## Многофамилна сграда (Вход А / Вход Б)
+
+1. Отворете вашия Google Sheets документ и създайте два нови листа:
+   "Многофамилна Вход А" и "Многофамилна Вход Б".
+2. Импортирайте файловете `google-sheets-data/mnogofamilna-vhod-a.csv` и
+   `mnogofamilna-vhod-b.csv` (File → Import → Upload → Replace current sheet).
+   Колоните са същите като при Golden Residence:
+   `Етаж, Апартамент, Вид, Застроена, Идеални, Обща, Изложение, Статус`
+   (по желание добавете колона `Цена` — тя се показва автоматично на сайта).
+3. За всеки от двата листа: File → Share → Publish to web → изберете листа →
+   "Comma-separated values (.csv)" → Publish → копирайте URL адреса.
+4. Добавете двата URL адреса като environment variables:
+   - локално в `.env.local`:
+     `VITE_GOOGLE_SHEET_MNOGO_A=<url на Вход А>`
+     `VITE_GOOGLE_SHEET_MNOGO_B=<url на Вход Б>`
+   - във Vercel: Settings → Environment Variables (същите две имена),
+     после Redeploy.
+5. Проверка: променете статус на апартамент, изчакайте ~30 секунди и
+   презаредете страницата на проекта.
+
+Забележка: докато URL адресите не са конфигурирани, сайтът показва
+вградените резервни данни (последното състояние преди тази промяна).
