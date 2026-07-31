@@ -236,7 +236,7 @@ function ProjectCard({ project, index, onClick }) {
         </div>
         <h3 className="font-display text-xl mt-4">{project.title}</h3>
         <p className="text-graphite text-sm mt-1">
-          {project.location} · {project.year} · {project.status}
+          {project.type} · {project.location} · {project.year}
         </p>
         <p className="text-graphite text-sm mt-2 leading-relaxed line-clamp-2">{project.description}</p>
       </motion.article>
@@ -371,7 +371,7 @@ const Blog = () => {
                 <div>
                   <h2 className="font-display text-xl text-plaster">{selectedProject.title}</h2>
                   <p className="text-gold-accent text-sm mt-1">
-                    {selectedProject.location} · {selectedProject.year} · {selectedProject.status}
+                    {selectedProject.type} · {selectedProject.location} · {selectedProject.year}
                   </p>
                 </div>
 

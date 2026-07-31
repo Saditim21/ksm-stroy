@@ -20,6 +20,16 @@ test('About opens with the "Строим от" thesis', () => {
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Строим от')
 })
 
+test('About has "Разгледайте обектите" link pointing to /blog', () => {
+  render(
+    <MemoryRouter>
+      <About />
+    </MemoryRouter>,
+  )
+  const link = screen.getByRole('link', { name: /Разгледайте обектите/i })
+  expect(link).toHaveAttribute('href', '/blog')
+})
+
 test('Blog leads with the "Завършени обекти" heading', () => {
   render(
     <MemoryRouter>

@@ -268,8 +268,9 @@ const About = () => {
               <p className="text-graphite mt-5 max-w-xl mx-auto">
                 Свържете се с нашия екип за консултация и да обсъдим как можем да реализираме вашия проект.
               </p>
-              <div className="mt-8 flex justify-center">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
                 <Button as={Link} to="/contact" variant="dark">Свържете се с нас</Button>
+                <Button as={Link} to="/blog" variant="ghost">Разгледайте обектите</Button>
               </div>
             </Reveal>
           </div>
