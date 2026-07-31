@@ -1,3 +1,9 @@
+// Lifted FLOOR_DATA out of the old FourTowersFloorMap component into
+// src/constants/mnogofamilnaFallbackData.js.
+//
+// HISTORICAL — kept for provenance only, it can no longer run: its input
+// (src/components/FourTowersFloorMap.jsx) was deleted once the extracted
+// fallback data was committed.
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const src = readFileSync('src/components/FourTowersFloorMap.jsx', 'utf8')

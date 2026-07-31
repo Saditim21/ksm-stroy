@@ -83,9 +83,9 @@ test('an unknown block redirects to the projects list', async () => {
   await waitFor(() => expect(screen.getByText('Списък проекти')).toBeInTheDocument())
 })
 
-// Regression: the context's getProjectStats() walks every sheet key, so for
-// Многофамилна сграда it counted the 7 garage/parking rows under key 0 as
-// apartments (151 instead of 144, +5 free / +2 sold).
+// Regression: summing every sheet key meant Многофамилна сграда counted the 7
+// garage/parking rows under key 0 as apartments (151 instead of 144,
+// +5 free / +2 sold).
 test('header stats count only apartments on configured floors', async () => {
   renderAt('/projects/mnogofamilna-sgrada/block-a')
   await waitFor(() => expect(floorButtons()).toHaveLength(9))

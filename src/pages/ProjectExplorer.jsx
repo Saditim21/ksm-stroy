@@ -49,10 +49,10 @@ export default function ProjectExplorer({ projectId }) {
     return out
   }, [project, floorDataByLetter])
 
-  // Header stats cover the CONFIGURED floors only. The context's own
-  // getProjectStats() walks every key of the sheet, which for Многофамилна
-  // сграда includes key 0 (the garages/parking rows) — those are not
-  // apartments and must not inflate the apartment counters.
+  // Header stats cover the CONFIGURED floors only. Summing the sheet wholesale
+  // would walk every key, which for Многофамилна сграда includes key 0 (the
+  // garages/parking rows) — those are not apartments and must not inflate the
+  // apartment counters.
   const projectStats = useMemo(() => {
     const totals = { available: 0, reserved: 0, sold: 0, total: 0 }
     for (const b of project?.blocks ?? []) {

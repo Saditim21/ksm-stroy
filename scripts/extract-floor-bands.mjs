@@ -1,5 +1,10 @@
 // Recovers floor-band polygons by diffing pre-baked hover images against the
 // base render. Usage: node scripts/extract-floor-bands.mjs [--render]
+//
+// HISTORICAL — kept for provenance only, it can no longer run. Its inputs (the
+// building-2-blog-*.{png,webp} and building-{A,B}-floor-*.webp hover renders)
+// were deleted once its output was finalised by hand; the resulting maps live
+// in src/data/maps/*.json and are the source of truth now.
 import sharp from 'sharp'
 import { writeFileSync, mkdirSync } from 'node:fs'
 

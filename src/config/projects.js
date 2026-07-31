@@ -33,7 +33,7 @@ import archB8 from '../assets/продажби/project 2/architectures-b/archite
 import mnogoBuildingImage from '../assets/продажби/project 1/sgrada1.webp'
 import mnogoFloorPlan from '../assets/продажби/project 1/building-all-floors-architecture.webp'
 
-// The Golden Residence render is served from /public (see src/constants/buildingImages.js)
+// The Golden Residence render is served from /public/images/golden-residence
 const publicBase = import.meta.env.BASE_URL || '/'
 const goldenBuildingImage = `${publicBase}images/golden-residence/building-2.webp`
 

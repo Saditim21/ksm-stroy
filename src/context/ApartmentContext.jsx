@@ -367,21 +367,6 @@ export function ApartmentProvider({ children }) {
     return getFloorData(blockId);
   };
 
-  // Get combined stats scoped to a project
-  const getProjectStats = (projectId) => {
-    const [a, b] = projectId === 'mnogofamilna-sgrada'
-      ? [mnogoAData || getMnogoAFallbackData(), mnogoBData || getMnogoBFallbackData()]
-      : [getFloorData('block-a'), getFloorData('block-b')];
-    const sa = calculateStats(a);
-    const sb = calculateStats(b);
-    return {
-      total: sa.total + sb.total,
-      available: sa.available + sb.available,
-      reserved: sa.reserved + sb.reserved,
-      sold: sa.sold + sb.sold,
-    };
-  };
-
   const value = {
     blockAData,
     blockBData,
@@ -395,7 +380,6 @@ export function ApartmentProvider({ children }) {
     getParkingData,
     getGoldenResidenceStats,
     getProjectFloorData,
-    getProjectStats,
     refreshData,
   };
 
