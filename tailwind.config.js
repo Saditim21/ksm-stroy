@@ -10,7 +10,7 @@ export default {
         // Primary Brand Colors - Luxury Enterprise
         primary: {
           900: '#1a1a1a', // Deep Charcoal
-          800: '#2c2c2c', // Warm Graphite  
+          800: '#2c2c2c', // Warm Graphite
           700: '#404040',
           600: '#525252',
           500: '#737373',
@@ -20,7 +20,7 @@ export default {
           100: '#f5f5f5',
           50: '#fafafa',  // Platinum White
         },
-        
+
         // Luxury Accent Colors
         gold: {
           900: '#8b7506',
@@ -34,7 +34,7 @@ export default {
           100: '#f5d7af',
           50: '#fdf4e6',
         },
-        
+
         // Royal Blue for Trust Elements
         royal: {
           900: '#1e3a8a', // Royal Blue
@@ -48,7 +48,7 @@ export default {
           100: '#dbeafe',
           50: '#eff6ff',
         },
-        
+
         // Premium Neutrals
         platinum: {
           900: '#171717',
@@ -62,7 +62,7 @@ export default {
           100: '#f5f5f5',
           50: '#fafafa',
         },
-        
+
         // Warm Accent
         copper: {
           900: '#7c2d12',
@@ -76,7 +76,7 @@ export default {
           100: '#ffedd5',
           50: '#fff7ed',
         },
-        
+
         // Silver Mist for subtle elements
         silver: {
           900: '#111827',
@@ -90,19 +90,34 @@ export default {
           100: '#f3f4f6',
           50: '#f9fafb',
         },
-        
+
         // Warm backgrounds
         ivory: {
           50: '#f8f8f6',  // Warm Ivory
           100: '#f3f3f1',
           200: '#e8e8e4',
-        }
+        },
+
+        // Redesign color palette
+        plaster: '#F6F5F1',
+        ink: '#1B1A17',
+        graphite: '#57544E',
+        'gold-accent': '#C7A032',
+        'gold-deep': '#A8862A',
+        concrete: '#DEDBD4',
       },
       
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
-        'serif': ['Playfair Display', 'Georgia', 'serif'],
-        'display': ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+      },
+
+      letterSpacing: {
+        eyebrow: '0.18em',
+      },
+
+      transitionTimingFunction: {
+        luxe: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
       
       fontSize: {
@@ -137,6 +152,7 @@ export default {
         'slide-in-right': 'slide-in-right 0.6s ease-out forwards',
         'scale-in': 'scale-in 0.5s ease-out forwards',
         'float': 'float 6s ease-in-out infinite',
+        'kenburns': 'kenburns 18s ease-in-out infinite alternate',
       },
       
       keyframes: {
@@ -159,6 +175,10 @@ export default {
         'float': {
           '0%, 100%': { transform: 'translateY(-10px)' },
           '50%': { transform: 'translateY(10px)' },
+        },
+        'kenburns': {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(1.08)' },
         },
       },
     },

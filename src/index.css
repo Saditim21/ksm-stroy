@@ -20,11 +20,19 @@
 
   /* Prevent horizontal overflow and overscroll on mobile */
   body {
+    @apply bg-plaster text-ink antialiased;
     overflow-x: hidden;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    /* Consistent background color to prevent flash - matches primary-50 */
-    background-color: #fafafa;
+  }
+
+  ::selection {
+    background: #c7a03233;
+  }
+
+  :focus-visible {
+    outline: 2px solid #c7a032;
+    outline-offset: 2px;
   }
 
   /* Better touch behavior for interactive elements */
