@@ -84,7 +84,13 @@ export default function InteractiveBuilding({ image, shapes, summaries, hoveredF
               onFocus={() => onHoverFloor?.(floorKey(shape))}
               onBlur={() => onHoverFloor?.(null)}
               onClick={(e) => handleClick(shape, e)}
-              onKeyDown={(e) => e.key === 'Enter' && onSelectFloor?.(shape)}
+              // role="button" promises both keys; Space also needs its default
+              // (page scroll) suppressed.
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return
+                e.preventDefault()
+                onSelectFloor?.(shape)
+              }}
             />
           ))
         })}

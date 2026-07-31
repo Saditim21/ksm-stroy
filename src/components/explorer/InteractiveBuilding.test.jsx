@@ -45,13 +45,30 @@ test('click selects the floor shape', () => {
   expect(onSelectFloor).toHaveBeenCalledWith(shapes[0])
 })
 
-test('keyboard: Enter on focused floor selects it', () => {
+test.each([['Enter'], [' ']])('keyboard: %s on focused floor selects it', (key) => {
   const onSelectFloor = vi.fn()
   const { container } = render(
     <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={() => {}} onSelectFloor={onSelectFloor} />,
   )
-  fireEvent.keyDown(container.querySelectorAll('polygon')[0], { key: 'Enter' })
+  fireEvent.keyDown(container.querySelectorAll('polygon')[0], { key })
   expect(onSelectFloor).toHaveBeenCalledWith(shapes[0])
+})
+
+test('keyboard: Space is consumed so the page does not scroll', () => {
+  const { container } = render(
+    <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={() => {}} onSelectFloor={() => {}} />,
+  )
+  const prevented = !fireEvent.keyDown(container.querySelectorAll('polygon')[0], { key: ' ' })
+  expect(prevented).toBe(true)
+})
+
+test('keyboard: other keys are ignored', () => {
+  const onSelectFloor = vi.fn()
+  const { container } = render(
+    <InteractiveBuilding image={image} shapes={shapes} summaries={summaries} hoveredFloor={null} onHoverFloor={() => {}} onSelectFloor={onSelectFloor} />,
+  )
+  fireEvent.keyDown(container.querySelectorAll('polygon')[0], { key: 'a' })
+  expect(onSelectFloor).not.toHaveBeenCalled()
 })
 
 test('touch: first tap arms/highlights, second tap selects (regression for armed state survival)', () => {
