@@ -13,8 +13,10 @@ import AvailabilityLegend from '../components/explorer/AvailabilityLegend'
 import LiveStatsBar from '../components/explorer/LiveStatsBar'
 import GarageGrid from '../components/explorer/GarageGrid'
 import SEO from '../components/common/SEO'
+import DimensionLine from '../components/ui/DimensionLine'
+import DisplayHeading from '../components/ui/DisplayHeading'
 
-const DOT = { available: 'bg-emerald-500', reserved: 'bg-amber-500', sold: 'bg-red-500', unknown: 'bg-neutral-300' }
+const DOT = { available: 'bg-emerald-500', reserved: 'bg-amber-500', sold: 'bg-red-500', unknown: 'bg-concrete' }
 
 export default function ProjectExplorer({ projectId }) {
   const { block: blockId } = useParams()
@@ -100,23 +102,24 @@ export default function ProjectExplorer({ projectId }) {
   }
 
   return (
-    <div className="min-h-screen bg-primary-50 py-8">
+    <div className="min-h-screen bg-plaster pt-24 pb-16">
       <SEO
         title={`${project.name} — ${block.label}`}
         description={`Свободни апартаменти в ${project.name}, ${block.label}`}
       />
-      <div className="container mx-auto max-w-7xl px-4">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <Link to={`/projects/${projectId}`} className="text-neutral-600 hover:text-neutral-900">
-            ← {project.name}
-          </Link>
-          <h1 className="text-2xl font-bold sm:text-3xl">
-            {project.name} · <span className="text-gold-600">{block.label}</span>
-          </h1>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <Link to={`/projects/${projectId}`} className="text-graphite hover:text-ink text-sm">
+              ← {project.name}
+            </Link>
+            <DimensionLine label={project.name} className="mt-3" />
+            <DisplayHeading as="h1" size="sub">{block.label}</DisplayHeading>
+          </div>
           <LiveStatsBar stats={projectStats} />
         </div>
 
-        {loading && <div className="animate-pulse rounded-xl bg-neutral-200" style={{ aspectRatio: '2 / 1' }} />}
+        {loading && <div className="animate-pulse rounded-2xl bg-concrete" style={{ aspectRatio: '2 / 1' }} />}
 
         <AnimatePresence mode="wait">
           {!activeFloor && !loading && (
@@ -128,7 +131,7 @@ export default function ProjectExplorer({ projectId }) {
               className="flex flex-col gap-6 lg:flex-row"
             >
               <div className="lg:w-2/3">
-                <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white p-2 shadow-luxury">
+                <div className="overflow-hidden rounded-2xl border border-concrete bg-white p-2">
                   <InteractiveBuilding
                     image={project.building.image}
                     shapes={project.building.map.shapes}
@@ -143,8 +146,8 @@ export default function ProjectExplorer({ projectId }) {
                 </div>
               </div>
               <aside className="lg:w-1/3">
-                <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-luxury">
-                  <h2 className="mb-3 text-lg font-bold">Етажи</h2>
+                <div className="rounded-2xl border border-concrete bg-white p-4">
+                  <h2 className="mb-3 font-display text-lg text-ink">Етажи</h2>
                   <div className="space-y-1.5">
                     {[...floors].reverse().map((floor) => {
                       const key = `${block.letter}:${floor}`
@@ -156,11 +159,11 @@ export default function ProjectExplorer({ projectId }) {
                           onMouseLeave={() => setHoveredFloor(null)}
                           onClick={() => openFloor(floor)}
                           className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition ${
-                            hoveredFloor === key ? 'border-gold-500 bg-gold-50' : 'border-neutral-200 hover:border-neutral-300'
+                            hoveredFloor === key ? 'border-gold-accent bg-gold-accent/5' : 'border-concrete hover:border-ink'
                           }`}
                         >
                           <span className="font-medium">Етаж {floor}</span>
-                          <span className="text-sm text-neutral-500">
+                          <span className="text-sm text-graphite">
                             {s.available > 0 ? `${s.available} свободни` : s.color === 'sold' ? 'продаден' : `${s.total} ап.`}
                           </span>
                           <span className={`h-2.5 w-2.5 rounded-full ${DOT[s.color]}`} />
@@ -176,10 +179,10 @@ export default function ProjectExplorer({ projectId }) {
           {activeFloor && !loading && (
             <motion.div key={`floor-${activeFloor}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <button onClick={closeFloor} className="text-neutral-600 hover:text-neutral-900">
+                <button onClick={closeFloor} className="text-graphite hover:text-ink text-sm">
                   ← Всички етажи
                 </button>
-                <h2 className="text-xl font-bold">Етаж {activeFloor}</h2>
+                <h2 className="font-display text-xl text-ink">Етаж {activeFloor}</h2>
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-2 text-sm">
                     <input
@@ -192,7 +195,7 @@ export default function ProjectExplorer({ projectId }) {
                   <select
                     value={filter.type ?? ''}
                     onChange={(e) => setFilter({ ...filter, type: e.target.value || undefined })}
-                    className="rounded border border-neutral-300 px-2 py-1 text-sm"
+                    className="rounded border border-concrete px-2 py-1 text-sm"
                     aria-label="Вид апартамент"
                   >
                     <option value="">Всички видове</option>
@@ -209,7 +212,7 @@ export default function ProjectExplorer({ projectId }) {
                       aria-label="Минимална площ"
                       value={filter.minArea ?? ''}
                       onChange={(e) => setFilter({ ...filter, minArea: e.target.value === '' ? undefined : Number(e.target.value) })}
-                      className="w-16 rounded border border-neutral-300 px-1 py-1"
+                      className="w-16 rounded border border-concrete px-1 py-1"
                     />
                     до
                     <input
@@ -219,7 +222,7 @@ export default function ProjectExplorer({ projectId }) {
                       aria-label="Максимална площ"
                       value={filter.maxArea ?? ''}
                       onChange={(e) => setFilter({ ...filter, maxArea: e.target.value === '' ? undefined : Number(e.target.value) })}
-                      className="w-16 rounded border border-neutral-300 px-1 py-1"
+                      className="w-16 rounded border border-concrete px-1 py-1"
                     />
                   </label>
                   <AvailabilityLegend />
@@ -239,30 +242,30 @@ export default function ProjectExplorer({ projectId }) {
                       onSelectUnit={selectUnit}
                     />
                   ) : (
-                    <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center text-neutral-500">
+                    <div className="rounded-2xl border border-concrete bg-white p-8 text-center text-graphite">
                       Планът за този етаж не е наличен.
                     </div>
                   )}
                 </div>
                 <aside className="lg:w-1/3">
-                  <div className="max-h-[70vh] space-y-1.5 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-3 shadow-luxury">
+                  <div className="max-h-[70vh] space-y-1.5 overflow-y-auto rounded-2xl border border-concrete bg-white p-3">
                     {floorApartments.map((apartment) => (
                       <button
                         key={apartment.apartment}
                         onClick={() => selectUnit(apartment, normalizeUnitId(apartment.apartment))}
                         className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${
                           selectedUnitKey === normalizeUnitId(apartment.apartment)
-                            ? 'border-gold-500 bg-gold-50'
-                            : 'border-neutral-100 hover:border-neutral-300'
+                            ? 'border-gold-accent bg-gold-accent/5'
+                            : 'border-concrete hover:border-ink'
                         }`}
                       >
                         <span className="font-medium">{apartment.apartment}</span>
-                        <span className="text-neutral-500">{apartment.вид}</span>
+                        <span className="text-graphite">{apartment.вид}</span>
                         <AvailabilityBadge status={apartment.status} />
                       </button>
                     ))}
                     {floorApartments.length === 0 && (
-                      <div className="p-4 text-center text-sm text-neutral-500">Няма данни за този етаж.</div>
+                      <div className="p-4 text-center text-sm text-graphite">Няма данни за този етаж.</div>
                     )}
                   </div>
                 </aside>

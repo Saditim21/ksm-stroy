@@ -79,7 +79,7 @@ export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFlo
           <button
             type="button"
             onClick={reset}
-            className="h-11 rounded bg-neutral-900/70 px-3 text-xs text-white"
+            className="h-11 rounded bg-ink/70 px-3 text-xs text-plaster"
           >
             Нулирай изгледа
           </button>
@@ -88,7 +88,7 @@ export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFlo
           type="button"
           onClick={zoomOut}
           aria-label="Намали"
-          className="flex h-11 w-11 items-center justify-center rounded bg-neutral-900/70 text-xl leading-none text-white"
+          className="flex h-11 w-11 items-center justify-center rounded bg-ink/70 text-xl leading-none text-plaster"
         >
           −
         </button>
@@ -96,7 +96,7 @@ export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFlo
           type="button"
           onClick={zoomIn}
           aria-label="Увеличи"
-          className="flex h-11 w-11 items-center justify-center rounded bg-neutral-900/70 text-xl leading-none text-white"
+          className="flex h-11 w-11 items-center justify-center rounded bg-ink/70 text-xl leading-none text-plaster"
         >
           +
         </button>

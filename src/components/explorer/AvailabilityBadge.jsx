@@ -4,7 +4,7 @@ const STYLES = {
   available: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   reserved: 'bg-amber-50 text-amber-700 border-amber-200',
   sold: 'bg-red-50 text-red-700 border-red-200',
-  unknown: 'bg-neutral-100 text-neutral-500 border-neutral-200',
+  unknown: 'bg-plaster text-graphite border-concrete',
 }
 const LABELS = { available: 'Свободен', reserved: 'Резервиран', sold: 'Продаден', unknown: 'Няма данни' }
 
