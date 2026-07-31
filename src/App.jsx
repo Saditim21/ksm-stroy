@@ -11,9 +11,8 @@ const About = lazy(() => import('./pages/About'))
 const Projects = lazy(() => import('./pages/Projects'))
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const GoldenResidenceBlockSelection = lazy(() => import('./components/GoldenResidenceBlockSelection'))
-const GoldenResidenceSingleBlock = lazy(() => import('./components/GoldenResidenceSingleBlock'))
 const MnogofamilnaBlockSelection = lazy(() => import('./components/MnogofamilnaBlockSelection'))
-const MnogofamilnaSingleBlock = lazy(() => import('./components/MnogofamilnaSingleBlock'))
+const ProjectExplorer = lazy(() => import('./pages/ProjectExplorer'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Blog = lazy(() => import('./pages/Blog'))
 const TracerPage = import.meta.env.DEV ? lazy(() => import('./pages/dev/TracerPage')) : null
@@ -45,9 +44,9 @@ function AnimatedRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/golden-residence" element={<GoldenResidenceBlockSelection />} />
-          <Route path="/projects/golden-residence/:block" element={<GoldenResidenceSingleBlock />} />
+          <Route path="/projects/golden-residence/:block" element={<ProjectExplorer projectId="golden-residence" />} />
           <Route path="/projects/mnogofamilna-sgrada" element={<MnogofamilnaBlockSelection />} />
-          <Route path="/projects/mnogofamilna-sgrada/:block" element={<MnogofamilnaSingleBlock />} />
+          <Route path="/projects/mnogofamilna-sgrada/:block" element={<ProjectExplorer projectId="mnogofamilna-sgrada" />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
