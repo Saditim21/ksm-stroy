@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link, Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PROJECTS } from '../config/projects'
@@ -22,7 +22,7 @@ export default function ProjectExplorer({ projectId }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const project = PROJECTS[projectId]
   const block = project?.blocks.find((b) => b.id === blockId)
-  const { getProjectFloorData, getProjectStats, getGaragesData, getParkingData, loading } = useApartments()
+  const { getProjectFloorData, getGaragesData, getParkingData, loading } = useApartments()
 
   const [hoveredFloor, setHoveredFloor] = useState(null)
   const [selectedApartment, setSelectedApartment] = useState(null)
@@ -49,21 +49,46 @@ export default function ProjectExplorer({ projectId }) {
     return out
   }, [project, floorDataByLetter])
 
+  // Header stats cover the CONFIGURED floors only. The context's own
+  // getProjectStats() walks every key of the sheet, which for Многофамилна
+  // сграда includes key 0 (the garages/parking rows) — those are not
+  // apartments and must not inflate the apartment counters.
+  const projectStats = useMemo(() => {
+    const totals = { available: 0, reserved: 0, sold: 0, total: 0 }
+    for (const b of project?.blocks ?? []) {
+      for (const floor of project.floors[b.id] ?? []) {
+        const s = summarizeFloor(floorDataByLetter[b.letter]?.[floor] ?? [])
+        totals.available += s.available
+        totals.reserved += s.reserved
+        totals.sold += s.sold
+        totals.total += s.total
+      }
+    }
+    return totals
+  }, [project, floorDataByLetter])
+
+  const floors = block ? project.floors[block.id] : []
+  const activeFloor = floorParam && floors.includes(floorParam) ? floorParam : null
+
+  // Changing floor or block invalidates the current selection — otherwise the
+  // detail drawer survives a floor switch or a browser Back and shows a unit
+  // that is no longer on screen.
+  useEffect(() => {
+    setSelectedApartment(null)
+    setSelectedUnitKey(null)
+  }, [activeFloor, blockId])
+
   if (!project || !block) return <Navigate to="/projects" replace />
 
-  const floors = project.floors[block.id]
-  const activeFloor = floorParam && floors.includes(floorParam) ? floorParam : null
   const floorApartments = activeFloor ? floorDataByLetter[block.letter]?.[activeFloor] ?? [] : []
   const unitsIndex = new Map(floorApartments.map((a) => [normalizeUnitId(a.apartment), a]))
   const floorMap = activeFloor ? findFloorMap(project.floorMaps, projectId, block.letter, activeFloor) : null
   const planImage = activeFloor ? project.planImages[block.id][activeFloor] : null
 
   const openFloor = (floor) => setSearchParams({ floor: String(floor) })
-  const closeFloor = () => {
-    setSearchParams({})
-    setSelectedApartment(null)
-    setSelectedUnitKey(null)
-  }
+  // The selection reset is handled by the effect above, which also covers
+  // browser Back and jumping straight from one floor to another.
+  const closeFloor = () => setSearchParams({})
   const selectFacadeFloor = (shape) => {
     const target = project.blocks.find((b) => b.letter === shape.block)
     if (target && target.id !== block.id) navigate(`/projects/${projectId}/${target.id}?floor=${shape.floor}`)
@@ -88,7 +113,7 @@ export default function ProjectExplorer({ projectId }) {
           <h1 className="text-2xl font-bold sm:text-3xl">
             {project.name} · <span className="text-gold-600">{block.label}</span>
           </h1>
-          <LiveStatsBar stats={getProjectStats(projectId)} />
+          <LiveStatsBar stats={projectStats} />
         </div>
 
         {loading && <div className="animate-pulse rounded-xl bg-neutral-200" style={{ aspectRatio: '2 / 1' }} />}

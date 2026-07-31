@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
 import { vi } from 'vitest'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom'
 
 // No network in tests — every fetch returns null so the context uses fallback data.
 vi.mock('../services/googleSheets', () => ({
@@ -14,10 +14,17 @@ vi.mock('../services/googleSheets', () => ({
 import { ApartmentProvider } from '../context/ApartmentContext'
 import ProjectExplorer from './ProjectExplorer'
 
-function renderAt(path) {
+// Stands in for the browser Back button inside MemoryRouter.
+function BackButton() {
+  const navigate = useNavigate()
+  return <button onClick={() => navigate(-1)}>назад-в-историята</button>
+}
+
+function renderAt(path, { history = [path], index } = {}) {
   return render(
     <ApartmentProvider>
-      <MemoryRouter initialEntries={[path]}>
+      <MemoryRouter initialEntries={history} initialIndex={index ?? history.length - 1}>
+        <BackButton />
         <Routes>
           <Route path="/projects" element={<div>Списък проекти</div>} />
           <Route path="/projects/golden-residence/:block" element={<ProjectExplorer projectId="golden-residence" />} />
@@ -74,4 +81,43 @@ test('Многофамилна floor 10 resolves units А-901… via the unitFlo
 test('an unknown block redirects to the projects list', async () => {
   renderAt('/projects/golden-residence/block-z')
   await waitFor(() => expect(screen.getByText('Списък проекти')).toBeInTheDocument())
+})
+
+// Regression: the context's getProjectStats() walks every sheet key, so for
+// Многофамилна сграда it counted the 7 garage/parking rows under key 0 as
+// apartments (151 instead of 144, +5 free / +2 sold).
+test('header stats count only apartments on configured floors', async () => {
+  renderAt('/projects/mnogofamilna-sgrada/block-a')
+  await waitFor(() => expect(floorButtons()).toHaveLength(9))
+
+  const statsBar = screen.getByText('общо 144').parentElement
+  expect(within(statsBar).getByText('16')).toBeInTheDocument() // свободни
+  expect(within(statsBar).getByText('6')).toBeInTheDocument() // резервирани
+  expect(within(statsBar).getByText('122')).toBeInTheDocument() // продадени
+  // the garage rows on floor key 0 must not leak into the counters
+  expect(screen.queryByText('общо 151')).not.toBeInTheDocument()
+})
+
+// Regression: the selection only cleared through "Всички етажи", so a browser
+// Back — or jumping to another floor — left the drawer showing a unit that is
+// no longer on screen.
+test('the apartment drawer closes when the floor changes or Back is pressed', async () => {
+  renderAt('/projects/golden-residence/block-a?floor=3', {
+    history: ['/projects/golden-residence/block-a', '/projects/golden-residence/block-a?floor=3'],
+  })
+  await waitFor(() => expect(screen.getByAltText('Архитектурен план')).toBeInTheDocument())
+
+  fireEvent.click(screen.getByRole('button', { name: /А 301/ }))
+  expect(screen.getByText('Изпратете запитване')).toBeInTheDocument()
+
+  // browser Back -> facade; the drawer must not survive it
+  fireEvent.click(screen.getByText('назад-в-историята'))
+  await waitFor(() => expect(floorButtons()).toHaveLength(8))
+  await waitFor(() => expect(screen.queryByText('Изпратете запитване')).not.toBeInTheDocument())
+
+  // and opening another floor must not resurrect the previous selection
+  fireEvent.click(screen.getByText('Етаж 5').closest('button'))
+  await waitFor(() => expect(screen.getByRole('heading', { name: 'Етаж 5' })).toBeInTheDocument())
+  expect(screen.queryByText('Изпратете запитване')).not.toBeInTheDocument()
+  expect(screen.queryByText('А 301')).not.toBeInTheDocument()
 })
