@@ -113,6 +113,55 @@ test('AnimatedNumber animates to final value when scrolled into view', () => {
   }
 })
 
+test('AnimatedNumber eases from the current value instead of restarting at 0 when value changes', () => {
+  // Regression test for Task 5 finding: hero counter visibly rewinds on cold load.
+  // useSiteAvailability yields a fallback total first, then live sheet data resolves
+  // ~1s later with a different total. AnimatedNumber must ease from the number it is
+  // currently showing to the new value, never snap back to 0 and re-count up.
+  const oldIO = globalThis.IntersectionObserver
+  globalThis.IntersectionObserver = ControlledIO
+  window.IntersectionObserver = ControlledIO
+  ControlledIO.instances = []
+
+  vi.useFakeTimers()
+  try {
+    const { rerender } = render(<AnimatedNumber value={100} duration={0.05} />)
+
+    // Scroll into view and let the first animation run to completion.
+    act(() => {
+      ControlledIO.instances.forEach(io => io.trigger(true))
+    })
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    expect(screen.getByText('100')).toBeInTheDocument()
+
+    // Live data resolves with a lower total (fallback 100 -> live 60).
+    rerender(<AnimatedNumber value={60} duration={0.05} />)
+
+    // Sample mid-transition, well before the new animation completes.
+    act(() => {
+      vi.advanceTimersByTime(20)
+    })
+    const midway = Number(screen.getByText(/^\d+$/).textContent)
+    // Guards the restart-from-0 regression: if the animation restarted at 0,
+    // this value would be well under 60 (e.g. ~47). Easing from 100 keeps it
+    // between the old and new value at all times.
+    expect(midway).toBeGreaterThanOrEqual(60)
+    expect(midway).toBeLessThanOrEqual(100)
+
+    // Let the second animation finish; should land exactly on the new value.
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    expect(screen.getByText('60')).toBeInTheDocument()
+  } finally {
+    vi.useRealTimers()
+    globalThis.IntersectionObserver = oldIO
+    window.IntersectionObserver = oldIO
+  }
+})
+
 test('Button variants render as link or button with gold styling', () => {
   render(
     <MemoryRouter>
