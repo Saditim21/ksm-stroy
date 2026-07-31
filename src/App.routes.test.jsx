@@ -46,6 +46,6 @@ test('an unknown project id also lands on Продажби', async () => {
 test('the specific golden-residence route still wins over the :id redirect', async () => {
   renderAt('/projects/golden-residence')
 
-  await waitFor(() => expect(screen.getByText(/Изберете блок за преглед/)).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Изберете'))
   expect(window.location.pathname).toBe('/projects/golden-residence')
 })

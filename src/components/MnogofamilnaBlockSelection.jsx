@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import DimensionLine from './ui/DimensionLine';
+import DisplayHeading from './ui/DisplayHeading';
+import Reveal from './ui/Reveal';
+import { hoverZoom } from '../utils/motion';
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.webp';
 import blockBImage from '../assets/продажби/project 1/block-B/blockB.webp';
 
@@ -9,6 +13,49 @@ import photo1 from '../assets/продажби/project 1/photos/photo-1.webp';
 import photo2 from '../assets/продажби/project 1/photos/photo-2.webp';
 import photo3 from '../assets/продажби/project 1/photos/photo-3.webp';
 import photo4 from '../assets/продажби/project 1/photos/photo-4.webp';
+
+const BLOCKS = [
+  { id: 'block-a', name: 'Блок А', count: '72 апартамента • 9 етажа', image: blockAImage },
+  { id: 'block-b', name: 'Блок Б', count: '72 апартамента • 9 етажа', image: blockBImage },
+];
+
+function BlockPanel({ block, delay, onSelect }) {
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
+  return (
+    <Reveal delay={delay}>
+      <motion.div
+        role="button"
+        tabIndex={0}
+        aria-label={`Разгледайте ${block.name}`}
+        onClick={onSelect}
+        onKeyDown={handleKeyDown}
+        initial="rest"
+        whileHover="hover"
+        whileFocus="hover"
+        className="relative overflow-hidden rounded-2xl group cursor-pointer aspect-[4/5] md:aspect-[3/4] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-accent"
+      >
+        <motion.img
+          src={block.image}
+          alt={block.name}
+          className="object-cover w-full h-full"
+          variants={{ rest: { scale: 1 }, hover: hoverZoom }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-6 sm:p-8">
+          <h2 className="font-display text-4xl text-plaster">{block.name}</h2>
+          <p className="text-plaster/70 text-sm mt-1">{block.count}</p>
+          <p className="text-gold-accent text-sm font-semibold mt-3">Преглед на блока →</p>
+        </div>
+      </motion.div>
+    </Reveal>
+  );
+}
 
 const MnogofamilnaBlockSelection = () => {
   const navigate = useNavigate();
@@ -38,209 +85,46 @@ const MnogofamilnaBlockSelection = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 py-2 sm:py-6 lg:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="mb-4 sm:mb-8 lg:mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Enhanced mobile-first header layout */}
-          <div className="mb-6 sm:mb-8">
-            {/* Back button and title on same level */}
-            <div className="grid grid-cols-3 items-center mb-6 sm:mb-8">
-              <div className="flex justify-start">
-                <button
-                  onClick={() => navigate('/projects')}
-                  className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
-                >
-                  <span className="text-2xl sm:text-xl font-bold">←</span>
-                  <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
-                </button>
-              </div>
-
-              <div className="flex justify-center">
-                <motion.h1
-                  className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 bg-clip-text text-transparent leading-tight text-center"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.7 }}
-                >
-                  Многофамилна жилищна сграда
-                </motion.h1>
-              </div>
-
-              {/* Gallery Button - Top Right */}
-              <div className="flex justify-end">
-                <motion.button
-                  onClick={() => {
-                    setShowGallery(true);
-                    setFullscreenImage(null);
-                  }}
-                  className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group text-sm sm:text-base"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="font-bold">Снимки</span>
-                  <span className="hidden sm:inline text-xs bg-white/20 px-2 py-0.5 rounded-full">({galleryImages.length})</span>
-                </motion.button>
-              </div>
-            </div>
-
-            {/* Centered decorative line */}
-            <div className="flex justify-center">
-              <motion.div
-                className="w-16 sm:w-20 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: "4rem" }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              />
-            </div>
-          </div>
-          <motion.p
-            className="text-base sm:text-lg lg:text-xl text-gray-700 text-center px-6 sm:px-8 font-medium"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
+    <div className="bg-plaster min-h-screen pt-28 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate('/projects')}
+            className="inline-flex items-center gap-2 text-graphite hover:text-ink transition-colors text-sm"
           >
-            Изберете блок за преглед
-          </motion.p>
-        </motion.div>
-
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-2 min-h-[75vh] sm:min-h-[80vh] lg:h-[75vh]">
-          {/* Block A - Enhanced Mobile Experience */}
-          <motion.div
-            className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-l-2xl lg:rounded-r-none touch-manipulation active:shadow-3xl"
-            onClick={() => handleBlockSelect('block-a')}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98, y: 0 }}
+            <span aria-hidden="true">←</span> Назад към проекти
+          </button>
+          <button
+            onClick={() => {
+              setShowGallery(true);
+              setFullscreenImage(null);
+            }}
+            className="inline-flex items-center gap-2 text-graphite hover:text-ink transition-colors text-sm"
           >
-            <div
-              className="w-full h-full bg-cover bg-center relative min-h-[45vh] sm:min-h-[50vh] lg:min-h-full"
-              style={{
-                backgroundImage: `url(${blockAImage})`,
-                backgroundPosition: 'center center',
-                backgroundSize: 'cover'
-              }}
-            >
-              {/* Enhanced gradient overlay for mobile */}
-              <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/30 to-black/60 group-hover:from-black/40 group-hover:via-black/20 group-hover:to-black/50 group-active:from-black/60 group-active:to-black/70 transition-all duration-500"></div>
-
-              {/* Mobile-optimized blue accent overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-
-              <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                <div className="text-center text-white max-w-sm">
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-                  >
-                    <motion.h2
-                      className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black mb-3 sm:mb-4 lg:mb-6 drop-shadow-2xl tracking-wide"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      БЛОК А
-                    </motion.h2>
-                    <motion.p
-                      className="text-lg sm:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 lg:mb-10 drop-shadow-lg font-semibold tracking-wide"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6, duration: 0.6 }}
-                    >
-                      72 апартамента • 9 етажа
-                    </motion.p>
-                    <motion.div
-                      className="bg-white/25 backdrop-blur-lg px-6 sm:px-8 lg:px-10 py-4 sm:py-5 rounded-2xl border-2 border-white/90 group-hover:bg-white/35 group-hover:border-white group-active:bg-white/20 transition-all duration-300 shadow-2xl min-h-[56px] flex items-center justify-center touch-manipulation"
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95, y: 0 }}
-                    >
-                      <span className="text-base sm:text-lg lg:text-xl font-bold tracking-wide">Преглед на блока</span>
-                    </motion.div>
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Block B - Enhanced Mobile Experience */}
-          <motion.div
-            className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-r-2xl lg:rounded-l-none touch-manipulation active:shadow-3xl"
-            onClick={() => handleBlockSelect('block-b')}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98, y: 0 }}
-          >
-            <div
-              className="w-full h-full bg-cover bg-center relative min-h-[45vh] sm:min-h-[50vh] lg:min-h-full"
-              style={{
-                backgroundImage: `url(${blockBImage})`,
-                backgroundPosition: 'center center',
-                backgroundSize: 'cover'
-              }}
-            >
-              {/* Enhanced gradient overlay for mobile */}
-              <div className="absolute inset-0 bg-gradient-to-bl from-black/50 via-black/30 to-black/60 group-hover:from-black/40 group-hover:via-black/20 group-hover:to-black/50 group-active:from-black/60 group-active:to-black/70 transition-all duration-500"></div>
-
-              {/* Mobile-optimized blue accent overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-
-              <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                <div className="text-center text-white max-w-sm">
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                  >
-                    <motion.h2
-                      className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black mb-3 sm:mb-4 lg:mb-6 drop-shadow-2xl tracking-wide"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      БЛОК Б
-                    </motion.h2>
-                    <motion.p
-                      className="text-lg sm:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 lg:mb-10 drop-shadow-lg font-semibold tracking-wide"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8, duration: 0.6 }}
-                    >
-                      72 апартамента • 9 етажа
-                    </motion.p>
-                    <motion.div
-                      className="bg-white/25 backdrop-blur-lg px-6 sm:px-8 lg:px-10 py-4 sm:py-5 rounded-2xl border-2 border-white/90 group-hover:bg-white/35 group-hover:border-white group-active:bg-white/20 transition-all duration-300 shadow-2xl min-h-[56px] flex items-center justify-center touch-manipulation"
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95, y: 0 }}
-                    >
-                      <span className="text-base sm:text-lg lg:text-xl font-bold tracking-wide">Преглед на блока</span>
-                    </motion.div>
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+            Снимки <span className="text-graphite/60 text-xs">({galleryImages.length})</span>
+          </button>
         </div>
 
+        <DimensionLine label="Многофамилна жилищна сграда" />
+        <DisplayHeading as="h1">Изберете <em>вход</em>.</DisplayHeading>
+
+        <div className="grid md:grid-cols-2 gap-6 mt-10">
+          {BLOCKS.map((block, index) => (
+            <BlockPanel
+              key={block.id}
+              block={block}
+              delay={index * 0.08}
+              onSelect={() => handleBlockSelect(block.id)}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Creative Full-Page Gallery */}
+      {/* Full-page photo gallery */}
       <AnimatePresence>
         {showGallery && (
           <motion.div
-            className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-50 overflow-y-auto"
+            className="fixed inset-0 bg-ink z-50 overflow-y-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -254,7 +138,7 @@ const MnogofamilnaBlockSelection = () => {
                 setShowGallery(false);
                 setFullscreenImage(null);
               }}
-              className="fixed top-6 right-6 z-50 text-white hover:text-gold-400 transition-colors p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm"
+              className="fixed top-6 right-6 z-50 text-plaster hover:text-gold-accent transition-colors p-3 rounded-full bg-plaster/10 hover:bg-plaster/20"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
@@ -272,23 +156,23 @@ const MnogofamilnaBlockSelection = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 bg-clip-text text-transparent mb-2">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-plaster mb-2">
                 Многофамилна жилищна сграда
               </h2>
-              <p className="text-gray-400 text-sm sm:text-base">Галерия със снимки</p>
+              <p className="text-plaster/60 text-sm sm:text-base">Галерия със снимки</p>
             </motion.div>
 
-            {/* Creative Bento Box Grid */}
+            {/* Bento Box Grid */}
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-7xl mx-auto">
 
                 {/* Image 1 - Large */}
                 <motion.div
-                  className="md:col-span-2 lg:col-span-2 lg:row-span-2 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
-                  initial={{ opacity: 0, y: 50, rotate: -2 }}
-                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  className="md:col-span-2 lg:col-span-2 lg:row-span-2 relative group overflow-hidden rounded-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
-                  whileHover={{ scale: 1.03, rotate: 0.5, transition: { duration: 0.2 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   onClick={() => setFullscreenImage(photo1)}
                 >
                   <div className="relative aspect-[16/10] lg:aspect-auto lg:h-full">
@@ -297,17 +181,17 @@ const MnogofamilnaBlockSelection = () => {
                       alt="Многофамилна сграда - Снимка 1"
                       className="w-full h-full object-cover transition-transform duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                    <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-200" />
                   </div>
                 </motion.div>
 
                 {/* Image 2 - Medium */}
                 <motion.div
-                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
-                  initial={{ opacity: 0, y: 50, rotate: 2 }}
-                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  whileHover={{ scale: 1.03, rotate: -0.5, transition: { duration: 0.2 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   onClick={() => setFullscreenImage(photo2)}
                 >
                   <div className="relative aspect-[4/3]">
@@ -316,17 +200,17 @@ const MnogofamilnaBlockSelection = () => {
                       alt="Многофамилна сграда - Снимка 2"
                       className="w-full h-full object-cover transition-transform duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                    <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-200" />
                   </div>
                 </motion.div>
 
                 {/* Image 3 - Medium */}
                 <motion.div
-                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
-                  initial={{ opacity: 0, y: 50, rotate: -2 }}
-                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  className="lg:col-span-1 relative group overflow-hidden rounded-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
-                  whileHover={{ scale: 1.03, rotate: 0.5, transition: { duration: 0.2 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   onClick={() => setFullscreenImage(photo3)}
                 >
                   <div className="relative aspect-[4/3]">
@@ -335,17 +219,17 @@ const MnogofamilnaBlockSelection = () => {
                       alt="Многофамилна сграда - Снимка 3"
                       className="w-full h-full object-cover transition-transform duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                    <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-200" />
                   </div>
                 </motion.div>
 
                 {/* Image 4 - Large */}
                 <motion.div
-                  className="md:col-span-2 lg:col-span-2 relative group overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
-                  initial={{ opacity: 0, y: 50, rotate: 2 }}
-                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                  className="md:col-span-2 lg:col-span-2 relative group overflow-hidden rounded-2xl cursor-pointer"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  whileHover={{ scale: 1.03, rotate: -0.5, transition: { duration: 0.2 } }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                   onClick={() => setFullscreenImage(photo4)}
                 >
                   <div className="relative aspect-[16/9]">
@@ -354,41 +238,38 @@ const MnogofamilnaBlockSelection = () => {
                       alt="Многофамилна сграда - Снимка 4"
                       className="w-full h-full object-cover transition-transform duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
+                    <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-200" />
                   </div>
                 </motion.div>
 
               </div>
 
-              {/* Decorative elements */}
               <motion.div
                 className="text-center mt-12 mb-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <p className="text-gray-500 text-sm">
+                <p className="text-plaster/50 text-sm">
                   Натиснете ESC или X за затваряне
                 </p>
               </motion.div>
             </div>
 
             {/* ESC key handler */}
-            {showGallery && (
-              <div
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    if (fullscreenImage) {
-                      setFullscreenImage(null);
-                    } else {
-                      setShowGallery(false);
-                    }
+            <div
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  if (fullscreenImage) {
+                    setFullscreenImage(null);
+                  } else {
+                    setShowGallery(false);
                   }
-                }}
-                tabIndex={0}
-                className="fixed inset-0 -z-10"
-              />
-            )}
+                }
+              }}
+              tabIndex={0}
+              className="fixed inset-0 -z-10"
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -397,7 +278,7 @@ const MnogofamilnaBlockSelection = () => {
       <AnimatePresence>
         {fullscreenImage && showGallery && (
           <motion.div
-            className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-ink/95 z-[60] flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -406,24 +287,22 @@ const MnogofamilnaBlockSelection = () => {
               setFullscreenImage(null);
             }}
           >
-            {/* Close button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setFullscreenImage(null);
               }}
-              className="absolute top-4 right-4 text-white hover:text-gold-400 transition-colors p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm z-10"
+              className="absolute top-4 right-4 text-plaster hover:text-gold-accent transition-colors p-3 rounded-full bg-plaster/10 hover:bg-plaster/20 z-10"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Fullscreen Image */}
             <motion.img
               src={fullscreenImage}
               alt="Многофамилна сграда - Fullscreen"
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-full object-contain rounded-lg"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
@@ -431,14 +310,12 @@ const MnogofamilnaBlockSelection = () => {
               onClick={(e) => e.stopPropagation()}
             />
 
-            {/* Hint */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/60 text-sm">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-plaster/60 text-sm">
               Кликнете навсякъде за затваряне
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 };
