@@ -2,12 +2,14 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import About from './About'
 import Blog from './Blog'
-import { blogPosts } from '../data/blogData'
 
 // whileInView (DimensionLine, Reveal) and AnimatedNumber observe intersections —
 // jsdom has no IntersectionObserver by default; src/test/setup.js already stubs
 // a no-op globally, so no per-file setup is needed here (neither page pulls
 // useSiteAvailability/ApartmentProvider, unlike Home/Projects).
+//
+// Blog.jsx is the site's real "Обекти" (completed-projects) gallery — nav
+// labels it Обекти — not a text blog; blogData.js stays dormant (Task 11).
 
 test('About opens with the "Строим от" thesis', () => {
   render(
@@ -18,20 +20,22 @@ test('About opens with the "Строим от" thesis', () => {
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Строим от')
 })
 
-test('Blog leads with the "Новини от" heading', () => {
+test('Blog leads with the "Завършени обекти" heading', () => {
   render(
     <MemoryRouter>
       <Blog />
     </MemoryRouter>,
   )
-  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Новини от')
+  const h1 = screen.getByRole('heading', { level: 1 })
+  expect(h1).toHaveTextContent('Завършени')
+  expect(h1.querySelector('em')).toHaveTextContent('обекти')
 })
 
-test('Blog renders posts sourced from blogData.js', () => {
+test('Blog renders real completed-project titles', () => {
   render(
     <MemoryRouter>
       <Blog />
     </MemoryRouter>,
   )
-  expect(screen.getByText(blogPosts[0].title)).toBeInTheDocument()
+  expect(screen.getByText('Айвазовски Парк')).toBeInTheDocument()
 })

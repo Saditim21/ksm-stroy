@@ -1,10 +1,5 @@
-// NOTE: this data file's original img001/img002 imports pointed at
-// '../assets/images/001.webp' and '002.webp', neither of which exists in the
-// repo (only 003.webp does) — the file had never actually been wired into a
-// page, so the broken paths went unnoticed until Task 10 pointed Blog.jsx at
-// it. Repointed to existing, already-used assets; post text is untouched.
-import img001 from '../assets/home/optimized/001.webp'
-import img002 from '../assets/images/slider02.webp'
+import img001 from '../assets/images/001.webp'
+import img002 from '../assets/images/002.webp'
 import img003 from '../assets/images/003.webp'
 import slider01 from '../assets/images/slider01.webp'
 
