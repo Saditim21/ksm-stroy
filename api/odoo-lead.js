@@ -16,6 +16,11 @@
 const ODOO_URL = (process.env.ODOO_URL || 'https://edu-ksmstroy.odoo.com').replace(/\/+$/, '')
 const ODOO_TIMEOUT_MS = 8000
 
+// Екип продажби в Odoo. Подаването на team_id е важно: website_crm решава
+// дали записът е Lead или Opportunity според отметката "use_leads" на екипа.
+// Без него запитването влиза направо в pipeline-а като Opportunity.
+const ODOO_TEAM_ID = process.env.ODOO_TEAM_ID || '1'
+
 // Ограниченията отговарят на валидацията в src/pages/Contact.jsx
 const LIMITS = {
   name: 200,
@@ -66,6 +71,10 @@ function buildOdooBody(payload) {
 
   if (payload.phone) {
     body.set('phone', payload.phone)
+  }
+
+  if (ODOO_TEAM_ID) {
+    body.set('team_id', ODOO_TEAM_ID)
   }
 
   // Полета, които не са част от crm.lead. Odoo ги събира автоматично
