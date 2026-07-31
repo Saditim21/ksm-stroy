@@ -1,5 +1,8 @@
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, screen } from '@testing-library/react'
 import FloorPlanViewer from './FloorPlanViewer'
+
+const stage = (container) => container.querySelector('div.relative.overflow-hidden.rounded-lg')
+const canvas = (container) => stage(container).firstElementChild
 
 const image = { src: 'plan.webp', width: 1000, height: 800 }
 const mapShapes = [
@@ -45,12 +48,41 @@ test('click reports the apartment row and normalized id', () => {
   expect(onSelectUnit).toHaveBeenCalledWith(unitsIndex.get('А301'), 'А301')
 })
 
-test('drag gesture does not select apartment (regression: wasDrag guard)', () => {
+test('zoom buttons are always available and change the transform', () => {
+  const { container } = render(<FloorPlanViewer {...props} />)
+  const zoomIn = screen.getByRole('button', { name: 'Увеличи' })
+  const zoomOut = screen.getByRole('button', { name: 'Намали' })
+
+  // Visible at scale 1, unlike the reset control
+  expect(zoomIn).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /Нулирай/ })).not.toBeInTheDocument()
+  expect(canvas(container).style.transform).toContain('scale(1)')
+
+  fireEvent.click(zoomIn)
+  expect(canvas(container).style.transform).toContain('scale(1.2)')
+  expect(screen.getByRole('button', { name: /Нулирай/ })).toBeInTheDocument()
+
+  fireEvent.click(zoomOut)
+  expect(canvas(container).style.transform).toContain('scale(1)')
+  expect(screen.queryByRole('button', { name: /Нулирай/ })).not.toBeInTheDocument()
+})
+
+test('touchAction allows page scroll until the plan is zoomed', () => {
+  const { container } = render(<FloorPlanViewer {...props} />)
+  expect(stage(container).style.touchAction).toBe('pan-y')
+  fireEvent.click(screen.getByRole('button', { name: 'Увеличи' }))
+  expect(stage(container).style.touchAction).toBe('none')
+})
+
+test('drag gesture while zoomed does not select apartment (regression: wasDrag guard)', () => {
   const onSelectUnit = vi.fn()
   const { container } = render(<FloorPlanViewer {...props} onSelectUnit={onSelectUnit} />)
   // Target the component's outer div (has handlers attached, not RTL wrapper)
-  const componentDiv = container.querySelector('div.relative.overflow-hidden.rounded-lg')
+  const componentDiv = stage(container)
   const polygon = container.querySelectorAll('polygon')[0]
+
+  // Zoom in first — panning only exists above scale 1
+  fireEvent.click(screen.getByRole('button', { name: 'Увеличи' }))
 
   // Simulate drag: pointerDown → pointerMove(+50px) → pointerUp → click
   fireEvent.pointerDown(componentDiv, { clientX: 0, clientY: 0, pointerId: 1 })
@@ -60,6 +92,34 @@ test('drag gesture does not select apartment (regression: wasDrag guard)', () =>
 
   // Should NOT call onSelectUnit because wasDrag() should be true
   expect(onSelectUnit).not.toHaveBeenCalled()
+})
+
+test('deliberate swipe at scale 1 still suppresses selection', () => {
+  const onSelectUnit = vi.fn()
+  const { container } = render(<FloorPlanViewer {...props} onSelectUnit={onSelectUnit} />)
+  const componentDiv = stage(container)
+
+  fireEvent.pointerDown(componentDiv, { clientX: 0, clientY: 0, pointerId: 1 })
+  fireEvent.pointerMove(componentDiv, { clientX: 50, clientY: 50, pointerId: 1 })
+  fireEvent.pointerUp(componentDiv)
+  fireEvent.click(container.querySelectorAll('polygon')[0])
+
+  expect(onSelectUnit).not.toHaveBeenCalled()
+})
+
+test('finger jitter at scale 1 does not suppress the tap (regression: mobile taps)', () => {
+  const onSelectUnit = vi.fn()
+  const { container } = render(<FloorPlanViewer {...props} onSelectUnit={onSelectUnit} />)
+  const componentDiv = stage(container)
+  const polygon = container.querySelectorAll('polygon')[0]
+
+  // 5px of drift — a tap, not a drag, and nothing to pan at scale 1
+  fireEvent.pointerDown(componentDiv, { clientX: 0, clientY: 0, pointerId: 1 })
+  fireEvent.pointerMove(componentDiv, { clientX: 3, clientY: 2, pointerId: 1 })
+  fireEvent.pointerUp(componentDiv)
+  fireEvent.click(polygon)
+
+  expect(onSelectUnit).toHaveBeenCalledWith(unitsIndex.get('А301'), 'А301')
 })
 
 test('plain click without drag selects apartment (regression: wasDrag guard)', () => {

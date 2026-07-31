@@ -11,7 +11,7 @@ const FILL = {
 }
 
 export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFloorNumber, unitsIndex, filter, selectedUnit, onSelectUnit }) {
-  const { transform, reset, wasDrag, handlers } = useZoomPan()
+  const { transform, reset, zoomIn, zoomOut, wasDrag, handlers } = useZoomPan()
 
   const resolved = mapShapes.map((shape) => {
     const key = unitKeyForShape(shape, blockLetter, unitFloorNumber)
@@ -21,7 +21,13 @@ export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFlo
   const hasFilter = Boolean(filter && (filter.onlyAvailable || filter.type || filter.minArea != null || filter.maxArea != null))
 
   return (
-    <div className="relative overflow-hidden rounded-lg" style={{ touchAction: 'none' }} {...handlers}>
+    <div
+      className="relative overflow-hidden rounded-lg"
+      // Until the user actually zooms in there is nothing to pan, so let the
+      // page scroll vertically under the finger.
+      style={{ touchAction: transform.scale === 1 ? 'pan-y' : 'none' }}
+      {...handlers}
+    >
       <div style={{ transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`, transformOrigin: '0 0' }}>
         <div className="relative">
           <img src={image.src} width={image.width} height={image.height} alt="Архитектурен план" className="block h-auto w-full" draggable={false} />
@@ -63,11 +69,38 @@ export default function FloorPlanViewer({ image, mapShapes, blockLetter, unitFlo
           </svg>
         </div>
       </div>
-      {transform.scale !== 1 && (
-        <button onClick={reset} className="absolute right-2 top-2 rounded bg-neutral-900/70 px-2 py-1 text-xs text-white">
-          Нулирай изгледа
+      {/* Zoom cluster — always visible so touch users have a way in; the
+          pointer handlers above must not treat a button press as a pan. */}
+      <div
+        className="absolute right-2 top-2 flex items-start gap-1"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        {transform.scale !== 1 && (
+          <button
+            type="button"
+            onClick={reset}
+            className="h-11 rounded bg-neutral-900/70 px-3 text-xs text-white"
+          >
+            Нулирай изгледа
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={zoomOut}
+          aria-label="Намали"
+          className="flex h-11 w-11 items-center justify-center rounded bg-neutral-900/70 text-xl leading-none text-white"
+        >
+          −
         </button>
-      )}
+        <button
+          type="button"
+          onClick={zoomIn}
+          aria-label="Увеличи"
+          className="flex h-11 w-11 items-center justify-center rounded bg-neutral-900/70 text-xl leading-none text-white"
+        >
+          +
+        </button>
+      </div>
     </div>
   )
 }
