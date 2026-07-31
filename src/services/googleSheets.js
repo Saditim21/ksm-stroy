@@ -153,6 +153,14 @@ export async function fetchApartmentData(block = 'blockA') {
     const rawData = parseCSV(csvText);
     const apartmentData = transformToApartmentData(rawData);
 
+    // A 200 that parses to nothing (Google serving an HTML error/login page,
+    // an emptied tab) must behave like a failure — an empty {} is truthy and
+    // would otherwise sail past the caller's fallback check and grey out the
+    // whole site.
+    if (Object.keys(apartmentData).length === 0) {
+      throw new Error('Sheet response contained no apartment rows');
+    }
+
     // Update cache
     cache[block] = {
       data: apartmentData,
@@ -252,6 +260,12 @@ export async function fetchGarageData(type = 'garages') {
     const csvText = await response.text();
     const rawData = parseCSV(csvText);
     const garageData = transformToGarageData(rawData);
+
+    // Same trap as above: [] is truthy, so an unparsable 200 would silently
+    // replace the fallback list with nothing.
+    if (garageData.length === 0) {
+      throw new Error('Sheet response contained no rows');
+    }
 
     cache[type] = {
       data: garageData,
