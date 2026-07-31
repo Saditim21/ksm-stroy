@@ -28,8 +28,7 @@ const Contact = () => {
       phone: '',
       message: '',
       projectType: '',
-      budget: '',
-      company: ''
+      budget: ''
     }
   })
 
@@ -46,8 +45,7 @@ const Contact = () => {
         phone: data.phone,
         projectType: data.projectType,
         budget: data.budget,
-        message: data.message,
-        company: data.company
+        message: data.message
       })
     })
 
@@ -284,17 +282,6 @@ const Contact = () => {
                 )}
                 
                 <form id="contact-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Honeypot - скрито от посетителите, ботовете го попълват */}
-                  <input
-                    type="text"
-                    autoComplete="off"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                    {...register('company')}
-                    className="absolute w-px h-px -m-px p-0 overflow-hidden border-0 opacity-0 pointer-events-none"
-                    style={{ clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)' }}
-                  />
-
                   {/* Name Field */}
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-primary-700 mb-2">

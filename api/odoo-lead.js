@@ -157,11 +157,10 @@ export default {
       return json({ ok: false, error: 'Invalid JSON body' }, 400)
     }
 
-    // Honeypot: истинските посетители не виждат това поле. Връщаме успех,
-    // за да не разбере ботът, че е отрязан.
-    if (clean(raw.company, 200)) {
-      return json({ ok: true, skipped: true })
-    }
+    // Нарочно НЯМА honeypot. Скрито поле на име "company" се попълваше
+    // автоматично от браузъра (autofill) и запитването се изхвърляше като
+    // спам, без никаква следа. По-добре да мине спам, отколкото да се загуби
+    // истинско запитване.
 
     const payload = {
       name: clean(raw.name, LIMITS.name),
