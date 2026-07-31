@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { MemoryRouter, Link } from 'react-router-dom'
+import { vi } from 'vitest'
 import DimensionLine from './DimensionLine'
 import DisplayHeading from './DisplayHeading'
 import Reveal from './Reveal'
@@ -17,6 +18,24 @@ class NoopIntersectionObserver {
 if (typeof globalThis.IntersectionObserver === 'undefined') {
   globalThis.IntersectionObserver = NoopIntersectionObserver
 }
+
+// Controllable IntersectionObserver stub for AnimatedNumber tests
+// Allows tests to fire intersection callbacks at will
+class ControlledIO {
+  constructor(cb) {
+    this.cb = cb
+    ControlledIO.instances.push(this)
+  }
+  observe(el) {
+    this.el = el
+  }
+  unobserve() {}
+  disconnect() {}
+  trigger(isIntersecting) {
+    this.cb([{ isIntersecting, target: this.el }])
+  }
+}
+ControlledIO.instances = []
 
 test('DimensionLine renders eyebrow label and rule with end ticks', () => {
   const { container } = render(<DimensionLine label="Продажби" />)
@@ -37,28 +56,20 @@ test('Reveal renders children', () => {
   expect(screen.getByText('съдържание')).toBeInTheDocument()
 })
 
-test('AnimatedNumber starts at 0 and renders when in view', () => {
-  // Component starts at 0 when reduce=false and canObserve=true and inView=false
-  // When IntersectionObserver never triggers (not in view), it stays at 0
-  class NeverTriggeringObserver {
-    constructor(callback) {
-      this.callback = callback
-    }
-    observe() {
-      // Never call callback - element stays out of view
-    }
-    unobserve() {}
-    disconnect() {}
-  }
+test('AnimatedNumber does not flash final value before intersection', () => {
+  // Regression test: verify the !inView guard prevents flash to final value on mount
+  // When IntersectionObserver is defined but never triggers (not in view),
+  // component should stay at 0, not flash to final value
   const oldIO = globalThis.IntersectionObserver
-  globalThis.IntersectionObserver = NeverTriggeringObserver
-  window.IntersectionObserver = NeverTriggeringObserver
+  globalThis.IntersectionObserver = ControlledIO
+  window.IntersectionObserver = ControlledIO
+  ControlledIO.instances = []
 
   try {
     render(<AnimatedNumber value={128} />)
-    // Should render 0 initially and stay at 0 since never comes into view
+    // With canObserve=true and inView=false (callback never fired),
+    // effect returns without setting display, stays at initial 0 (CORRECT - no flash)
     expect(screen.getByText('0')).toBeInTheDocument()
-    // The fix ensures we don't flash to 128 even though 128 is the target value
     expect(screen.queryByText('128')).not.toBeInTheDocument()
   } finally {
     globalThis.IntersectionObserver = oldIO
@@ -66,28 +77,37 @@ test('AnimatedNumber starts at 0 and renders when in view', () => {
   }
 })
 
-test('AnimatedNumber does not flash final value before intersection', () => {
-  // With IntersectionObserver defined but not triggering (not in view)
-  // Component should stay at 0, not flash to final value (the bug fix)
-  class NonTriggeringObserver {
-    observe() {
-      // Do NOT call callback — element is not in view
-    }
-    unobserve() {}
-    disconnect() {}
-  }
+test('AnimatedNumber animates to final value when scrolled into view', () => {
+  // Coverage test: verify intersection → animation → final value path
+  // Uses ControlledIO to fire intersection callback mid-test
   const oldIO = globalThis.IntersectionObserver
-  globalThis.IntersectionObserver = NonTriggeringObserver
-  window.IntersectionObserver = NonTriggeringObserver
+  globalThis.IntersectionObserver = ControlledIO
+  window.IntersectionObserver = ControlledIO
+  ControlledIO.instances = []
 
+  vi.useFakeTimers()
   try {
-    render(<AnimatedNumber value={128} />)
-    // With canObserve=true and inView=false, effect returns without setting display
-    // So it stays at initial 0 (CORRECT - no flash to 128)
+    render(<AnimatedNumber value={128} duration={0.05} />)
+
+    // Initially at 0 (not in view yet)
     expect(screen.getByText('0')).toBeInTheDocument()
-    // Should NOT show final value while not in view
     expect(screen.queryByText('128')).not.toBeInTheDocument()
+
+    // Simulate scrolling into view by triggering all IO instances
+    act(() => {
+      ControlledIO.instances.forEach(io => io.trigger(true))
+    })
+
+    // Advance timers to let animation frames process
+    // With duration=0.05s (50ms), advance enough for animation to complete
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+
+    // Should now show the final value (animation completed)
+    expect(screen.getByText('128')).toBeInTheDocument()
   } finally {
+    vi.useRealTimers()
     globalThis.IntersectionObserver = oldIO
     window.IntersectionObserver = oldIO
   }
