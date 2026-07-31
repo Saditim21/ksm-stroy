@@ -419,6 +419,18 @@ const Contact = () => {
                         >
                           {detail}
                         </a>
+                      ) : info.title === "Адреси" ? (
+                        // Opens the address in Google Maps — same affordance as
+                        // the tel:/mailto: entries above, in a new tab.
+                        <a
+                          key={idx}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-ink text-lg hover:text-gold-accent transition-colors duration-200"
+                        >
+                          {detail}
+                        </a>
                       ) : (
                         <p key={idx} className="text-ink text-lg">{detail}</p>
                       )

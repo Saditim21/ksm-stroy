@@ -298,10 +298,3 @@ export const properties = [
     }
   }
 ]
-
-// Filter configurations
-export const filters = [
-  { id: 'all', name: 'Всички', count: properties.length },
-  { id: 'for-sale', name: 'За продажба', count: properties.filter(p => p.status === 'За продажба').length },
-  { id: 'coming-soon', name: 'Скоро', count: properties.filter(p => p.status === 'Скоро').length }
-]

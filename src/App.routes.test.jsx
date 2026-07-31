@@ -15,7 +15,7 @@ import App from './App'
 // App's route change effect calls window.scrollTo, which jsdom does not implement.
 window.scrollTo = vi.fn()
 
-// PropertyCard lazy-loads its image through IntersectionObserver — also absent in jsdom.
+// Reveal, DimensionLine and AnimatedNumber all observe intersections — also absent in jsdom.
 class NoopIntersectionObserver {
   observe() {}
   unobserve() {}

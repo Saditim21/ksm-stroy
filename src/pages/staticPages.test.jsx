@@ -9,7 +9,8 @@ import Blog from './Blog'
 // useSiteAvailability/ApartmentProvider, unlike Home/Projects).
 //
 // Blog.jsx is the site's real "Обекти" (completed-projects) gallery — nav
-// labels it Обекти — not a text blog; blogData.js stays dormant (Task 11).
+// labels it Обекти — not a text blog. The never-wired blogData.js article
+// fixtures were deleted in Task 11.
 
 test('About opens with the "Строим от" thesis', () => {
   render(
