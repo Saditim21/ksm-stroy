@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { EASE } from '../../utils/motion'
 
@@ -11,11 +12,22 @@ const variants = {
   exit: { opacity: 0, transition: { duration: 0.2, ease: EASE } },
 }
 
+// A transition belongs *between* pages: the landing page has nothing to fade
+// from, and starting it at opacity 0 only pushes the hero out of LCP contention
+// (measured: +0.6s on Home). So the first routed page to mount skips the enter
+// leg; every route change after it cross-fades normally.
+let appHasPainted = false
+
 // `as` lets a page hand over its own root tag (<main>, <div>) instead of gaining
 // an extra wrapper element. motion's proxy caches motion.main / motion.div, so
 // the component identity stays stable across renders.
 export default function PageTransition({ as = 'div', className, children, ...rest }) {
   const reduce = useReducedMotion()
+  const [isFirstPage] = useState(() => {
+    const first = !appHasPainted
+    appHasPainted = true
+    return first
+  })
 
   if (reduce) {
     const Tag = as
@@ -24,7 +36,14 @@ export default function PageTransition({ as = 'div', className, children, ...res
 
   const Motion = motion[as]
   return (
-    <Motion variants={variants} initial="initial" animate="animate" exit="exit" className={className} {...rest}>
+    <Motion
+      variants={variants}
+      initial={isFirstPage ? false : 'initial'}
+      animate="animate"
+      exit="exit"
+      className={className}
+      {...rest}
+    >
       {children}
     </Motion>
   )

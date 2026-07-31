@@ -51,6 +51,10 @@ const projectCards = [
 // The hero render: settles in on load, then drifts (Ken Burns). The drift class is
 // added only after the settle finishes so the CSS animation cannot fight the inline
 // transform — and neither runs when the visitor asked for reduced motion.
+//
+// Deliberately no fetchpriority="high": this LCP is gated by the lazy page chunk,
+// not by the image, so promoting the render ahead of that JS on a throttled link
+// measured 0.6s SLOWER (5.2s vs 4.6s mobile LCP, two Lighthouse runs each).
 function HeroImage({ reduce }) {
   const [settled, setSettled] = useState(false)
   return (
@@ -58,7 +62,6 @@ function HeroImage({ reduce }) {
       src={GOLDEN_RENDER.src}
       srcSet={GOLDEN_RENDER.srcSet}
       sizes={HERO_SIZES}
-      fetchPriority="high"
       alt="Жилищна сграда Golden Residence, построена от KSM Строй в София"
       className={`absolute inset-0 h-full w-full object-cover ${!reduce && settled ? 'animate-kenburns' : ''}`}
       initial={reduce ? false : { scale: 1.06 }}
