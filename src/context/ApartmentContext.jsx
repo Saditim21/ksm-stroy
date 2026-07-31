@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageStats, clearCache } from '../services/googleSheets';
 
 // Fallback data - used when Google Sheets is not configured or unavailable
@@ -199,6 +199,11 @@ const defaultParkingFallback = [
 
 const ApartmentContext = createContext(null);
 
+// How often the sheets are re-read in the background. The spec promises that a
+// change in the Google Sheet shows up on the site within ~a minute, without the
+// visitor reloading the page.
+const REFRESH_INTERVAL_MS = 60 * 1000;
+
 export function ApartmentProvider({ children }) {
   const [blockAData, setBlockAData] = useState(null);
   const [blockBData, setBlockBData] = useState(null);
@@ -268,6 +273,43 @@ export function ApartmentProvider({ children }) {
     loadData();
   }, []);
 
+  // Silent re-read of every sheet. Deliberately different from the initial
+  // load: it never touches `loading` (no spinner mid-browse) and never falls
+  // back to the bundled data — a failed refresh just keeps the last good rows.
+  const backgroundRefresh = useCallback(async () => {
+    try {
+      clearCache();
+      const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
+        fetchApartmentData('blockA'),
+        fetchApartmentData('blockB'),
+        fetchGarageData('garages'),
+        fetchGarageData('parking'),
+        fetchApartmentData('mnogoA'),
+        fetchApartmentData('mnogoB'),
+      ]);
+
+      if (blockA) setBlockAData(blockA);
+      if (blockB) setBlockBData(blockB);
+      if (garages) setGaragesData(garages);
+      if (parking) setParkingData(parking);
+      if (mnogoA) setMnogoAData(mnogoA);
+      if (mnogoB) setMnogoBData(mnogoB);
+      if (blockA && blockB) setUsingFallback(false);
+    } catch (err) {
+      console.error('Background refresh failed, keeping current data:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      // Nothing to see on a backgrounded tab; the next visible tick catches up.
+      if (typeof document !== 'undefined' && document.hidden) return;
+      backgroundRefresh();
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(id);
+  }, [backgroundRefresh]);
+
   // Calculate combined stats for Golden Residence
   const getGoldenResidenceStats = () => {
     const defaultStats = {
@@ -328,36 +370,6 @@ export function ApartmentProvider({ children }) {
     return parkingData || defaultParkingFallback;
   };
 
-  // Refresh data from Google Sheets
-  const refreshData = async () => {
-    setLoading(true);
-    // Clear cache to ensure fresh data is fetched
-    clearCache();
-    try {
-      const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
-        fetchApartmentData('blockA'),
-        fetchApartmentData('blockB'),
-        fetchGarageData('garages'),
-        fetchGarageData('parking'),
-        fetchApartmentData('mnogoA'),
-        fetchApartmentData('mnogoB'),
-      ]);
-
-      if (blockA) setBlockAData(blockA);
-      if (blockB) setBlockBData(blockB);
-      if (garages) setGaragesData(garages);
-      if (parking) setParkingData(parking);
-      if (mnogoA) setMnogoAData(mnogoA);
-      if (mnogoB) setMnogoBData(mnogoB);
-      setUsingFallback(!blockA && !blockB);
-
-    } catch (err) {
-      console.error('Error refreshing data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Get floor data scoped to a project + block
   const getProjectFloorData = (projectId, blockId) => {
     if (projectId === 'mnogofamilna-sgrada') {
@@ -380,7 +392,6 @@ export function ApartmentProvider({ children }) {
     getParkingData,
     getGoldenResidenceStats,
     getProjectFloorData,
-    refreshData,
   };
 
   return (
