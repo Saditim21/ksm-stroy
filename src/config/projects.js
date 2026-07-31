@@ -29,13 +29,13 @@ import archB6 from '../assets/продажби/project 2/architectures-b/archite
 import archB7 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-7.webp'
 import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.webp'
 
-// Многофамилна сграда: one render, one architecture plan shared by every floor
-import mnogoBuildingImage from '../assets/продажби/project 1/sgrada1.webp'
+// Многофамилна сграда: one architecture plan shared by every floor
 import mnogoFloorPlan from '../assets/продажби/project 1/building-all-floors-architecture.webp'
 
-// The Golden Residence render is served from /public/images/golden-residence
-const publicBase = import.meta.env.BASE_URL || '/'
-const goldenBuildingImage = `${publicBase}images/golden-residence/building-2.webp`
+// Both facade renders are served from /public. The explorer always loads the
+// full-width master (never a srcset variant): its polygons are expressed in the
+// master's coordinate space, mirrored below from the map JSONs.
+import { GOLDEN_RENDER, MNOGO_RENDER } from '../constants/buildingRenders'
 
 const GOLDEN_FLOORS = [1, 2, 3, 4, 5, 6, 7, 8]
 // Floor key 0 holds the garages (shown separately) and there is no key 1 —
@@ -63,7 +63,7 @@ export const PROJECTS = {
     unitFloor: (floor) => floor,
     building: {
       image: {
-        src: goldenBuildingImage,
+        src: GOLDEN_RENDER.src,
         width: goldenBuildingMap.imageWidth,
         height: goldenBuildingMap.imageHeight,
       },
@@ -85,7 +85,7 @@ export const PROJECTS = {
     unitFloor: (floor) => floor - 1,
     building: {
       image: {
-        src: mnogoBuildingImage,
+        src: MNOGO_RENDER.src,
         width: mnogoBuildingMap.imageWidth,
         height: mnogoBuildingMap.imageHeight,
       },

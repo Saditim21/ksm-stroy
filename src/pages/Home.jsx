@@ -7,17 +7,16 @@ import DisplayHeading from '../components/ui/DisplayHeading'
 import Reveal from '../components/ui/Reveal'
 import AnimatedNumber from '../components/ui/AnimatedNumber'
 import Button from '../components/ui/Button'
+import PageTransition from '../components/ui/PageTransition'
 import useSiteAvailability from '../hooks/useSiteAvailability'
 import { EASE, stagger, fadeUpChild, hoverZoom } from '../utils/motion'
 import { seoData, generateStructuredData } from '../utils/seo'
+// Both building renders are served from /public with 640/1024/1200 variants so
+// the hero and the cards can hand the browser a srcSet (see buildingRenders.js).
+import { GOLDEN_RENDER, MNOGO_RENDER, HERO_SIZES, CARD_SIZES } from '../constants/buildingRenders'
 import img001 from '../assets/home/optimized/001.webp'
 import img003 from '../assets/images/003.webp'
 import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
-// The Многофамилна сграда render is bundled (same import as src/config/projects.js);
-// the Golden Residence render is served from /public like the explorer serves it.
-import mnogoBuildingImage from '../assets/продажби/project 1/sgrada1.webp'
-
-const goldenBuildingImage = `${import.meta.env.BASE_URL || '/'}images/golden-residence/building-2.webp`
 
 const services = [
   {
@@ -45,8 +44,8 @@ const stats = [
 ]
 
 const projectCards = [
-  { id: 'golden-residence', to: '/projects/golden-residence', image: goldenBuildingImage, fallbackName: 'Golden Residence' },
-  { id: 'mnogofamilna-sgrada', to: '/projects/mnogofamilna-sgrada', image: mnogoBuildingImage, fallbackName: 'Многофамилна сграда' },
+  { id: 'golden-residence', to: '/projects/golden-residence', image: GOLDEN_RENDER, fallbackName: 'Golden Residence' },
+  { id: 'mnogofamilna-sgrada', to: '/projects/mnogofamilna-sgrada', image: MNOGO_RENDER, fallbackName: 'Многофамилна сграда' },
 ]
 
 // The hero render: settles in on load, then drifts (Ken Burns). The drift class is
@@ -56,7 +55,10 @@ function HeroImage({ reduce }) {
   const [settled, setSettled] = useState(false)
   return (
     <motion.img
-      src={goldenBuildingImage}
+      src={GOLDEN_RENDER.src}
+      srcSet={GOLDEN_RENDER.srcSet}
+      sizes={HERO_SIZES}
+      fetchPriority="high"
       alt="Жилищна сграда Golden Residence, построена от KSM Строй в София"
       className={`absolute inset-0 h-full w-full object-cover ${!reduce && settled ? 'animate-kenburns' : ''}`}
       initial={reduce ? false : { scale: 1.06 }}
@@ -145,7 +147,9 @@ function ProjectsDuo({ byProject }) {
                     {/* 16/9 is deliberate: sgrada1.webp ships with ~6%/8% white
                         margins baked in, and this crop cuts them off at every width. */}
                     <motion.img
-                      src={project.image}
+                      src={project.image.src}
+                      srcSet={project.image.srcSet}
+                      sizes={CARD_SIZES}
                       alt={`Сграда ${name}`}
                       loading="lazy"
                       className="aspect-[16/9] w-full object-cover"
@@ -252,13 +256,13 @@ const Home = () => {
         structuredData={organizationStructuredData}
       />
 
-      <main className="bg-plaster">
+      <PageTransition as="main" className="bg-plaster">
         <Hero available={available} reduce={reduce} />
         <ProjectsDuo byProject={byProject} />
         <Services />
         <StatsBand />
         <ClosingCTA />
-      </main>
+      </PageTransition>
     </>
   )
 }

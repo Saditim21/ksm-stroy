@@ -15,6 +15,7 @@ import GarageGrid from '../components/explorer/GarageGrid'
 import SEO from '../components/common/SEO'
 import DimensionLine from '../components/ui/DimensionLine'
 import DisplayHeading from '../components/ui/DisplayHeading'
+import PageTransition from '../components/ui/PageTransition'
 
 const DOT = { available: 'bg-emerald-500', reserved: 'bg-amber-500', sold: 'bg-red-500', unknown: 'bg-concrete' }
 
@@ -102,7 +103,7 @@ export default function ProjectExplorer({ projectId }) {
   }
 
   return (
-    <div className="min-h-screen bg-plaster pt-24 pb-16">
+    <PageTransition className="min-h-screen bg-plaster pt-24 pb-16">
       <SEO
         title={`${project.name} — ${block.label}`}
         description={`Свободни апартаменти в ${project.name}, ${block.label}`}
@@ -282,6 +283,6 @@ export default function ProjectExplorer({ projectId }) {
         )}
       </div>
       <ApartmentPanel apartment={selectedApartment} onClose={() => selectUnit(null, null)} />
-    </div>
+    </PageTransition>
   )
 }

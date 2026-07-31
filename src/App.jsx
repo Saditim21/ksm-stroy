@@ -16,12 +16,17 @@ const Contact = lazy(() => import('./pages/Contact'))
 const Blog = lazy(() => import('./pages/Blog'))
 const TracerPage = import.meta.env.DEV ? lazy(() => import('./pages/dev/TracerPage')) : null
 
-// Loading component
+// Loading component — a pulsing dimension line, the same 96px gold rule the
+// rest of the site uses as its signature, instead of a generic spinner.
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  <div className="min-h-screen flex items-center justify-center bg-plaster">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Зареждане...</p>
+      <div className="mx-auto mb-4 flex h-[7px] w-24 items-center animate-pulse" aria-hidden="true">
+        <span className="h-[7px] w-px bg-gold-accent" />
+        <span className="h-px flex-1 bg-gold-accent" />
+        <span className="h-[7px] w-px bg-gold-accent" />
+      </div>
+      <p className="text-graphite text-sm">Зареждане…</p>
     </div>
   </div>
 )
@@ -34,9 +39,12 @@ function AnimatedRoutes() {
     window.scrollTo(0, 0)
   }, [location.pathname])
   
+  // Suspense sits OUTSIDE AnimatePresence on purpose: AnimatePresence only
+  // tracks its own direct child, so <Routes> (not <Suspense>) has to be the
+  // keyed element for the page exit fade to run.
   return (
-    <AnimatePresence mode="wait">
-      <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PageLoader />}>
+      <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {TracerPage && <Route path="/dev/tracer" element={<TracerPage />} />}
           <Route path="/" element={<Home />} />
@@ -53,8 +61,8 @@ function AnimatedRoutes() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
         </Routes>
-      </Suspense>
-    </AnimatePresence>
+      </AnimatePresence>
+    </Suspense>
   )
 }
 
@@ -62,7 +70,7 @@ function App() {
   return (
     <ApartmentProvider>
       <Router>
-        <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
+        <div className="min-h-screen flex flex-col bg-plaster overscroll-none">
           <Navbar />
           <main className="flex-1 overscroll-none">
             <AnimatedRoutes />

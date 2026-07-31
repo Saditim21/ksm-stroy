@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DimensionLine from './ui/DimensionLine';
 import DisplayHeading from './ui/DisplayHeading';
 import Reveal from './ui/Reveal';
+import PageTransition from './ui/PageTransition';
 import { hoverZoom } from '../utils/motion';
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.webp';
 import blockBImage from '../assets/продажби/project 1/block-B/blockB.webp';
@@ -85,7 +86,7 @@ const MnogofamilnaBlockSelection = () => {
   }, []);
 
   return (
-    <div className="bg-plaster min-h-screen pt-28 pb-16">
+    <PageTransition className="bg-plaster min-h-screen pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <button
@@ -316,7 +317,7 @@ const MnogofamilnaBlockSelection = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageTransition>
   );
 };
 

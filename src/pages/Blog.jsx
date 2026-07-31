@@ -6,6 +6,7 @@ import DimensionLine from '../components/ui/DimensionLine'
 import DisplayHeading from '../components/ui/DisplayHeading'
 import Reveal from '../components/ui/Reveal'
 import Button from '../components/ui/Button'
+import PageTransition from '../components/ui/PageTransition'
 import { hoverZoom } from '../utils/motion'
 
 // Import project images
@@ -295,7 +296,7 @@ const Blog = () => {
         ogImage={projects[0]?.images[0]}
       />
 
-      <main className="bg-plaster pt-28 pb-24">
+      <PageTransition as="main" className="bg-plaster pt-28 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <DimensionLine label="Обекти" />
           <DisplayHeading as="h1">Завършени <em>обекти</em>.</DisplayHeading>
@@ -353,7 +354,7 @@ const Blog = () => {
             </div>
           </div>
         </section>
-      </main>
+      </PageTransition>
 
       {/* Lightbox — restyled to tokens: ink overlay, plaster text, gold accents */}
       <AnimatePresence>

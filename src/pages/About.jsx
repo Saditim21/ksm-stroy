@@ -5,6 +5,7 @@ import DisplayHeading from '../components/ui/DisplayHeading'
 import Reveal from '../components/ui/Reveal'
 import AnimatedNumber from '../components/ui/AnimatedNumber'
 import Button from '../components/ui/Button'
+import PageTransition from '../components/ui/PageTransition'
 import { seoData } from '../utils/seo'
 import slider01 from '../assets/images/slider01.webp'
 import slider02 from '../assets/images/slider02.webp'
@@ -111,7 +112,7 @@ const About = () => {
         ogImage={seoData.about.ogImage}
       />
 
-      <main className="bg-plaster">
+      <PageTransition as="main" className="bg-plaster">
         {/* Opening statement */}
         <section className="bg-plaster pt-28 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -275,7 +276,7 @@ const About = () => {
             </Reveal>
           </div>
         </section>
-      </main>
+      </PageTransition>
     </>
   )
 }

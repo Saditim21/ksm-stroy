@@ -6,18 +6,17 @@ import DisplayHeading from '../components/ui/DisplayHeading'
 import Reveal from '../components/ui/Reveal'
 import AnimatedNumber from '../components/ui/AnimatedNumber'
 import Button from '../components/ui/Button'
+import PageTransition from '../components/ui/PageTransition'
 import useSiteAvailability from '../hooks/useSiteAvailability'
 import { hoverZoom } from '../utils/motion'
 import { properties } from '../constants/properties'
-// Многофамилна render bundled the same way src/config/projects.js and Home.jsx import it;
-// Golden Residence render is served from /public like the explorer and Home's hero.
-import mnogoBuildingImage from '../assets/продажби/project 1/sgrada1.webp'
-
-const goldenBuildingImage = `${import.meta.env.BASE_URL || '/'}images/golden-residence/building-2.webp`
+// Both renders are served from /public with 640/1024/1200 variants, the same
+// source Home and the explorer use (see src/constants/buildingRenders.js).
+import { GOLDEN_RENDER, MNOGO_RENDER, PANEL_SIZES } from '../constants/buildingRenders'
 
 const PANEL_IMAGES = {
-  'golden-residence': goldenBuildingImage,
-  'mnogofamilna-sgrada': mnogoBuildingImage,
+  'golden-residence': GOLDEN_RENDER,
+  'mnogofamilna-sgrada': MNOGO_RENDER,
 }
 
 function ProjectPanel({ property, available, reversed, onOpen }) {
@@ -42,7 +41,9 @@ function ProjectPanel({ property, available, reversed, onOpen }) {
         className={`relative overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-accent lg:col-span-3 ${reversed ? 'lg:order-2' : ''}`}
       >
         <motion.img
-          src={PANEL_IMAGES[property.projectType]}
+          src={PANEL_IMAGES[property.projectType]?.src}
+          srcSet={PANEL_IMAGES[property.projectType]?.srcSet}
+          sizes={PANEL_SIZES}
           alt={`Сграда ${property.title}`}
           loading="lazy"
           className="aspect-[16/10] lg:aspect-auto object-cover h-full w-full"
@@ -92,7 +93,7 @@ const Projects = () => {
         ogImage={properties[0]?.images[0]}
       />
 
-      <main>
+      <PageTransition as="main">
         <header className="bg-plaster pt-28 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <DimensionLine label="Продажби" />
@@ -119,7 +120,7 @@ const Projects = () => {
             </div>
           </div>
         </section>
-      </main>
+      </PageTransition>
     </>
   )
 }
