@@ -15,9 +15,10 @@ import Parallax from '../components/ui/Parallax'
 import useSiteAvailability from '../hooks/useSiteAvailability'
 import { EASE, stagger, fadeUpChild, hoverZoom } from '../utils/motion'
 import { seoData, generateStructuredData } from '../utils/seo'
-// Both building renders are served from /public with 640/1024/1200 variants so
-// the hero and the cards can hand the browser a srcSet (see buildingRenders.js).
-import { GOLDEN_RENDER, MNOGO_RENDER, HERO_SIZES, CARD_SIZES } from '../constants/buildingRenders'
+// These are all served from /public with a 640/1024(/1600) srcSet so the hero
+// slides and the project cards can hand the browser a responsive candidate
+// instead of one fixed-size download (see buildingRenders.js).
+import { GOLDEN_RENDER, MNOGO_RENDER, HOME_SLIDE_1, HOME_SLIDE_2, HERO_SIZES, CARD_SIZES } from '../constants/buildingRenders'
 import img001 from '../assets/home/optimized/001.webp'
 import img003 from '../assets/images/003.webp'
 import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
@@ -57,18 +58,22 @@ const projectCards = [
 // underneath it. sgrada1.webp is deliberately absent: its baked-in white
 // margins would show as bands in a full-bleed cover hero.
 //
-// Deliberately no fetchpriority="high" on the first slide: this LCP is gated by
-// the lazy page chunk, not by the image, so promoting the render ahead of that
-// JS on a throttled link measured 0.6s SLOWER (5.2s vs 4.6s mobile LCP).
+// Deliberately no fetchpriority="high" on slide 1: CineSlider already marks
+// it loading="eager", and every slide now ships a srcSet, so the remaining
+// LCP cost is the lazy page chunk, not image priority or a fixed-size photo.
 const HERO_SLIDES = [
   {
-    src: imgPhoto4,
+    src: HOME_SLIDE_1.src,
+    srcSet: HOME_SLIDE_1.srcSet,
+    sizes: HERO_SIZES,
     alt: 'Многофамилна жилищна сграда',
     caption: 'Луксозни жилищни комплекси',
     sub: 'Създаваме пространства за мечтания живот',
   },
   {
-    src: img001,
+    src: HOME_SLIDE_2.src,
+    srcSet: HOME_SLIDE_2.srcSet,
+    sizes: HERO_SIZES,
     alt: 'Golden Residence',
     caption: 'Модерна архитектура',
     sub: 'Иновативни дизайнерски решения',

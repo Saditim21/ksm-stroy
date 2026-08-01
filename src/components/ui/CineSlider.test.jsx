@@ -1,4 +1,4 @@
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, within } from '@testing-library/react'
 import { vi } from 'vitest'
 
 // Controllable useReducedMotion mock (see motion2.test.jsx for the rationale:
@@ -153,6 +153,25 @@ test('captionPosition defaults to bottom-left and can be switched to top-right',
   // block carries its own shadow at either position.
   expect(blCaption.className).toMatch(/text-shadow/)
   expect(trCaption.className).toMatch(/text-shadow/)
+})
+
+// Regression: a bright sky/facade slide (e.g. Home's slide 1) measured
+// 1.05:1 contrast against a bare top-parked caption — the bottom-up scrim
+// never reaches the top of the frame. Top positions get a dedicated
+// top-down scrim and a stronger sub-line opacity; bottom positions are
+// already covered by the bottom-up scrim and keep the lighter sub.
+test('top-positioned captions get an extra top-down scrim and a stronger sub opacity; bottom does not', () => {
+  const { container: bl } = render(<CineSlider slides={SLIDES} interval={1000} captionPosition="bottom-left" />)
+  expect(bl.querySelector('[data-top-scrim]')).not.toBeInTheDocument()
+  const blSub = within(bl).getByText('Първи подтекст')
+  expect(blSub.className).toMatch(/text-plaster\/60/)
+  expect(blSub.className).not.toMatch(/text-plaster\/80/)
+
+  const { container: tr } = render(<CineSlider slides={SLIDES} interval={1000} captionPosition="top-right" />)
+  expect(tr.querySelector('[data-top-scrim]')).toBeInTheDocument()
+  const trSub = within(tr).getByText('Първи подтекст')
+  expect(trSub.className).toMatch(/text-plaster\/80/)
+  expect(trSub.className).not.toMatch(/text-plaster\/60/)
 })
 
 test('only the first slide loads eagerly; subsequent slides are lazy', () => {

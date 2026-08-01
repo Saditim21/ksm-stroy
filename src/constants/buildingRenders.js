@@ -22,6 +22,13 @@ export const GOLDEN_RENDER = render('golden-residence', 'building-2', 1200, [640
 // traced against, so the explorer may point at it without shifting a polygon.
 export const MNOGO_RENDER = render('mnogofamilna', 'sgrada1', 1200, [640, 1024])
 
+// Home's hero slides 1-2 (Task 3 CineSlider). Both masters still live in
+// src/assets/home/optimized (bundled, no srcset) — these are the same files
+// re-generated into /public with a 640/1024/1600 ladder so phones stop
+// downloading the full desktop frame. See scripts/generate-srcset.mjs.
+export const HOME_SLIDE_1 = render('home', 'photo-4', 2006, [640, 1024, 1600])
+export const HOME_SLIDE_2 = render('home', '001', 2452, [640, 1024, 1600])
+
 export const HERO_SIZES = '100vw'
 // Home's two-up cards: full width until the lg grid splits them in half.
 export const CARD_SIZES = '(max-width: 768px) 100vw, 50vw'

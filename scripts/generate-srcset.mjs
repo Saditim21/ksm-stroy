@@ -3,10 +3,11 @@
 //
 //   node scripts/generate-srcset.mjs
 //
-// Both building renders are served from /public (not bundled) so a plain
-// <img srcSet> can name them by URL. The master file is copied through
-// untouched: the explorer's polygon maps in src/data/maps/*.json are pinned to
-// its exact pixel size, so the full-width candidate must stay byte-identical.
+// Every entry is served from /public (not bundled) so a plain <img srcSet>
+// can name it by URL. The two building renders' master files are copied
+// through untouched: the explorer's polygon maps in src/data/maps/*.json are
+// pinned to their exact pixel size, so the full-width candidate must stay
+// byte-identical.
 //
 // Re-runnable: it overwrites its outputs and never edits the masters.
 import { mkdir, copyFile } from 'node:fs/promises'
@@ -29,6 +30,22 @@ const RENDERS = [
     master: 'src/assets/продажби/project 1/sgrada1.webp',
     outDir: 'public/images/mnogofamilna',
     name: 'sgrada1',
+  },
+  {
+    // Home's hero slide 1 (Task 3 CineSlider). The src/assets original ships
+    // fixed-size with no srcset, so phones downloaded the full 2006x1202/215KB
+    // frame — this generates the same 640/1024/1600 ladder as the other
+    // renders. The src/assets master is left in place; nothing else imports it.
+    master: 'src/assets/home/optimized/photo-4.webp',
+    outDir: 'public/images/home',
+    name: 'photo-4',
+  },
+  {
+    // Home's hero slide 2. Same story as photo-4: 2452x1410/172KB shipped
+    // with no srcset.
+    master: 'src/assets/home/optimized/001.webp',
+    outDir: 'public/images/home',
+    name: '001',
   },
 ]
 

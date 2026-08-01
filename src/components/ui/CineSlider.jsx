@@ -102,10 +102,23 @@ export default function CineSlider({
         aria-hidden="true"
       />
 
+      {captionPosition.startsWith('top') && (
+        // The bottom-up scrim above never reaches a top-parked caption — a
+        // bright sky/facade slide (e.g. Home's slide 1) measured 1.05:1
+        // contrast against the plain photo. A dedicated top-down scrim gives
+        // it a dark backdrop independent of whatever the photo is doing.
+        <div
+          data-top-scrim
+          className="pointer-events-none absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-ink/60 via-ink/20 to-transparent"
+          aria-hidden="true"
+        />
+      )}
+
       <div className="pointer-events-none absolute inset-0">
         {/* The scrim above only darkens the bottom of the frame, so a caption
             parked at the top rides straight on the photo — bright sky in two of
-            Home's three slides. The shadow is what keeps it readable there. */}
+            Home's three slides. The shadow (and, at top positions, the extra
+            top-down scrim above) is what keeps it readable there. */}
         <div
           className={`absolute [text-shadow:0_2px_14px_rgba(27,26,23,0.75)] ${CAPTION_POSITION_CLASS[captionPosition]}`}
         >
@@ -113,7 +126,11 @@ export default function CineSlider({
             slide.caption && (
               <div>
                 <p className="text-plaster font-display text-lg">{slide.caption}</p>
-                {slide.sub && <p className="text-plaster/60 text-sm">{slide.sub}</p>}
+                {slide.sub && (
+                  <p className={`${captionPosition.startsWith('top') ? 'text-plaster/80' : 'text-plaster/60'} text-sm`}>
+                    {slide.sub}
+                  </p>
+                )}
               </div>
             )
           ) : (
@@ -127,7 +144,11 @@ export default function CineSlider({
                   transition={{ duration: 1.2, ease: EASE }}
                 >
                   <p className="text-plaster font-display text-lg">{slide.caption}</p>
-                  {slide.sub && <p className="text-plaster/60 text-sm">{slide.sub}</p>}
+                  {slide.sub && (
+                    <p className={`${captionPosition.startsWith('top') ? 'text-plaster/80' : 'text-plaster/60'} text-sm`}>
+                      {slide.sub}
+                    </p>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
