@@ -28,6 +28,26 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Only Home has a dark hero image behind the unscrolled navbar — every other
+  // route sits on the plaster background, so light (plaster-colored) text there
+  // would be near-invisible. Everywhere else gets ink text at scroll-top too.
+  const light = !scrolled && location.pathname === '/'
+
+  // Lock body scroll while the mobile overlay is open, and let Escape close it.
+  useEffect(() => {
+    if (!isOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isOpen])
+
   return (
     <nav
       className={`fixed inset-x-0 top-0 z-50 h-16 transition-colors duration-300 ease-luxe ${
@@ -37,7 +57,7 @@ const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="KSM Stroy Logo" className="h-9 w-9 object-cover" />
-          <span className={`font-display text-lg ${scrolled ? 'text-ink' : 'text-plaster'}`}>
+          <span className={`font-display text-lg ${light ? 'text-plaster' : 'text-ink'}`}>
             КСМ Строй
           </span>
         </Link>
@@ -49,7 +69,7 @@ const Navbar = () => {
               to={item.path}
               className={`text-sm font-medium ${linkUnderline} ${
                 location.pathname === item.path ? 'after:scale-x-100' : ''
-              } ${scrolled ? 'text-ink' : 'text-plaster'}`}
+              } ${light ? 'text-plaster' : 'text-ink'}`}
             >
               {item.label}
             </Link>
@@ -61,7 +81,7 @@ const Navbar = () => {
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? 'Затвори менюто' : 'Отвори менюто'}
           aria-expanded={isOpen}
-          className={`p-2 lg:hidden ${scrolled ? 'text-ink' : 'text-plaster'}`}
+          className={`p-2 lg:hidden ${light ? 'text-plaster' : 'text-ink'}`}
         >
           <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             {isOpen ? (

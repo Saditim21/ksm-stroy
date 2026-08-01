@@ -103,7 +103,7 @@ export default function ProjectExplorer({ projectId }) {
   }
 
   return (
-    <PageTransition className="min-h-screen bg-plaster pt-24 pb-16">
+    <PageTransition as="main" className="min-h-screen bg-plaster pt-24 pb-16">
       <SEO
         title={`${project.name} — ${block.label}`}
         description={`Свободни апартаменти в ${project.name}, ${block.label}`}

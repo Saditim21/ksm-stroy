@@ -89,8 +89,25 @@ const GoldenResidenceBlockSelection = () => {
     };
   }, []);
 
+  // Escape closes the gallery (or, if a photo is open, the fullscreen viewer
+  // first) — mirrors MnogofamilnaBlockSelection's ESC behavior. The gallery
+  // copy advertises "Натиснете ESC" so this needs to actually work.
+  useEffect(() => {
+    if (!showGallery) return;
+    const handleKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      if (fullscreenImage) {
+        setFullscreenImage(null);
+      } else {
+        setShowGallery(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showGallery, fullscreenImage]);
+
   return (
-    <PageTransition className="bg-plaster min-h-screen pt-28 pb-16">
+    <PageTransition as="main" className="bg-plaster min-h-screen pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <button

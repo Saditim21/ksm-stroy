@@ -15,13 +15,28 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
   window.IntersectionObserver = NoopIntersectionObserver
 }
 
-const wrap = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>)
+const wrap = (ui, initialEntries = ['/']) =>
+  render(<MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>)
 
 test('navbar renders all primary links', () => {
   wrap(<Navbar />)
   for (const label of ['Начало', 'За нас', 'Продажби', 'Контакти']) {
     expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0)
   }
+})
+
+test('navbar links are dark-on-light at scroll-top on non-Home routes', () => {
+  wrap(<Navbar />, ['/projects'])
+  const link = screen.getAllByRole('link', { name: 'Продажби' })[0]
+  expect(link.className).toMatch(/text-ink/)
+  expect(link.className).not.toMatch(/text-plaster/)
+})
+
+test('navbar links stay light-on-dark at scroll-top on Home', () => {
+  wrap(<Navbar />, ['/'])
+  const link = screen.getAllByRole('link', { name: 'Продажби' })[0]
+  expect(link.className).toMatch(/text-plaster/)
+  expect(link.className).not.toMatch(/text-ink/)
 })
 
 test('navbar starts transparent and becomes solid after scroll', () => {
@@ -39,6 +54,25 @@ test('mobile menu opens with aria-expanded', () => {
   expect(burger).toHaveAttribute('aria-expanded', 'false')
   fireEvent.click(burger)
   expect(burger).toHaveAttribute('aria-expanded', 'true')
+})
+
+test('mobile menu locks body scroll while open and restores it on close', () => {
+  document.body.style.overflow = ''
+  wrap(<Navbar />)
+  const burger = screen.getByRole('button', { name: /меню/i })
+  fireEvent.click(burger)
+  expect(document.body.style.overflow).toBe('hidden')
+  fireEvent.click(burger)
+  expect(document.body.style.overflow).not.toBe('hidden')
+})
+
+test('mobile menu closes on Escape', () => {
+  wrap(<Navbar />)
+  const burger = screen.getByRole('button', { name: /меню/i })
+  fireEvent.click(burger)
+  expect(burger).toHaveAttribute('aria-expanded', 'true')
+  fireEvent.keyDown(window, { key: 'Escape' })
+  expect(burger).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('footer shows brand, navigation and current year', () => {

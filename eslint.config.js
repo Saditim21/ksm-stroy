@@ -26,4 +26,25 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Vitest runs test files with its globals injected (globalThis, not an
+    // import) — the `globals` package has no "vitest" set, so declare the
+    // handful this repo actually uses by hand.
+    files: ['**/*.test.{js,jsx}', 'src/test/**'],
+    languageOptions: {
+      globals: {
+        test: 'readonly',
+        expect: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        vi: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        suite: 'readonly',
+        assert: 'readonly',
+      },
+    },
+  },
 ])

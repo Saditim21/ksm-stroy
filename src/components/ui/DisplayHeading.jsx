@@ -7,7 +7,7 @@ const SIZES = {
 
 export default function DisplayHeading({ as: Tag = 'h2', size = 'section', className = '', children }) {
   return (
-    <Tag className={`font-display font-medium [&_em]:font-normal [&_em]:italic [&_em]:text-gold-accent ${SIZES[size]} ${className}`}>
+    <Tag className={`font-display font-medium [&_em]:font-normal [&_em]:italic [&_em]:text-gold-deep ${SIZES[size]} ${className}`}>
       {children}
     </Tag>
   )

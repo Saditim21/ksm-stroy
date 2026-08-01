@@ -72,9 +72,9 @@ function App() {
       <Router>
         <div className="min-h-screen flex flex-col bg-plaster overscroll-none">
           <Navbar />
-          <main className="flex-1 overscroll-none">
+          <div className="flex-1 overscroll-none">
             <AnimatedRoutes />
-          </main>
+          </div>
           <Footer />
         </div>
       </Router>
