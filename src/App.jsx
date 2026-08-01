@@ -5,6 +5,7 @@ import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import SmoothScroll from './components/ui/SmoothScroll'
 import IntroReveal from './components/ui/IntroReveal'
+import { CURTAIN_COVER_MS } from './components/ui/PageTransition'
 import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
@@ -36,9 +37,21 @@ const PageLoader = () => (
 function AnimatedRoutes() {
   const location = useLocation()
   
-  // Scroll to top when route changes
+  // Scroll to top when route changes. On a long-scrolled page, jumping
+  // straight to (0, 0) is visible for a beat before the curtain (the ink
+  // panel in PageTransition) has swept up far enough to mask it — so the
+  // jump is delayed by CURTAIN_COVER_MS, the same duration the curtain uses
+  // to fully cover the viewport (imported from PageTransition itself so the
+  // two values can't drift apart). Reduced motion skips the curtain
+  // entirely, so there's nothing to wait for there — scroll immediately.
   useEffect(() => {
-    window.scrollTo(0, 0)
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce) {
+      window.scrollTo(0, 0)
+      return undefined
+    }
+    const timer = setTimeout(() => window.scrollTo(0, 0), CURTAIN_COVER_MS)
+    return () => clearTimeout(timer)
   }, [location.pathname])
   
   // Suspense sits OUTSIDE AnimatePresence on purpose: AnimatePresence only

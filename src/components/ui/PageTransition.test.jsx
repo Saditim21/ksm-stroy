@@ -78,3 +78,24 @@ test('the very first page of a session still mounts a curtain panel instance (so
   const { container } = render(<PageTransition as="main">първа страница</PageTransition>)
   expect(container.querySelector('[data-curtain]')).toBeInTheDocument()
 })
+
+// Regression: the curtain panel's `initial` prop used to be hardcoded to the
+// "initial" variant (y: 0%, i.e. fully covering) regardless of first-paint
+// state, while only `animate` was gated on `isFirstPage`. Framer Motion always
+// animates from `initial` to `animate` on mount, so on the very first page of
+// a *reload* (not a fresh session — sessionStorage's 'ksm-intro-seen' already
+// set, so IntroReveal doesn't mount to hide it) the panel would visibly sweep
+// from y:0% up to y:-100%: a full-viewport ink wipe with nothing masking it.
+// The fix gates `initial` the same way as `animate` so the first page's panel
+// starts already off-screen, with no mount-to-mount animation to see at all.
+test('the first page of a session mounts its curtain panel already off-screen — no unmasked sweep on reload after the intro has already played', async () => {
+  const PageTransition = await freshPageTransition()
+  const { container } = render(<PageTransition as="main">начало</PageTransition>)
+  const panel = container.querySelector('[data-curtain]')
+  // A `fixed inset-0` element with no inline transform ("none") sits at its
+  // layout position — fully covering the viewport. `translateY(-100%)` is the
+  // off-screen resting position. The buggy version reads "none" here (still
+  // covering); the fix must read translateY(-100%).
+  expect(panel.style.transform).not.toBe('none')
+  expect(panel.style.transform).toMatch(/translateY\(-100%\)/)
+})

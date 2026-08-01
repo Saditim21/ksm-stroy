@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { EASE } from '../../utils/motion'
 
+// How long the curtain panel's exit takes to fully cover the viewport, in ms.
+// App.jsx's route-change scroll-to-top effect delays its `window.scrollTo`
+// by this same value so the snap never happens before the curtain has masked
+// it — exported (rather than each side hardcoding "0.45s"/"450") so the two
+// can't silently drift apart.
+export const CURTAIN_COVER_MS = 450
+
 // The page content itself keeps a fast cross-fade — no slide, no scale — so
 // the persistent Navbar/Footer never appear to shift while a page swaps. It
 // runs *underneath* the ink curtain panel below, which is what the visitor
@@ -26,7 +33,7 @@ const contentVariants = {
 const panelVariants = {
   initial: { y: '0%' },
   animate: { y: '-100%', transition: { duration: 0.5, delay: 0.05, ease: EASE } },
-  exit: { y: ['100%', '0%'], transition: { duration: 0.45, ease: EASE } },
+  exit: { y: ['100%', '0%'], transition: { duration: CURTAIN_COVER_MS / 1000, ease: EASE } },
 }
 
 // A transition belongs *between* pages: the landing page has nothing to fade
@@ -78,7 +85,17 @@ export default function PageTransition({ as = 'div', className, children, ...res
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-[150] bg-ink"
         variants={panelVariants}
-        initial="initial"
+        // `initial` is gated on `isFirstPage` exactly like `animate` just
+        // below — not left on the "initial" variant (y: 0%, covering)
+        // unconditionally. Framer Motion always animates from `initial` to
+        // `animate` on mount, so if `initial` stayed at y:0% while `animate`
+        // jumped straight to y:-100% for the first page, the panel would
+        // still visibly sweep from covering to off-screen on mount. That's
+        // invisible on a *fresh* session (IntroReveal's opaque overlay is on
+        // top of it), but on a reload *after* the session has already seen
+        // the intro, IntroReveal doesn't mount and the sweep plays bare: an
+        // unmasked black curtain wipe on page load.
+        initial={isFirstPage ? { y: '-100%' } : 'initial'}
         animate={isFirstPage ? { y: '-100%' } : 'animate'}
         exit="exit"
       >
