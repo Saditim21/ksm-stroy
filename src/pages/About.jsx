@@ -14,6 +14,8 @@ import slider02 from '../assets/images/slider02.webp'
 import slider03 from '../assets/images/slider03.webp'
 import traditions from '../assets/images/traditions.webp'
 import hotelParadise from '../assets/projects/Хотел Парадайс - с.Огняново/45263613_104668413873023_2147464397956579328_n.webp'
+import goldenResidenceFacade from '../assets/продажби/project 2/photos/golden-residence-2.webp'
+import goldenResidenceVision from '../assets/продажби/project 2/photos/golden-residence-1.webp'
 
 // Pure-imagery cinematic interlude — no captions, so every slide shares one
 // alt (the chrome shows only index + progress, per task-5-brief.md).
@@ -178,8 +180,8 @@ const About = () => {
 
         {/* Кои сме ние */}
         <EditorialSection
-          image={slider01}
-          alt="KSM Stroy строителни проекти"
+          image={goldenResidenceFacade}
+          alt="Завършена жилищна сграда на КСМ Строй — комплекс Golden Residence"
           eyebrow="За компанията"
           heading={<>Кои сме <em>ние</em>?</>}
           reversed
@@ -251,8 +253,8 @@ const About = () => {
 
         {/* Мисия и визия */}
         <EditorialSection
-          image={slider02}
-          alt="KSM Stroy строителни проекти"
+          image={goldenResidenceVision}
+          alt="Изглед отдолу нагоре към фасадата на сграда на КСМ Строй на фона на небето"
           eyebrow="Нашите принципи"
           heading={<>Мисия и <em>визия</em></>}
           reversed
