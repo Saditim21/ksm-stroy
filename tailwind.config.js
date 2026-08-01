@@ -153,8 +153,9 @@ export default {
         'scale-in': 'scale-in 0.5s ease-out forwards',
         'float': 'float 6s ease-in-out infinite',
         'kenburns': 'kenburns 18s ease-in-out infinite alternate',
+        'marquee': 'marquee 20s linear infinite',
       },
-      
+
       keyframes: {
         'fade-in-up': {
           '0%': { opacity: '0', transform: 'translateY(30px)' },
@@ -179,6 +180,10 @@ export default {
         'kenburns': {
           '0%': { transform: 'scale(1)' },
           '100%': { transform: 'scale(1.08)' },
+        },
+        'marquee': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

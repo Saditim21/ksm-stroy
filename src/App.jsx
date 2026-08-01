@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
+import SmoothScroll from './components/ui/SmoothScroll'
 import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
@@ -70,13 +71,15 @@ function App() {
   return (
     <ApartmentProvider>
       <Router>
-        <div className="min-h-screen flex flex-col bg-plaster overscroll-none">
-          <Navbar />
-          <div className="flex-1 overscroll-none">
-            <AnimatedRoutes />
+        <SmoothScroll>
+          <div className="min-h-screen flex flex-col bg-plaster overscroll-none">
+            <Navbar />
+            <div className="flex-1 overscroll-none">
+              <AnimatedRoutes />
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </SmoothScroll>
       </Router>
     </ApartmentProvider>
   )
