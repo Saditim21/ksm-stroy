@@ -142,9 +142,17 @@ test('captionPosition defaults to bottom-left and can be switched to top-right',
   const blCaption = bl.querySelector('.bottom-8.left-6')
   expect(blCaption).toBeInTheDocument()
 
+  // top-24, not top-8: the site's h-16 fixed navbar floats over the hero and
+  // the caption printed straight through the nav links at top-8.
   const { container: tr } = render(<CineSlider slides={SLIDES} interval={1000} captionPosition="top-right" />)
-  const trCaption = tr.querySelector('.top-8.right-6')
+  const trCaption = tr.querySelector('.top-24.right-6')
   expect(trCaption).toBeInTheDocument()
+  expect(tr.querySelector('.top-8')).not.toBeInTheDocument()
+
+  // The bottom-up scrim does not reach a top-parked caption, so the caption
+  // block carries its own shadow at either position.
+  expect(blCaption.className).toMatch(/text-shadow/)
+  expect(trCaption.className).toMatch(/text-shadow/)
 })
 
 test('only the first slide loads eagerly; subsequent slides are lazy', () => {

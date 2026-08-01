@@ -110,10 +110,39 @@ describe('SplitLines', () => {
     )
     expect(container.querySelector('h2')).toBeInTheDocument()
   })
+
+  // Regression: the reveal used to hang `whileInView` on the masked word span
+  // itself. A word parked at y:110% sits entirely outside its overflow-hidden
+  // mask, so a real IntersectionObserver reports ratio 0 forever and the words
+  // never rise (jsdom's no-op observer hid it; Home's hero shipped a blank h1
+  // until this was measured in Chrome). The observed target must therefore be
+  // an element that is not clipped away by a mask.
+  test('observes an unclipped wrapper, not the masked word spans', () => {
+    const observed = []
+    class SpyIntersectionObserver {
+      constructor(callback) { this.callback = callback }
+      observe(el) { observed.push(el) }
+      unobserve() {}
+      disconnect() {}
+    }
+    const original = globalThis.IntersectionObserver
+    globalThis.IntersectionObserver = SpyIntersectionObserver
+    window.IntersectionObserver = SpyIntersectionObserver
+    try {
+      render(<SplitLines as="h2">Изберете своя дом</SplitLines>)
+      expect(observed.length).toBeGreaterThan(0)
+      observed.forEach((el) => {
+        expect(el.closest('.overflow-hidden')).toBeNull()
+      })
+    } finally {
+      globalThis.IntersectionObserver = original
+      window.IntersectionObserver = original
+    }
+  })
 })
 
 describe('Parallax', () => {
-  test('renders children inside an overflow-hidden wrapper with a scale-110 inner layer', () => {
+  test('renders children inside an overflow-hidden wrapper with an oversized inner layer', () => {
     const { container } = render(
       <Parallax strength={40} className="h-64">
         <img alt="сграда" src="/x.webp" />
@@ -121,10 +150,25 @@ describe('Parallax', () => {
     )
     expect(screen.getByAltText('сграда')).toBeInTheDocument()
     expect(container.querySelector('.overflow-hidden')).toBeInTheDocument()
-    expect(container.querySelector('.scale-110')).toBeInTheDocument()
+    expect(container.querySelector('[data-parallax-layer]')).toBeInTheDocument()
   })
 
-  test('reduced motion renders a static passthrough (no scale-110 drift layer)', () => {
+  // Regression: the oversize used to be a `scale-110` utility class. framer
+  // writes an inline `transform` for the drift, and an inline transform wins
+  // over the class outright — the layer was never actually oversized and the
+  // page background showed through by the full drift distance at the extremes.
+  test('carries the 10% oversize in the same inline transform as the drift', () => {
+    const { container } = render(
+      <Parallax strength={40}>
+        <img alt="сграда" src="/x.webp" />
+      </Parallax>
+    )
+    const layer = container.querySelector('[data-parallax-layer]')
+    expect(layer.style.transform).toMatch(/scale\(1\.1\)/)
+    expect(layer.className).not.toMatch(/scale-110/)
+  })
+
+  test('reduced motion renders a static passthrough (no drift layer at all)', () => {
     mockReduced = true
     const { container } = render(
       <Parallax strength={40}>
@@ -132,7 +176,7 @@ describe('Parallax', () => {
       </Parallax>
     )
     expect(screen.getByAltText('сграда')).toBeInTheDocument()
-    expect(container.querySelector('.scale-110')).not.toBeInTheDocument()
+    expect(container.querySelector('[data-parallax-layer]')).not.toBeInTheDocument()
   })
 })
 

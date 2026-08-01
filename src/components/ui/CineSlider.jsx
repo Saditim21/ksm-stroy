@@ -4,9 +4,13 @@ import { EASE } from '../../utils/motion'
 
 // Only the caption block moves with captionPosition — the bottom-right slide
 // index + progress line stay put regardless (see task-2-brief.md).
+//
+// top-right clears the h-16 fixed navbar that floats over every full-bleed
+// hero on this site; at top-8 the caption printed straight through the nav
+// links (measured at 1440px and at 390px).
 const CAPTION_POSITION_CLASS = {
   'bottom-left': 'bottom-8 left-6 max-w-md sm:left-10',
-  'top-right': 'top-8 right-6 max-w-md text-right sm:right-10',
+  'top-right': 'top-24 right-6 max-w-md text-right sm:right-10',
 }
 
 // Cinematic crossfade slider shared by Home's hero (Task 3) and About (Task 5) —
@@ -99,7 +103,12 @@ export default function CineSlider({
       />
 
       <div className="pointer-events-none absolute inset-0">
-        <div className={`absolute ${CAPTION_POSITION_CLASS[captionPosition]}`}>
+        {/* The scrim above only darkens the bottom of the frame, so a caption
+            parked at the top rides straight on the photo — bright sky in two of
+            Home's three slides. The shadow is what keeps it readable there. */}
+        <div
+          className={`absolute [text-shadow:0_2px_14px_rgba(27,26,23,0.75)] ${CAPTION_POSITION_CLASS[captionPosition]}`}
+        >
           {reduce ? (
             slide.caption && (
               <div>
