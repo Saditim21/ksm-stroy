@@ -6,11 +6,21 @@ import Reveal from '../components/ui/Reveal'
 import AnimatedNumber from '../components/ui/AnimatedNumber'
 import Button from '../components/ui/Button'
 import PageTransition from '../components/ui/PageTransition'
+import CineSlider from '../components/ui/CineSlider'
+import Parallax from '../components/ui/Parallax'
 import { seoData } from '../utils/seo'
 import slider01 from '../assets/images/slider01.webp'
 import slider02 from '../assets/images/slider02.webp'
+import slider03 from '../assets/images/slider03.webp'
 import traditions from '../assets/images/traditions.webp'
 import hotelParadise from '../assets/projects/Хотел Парадайс - с.Огняново/45263613_104668413873023_2147464397956579328_n.webp'
+
+// Pure-imagery cinematic interlude — no captions, so every slide shares one
+// alt (the chrome shows only index + progress, per task-5-brief.md).
+const ABOUT_SLIDES = [slider01, slider02, slider03].map((src) => ({
+  src,
+  alt: 'КСМ Строй — обекти',
+}))
 
 // Same four figures the old hero-counter overlay used ("Task 5 stats-band style").
 const stats = [
@@ -79,17 +89,26 @@ const vision = {
 // An alternating editorial row: image rounded-2xl on one side, DimensionLine +
 // DisplayHeading(size="sub") + body on the other. `reversed` flips which side
 // the image sits on so consecutive sections alternate.
-function EditorialSection({ image, alt, eyebrow, heading, reversed = false, bg = 'bg-plaster', children }) {
+function EditorialSection({ image, alt, eyebrow, heading, reversed = false, bg = 'bg-plaster', parallax = false, children }) {
+  const img = (
+    <img
+      src={image}
+      alt={alt}
+      loading="lazy"
+      className="rounded-2xl aspect-[4/3] object-cover w-full"
+    />
+  )
   return (
     <section className={`${bg} py-20`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
         <Reveal className={reversed ? 'lg:order-2' : ''}>
-          <img
-            src={image}
-            alt={alt}
-            loading="lazy"
-            className="rounded-2xl aspect-[4/3] object-cover w-full"
-          />
+          {parallax ? (
+            <Parallax strength={24} className="rounded-2xl">
+              {img}
+            </Parallax>
+          ) : (
+            img
+          )}
         </Reveal>
         <Reveal delay={0.08} className={reversed ? 'lg:order-1' : ''}>
           <DimensionLine label={eyebrow} />
@@ -126,12 +145,18 @@ const About = () => {
           </div>
         </section>
 
+        {/* Cinematic interlude — pure imagery, no captions */}
+        <section className="relative h-[55vh] min-h-[380px] overflow-hidden">
+          <CineSlider interval={5500} slides={ABOUT_SLIDES} />
+        </section>
+
         {/* История */}
         <EditorialSection
           image={traditions}
           alt="KSM Stroy - Традиция и иновации"
           eyebrow="Нашата история"
           heading={<>Традиция и иновации <em>от 2008</em></>}
+          parallax
         >
           <p>
             КСМ СТРОЙ ООД е основана през месец септември 2008 г. от двама братя Кадри и Сухат,
@@ -195,6 +220,7 @@ const About = () => {
           eyebrow="Нашите услуги"
           heading={<>Какво <em>предлагаме</em>?</>}
           bg="bg-white"
+          parallax
         >
           <div className="divide-y divide-concrete border-t border-concrete">
             {services.map((service) => (

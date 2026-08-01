@@ -18,6 +18,15 @@ if (typeof globalThis.IntersectionObserver === 'undefined') {
 const wrap = (ui, initialEntries = ['/']) =>
   render(<MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>)
 
+test('navbar logo carries the prominent gold ring treatment', () => {
+  wrap(<Navbar />)
+  const logo = screen.getByAltText('KSM Stroy Logo')
+  expect(logo.className).toMatch(/ring-2/)
+  expect(logo.className).toMatch(/ring-gold-accent\/50/)
+  expect(logo.className).toMatch(/hover:ring-gold-accent/)
+  expect(logo.className).toMatch(/rounded-full/)
+})
+
 test('navbar renders all primary links', () => {
   wrap(<Navbar />)
   for (const label of ['Начало', 'За нас', 'Продажби', 'Контакти']) {

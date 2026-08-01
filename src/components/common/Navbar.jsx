@@ -50,13 +50,17 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed inset-x-0 top-0 z-50 h-16 transition-colors duration-300 ease-luxe ${
+      className={`fixed inset-x-0 top-0 z-50 h-18 transition-colors duration-300 ease-luxe ${
         scrolled ? 'bg-plaster/90 backdrop-blur border-b border-concrete' : 'bg-transparent'
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="KSM Stroy Logo" className="h-9 w-9 object-cover" />
+          <img
+            src={logo}
+            alt="KSM Stroy Logo"
+            className="h-11 w-11 sm:h-12 sm:w-12 rounded-full object-cover ring-2 ring-gold-accent/50 hover:ring-gold-accent transition-shadow"
+          />
           <span className={`font-display text-lg ${light ? 'text-plaster' : 'text-ink'}`}>
             КСМ Строй
           </span>
@@ -95,7 +99,7 @@ const Navbar = () => {
 
       {isOpen && (
         <motion.div
-          className="fixed inset-0 top-16 z-40 flex flex-col items-center justify-center gap-8 bg-ink text-plaster lg:hidden"
+          className="fixed inset-0 top-18 z-40 flex flex-col items-center justify-center gap-8 bg-ink text-plaster lg:hidden"
           initial="initial"
           animate="animate"
           variants={reduce ? undefined : stagger(0.08)}
