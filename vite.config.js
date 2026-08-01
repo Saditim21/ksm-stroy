@@ -29,7 +29,6 @@ export default defineConfig({
           // Split vendor chunks for better caching
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'framer': ['framer-motion'],
-          'swiper': ['swiper'],
         }
       }
     }

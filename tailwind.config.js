@@ -152,7 +152,6 @@ export default {
         'slide-in-right': 'slide-in-right 0.6s ease-out forwards',
         'scale-in': 'scale-in 0.5s ease-out forwards',
         'float': 'float 6s ease-in-out infinite',
-        'kenburns': 'kenburns 18s ease-in-out infinite alternate',
         'marquee': 'marquee 20s linear infinite',
       },
 
@@ -176,10 +175,6 @@ export default {
         'float': {
           '0%, 100%': { transform: 'translateY(-10px)' },
           '50%': { transform: 'translateY(10px)' },
-        },
-        'kenburns': {
-          '0%': { transform: 'scale(1)' },
-          '100%': { transform: 'scale(1.08)' },
         },
         'marquee': {
           '0%': { transform: 'translateX(0)' },
