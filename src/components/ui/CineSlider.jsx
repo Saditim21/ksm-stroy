@@ -39,6 +39,21 @@ export default function CineSlider({
     return () => clearInterval(id)
   }, [reduce, interval, n])
 
+  // Warm the browser's image cache for the slide that's coming up next — with
+  // only the active slide mounted, waiting for it to become current before
+  // the <img>/motion.img even exists means the 1.2s crossfade animates over
+  // a still-downloading (blank) image on real networks. This runs regardless
+  // of reduced motion: even without autoplay, the prev/next buttons can jump
+  // straight to an unwarmed slide.
+  useEffect(() => {
+    if (slides.length <= 1) return undefined
+    const next = slides[(index + 1) % slides.length]
+    const img = new Image()
+    if (next.srcSet) img.srcset = next.srcSet
+    img.src = next.src
+    return undefined
+  }, [index, slides])
+
   const goPrev = () => setIndex((i) => (i - 1 + n) % n)
   const goNext = () => setIndex((i) => (i + 1) % n)
 
@@ -133,7 +148,7 @@ export default function CineSlider({
       )}
 
       {reduce && (
-        <div className="absolute inset-0 flex items-center justify-between px-3">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-3">
           <button
             type="button"
             aria-label="Предишен слайд"

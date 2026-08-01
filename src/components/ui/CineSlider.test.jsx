@@ -10,6 +10,19 @@ vi.mock('framer-motion', async (importOriginal) => {
   return { ...actual, useReducedMotion: () => mockReduced }
 })
 
+// Spy on `new Image()` (used by the next-slide preloader) without touching
+// real network/decoding — jsdom's Image already no-ops network loads, but a
+// plain spy class lets tests assert exactly which src/srcset got assigned.
+const { imageInstances, MockImage } = vi.hoisted(() => {
+  const instances = []
+  class MockImage {
+    constructor() {
+      instances.push(this)
+    }
+  }
+  return { imageInstances: instances, MockImage }
+})
+
 import CineSlider from './CineSlider'
 
 const SLIDES = [
@@ -20,10 +33,13 @@ const SLIDES = [
 
 beforeEach(() => {
   mockReduced = false
+  imageInstances.length = 0
+  vi.stubGlobal('Image', MockImage)
 })
 
 afterEach(() => {
   vi.useRealTimers()
+  vi.unstubAllGlobals()
 })
 
 test('renders the first slide with eager loading and the 1-of-n index chrome', () => {
@@ -185,4 +201,66 @@ test('root fills its parent and chrome (excluding buttons) is pointer-events-non
   expect(root.className).toMatch(/overflow-hidden/)
   expect(root.className).toMatch(/h-\[80vh\]/)
   expect(container.querySelectorAll('.pointer-events-none').length).toBeGreaterThan(0)
+})
+
+// Regression: the reduced-motion prev/next wrapper is an `absolute inset-0`
+// div that paints ABOVE the {children} overlay in DOM order. Without
+// pointer-events-none on that wrapper itself (only the buttons had it), the
+// full-bleed wrapper swallowed clicks anywhere over the overlay layer except
+// the two 44px button hitboxes — e.g. Task 3's hero CTA sitting under it.
+test('reduced-motion nav-button wrapper does not swallow clicks meant for overlay children', () => {
+  mockReduced = true
+  const onCtaClick = vi.fn()
+  const { container } = render(
+    <CineSlider slides={SLIDES} interval={1000} overlayClassName="flex items-center justify-center">
+      <button type="button" onClick={onCtaClick}>Разгледайте</button>
+    </CineSlider>
+  )
+
+  const navWrapper = screen.getByRole('button', { name: /следващ/i }).parentElement
+  expect(navWrapper.className).toMatch(/pointer-events-none/)
+  // The buttons themselves must still opt back in individually.
+  expect(screen.getByRole('button', { name: /следващ/i }).className).toMatch(/pointer-events-auto/)
+  expect(screen.getByRole('button', { name: /предишен/i }).className).toMatch(/pointer-events-auto/)
+
+  fireEvent.click(screen.getByRole('button', { name: 'Разгледайте' }))
+  expect(onCtaClick).toHaveBeenCalledTimes(1)
+  expect(container).toBeTruthy()
+})
+
+test('preloads the next slide image on mount so the crossfade never animates over a blank download', () => {
+  render(<CineSlider slides={SLIDES} interval={1000} />)
+  // Mounted on slide 1 (index 0); the preloader should warm slide 2 (index 1).
+  expect(imageInstances).toHaveLength(1)
+  expect(imageInstances[0].src).toBe(SLIDES[1].src)
+})
+
+test('warms the following slide again after each advance', () => {
+  vi.useFakeTimers()
+  render(<CineSlider slides={SLIDES} interval={1000} />)
+  expect(imageInstances.some((img) => img.src === SLIDES[1].src)).toBe(true)
+
+  act(() => {
+    vi.advanceTimersByTime(1000)
+  })
+  // Now on slide 2 (index 1); the preloader should warm slide 3 (index 2).
+  expect(imageInstances.some((img) => img.src === SLIDES[2].src)).toBe(true)
+})
+
+test('preload assigns srcset when the upcoming slide has one', () => {
+  mockReduced = true
+  render(<CineSlider slides={SLIDES} interval={1000} />)
+  // Jump to the last slide (index 2); the preloader wraps to slide 1 (index 0),
+  // which is the only fixture slide carrying a srcSet.
+  fireEvent.click(screen.getByRole('button', { name: /следващ/i }))
+  fireEvent.click(screen.getByRole('button', { name: /следващ/i }))
+
+  const warmed = imageInstances.find((img) => img.src === SLIDES[0].src)
+  expect(warmed).toBeDefined()
+  expect(warmed.srcset).toBe(SLIDES[0].srcSet)
+})
+
+test('does not attempt to preload when there is only a single slide', () => {
+  render(<CineSlider slides={[SLIDES[0]]} interval={1000} />)
+  expect(imageInstances).toHaveLength(0)
 })
