@@ -140,18 +140,6 @@ html, body, #root {
 
 /* Additional mobile overscroll prevention */
 #root {
-  /* Ensure consistent background - matches primary-50 */
-  background-color: #fafafa;
   /* Prevent content from causing overscroll */
   position: relative;
-}
-
-/* Enhanced smooth zoom animation - more noticeable */
-@keyframes smoothZoom {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.12);
-  }
 }

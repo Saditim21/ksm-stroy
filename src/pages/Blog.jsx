@@ -286,6 +286,15 @@ const Blog = () => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [selectedProject, currentImageIndex])
 
+  // openModal sets body overflow: hidden directly (not via this effect) so it
+  // can fire before the next paint; this only guarantees the reverse happens
+  // if the component unmounts (route change) while the modal is still open.
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [])
+
   return (
     <>
       <SEO
@@ -371,7 +380,7 @@ const Blog = () => {
               <div className="flex items-center justify-between gap-4 p-4 sm:p-6 border-b border-plaster/10">
                 <div>
                   <h2 className="font-display text-xl text-plaster">{selectedProject.title}</h2>
-                  <p className="text-gold-accent text-sm mt-1">
+                  <p className="text-plaster/70 text-sm mt-1">
                     {selectedProject.type} · {selectedProject.location} · {selectedProject.year}
                   </p>
                 </div>
