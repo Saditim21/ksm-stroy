@@ -4,6 +4,7 @@ import { useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import SmoothScroll from './components/ui/SmoothScroll'
+import IntroReveal from './components/ui/IntroReveal'
 import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
@@ -71,6 +72,7 @@ function App() {
   return (
     <ApartmentProvider>
       <Router>
+        <IntroReveal />
         <SmoothScroll>
           <div className="min-h-screen flex flex-col bg-plaster overscroll-none">
             <Navbar />
