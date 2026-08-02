@@ -11,9 +11,12 @@ export const fadeUpChild = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
 }
 
-export const stagger = (staggerChildren = 0.08) => ({
+// `delayChildren` holds the whole run back before the first child moves —
+// used by Home's hero to wait out the intro overlay (see utils/introGate.js)
+// so the entrance is not spent behind an opaque panel.
+export const stagger = (staggerChildren = 0.08, delayChildren = 0) => ({
   initial: {},
-  animate: { transition: { staggerChildren } },
+  animate: { transition: { staggerChildren, delayChildren } },
 })
 
 export const viewportOnce = { once: true, amount: 0.3 }

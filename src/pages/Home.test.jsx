@@ -112,3 +112,24 @@ test('primary CTA goes to Продажби', () => {
   renderHome()
   expect(screen.getByRole('link', { name: 'Разгледайте сградите' })).toHaveAttribute('href', '/projects')
 })
+
+// Two of the three service photos are the same files the hero reel uses, so
+// they get the hero's /public 640/1024/1600 ladder instead of the bundled
+// desktop originals (001.webp 172KB, photo-4.webp 220KB) — a phone was
+// downloading a full-width frame for a card that is a third of a desktop row.
+// 003.webp has no ladder generated, so it stays a plain bundled src.
+test('the two service photos that have a responsive ladder use it, at services-grid sizes', () => {
+  renderHome()
+  const withLadder = ['Жилищно Строителство', 'Ремонти и Реновация']
+  withLadder.forEach((title) => {
+    const img = screen.getByAltText(title)
+    expect(img.getAttribute('srcset')).toMatch(/640w/)
+    expect(img.getAttribute('srcset')).toMatch(/1024w/)
+    expect(img.getAttribute('sizes')).toBe('(max-width: 768px) 100vw, 33vw')
+    expect(img.getAttribute('src')).toMatch(/^\/images\/home\//)
+  })
+
+  const noLadder = screen.getByAltText('Комерсиално Строителство')
+  expect(noLadder.getAttribute('srcset')).toBeNull()
+  expect(noLadder.getAttribute('src')).toBeTruthy()
+})

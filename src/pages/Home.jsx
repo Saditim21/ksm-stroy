@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import SEO from '../components/common/SEO'
@@ -14,28 +14,43 @@ import Marquee from '../components/ui/Marquee'
 import Parallax from '../components/ui/Parallax'
 import useSiteAvailability from '../hooks/useSiteAvailability'
 import { EASE, stagger, fadeUpChild, hoverZoom } from '../utils/motion'
+import { getIntroDelayMs } from '../utils/introGate'
 import { seoData, generateStructuredData } from '../utils/seo'
 // These are all served from /public with a 640/1024(/1600) srcSet so the hero
-// slides and the project cards can hand the browser a responsive candidate
-// instead of one fixed-size download (see buildingRenders.js).
-import { GOLDEN_RENDER, MNOGO_RENDER, HOME_SLIDE_1, HOME_SLIDE_2, HERO_SIZES, CARD_SIZES } from '../constants/buildingRenders'
-import img001 from '../assets/home/optimized/001.webp'
+// slides, the project cards and the services grid can hand the browser a
+// responsive candidate instead of one fixed-size download (see
+// buildingRenders.js).
+import {
+  GOLDEN_RENDER,
+  MNOGO_RENDER,
+  HOME_SLIDE_1,
+  HOME_SLIDE_2,
+  HERO_SIZES,
+  CARD_SIZES,
+  SERVICE_SIZES,
+} from '../constants/buildingRenders'
 import img003 from '../assets/images/003.webp'
-import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
 
+// The first two service photos are the same files the hero reel uses, so they
+// reuse the hero's /public ladder: a phone pulls the 640w variant instead of
+// the bundled desktop original (001.webp 172KB, photo-4.webp 220KB) for a card
+// that is never wider than the screen. 003.webp has no ladder — it is not a
+// hero slide, and nothing else on the site references it — so it stays a
+// bundled import with no srcSet until someone regenerates it
+// (scripts/generate-srcset.mjs).
 const services = [
   {
-    image: img001,
+    image: HOME_SLIDE_2, // 001.webp
     title: 'Жилищно Строителство',
     description: 'Строителство на къщи, апартаменти и жилищни комплекси с висок стандарт',
   },
   {
-    image: imgPhoto4,
+    image: HOME_SLIDE_1, // photo-4.webp
     title: 'Ремонти и Реновация',
     description: 'Цялостни ремонти и модернизация на съществуващи сгради',
   },
   {
-    image: img003,
+    image: { src: img003 },
     title: 'Комерсиално Строителство',
     description: 'Офисни сгради, складове и индустриални обекти',
   },
@@ -98,7 +113,7 @@ const ACCENT_DELAY = 3 * 0.045
 // parked at y:110%, fully outside the mask's clip, where an
 // IntersectionObserver would report ratio 0 forever (same trap SplitLines
 // documents).
-function AccentRise({ children }) {
+function AccentRise({ delay = 0, children }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, amount: 0.6 })
   return (
@@ -107,7 +122,7 @@ function AccentRise({ children }) {
         className="inline-block"
         initial={{ y: '110%' }}
         animate={inView ? { y: 0 } : { y: '110%' }}
-        transition={{ duration: 0.65, ease: EASE, delay: ACCENT_DELAY }}
+        transition={{ duration: 0.65, ease: EASE, delay: delay + ACCENT_DELAY }}
       >
         {children}
       </motion.em>
@@ -115,11 +130,11 @@ function AccentRise({ children }) {
   )
 }
 
-function HeroHeadline() {
+function HeroHeadline({ delay = 0 }) {
   const reduce = useReducedMotion()
   return (
     <DisplayHeading as="h1" size="hero" className="max-w-3xl text-plaster">
-      <SplitLines>Изберете своя дом</SplitLines>
+      <SplitLines delay={delay}>Изберете своя дом</SplitLines>
       {/* SplitLines' animated path ends each word with a nbsp; its plain-text
           fallback does not, so the accent brings its own separator. */}
       {reduce ? (
@@ -128,7 +143,7 @@ function HeroHeadline() {
           <em>етаж по етаж</em>
         </>
       ) : (
-        <AccentRise>етаж по етаж</AccentRise>
+        <AccentRise delay={delay}>етаж по етаж</AccentRise>
       )}
       .
     </DisplayHeading>
@@ -137,6 +152,17 @@ function HeroHeadline() {
 
 function Hero({ available }) {
   const reduce = useReducedMotion()
+  // How much of the branded intro overlay is still to come, in seconds, read
+  // ONCE at mount (it is a countdown — see utils/introGate.js). On a repeat
+  // visit, under reduced motion, and on every client-side navigation back here
+  // it is 0 and nothing below changes.
+  //
+  // Only the TEXT layer waits. The slider underneath starts its crossfade and
+  // Ken Burns immediately: it sits behind the overlay, so by the time the
+  // curtain lifts it is already a moving image rather than a still frame. The
+  // headline is the opposite — it is the one gesture worth arriving for, and
+  // ungated it played out and settled entirely behind the panel.
+  const [introDelay] = useState(() => getIntroDelayMs() / 1000)
   return (
     <section className="relative h-[92vh] min-h-[560px] overflow-hidden bg-ink">
       {/* Captions go top-right: the overlay's bottom-left is the headline block. */}
@@ -144,7 +170,7 @@ function Hero({ available }) {
         <div className="absolute inset-x-0 bottom-0 pb-16 sm:pb-20">
           <motion.div
             className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-            variants={stagger(0.12)}
+            variants={stagger(0.12, introDelay)}
             initial="initial"
             animate="animate"
           >
@@ -153,8 +179,10 @@ function Hero({ available }) {
             </motion.div>
 
             {/* The split-line rise IS this block's reveal, so the headline is
-                the one child that skips the fadeUpChild variant. */}
-            <HeroHeadline />
+                the one child that skips the fadeUpChild variant — which also
+                means it does not inherit the container's delayChildren and has
+                to be handed the intro offset itself. */}
+            <HeroHeadline delay={introDelay} />
 
             <motion.p variants={fadeUpChild} className="text-plaster/80 max-w-xl mt-5">
               Реална наличност на всеки апартамент — обновява се на живо от нашия отдел продажби.
@@ -256,7 +284,9 @@ function Services() {
                   path (where Parallax is a plain, unclipped passthrough). */}
               <Parallax strength={30} className="rounded-2xl">
                 <img
-                  src={service.image}
+                  src={service.image.src}
+                  srcSet={service.image.srcSet}
+                  sizes={service.image.srcSet ? SERVICE_SIZES : undefined}
                   alt={service.title}
                   loading="lazy"
                   className="aspect-[4/3] rounded-2xl object-cover w-full"

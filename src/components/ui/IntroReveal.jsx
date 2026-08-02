@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import logo from '../../assets/images/logo.webp'
 import { EASE } from '../../utils/motion'
+import {
+  INTRO_LIFT_DELAY_MS,
+  INTRO_LIFT_DURATION_MS,
+  INTRO_DONE_DELAY_MS,
+  markIntroStart,
+  markIntroEnd,
+} from '../../utils/introGate'
 
 const FLAG = 'ksm-intro-seen'
 
@@ -12,9 +19,13 @@ const FLAG = 'ksm-intro-seen'
 //   1000  rule finishes drawing; a 0.2s hold lets the mark breathe
 //   1200  the whole overlay lifts away over 0.7s, revealing the site
 //   1900  session flag is set and the overlay unmounts
+//
+// The two lift numbers live in utils/introGate.js, which is also where the page
+// underneath reads its entrance cue from — one source of truth, so the hero's
+// handoff can't drift away from the lift it is timed against.
 const RULE_DELAY = 0.4
-const LIFT_DELAY_MS = 1200
-const DONE_DELAY_MS = 1900
+const LIFT_DELAY_MS = INTRO_LIFT_DELAY_MS
+const DONE_DELAY_MS = INTRO_DONE_DELAY_MS
 
 export default function IntroReveal() {
   const reduce = useReducedMotion()
@@ -27,6 +38,14 @@ export default function IntroReveal() {
   const hasFlag = typeof window !== 'undefined' && Boolean(sessionStorage.getItem(FLAG))
   const shouldPlay = !done && !hasFlag && !reduce
 
+  // Publish the countdown so the page mounting underneath (Home's hero) can
+  // hold its entrance until this overlay is on its way out, instead of playing
+  // the whole reveal behind an opaque panel. Deliberately in the render phase
+  // rather than in the effect below: a page rendering in the same commit as
+  // this one would otherwise read the gate before the effect had opened it.
+  // markIntroStart is idempotent, so the repeat calls cost nothing.
+  if (shouldPlay) markIntroStart()
+
   useEffect(() => {
     if (!shouldPlay) return undefined
 
@@ -36,6 +55,7 @@ export default function IntroReveal() {
     const liftTimer = setTimeout(() => setLifting(true), LIFT_DELAY_MS)
     const doneTimer = setTimeout(() => {
       sessionStorage.setItem(FLAG, 'true')
+      markIntroEnd()
       setDone(true)
     }, DONE_DELAY_MS)
 
@@ -55,7 +75,7 @@ export default function IntroReveal() {
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 bg-ink"
       initial={{ y: 0 }}
       animate={{ y: lifting ? '-100%' : 0 }}
-      transition={{ duration: 0.7, ease: EASE }}
+      transition={{ duration: INTRO_LIFT_DURATION_MS / 1000, ease: EASE }}
     >
       <motion.img
         data-intro-logo
