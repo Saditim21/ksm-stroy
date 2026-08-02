@@ -6,6 +6,7 @@ import Footer from './components/common/Footer'
 import SmoothScroll from './components/ui/SmoothScroll'
 import IntroReveal from './components/ui/IntroReveal'
 import { CURTAIN_COVER_MS } from './components/ui/PageTransition'
+import { getLenis } from './utils/lenis'
 import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
@@ -44,13 +45,26 @@ function AnimatedRoutes() {
   // to fully cover the viewport (imported from PageTransition itself so the
   // two values can't drift apart). Reduced motion skips the curtain
   // entirely, so there's nothing to wait for there — scroll immediately.
+  //
+  // The jump has to be addressed to Lenis, not to the window: while a fling
+  // is still gliding, Lenis' rAF loop rewrites `scrollTop` every frame and
+  // simply overwrites a bare `window.scrollTo(0, 0)` — clicking a nav link
+  // mid-fling landed /about at scrollY 2582 instead of 0. `immediate: true`
+  // cancels the in-flight animation rather than racing it. `window.scrollTo`
+  // stays as the fallback for every path where Lenis isn't running (reduced
+  // motion, tests, prerender).
   useEffect(() => {
+    const toTop = () => {
+      const lenis = getLenis()
+      if (lenis) lenis.scrollTo(0, { immediate: true })
+      else window.scrollTo(0, 0)
+    }
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       window.scrollTo(0, 0)
       return undefined
     }
-    const timer = setTimeout(() => window.scrollTo(0, 0), CURTAIN_COVER_MS)
+    const timer = setTimeout(toTop, CURTAIN_COVER_MS)
     return () => clearTimeout(timer)
   }, [location.pathname])
   

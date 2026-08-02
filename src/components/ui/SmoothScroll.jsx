@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import Lenis from 'lenis'
+import { setLenis, clearLenis } from '../../utils/lenis'
 
 // Lenis drives real scroll + rAF browser APIs that jsdom doesn't implement (no
 // native scroll physics, and an uninterrupted rAF loop would never settle in a
@@ -9,6 +10,10 @@ import Lenis from 'lenis'
 // touch Lenis, rather than relying on it happening to throw. The try/catch
 // around init is a second line of defense for any other non-browser/headless
 // context (e.g. a future SSR pass) this component hasn't been audited for.
+//
+// The instance is published to src/utils/lenis.js on init and retracted on
+// destroy, so code outside the React tree (App's route-change scroll) can
+// cancel an in-flight fling instead of being overwritten by it.
 export default function SmoothScroll({ children }) {
   const reduce = useReducedMotion()
 
@@ -19,6 +24,7 @@ export default function SmoothScroll({ children }) {
     let rafId
     try {
       lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 })
+      setLenis(lenis)
       const raf = (time) => {
         lenis.raf(time)
         rafId = requestAnimationFrame(raf)
@@ -31,6 +37,7 @@ export default function SmoothScroll({ children }) {
 
     return () => {
       if (rafId !== undefined) cancelAnimationFrame(rafId)
+      clearLenis(lenis)
       lenis.destroy()
     }
   }, [reduce])
