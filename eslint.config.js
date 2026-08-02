@@ -23,7 +23,18 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `^[A-Z_]` covers imported components and SCREAMING_CASE constants:
+      // core no-unused-vars has no idea JSX counts as a use (that lives in
+      // eslint-plugin-react's jsx-uses-vars, which this config does not load),
+      // so every `import Navbar from ...` would otherwise read as unused.
+      //
+      // `motion` is the one JSX identifier that is lowercase — it is always
+      // used as `<motion.div>`, a member expression the rule likewise cannot
+      // see — so it needs naming explicitly. Without it every framer-motion
+      // consumer in the repo reported a false "'motion' is defined but never
+      // used" (20 of them), which is exactly the kind of noise that trains
+      // people to stop reading lint output.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|motion$)' }],
     },
   },
   {

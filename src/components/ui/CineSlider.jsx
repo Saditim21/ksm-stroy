@@ -21,6 +21,12 @@ const CAPTION_POSITION_CLASS = {
 // resumes on the very next visible tick without drift). Reduced motion drops
 // autoplay and Ken Burns entirely — a static first slide plus small prev/next
 // buttons keep every slide reachable without relying on animation.
+//
+// Pointing at the slider pauses it (WCAG 2.2.2 "Pause, Stop, Hide": moving
+// content that starts automatically and runs for more than five seconds needs
+// a way to stop it). Here the interval is torn down rather than skipped, so
+// leaving restarts the countdown from zero and a visitor reading a caption
+// never gets the slide yanked out from under them a beat after they look away.
 export default function CineSlider({
   slides,
   interval = 6500,
@@ -31,17 +37,18 @@ export default function CineSlider({
 }) {
   const reduce = useReducedMotion()
   const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
   const n = slides.length
 
   useEffect(() => {
-    if (reduce || n <= 1) return undefined
+    if (reduce || paused || n <= 1) return undefined
     const id = setInterval(() => {
       // Nothing to see on a backgrounded tab; the next visible tick catches up.
       if (typeof document !== 'undefined' && document.hidden) return
       setIndex((i) => (i + 1) % n)
     }, interval)
     return () => clearInterval(id)
-  }, [reduce, interval, n])
+  }, [reduce, paused, interval, n])
 
   // Warm the browser's image cache for the slide that's coming up next — with
   // only the active slide mounted, waiting for it to become current before
@@ -66,7 +73,14 @@ export default function CineSlider({
   const loading = index === 0 ? 'eager' : 'lazy'
 
   return (
-    <div className={`relative h-full w-full overflow-hidden ${className}`.trim()}>
+    <div
+      className={`relative h-full w-full overflow-hidden ${className}`.trim()}
+      // Pointer events, not mouse events, so a stylus/touch hold pauses too.
+      // The handlers are unconditional: under reduced motion `paused` simply
+      // has nothing to pause.
+      onPointerEnter={() => setPaused(true)}
+      onPointerLeave={() => setPaused(false)}
+    >
       {reduce ? (
         <img
           src={slide.src}

@@ -208,4 +208,24 @@ describe('Marquee', () => {
     const { container } = render(<Marquee text="КСМ Строй" speed={40} />)
     expect(container.querySelector('.animate-marquee')).toBeInTheDocument()
   })
+
+  // `speed` is characters per second, so the loop duration is length / speed —
+  // longer copy takes proportionally longer and every strip reads at one pace.
+  test('speed is characters per second: doubling it halves the loop duration', () => {
+    const text = 'КСМ Строй' // 9 characters
+    const { container: slow } = render(<Marquee text={text} speed={2} />)
+    const { container: fast } = render(<Marquee text={text} speed={4} />)
+    expect(slow.querySelector('.animate-marquee').style.animationDuration).toBe('4.5s')
+    expect(fast.querySelector('.animate-marquee').style.animationDuration).toBe('2.25s')
+  })
+
+  // Regression: the default used to be 40 chars/s, which loops Home's
+  // 60-character, ~2900px strip in 1.5 seconds — a strobe, not a marquee.
+  // Every caller had to know to override it; now the default is the pace the
+  // design actually wants.
+  test('defaults to a legible 2 characters per second, not the old strobe', () => {
+    const text = 'КСМ Строй'
+    const { container } = render(<Marquee text={text} />)
+    expect(container.querySelector('.animate-marquee').style.animationDuration).toBe('4.5s')
+  })
 })

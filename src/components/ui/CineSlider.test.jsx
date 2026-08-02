@@ -80,6 +80,56 @@ test('autoplay pauses while the tab is hidden and resumes once visible again', (
   hiddenSpy.mockRestore()
 })
 
+// WCAG 2.2.2 (Pause, Stop, Hide): moving content that starts automatically and
+// runs longer than five seconds needs a way to stop it. Pointing at the slider
+// is that way — cheap, discoverable, and it also stops the frame changing under
+// a visitor who is reading a caption.
+//
+// React synthesises onPointerEnter/onPointerLeave from pointerover/pointerout
+// (EnterLeaveEventPlugin), so those are the events the test has to dispatch —
+// a raw `pointerenter` never reaches the handler.
+test('autoplay pauses while the pointer is over the slider and resumes on leave', () => {
+  vi.useFakeTimers()
+  const { container } = render(<CineSlider slides={SLIDES} interval={1000} />)
+  const root = container.firstChild
+
+  fireEvent.pointerOver(root)
+  act(() => {
+    vi.advanceTimersByTime(3000)
+  })
+  // Three intervals' worth of time with the pointer down on it: still slide 1.
+  expect(screen.getByAltText('Слайд едно')).toBeInTheDocument()
+
+  fireEvent.pointerOut(root)
+  act(() => {
+    vi.advanceTimersByTime(1000)
+  })
+  expect(screen.getByAltText('Слайд две')).toBeInTheDocument()
+})
+
+// Tearing the interval down (rather than skipping ticks) means leaving restarts
+// the countdown, so the slide never jumps a beat after the pointer moves away.
+test('leaving restarts the full interval rather than firing a pending tick', () => {
+  vi.useFakeTimers()
+  const { container } = render(<CineSlider slides={SLIDES} interval={1000} />)
+  const root = container.firstChild
+
+  act(() => {
+    vi.advanceTimersByTime(900) // 100ms short of the first advance
+  })
+  fireEvent.pointerOver(root)
+  fireEvent.pointerOut(root)
+  act(() => {
+    vi.advanceTimersByTime(900) // would have been 1800ms of uninterrupted time
+  })
+  expect(screen.getByAltText('Слайд едно')).toBeInTheDocument()
+
+  act(() => {
+    vi.advanceTimersByTime(100)
+  })
+  expect(screen.getByAltText('Слайд две')).toBeInTheDocument()
+})
+
 test('the gold progress line remounts (new DOM node) on every slide change, keyed by index', () => {
   vi.useFakeTimers()
   const { container } = render(<CineSlider slides={SLIDES} interval={1000} />)

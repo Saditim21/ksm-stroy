@@ -8,7 +8,14 @@ const TEXT_CLASS =
 // inner flex row is translated from 0 to -50% (exactly one copy's width), so
 // the loop restarts seamlessly. The second copy is aria-hidden — it exists
 // only to fill the visual loop, not to be announced twice.
-export default function Marquee({ text, speed = 40, className = '' }) {
+//
+// `speed` is in CHARACTERS PER SECOND — the loop duration is the copy's length
+// divided by it, so longer copy takes proportionally longer and every strip on
+// the site reads at the same pace regardless of what it says. The default is
+// deliberately slow: at 40 chars/s a typical 60-character strip loops its whole
+// ~2900px width in 1.5 seconds, which is a strobe, not a marquee. 2 gives
+// roughly 90px/s — legible, and calm enough to sit behind other content.
+export default function Marquee({ text, speed = 2, className = '' }) {
   const reduce = useReducedMotion()
   const duration = text.length / speed
 
