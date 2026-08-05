@@ -15,6 +15,7 @@
 
 const ODOO_URL = (process.env.ODOO_URL || 'https://edu-ksmstroy.odoo.com').replace(/\/+$/, '')
 const ODOO_TIMEOUT_MS = 8000
+const HEALTH_TIMEOUT_MS = 5000
 
 // Екип продажби в Odoo. Подаването на team_id е важно: website_crm решава
 // дали записът е Lead или Opportunity според отметката "use_leads" на екипа.
@@ -33,10 +34,14 @@ const LIMITS = {
 
 const EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
 
+// no-store е важно за health check-а: кеширан 200 би скрил реален проблем.
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0'
+    }
   })
 
 const clean = (value, max) =>
@@ -131,12 +136,64 @@ async function createOdooLead(payload) {
   }
 }
 
+/**
+ * Проверява дали Odoo е достъпен, БЕЗ да създава запис.
+ * Ползва common.version - публичен метод, който не иска автентикация.
+ */
+async function checkOdoo() {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS)
+
+  try {
+    const response = await fetch(`${ODOO_URL}/jsonrpc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'call',
+        params: { service: 'common', method: 'version', args: [] },
+        id: 1
+      }),
+      signal: controller.signal
+    })
+
+    if (!response.ok) {
+      return { reachable: false, error: `HTTP ${response.status}` }
+    }
+
+    const data = await response.json()
+    const version = data?.result?.server_version
+
+    if (!version) {
+      return { reachable: false, error: 'Неочакван отговор от Odoo' }
+    }
+
+    return { reachable: true, version, teamId: ODOO_TEAM_ID }
+  } catch (error) {
+    return {
+      reachable: false,
+      error: error?.name === 'AbortError'
+        ? `timeout след ${HEALTH_TIMEOUT_MS}ms`
+        : (error?.message || 'fetch failed')
+    }
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 export default {
   async fetch(request) {
-    // GET е health check - позволява да се провери че endpoint-ът е
-    // деплойнат и рутван правилно, без да създава Lead в Odoo.
+    // GET е health check. Проверява реално дали Odoo отговаря, без да
+    // създава Lead. Връща 503 при проблем, за да може външен монитор
+    // (UptimeRobot и подобни) да засече, че връзката с CRM-а е паднала.
+    // Без това повредата остава невидима - формата нарочно не показва
+    // грешка на посетителя.
     if (request.method === 'GET') {
-      return json({ ok: true, service: 'odoo-lead', crmConfigured: Boolean(ODOO_URL) })
+      const crm = await checkOdoo()
+      if (!crm.reachable) {
+        console.error('[odoo-lead] health check: Odoo не отговаря:', crm.error)
+      }
+      return json({ ok: crm.reachable, service: 'odoo-lead', crm }, crm.reachable ? 200 : 503)
     }
 
     if (request.method !== 'POST') {
