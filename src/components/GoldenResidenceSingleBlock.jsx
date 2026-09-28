@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
 import { useApartments } from '../context/ApartmentContext';
+import { normalizeStatus } from '../utils/propertyStatus';
 
 // Gallery Images
 import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.webp';
@@ -30,24 +31,6 @@ import archB7 from '../assets/продажби/project 2/architectures-b/archite
 import archB8 from '../assets/продажби/project 2/architectures-b/architecture-b-floor-8.webp';
 import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.webp';
 import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.webp';
-
-// Helper function to normalize status values from Google Sheets
-const normalizeStatus = (status) => {
-  if (!status) return 'Свободен';
-  const trimmed = status.trim().toLowerCase();
-
-  if (trimmed.includes('продаден') || trimmed.includes('sold')) {
-    return 'Продадени';
-  }
-  if (trimmed.includes('резервиран') || trimmed.includes('reserved')) {
-    return 'Резервиран';
-  }
-  if (trimmed.includes('свободен') || trimmed.includes('available') || trimmed.includes('free')) {
-    return 'Свободен';
-  }
-  // Default to the original value if no match
-  return status.trim();
-};
 
 const GoldenResidenceSingleBlock = () => {
   const { block } = useParams();
@@ -683,6 +666,7 @@ const GoldenResidenceSingleBlock = () => {
       case 'Свободен': return 'text-green-500';
       case 'Продадени': return 'text-red-500';
       case 'Резервиран': return 'text-yellow-500';
+      case 'Блокиран': return 'text-gray-500';
       default: return 'text-gray-500';
     }
   };
@@ -692,6 +676,7 @@ const GoldenResidenceSingleBlock = () => {
       case 'Свободен': return 'bg-green-500';
       case 'Продадени': return 'bg-red-500';
       case 'Резервиран': return 'bg-yellow-500';
+      case 'Блокиран': return 'bg-gray-400';
       default: return 'bg-gray-500';
     }
   };
@@ -927,6 +912,10 @@ const GoldenResidenceSingleBlock = () => {
                     <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
                     <span>Продаден</span>
                   </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                    <span>Блокиран</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -973,6 +962,7 @@ const GoldenResidenceSingleBlock = () => {
                         const available = floorData.filter(a => a.status === 'Свободен').length;
                         const sold = floorData.filter(a => a.status === 'Продадени').length;
                         const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+                        const blocked = floorData.filter(a => a.status === 'Блокиран').length;
 
                         return (
                           <>
@@ -993,6 +983,10 @@ const GoldenResidenceSingleBlock = () => {
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                                   <span className="text-xs text-gray-600">{reserved}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">{blocked}</span>
                                 </div>
                               </div>
                             </div>
@@ -1019,10 +1013,12 @@ const GoldenResidenceSingleBlock = () => {
                                     const statusColor =
                                       garage.status === 'Свободен' ? 'bg-green-50 border-green-300 hover:border-green-500' :
                                       garage.status === 'Продадени' ? 'bg-red-50 border-red-300 opacity-75' :
+                                      garage.status === 'Блокиран' ? 'bg-gray-100 border-gray-300 opacity-75' :
                                       'bg-yellow-50 border-yellow-300 hover:border-yellow-500';
                                     const statusDot =
                                       garage.status === 'Свободен' ? 'bg-green-500' :
                                       garage.status === 'Продадени' ? 'bg-red-500' :
+                                      garage.status === 'Блокиран' ? 'bg-gray-400' :
                                       'bg-yellow-500';
 
                                     return (
@@ -1060,7 +1056,7 @@ const GoldenResidenceSingleBlock = () => {
                             </div>
 
                             {/* Summary Stats */}
-                            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                               <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
                                 <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
                                 <div className="text-xs text-green-600">Свободни</div>
@@ -1073,6 +1069,10 @@ const GoldenResidenceSingleBlock = () => {
                                 <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
                                 <div className="text-xs text-yellow-600">Резервирани</div>
                               </div>
+                              <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-gray-700">{blocked}</div>
+                                <div className="text-xs text-gray-500">Блокирани</div>
+                              </div>
                             </div>
                           </>
                         );
@@ -1081,6 +1081,7 @@ const GoldenResidenceSingleBlock = () => {
                         const available = floorData.filter(a => a.status === 'Свободен').length;
                         const sold = floorData.filter(a => a.status === 'Продадени').length;
                         const reserved = floorData.filter(a => a.status === 'Резервиран').length;
+                        const blocked = floorData.filter(a => a.status === 'Блокиран').length;
 
                         return (
                           <>
@@ -1154,6 +1155,7 @@ const GoldenResidenceSingleBlock = () => {
                                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
                                             apt.status === 'Свободен' ? 'bg-green-100 text-green-700' :
                                             apt.status === 'Продадени' ? 'bg-red-100 text-red-700' :
+                                            apt.status === 'Блокиран' ? 'bg-gray-100 text-gray-700' :
                                             apt.status === 'Скоро' ? 'bg-gold-100 text-gold-700' :
                                             'bg-yellow-100 text-yellow-700'
                                           }`}>
@@ -1168,7 +1170,7 @@ const GoldenResidenceSingleBlock = () => {
                             </div>
 
                             {/* Summary Stats */}
-                            <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                               <div className="bg-green-100 border border-green-300 rounded-lg p-2 sm:p-3 text-center">
                                 <div className="text-lg sm:text-xl font-bold text-green-800">{available}</div>
                                 <div className="text-xs text-green-600">Свободни</div>
@@ -1180,6 +1182,10 @@ const GoldenResidenceSingleBlock = () => {
                               <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-2 sm:p-3 text-center">
                                 <div className="text-lg sm:text-xl font-bold text-yellow-800">{reserved}</div>
                                 <div className="text-xs text-yellow-600">Резервирани</div>
+                              </div>
+                              <div className="bg-gray-100 border border-gray-300 rounded-lg p-2 sm:p-3 text-center">
+                                <div className="text-lg sm:text-xl font-bold text-gray-700">{blocked}</div>
+                                <div className="text-xs text-gray-500">Блокирани</div>
                               </div>
                             </div>
                           </>

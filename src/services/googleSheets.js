@@ -8,7 +8,13 @@
  * 3. Select the sheet tab and choose "Comma-separated values (.csv)"
  * 4. Click Publish and copy the URL
  * 5. Paste the URL in the SHEET_URL constant below
+ *
+ * The "Статус" column accepts four values (case and plural forms are tolerated):
+ *   Свободен · Резервиран · Продаден · Блокиран
+ * See src/utils/propertyStatus.js for how they are normalized and counted.
  */
+
+import { normalizeStatus, summarizeStatuses } from '../utils/propertyStatus';
 
 // Replace this with your published Google Sheet CSV URL
 // Format: https://docs.google.com/spreadsheets/d/e/SPREADSHEET_ID/pub?gid=SHEET_ID&single=true&output=csv
@@ -102,7 +108,7 @@ function transformToApartmentData(rawData) {
       вид: row['Вид'] || row['Type'] || '',
       total: row['Обща'] || row['Total'] || '',
       изложение: row['Изложение'] || row['Exposure'] || '',
-      status: row['Статус'] || row['Status'] || 'Свободен',
+      status: normalizeStatus(row['Статус'] || row['Status']),
     });
   });
 
@@ -174,27 +180,10 @@ export async function fetchApartmentData(block = 'blockA') {
  * Calculate apartment statistics from floor data
  */
 export function calculateStats(floorData) {
-  let total = 0;
-  let available = 0;
-  let reserved = 0;
-  let sold = 0;
-
-  Object.values(floorData).forEach(apartments => {
-    apartments.forEach(apt => {
-      total++;
-      const status = (apt.status || '').toLowerCase();
-
-      if (status.includes('свободен') || status.includes('available')) {
-        available++;
-      } else if (status.includes('резервиран') || status.includes('reserved')) {
-        reserved++;
-      } else if (status.includes('продаден') || status.includes('sold')) {
-        sold++;
-      }
-    });
-  });
-
-  return { total, available, reserved, sold };
+  const statuses = Object.values(floorData).flatMap(apartments =>
+    apartments.map(apt => apt.status)
+  );
+  return summarizeStatuses(statuses);
 }
 
 /**
@@ -207,7 +196,7 @@ function transformToGarageData(rawData) {
     ideal: row['Идеални'] || row['Ideal'] || '',
     total: row['Обща'] || row['Total'] || '',
     type: row['Тип'] || row['Type'] || 'Гараж',
-    status: row['Статус'] || row['Status'] || 'Свободен',
+    status: normalizeStatus(row['Статус'] || row['Status']),
   }));
 }
 
@@ -272,25 +261,7 @@ export async function fetchGarageData(type = 'garages') {
  * Calculate garage/parking statistics from flat list
  */
 export function calculateGarageStats(garageData) {
-  let total = 0;
-  let available = 0;
-  let reserved = 0;
-  let sold = 0;
-
-  garageData.forEach(item => {
-    total++;
-    const status = (item.status || '').toLowerCase();
-
-    if (status.includes('свободен') || status.includes('available')) {
-      available++;
-    } else if (status.includes('резервиран') || status.includes('reserved')) {
-      reserved++;
-    } else if (status.includes('продаден') || status.includes('sold')) {
-      sold++;
-    }
-  });
-
-  return { total, available, reserved, sold };
+  return summarizeStatuses(garageData.map(item => item.status));
 }
 
 /**

@@ -111,7 +111,7 @@ type PropertyData = {
   zastroyena: string;  // Built area
   obshta: string;      // Total area  
   izlozhenie: string;  // Exposure direction
-  status: string;      // Status (Свободен, Резервиран, Продаден)
+  status: string;      // Status (Свободен, Резервиран, Продаден, Блокиран)
 };
 ```
 

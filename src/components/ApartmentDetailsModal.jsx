@@ -75,6 +75,8 @@ const ApartmentDetailsModal = ({ isOpen, onClose, apartmentData, apartmentImage 
                         ? 'bg-green-100 text-green-800' 
                         : apartmentData.status === 'Резервиран'
                         ? 'bg-yellow-100 text-yellow-800'
+                        : apartmentData.status === 'Блокиран'
+                        ? 'bg-gray-100 text-gray-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {apartmentData.status}

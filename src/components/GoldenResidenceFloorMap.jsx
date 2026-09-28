@@ -591,6 +591,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                         <span className={`px-3 py-1 text-sm rounded-full font-normal ${
                           apt.status === 'Продадени' ? 'bg-red-100 text-red-700' :
                           apt.status === 'Резервиран' ? 'bg-yellow-100 text-yellow-700' :
+                          apt.status === 'Блокиран' ? 'bg-gray-100 text-gray-700' :
                           'bg-green-100 text-green-700'
                         }`}>
                           {apt.status === 'Продадени' ? 'Продаден' : apt.status}
@@ -604,7 +605,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
             
             {/* Apartment Statistics */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-green-50 rounded-lg p-4 text-center border border-green-200">
                   <div className="text-3xl font-bold text-green-600 leading-none mb-2">
                     {selectedFloor.data.filter(apt => apt.status === 'Свободен').length}
@@ -632,6 +633,16 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
                   <div className="text-sm font-medium text-yellow-700">Резервирани</div>
                   <div className="w-full h-1 bg-yellow-200 rounded-full mt-2">
                     <div className="h-full bg-yellow-500 rounded-full" style={{width: selectedFloor.data.filter(apt => apt.status === 'Резервиран').length > 0 ? '100%' : '0%'}}></div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-200">
+                  <div className="text-3xl font-bold text-gray-600 leading-none mb-2">
+                    {selectedFloor.data.filter(apt => apt.status === 'Блокиран').length}
+                  </div>
+                  <div className="text-sm font-medium text-gray-700">Блокирани</div>
+                  <div className="w-full h-1 bg-gray-200 rounded-full mt-2">
+                    <div className="h-full bg-gray-400 rounded-full" style={{width: selectedFloor.data.filter(apt => apt.status === 'Блокиран').length > 0 ? '100%' : '0%'}}></div>
                   </div>
                 </div>
               </div>

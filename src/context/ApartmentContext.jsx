@@ -258,8 +258,8 @@ export function ApartmentProvider({ children }) {
   // Calculate combined stats for Golden Residence
   const getGoldenResidenceStats = () => {
     const defaultStats = {
-      apartments: { total: 192, available: 127, reserved: 6, sold: 59 },
-      garages: { total: 224, available: 172, reserved: 2, sold: 50 },
+      apartments: { total: 192, available: 127, reserved: 6, sold: 59, blocked: 0 },
+      garages: { total: 224, available: 172, reserved: 2, sold: 50, blocked: 0 },
     };
 
     if (!blockAData || !blockBData) {
@@ -279,6 +279,7 @@ export function ApartmentProvider({ children }) {
         available: gStats.available + pStats.available,
         reserved: gStats.reserved + pStats.reserved,
         sold: gStats.sold + pStats.sold,
+        blocked: gStats.blocked + pStats.blocked,
       };
     } else if (garagesData) {
       garageStats = calculateGarageStats(garagesData);
@@ -292,6 +293,7 @@ export function ApartmentProvider({ children }) {
         available: blockAStats.available + blockBStats.available,
         reserved: blockAStats.reserved + blockBStats.reserved,
         sold: blockAStats.sold + blockBStats.sold,
+        blocked: blockAStats.blocked + blockBStats.blocked,
       },
       garages: garageStats,
     };
