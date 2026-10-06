@@ -13,7 +13,7 @@
  * документира за проекти без Next.js.
  */
 
-const ODOO_URL = (process.env.ODOO_URL || 'https://edu-ksmstroy.odoo.com').replace(/\/+$/, '')
+const ODOO_URL = (process.env.ODOO_URL || 'https://ksmstroy.odoo.com').replace(/\/+$/, '')
 const ODOO_TIMEOUT_MS = 8000
 const HEALTH_TIMEOUT_MS = 5000
 
