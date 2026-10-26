@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
+import EuStrip from './components/common/EuStrip'
 import { ApartmentProvider } from './context/ApartmentContext'
 
 // Lazy load page components for better performance
@@ -16,6 +17,7 @@ const MnogofamilnaBlockSelection = lazy(() => import('./components/MnogofamilnaB
 const MnogofamilnaSingleBlock = lazy(() => import('./components/MnogofamilnaSingleBlock'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Blog = lazy(() => import('./pages/Blog'))
+const EuProekt = lazy(() => import('./pages/EuProekt'))
 
 // Loading component
 const PageLoader = () => (
@@ -49,6 +51,7 @@ function AnimatedRoutes() {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/eu-proekt" element={<EuProekt />} />
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -60,6 +63,7 @@ function App() {
     <ApartmentProvider>
       <Router>
         <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
+          <EuStrip />
           <Navbar />
           <main className="flex-1 overscroll-none">
             <AnimatedRoutes />
