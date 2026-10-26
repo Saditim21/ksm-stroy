@@ -13,6 +13,11 @@ const EuStrip = () => (
         alt="Съфинансирано от Европейския съюз"
         className="h-8 sm:h-10 w-auto flex-shrink-0"
       />
+      <img
+        src="/eu/pkip.png"
+        alt="Програма „Конкурентоспособност и иновации в предприятията“"
+        className="h-7 sm:h-9 w-auto flex-shrink-0"
+      />
       <span className="text-xs sm:text-sm text-gray-800 leading-snug">
         Проект „Дигитализация на предприятията“, № BG16RFPR001-1.012-1485-C01, по Програма
         „Конкурентоспособност и иновации в предприятията“ 2021-2027.{' '}
