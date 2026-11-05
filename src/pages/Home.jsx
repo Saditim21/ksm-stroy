@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import HeroCarousel from '../components/ui/HeroCarousel'
 import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
+import EuPosterSection from '../components/EuPosterSection'
 import { seoData, generateStructuredData } from '../utils/seo'
 import img001 from '../assets/home/optimized/001.webp'
 import img003 from '../assets/images/003.webp'
@@ -171,6 +172,9 @@ const Home = () => {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* EU co-funding poster (project BG16RFPR001-1.012-1485-C01) */}
+      <EuPosterSection />
     </motion.main>
     </>)
 }
