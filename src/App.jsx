@@ -15,6 +15,10 @@ const MnogofamilnaBlockSelection = lazy(() => import('./components/MnogofamilnaB
 const MnogofamilnaSingleBlock = lazy(() => import('./components/MnogofamilnaSingleBlock'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Blog = lazy(() => import('./pages/Blog'))
+// Dev-only polygon tracer for the explorer maps (src/data/maps). Vite replaces
+// import.meta.env.DEV with false in a production build, so the route and its
+// chunk are dropped from dist entirely.
+const TracerPage = import.meta.env.DEV ? lazy(() => import('./pages/dev/TracerPage')) : null
 
 // Loading component
 const PageLoader = () => (
@@ -38,6 +42,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Suspense fallback={<PageLoader />}>
         <Routes location={location} key={location.pathname}>
+          {TracerPage && <Route path="/dev/tracer" element={<TracerPage />} />}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />

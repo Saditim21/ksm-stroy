@@ -7,7 +7,11 @@ import { vi } from 'vitest'
 // Tests never read the developer's .env: blank the sheet URLs so no suite
 // reaches Google Sheets and ApartmentContext falls back to the built-in data.
 // Suites that need a URL stub their own.
-for (const name of ['VITE_GOOGLE_SHEET_BLOCK_A', 'VITE_GOOGLE_SHEET_BLOCK_B', 'VITE_GOOGLE_SHEET_GARAGES', 'VITE_GOOGLE_SHEET_PARKING']) {
+for (const name of [
+  'VITE_GOOGLE_SHEET_BLOCK_A', 'VITE_GOOGLE_SHEET_BLOCK_B',
+  'VITE_GOOGLE_SHEET_GARAGES', 'VITE_GOOGLE_SHEET_PARKING',
+  'VITE_GOOGLE_SHEET_MNOGO_A', 'VITE_GOOGLE_SHEET_MNOGO_B',
+]) {
   vi.stubEnv(name, '')
 }
 

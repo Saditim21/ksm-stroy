@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Map previews from scripts/render-floor-overlay.mjs (regenerable, not source)
+scripts/.preview/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

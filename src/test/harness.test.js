@@ -13,6 +13,8 @@ describe('test environment', () => {
     expect(import.meta.env.VITE_GOOGLE_SHEET_BLOCK_B).toBe('')
     expect(import.meta.env.VITE_GOOGLE_SHEET_GARAGES).toBe('')
     expect(import.meta.env.VITE_GOOGLE_SHEET_PARKING).toBe('')
+    expect(import.meta.env.VITE_GOOGLE_SHEET_MNOGO_A).toBe('')
+    expect(import.meta.env.VITE_GOOGLE_SHEET_MNOGO_B).toBe('')
   })
 
   it('fills the jsdom gaps real browsers never have', () => {

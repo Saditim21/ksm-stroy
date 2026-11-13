@@ -5,7 +5,9 @@
 //    built the Golden Residence landing (golden-residence @944bb03): its name,
 //    its domain or its phone number. Parts of that site are ported into this
 //    one, and none of its branding may reach ksmstroy.com.
-// 2. Prints the total gzip size of the JavaScript in dist/assets, for
+// 2. Fails when dev-only code reaches dist/: the /dev/tracer polygon tracer is
+//    routed only under the dev server (import.meta.env.DEV in src/App.jsx).
+// 3. Prints the total gzip size of the JavaScript in dist/assets, for
 //    information only.
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
@@ -21,6 +23,13 @@ const DIST = join(ROOT, 'dist')
 const FORBIDDEN = [
   { label: 'dianahomes', pattern: /diana[\s._-]?homes/i },
   { label: '893 951 010', pattern: /893[\s.\- ]?951[\s.\- ]?010/ },
+]
+
+// The tracer's route path, its lazy chunk's file name and its
+// "Export → clipboard" button (the arrow is three bytes read as latin1).
+const DEV_ONLY = [
+  { label: '/dev/tracer', pattern: /\/dev\/tracer/ },
+  { label: 'TracerPage', pattern: /TracerPage|Export .{1,4}clipboard/ },
 ]
 
 function filesUnder(dir) {
@@ -43,17 +52,23 @@ try {
   process.exit(1)
 }
 
+function scan(patterns, name, content, found) {
+  for (const { label, pattern } of patterns) {
+    if (pattern.test(name)) found.push(`${name}: file name matches "${label}"`)
+    const match = content.match(pattern)
+    if (match) found.push(`${name}: contains "${match[0]}" (${label})`)
+  }
+}
+
 const leaks = []
+const devCode = []
 for (const file of files) {
   const name = relative(DIST, file).split(sep).join('/')
   // latin1 maps every byte to one character, so text needles are found in
   // any file, text or binary, whatever its encoding around them.
   const content = readFileSync(file).toString('latin1')
-  for (const { label, pattern } of FORBIDDEN) {
-    if (pattern.test(name)) leaks.push(`${name}: file name matches "${label}"`)
-    const match = content.match(pattern)
-    if (match) leaks.push(`${name}: contains "${match[0]}" (${label})`)
-  }
+  scan(FORBIDDEN, name, content, leaks)
+  scan(DEV_ONLY, name, content, devCode)
 }
 
 // dist/assets/*.js: the bundles directly in dist/assets.
@@ -70,7 +85,11 @@ console.log(`check:dist: dist/assets/*.js: ${scripts.length} files, ${formatKiB(
 if (leaks.length > 0) {
   console.error('check:dist: FAILED, agency branding found in the build:')
   for (const leak of leaks) console.error(`  ${leak}`)
-  process.exit(1)
 }
+if (devCode.length > 0) {
+  console.error('check:dist: FAILED, dev-only code found in the build:')
+  for (const hit of devCode) console.error(`  ${hit}`)
+}
+if (leaks.length > 0 || devCode.length > 0) process.exit(1)
 
-console.log('check:dist: OK, no agency branding in dist/')
+console.log('check:dist: OK, no agency branding and no dev-only code in dist/')
