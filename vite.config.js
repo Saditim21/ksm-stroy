@@ -17,8 +17,7 @@ export default defineConfig({
       'framer-motion',
       '@emailjs/browser',
       'react-hook-form'
-    ],
-    exclude: ['@react-three/fiber', '@react-three/drei', 'three']
+    ]
   },
   build: {
     target: 'es2020',
@@ -31,7 +30,6 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'framer': ['framer-motion'],
           'swiper': ['swiper'],
-          // Three.js is already lazy loaded via ProjectDetail
         }
       }
     }

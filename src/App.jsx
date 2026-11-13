@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, lazy, Suspense } from 'react'
 import Navbar from './components/common/Navbar'
@@ -9,7 +9,6 @@ import { ApartmentProvider } from './context/ApartmentContext'
 const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))
 const Projects = lazy(() => import('./pages/Projects'))
-const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const GoldenResidenceBlockSelection = lazy(() => import('./components/GoldenResidenceBlockSelection'))
 const GoldenResidenceSingleBlock = lazy(() => import('./components/GoldenResidenceSingleBlock'))
 const MnogofamilnaBlockSelection = lazy(() => import('./components/MnogofamilnaBlockSelection'))
@@ -46,7 +45,11 @@ function AnimatedRoutes() {
           <Route path="/projects/golden-residence/:block" element={<GoldenResidenceSingleBlock />} />
           <Route path="/projects/mnogofamilna-sgrada" element={<MnogofamilnaBlockSelection />} />
           <Route path="/projects/mnogofamilna-sgrada/:block" element={<MnogofamilnaSingleBlock />} />
-          <Route path="/projects/:id" element={<ProjectDetail />} />
+          {/* /projects/1 to /projects/12 were placeholder projects that never
+              existed. Their old URLs must not 404, so they land on /projects.
+              React Router ranks static segments above params, so the
+              golden-residence / mnogofamilna-sgrada routes above still win. */}
+          <Route path="/projects/:id" element={<Navigate to="/projects" replace />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
         </Routes>

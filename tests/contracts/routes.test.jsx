@@ -5,8 +5,9 @@ import { goOffline, pageText, renderSiteAt } from './site'
 // Production contract (main @151c060): every URL the site serves today keeps
 // rendering its page, under the same address.
 //
-// /projects/:id (the old numbered project pages) is left out on purpose: the
-// redesign turns it into a redirect to /projects.
+// The one exception is /projects/:id. On main, /projects/1 to /projects/12
+// show placeholder projects that KSM Stroy never built; the redesign removes
+// them and sends their URLs to /projects instead.
 
 // "Блок А" / "БЛОК A" (Cyrillic or Latin letter), but not the word "блока".
 const BLOCK_A = /блок\s+[аa](?![а-яёa-z])/i
@@ -49,4 +50,18 @@ it('/contact renders the inquiry form', async () => {
   expect(await screen.findByRole('textbox', { name: /съобщение/i }, { timeout: 15000 })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /изпрати/i })).toBeInTheDocument()
   expect(window.location.pathname).toBe('/contact')
+}, 30000)
+
+// The redirect replaces the history entry, so Back does not land on the old
+// URL and bounce straight back to /projects.
+it.each(['/projects/1', '/projects/12'])('%s redirects to /projects', async (path) => {
+  const entries = window.history.length
+  renderSiteAt(path)
+
+  await waitFor(() => {
+    expect(window.location.pathname).toBe('/projects')
+    expect(pageText()).toMatch(/Golden Residence/i)
+    expect(pageText()).toMatch(/Многофамилна/i)
+  }, { timeout: 15000 })
+  expect(window.history.length).toBe(entries)
 }, 30000)
