@@ -1,9 +1,11 @@
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, waitFor, act } from '@testing-library/react'
 import { vi } from 'vitest'
 
-vi.mock('../services/googleSheets', () => ({
-  fetchApartmentData: vi.fn(async (key) =>
-    key === 'mnogoA' ? { 3: [{ apartment: 'А-201', status: 'Свободен' }] } : null),
+// The fetchers are mocked; everything else, normalizeFloorData included, is
+// the real service.
+vi.mock('../services/googleSheets', async (importOriginal) => ({
+  ...(await importOriginal()),
+  fetchApartmentData: vi.fn(),
   fetchGarageData: vi.fn(async () => null),
   calculateStats: vi.fn(() => ({ total: 1, available: 1, reserved: 0, sold: 0 })),
   calculateGarageStats: vi.fn(() => ({ total: 0, available: 0, reserved: 0, sold: 0 })),
@@ -12,62 +14,119 @@ vi.mock('../services/googleSheets', () => ({
 
 import { ApartmentProvider, useApartments } from './ApartmentContext'
 import { fetchApartmentData, clearCache } from '../services/googleSheets'
-import { getMnogoBFallbackData } from '../constants/mnogofamilnaFallbackData'
 
-function Probe() {
-  const { loading, getProjectFloorData } = useApartments()
-  if (loading) return <div>loading</div>
-  const a = getProjectFloorData('mnogofamilna-sgrada', 'block-a')
-  const b = getProjectFloorData('mnogofamilna-sgrada', 'block-b')
-  return (
-    <div>
-      <div data-testid="a-first">{a[3]?.[0]?.apartment}</div>
-      <div data-testid="b-floors">{Object.keys(b).length}</div>
-    </div>
-  )
+const MNOGO_A = { 3: [{ apartment: 'А-201', status: 'Свободен' }] }
+const BLOCK_A = { 3: [{ apartment: 'А 301', status: 'Блокиран' }, { apartment: 'А 302', status: 'Свободен' }] }
+
+// What each sheet answers; a sheet left out answers null (unconfigured, or
+// failed once the service's cache is cleared).
+const sheets = (answers) => async (key) => answers[key] ?? null
+
+let apartments
+function Capture() {
+  apartments = useApartments()
+  return null
 }
 
-test('background refresh picks up sheet changes after 60s without flipping loading', async () => {
-  const loadingSeen = []
-  function LoadingProbe() {
-    const { loading, getProjectFloorData } = useApartments()
-    loadingSeen.push(loading)
-    const a = getProjectFloorData('mnogofamilna-sgrada', 'block-a')
-    return <div data-testid="a-first">{a[3]?.[0]?.apartment ?? ''}</div>
-  }
+// Renders the provider on a fake clock, so any timer it sets is one a test
+// moves on, and lets the first load settle. The clock also runs on with real
+// time, as the Многофамилна fallback is a dynamic import it cannot hurry.
+async function renderLoaded(children = null) {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  render(<ApartmentProvider><Capture />{children}</ApartmentProvider>)
+  await waitFor(() => expect(apartments.loading).toBe(false))
+}
 
-  vi.useFakeTimers()
-  try {
-    render(<ApartmentProvider><LoadingProbe /></ApartmentProvider>)
-    // Let the initial load settle
-    await act(async () => { await vi.advanceTimersByTimeAsync(0) })
-    expect(screen.getByTestId('a-first')).toHaveTextContent('А-201')
+// The tab's visibility as the browser reports it, and the event it fires.
+function setVisibility(state) {
+  Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state })
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => state !== 'visible' })
+  document.dispatchEvent(new Event('visibilitychange'))
+}
 
-    // The sheet changes; nobody reloads the page
-    const rendersBefore = loadingSeen.length
-    clearCache.mockClear()
-    fetchApartmentData.mockImplementation(async (key) =>
-      key === 'mnogoA' ? { 3: [{ apartment: 'А-999', status: 'Свободен' }] } : null)
+// The visitor leaves the tab for `ms`, then comes back.
+async function awayFor(ms) {
+  await act(async () => {
+    setVisibility('hidden')
+    await vi.advanceTimersByTimeAsync(ms)
+    setVisibility('visible')
+    await vi.advanceTimersByTimeAsync(0)
+  })
+}
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
-
-    expect(screen.getByTestId('a-first')).toHaveTextContent('А-999')
-    expect(clearCache).toHaveBeenCalled()
-    // No spinner mid-browse: loading never went back to true
-    expect(loadingSeen.slice(rendersBefore)).not.toContain(true)
-  } finally {
-    vi.useRealTimers()
-    fetchApartmentData.mockImplementation(async (key) =>
-      key === 'mnogoA' ? { 3: [{ apartment: 'А-201', status: 'Свободен' }] } : null)
-  }
+beforeEach(() => {
+  fetchApartmentData.mockReset()
+  fetchApartmentData.mockImplementation(sheets({ mnogoA: MNOGO_A }))
+  clearCache.mockClear()
 })
 
-test('mnogofamilna uses fetched data when available, fallback otherwise', async () => {
-  render(<ApartmentProvider><Probe /></ApartmentProvider>)
-  await waitFor(() => expect(screen.queryByText('loading')).not.toBeInTheDocument())
+afterEach(() => {
+  vi.useRealTimers()
+  // Back to jsdom's own visibility.
+  delete document.visibilityState
+  delete document.hidden
+})
+
+test('coming back to the tab after more than a minute re-reads the sheets, without flipping loading', async () => {
+  const loadingSeen = []
+  function LoadingProbe() {
+    loadingSeen.push(useApartments().loading)
+    return null
+  }
+  await renderLoaded(<LoadingProbe />)
+  expect(apartments.getProjectFloorData('mnogofamilna-sgrada', 'block-a')).toEqual(MNOGO_A)
+
+  // The sheet changes while the visitor is on another tab.
+  const rendersBefore = loadingSeen.length
+  const changed = { 3: [{ apartment: 'А-999', status: 'Свободен' }] }
+  fetchApartmentData.mockImplementation(sheets({ mnogoA: changed }))
+
+  await awayFor(61_000)
+
+  expect(apartments.getProjectFloorData('mnogofamilna-sgrada', 'block-a')).toEqual(changed)
+  expect(clearCache).toHaveBeenCalled()
+  // No spinner mid-browse: loading never went back to true
+  expect(loadingSeen.slice(rendersBefore)).not.toContain(true)
+})
+
+test('nothing is re-read on coming back to data under a minute old, or on a timer', async () => {
+  await renderLoaded()
+  fetchApartmentData.mockClear()
+
+  // A short trip to another tab: what the page shows is 30 s old.
+  await awayFor(30_000)
+  expect(fetchApartmentData).not.toHaveBeenCalled()
+
+  // Five minutes on the page.
+  await act(async () => { await vi.advanceTimersByTimeAsync(5 * 60_000) })
+  expect(fetchApartmentData).not.toHaveBeenCalled()
+  expect(clearCache).not.toHaveBeenCalled()
+})
+
+test('a failed refresh of Блок А keeps the last good rows', async () => {
+  fetchApartmentData.mockImplementation(sheets({ blockA: BLOCK_A }))
+  await renderLoaded()
+  expect(apartments.getFloorData('block-a')).toEqual(BLOCK_A)
+
+  // Google fails: with its cache cleared, the service answers null.
+  fetchApartmentData.mockReset()
+  fetchApartmentData.mockImplementation(sheets({}))
+  await awayFor(61_000)
+
+  expect(fetchApartmentData).toHaveBeenCalledWith('blockA')
+  expect(apartments.getFloorData('block-a')).toEqual(BLOCK_A)
+})
+
+test('Многофамилна uses a fetched sheet as it is, and its built-in data normalised like a sheet', async () => {
+  await renderLoaded()
+
   // mnogoA fetch succeeded -> fetched data
-  expect(screen.getByTestId('a-first')).toHaveTextContent('А-201')
-  // mnogoB fetch returned null -> fallback
-  expect(Number(screen.getByTestId('b-floors').textContent))
-    .toBe(Object.keys(getMnogoBFallbackData()).length)
+  expect(apartments.getProjectFloorData('mnogofamilna-sgrada', 'block-a')).toEqual(MNOGO_A)
+
+  // mnogoB fetch returned null -> the built-in data, read the way a sheet is:
+  // no floor 0 (the garages) and canonical statuses („Продадени")
+  const b = apartments.getProjectFloorData('mnogofamilna-sgrada', 'block-b')
+  expect(Object.keys(b)).toEqual(['2', '3', '4', '5', '6', '7', '8', '9', '10'])
+  const statuses = new Set(Object.values(b).flat().map((row) => row.status))
+  expect([...statuses].sort()).toEqual(['Продадени', 'Резервиран', 'Свободен'])
 })

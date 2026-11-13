@@ -23,6 +23,9 @@ export function summarizeFloor(apartments = []) {
   return { ...counts, color }
 }
 
+// „Само свободни" (onlyAvailable) keeps available units only. It reads the
+// status key, never the text a unit keeps beside it (units.js `statusText`):
+// a „Скоро" unit is shown with its own text, but it is not free.
 export function matchesFilter(apartment, filter = {}) {
   if (!apartment) return false
   if (filter.onlyAvailable && statusOf(apartment.status ?? apartment.статус) !== STATUS.AVAILABLE) return false

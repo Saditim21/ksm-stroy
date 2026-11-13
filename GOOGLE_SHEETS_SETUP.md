@@ -104,13 +104,18 @@ This ensures the website never breaks even if Google Sheets has issues.
 
 ## Многофамилна сграда (Вход А / Вход Б)
 
+> **Takes effect with the new site (redesign v2).** Until then the
+> Многофамилна pages show the data built into the site, whatever these sheets
+> say.
+
 1. Отворете вашия Google Sheets документ и създайте два нови листа:
    "Многофамилна Вход А" и "Многофамилна Вход Б".
 2. Импортирайте файловете `google-sheets-data/mnogofamilna-vhod-a.csv` и
    `mnogofamilna-vhod-b.csv` (File → Import → Upload → Replace current sheet).
    Колоните са същите като при Golden Residence:
    `Етаж, Апартамент, Вид, Застроена, Идеални, Обща, Изложение, Статус`
-   (по желание добавете колона `Цена` — тя се показва автоматично на сайта).
+   (по желание добавете колона `Цена` — тя се показва автоматично на сайта;
+   **Takes effect with the new site (redesign v2)**: no page shows it yet).
 3. За всеки от двата листа: File → Share → Publish to web → изберете листа →
    "Comma-separated values (.csv)" → Publish → копирайте URL адреса.
 4. Добавете двата URL адреса като environment variables:

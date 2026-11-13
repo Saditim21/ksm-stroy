@@ -1,12 +1,31 @@
 import { renderHook } from '@testing-library/react'
 import { vi } from 'vitest'
 import useScrollLock from './useScrollLock'
-import { setLenis, clearLenis } from '../utils/lenis'
+import { setLenis } from '../utils/lenis'
 
 // From golden-residence src/hooks/useScrollLock.test.js @944bb03.
 
 afterEach(() => {
-  clearLenis(null)
+  setLenis(null)
+})
+
+// Two overlays at once, such as a unit's panel over the mobile menu: closing
+// the inner one must not set Lenis scrolling under the outer one.
+test('two overlapping locks: releasing the inner one keeps Lenis stopped', () => {
+  const stop = vi.fn()
+  const start = vi.fn()
+  setLenis({ stop, start })
+
+  const outer = renderHook(() => useScrollLock())
+  const inner = renderHook(() => useScrollLock())
+  expect(stop).toHaveBeenCalledTimes(1)
+
+  inner.unmount()
+  expect(start).not.toHaveBeenCalled()
+  expect(document.documentElement.style.overflow).toBe('hidden')
+
+  outer.unmount()
+  expect(start).toHaveBeenCalledTimes(1)
 })
 
 test('calls stop on Lenis when mounted', () => {

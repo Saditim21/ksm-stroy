@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react'
 
-// A tap on a touch screen always drifts a few pixels. When the plan cannot be
-// panned (scale === 1) that drift must not be mistaken for a drag, otherwise the
-// click that follows is swallowed and the apartment never opens.
-const TAP_TOLERANCE = 10
-// On a zoomed plan a gesture that travels further than this is a pan.
-const DRAG_THRESHOLD = 4
+// A tap always drifts a little between press and release: a finger the most,
+// a mouse the least. A press that travels further than its pointer's tolerance,
+// in a straight line, is a drag: it selects nothing, and on a zoomed plan it
+// pans. Anything less is a tap, zoomed or not, or the click that follows would
+// be swallowed and the unit never open. A pointer of unknown type gets the
+// mouse's.
+export const TAP_TOLERANCE = { mouse: 4, touch: 8, pen: 6 }
 
 export default function useZoomPan({ minScale = 1, maxScale = 8, step = 1.2 } = {}) {
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
@@ -30,7 +31,14 @@ export default function useZoomPan({ minScale = 1, maxScale = 8, step = 1.2 } = 
   // click to the stage and no polygon's onClick ever ran.
   const onPointerDown = (e) => {
     lastMoved.current = false
-    drag.current = { x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false }
+    drag.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startX: e.clientX,
+      startY: e.clientY,
+      moved: false,
+      tolerance: TAP_TOLERANCE[e.pointerType] ?? TAP_TOLERANCE.mouse,
+    }
   }
   const onPointerMove = (e) => {
     if (!drag.current) return
@@ -39,10 +47,9 @@ export default function useZoomPan({ minScale = 1, maxScale = 8, step = 1.2 } = 
     drag.current.x = e.clientX
     drag.current.y = e.clientY
 
-    const travelled =
-      Math.abs(e.clientX - drag.current.startX) + Math.abs(e.clientY - drag.current.startY)
+    const travelled = Math.hypot(e.clientX - drag.current.startX, e.clientY - drag.current.startY)
     const pannable = transform.scale > 1
-    if (!drag.current.moved && travelled > (pannable ? DRAG_THRESHOLD : TAP_TOLERANCE)) {
+    if (!drag.current.moved && travelled > drag.current.tolerance) {
       drag.current.moved = true
       // Now it is a pan: capture the pointer, so the pan follows it off the
       // plan and its pointerup still comes back here. The click it ends with

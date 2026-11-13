@@ -22,8 +22,16 @@
 // therefore keep `window.scrollTo` as its fallback.
 let instance = null
 
+// Scroll locks (useScrollLock): an overlay that must not scroll the page stops
+// Lenis while it is open. Overlays can overlap, a unit's panel over the mobile
+// menu, so the locks are counted: Lenis stops on the first and starts again
+// only on the last release. A Lenis published while a lock holds starts out
+// stopped.
+let locks = 0
+
 export function setLenis(next) {
   instance = next
+  if (locks > 0) instance?.stop()
 }
 
 export function clearLenis(previous) {
@@ -34,4 +42,17 @@ export function clearLenis(previous) {
 
 export function getLenis() {
   return instance
+}
+
+export function acquireScrollLock() {
+  locks += 1
+  if (locks === 1) instance?.stop()
+}
+
+export function releaseScrollLock() {
+  // A release with no lock held is a caller's bug; ignoring it keeps the count
+  // from going negative, after which no lock would stop Lenis again.
+  if (locks === 0) return
+  locks -= 1
+  if (locks === 0) instance?.start()
 }

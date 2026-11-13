@@ -27,6 +27,16 @@ export default defineConfig([
     },
   },
   {
+    // The build and data scripts (scripts/*.mjs) run in Node.
+    files: ['**/*.mjs'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+    },
+  },
+  {
     // Vitest runs test files with its globals injected (globalThis, not an
     // import) — the `globals` package has no "vitest" set, so declare the
     // handful this repo actually uses by hand. (redesign v1 @5cecebb)

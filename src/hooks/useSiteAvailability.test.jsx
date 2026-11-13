@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
-vi.mock('../services/googleSheets', () => ({
+vi.mock('../services/googleSheets', async (importOriginal) => ({
+  ...(await importOriginal()),
   fetchApartmentData: vi.fn(async () => null),
   fetchGarageData: vi.fn(async () => null),
   calculateStats: vi.fn(() => ({ total: 0, available: 0, reserved: 0, sold: 0 })),

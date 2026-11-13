@@ -16,7 +16,7 @@ describe('toApartment', () => {
     expect(toApartment(row, 'A')).toEqual({
       id: 'А101', label: 'А 101', kind: 'apartment', block: 'A', floor: 1,
       builtArea: 57.46, idealParts: 8.22, totalArea: 65.68,
-      type: '2-стаен', exposure: 'Юг', status: 'available',
+      type: '2-стаен', exposure: 'Юг', status: 'available', statusText: 'Свободен',
     })
   })
 
@@ -29,10 +29,18 @@ describe('toApartment', () => {
     expect(toApartment({ ...row, 'Обща': '65,68' }, 'A').totalArea).toBe(65.68)
   })
 
-  test('reads the status with the production rules', () => {
-    expect(toApartment({ ...row, 'Статус': 'Блокиран' }, 'A').status).toBe('blocked')
-    expect(toApartment({ ...row, 'Статус': '' }, 'A').status).toBe('available')
-    expect(toApartment({ ...row, 'Статус': 'Скоро' }, 'A').status).toBe('unknown')
+  test('reads the status with the production rules, and keeps its canonical text', () => {
+    expect(toApartment({ ...row, 'Статус': 'Блокиран' }, 'A')).toMatchObject({ status: 'blocked', statusText: 'Блокиран' })
+    expect(toApartment({ ...row, 'Статус': '' }, 'A')).toMatchObject({ status: 'available', statusText: 'Свободен' })
+    expect(toApartment({ ...row, 'Статус': 'Продаден' }, 'A')).toMatchObject({ status: 'sold', statusText: 'Продадени' })
+  })
+
+  // Production shows text the rules do not know as the owner wrote it
+  // (GoldenResidenceSingleBlock on main @7a741d5), so the unit keeps it.
+  test('a status the rules do not know keeps its text, and its button says it', () => {
+    const unit = toApartment({ ...row, 'Статус': ' Скоро ' }, 'A')
+    expect(unit).toMatchObject({ status: 'unknown', statusText: 'Скоро' })
+    expect(unitButtonLabel(unit)).toContain('Скоро')
   })
 })
 
@@ -41,13 +49,18 @@ describe('toParkingUnit', () => {
     expect(toParkingUnit({
       'Номер': 'Г-001', 'Застроена': '21.07', 'Идеални': '12.94', 'Обща': '34.01', 'Тип': 'Гараж', 'Статус': 'Свободен',
     }, 'garage')).toEqual({
-      id: 'Г001', label: 'Г-001', kind: 'garage', builtArea: 21.07, idealParts: 12.94, totalArea: 34.01, type: 'Гараж', status: 'available',
+      id: 'Г001', label: 'Г-001', kind: 'garage', builtArea: 21.07, idealParts: 12.94, totalArea: 34.01, type: 'Гараж',
+      status: 'available', statusText: 'Свободен',
     })
   })
 
   test('fills the type and reads the plural sold status for parking', () => {
     const unit = toParkingUnit({ 'Номер': 'ПМ-02', 'Обща': '28.52', 'Статус': 'Продадени' }, 'parking')
-    expect(unit).toMatchObject({ type: 'Паркомясто', status: 'sold', builtArea: null })
+    expect(unit).toMatchObject({ type: 'Паркомясто', status: 'sold', statusText: 'Продадени', builtArea: null })
+  })
+
+  test('keeps the text of a status the rules do not know', () => {
+    expect(toParkingUnit({ 'Номер': 'Г-001', 'Статус': 'Скоро' }, 'garage')).toMatchObject({ status: 'unknown', statusText: 'Скоро' })
   })
 
   test('skips rows without a number', () => {
@@ -128,9 +141,17 @@ describe('unitButtonLabel', () => {
     expect(unitButtonLabel({ label: 'Г-001', type: 'Гараж', totalArea: null, status: 'available' })).toBe('Г-001, Гараж, Свободен')
   })
 
-  test('a status outside the five keys reads as unknown', () => {
-    expect(unitButtonLabel({ ...unit, status: 'скоро' })).toBe('А 306, 3-стаен, 98,40 м², Няма информация')
+  test('an unknown status reads as the text the unit keeps', () => {
+    expect(unitButtonLabel({ ...unit, status: 'unknown', statusText: 'Скоро' })).toBe('А 306, 3-стаен, 98,40 м², Скоро')
+  })
+
+  test('a unit with no text, or a status outside the five keys, reads as „Няма информация"', () => {
+    expect(unitButtonLabel({ ...unit, status: 'unknown' })).toBe('А 306, 3-стаен, 98,40 м², Няма информация')
     expect(unitButtonLabel({ ...unit, status: 'constructor' })).toBe('А 306, 3-стаен, 98,40 м², Няма информация')
     expect(unitButtonLabel({ label: 'А 306' })).toBe('А 306, Няма информация')
+  })
+
+  test('a known status reads its own label, not the sheet\'s spelling', () => {
+    expect(unitButtonLabel({ ...unit, status: 'sold', statusText: 'Продадени' })).toBe('А 306, 3-стаен, 98,40 м², Продаден')
   })
 })

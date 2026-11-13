@@ -1,11 +1,23 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageStats, clearCache } from '../services/googleSheets';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { fetchApartmentData, fetchGarageData, calculateStats, calculateGarageStats, clearCache, normalizeFloorData } from '../services/googleSheets';
 
 // Fallback data - used when Google Sheets is not configured or unavailable
 import { getBlockAFallbackData, getBlockBFallbackData } from '../constants/apartmentFallbackData';
 
-// Fallback data for Многофамилна сграда
-import { getMnogoAFallbackData, getMnogoBFallbackData } from '../constants/mnogofamilnaFallbackData';
+// The Многофамилна data built into the site, for when its sheets are not
+// configured (they are optional) or fail. Nothing needs it before the sheets
+// have answered, so it is a chunk of its own, loaded only then, and it goes
+// through the same normalizeFloorData() as a sheet's rows. If even the chunk
+// fails to load, the project shows no floors and the rest of the data stands.
+async function loadMnogoFallback() {
+  try {
+    const { getMnogoAFallbackData, getMnogoBFallbackData } = await import('../constants/mnogofamilnaFallbackData');
+    return { A: normalizeFloorData(getMnogoAFallbackData()), B: normalizeFloorData(getMnogoBFallbackData()) };
+  } catch (err) {
+    console.error('Could not load the Многофамилна fallback data:', err);
+    return { A: {}, B: {} };
+  }
+}
 
 // Fallback data for garages and parking
 const defaultGaragesFallback = [
@@ -199,10 +211,11 @@ const defaultParkingFallback = [
 
 const ApartmentContext = createContext(null);
 
-// How often the sheets are re-read in the background. The spec promises that a
-// change in the Google Sheet shows up on the site within ~a minute, without the
-// visitor reloading the page.
-const REFRESH_INTERVAL_MS = 60 * 1000;
+// A change in a sheet reaches a page that is already open when the visitor
+// comes back to its tab and what it shows is more than a minute old. Not on a
+// timer: polling re-read every sheet every minute on every open tab, for
+// changes nobody was looking at.
+const STALE_AFTER_MS = 60 * 1000;
 
 export function ApartmentProvider({ children }) {
   const [blockAData, setBlockAData] = useState(null);
@@ -214,11 +227,14 @@ export function ApartmentProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usingFallback, setUsingFallback] = useState(false);
+  // When the sheets were last read: the first load, or the last refresh.
+  const readAt = useRef(0);
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       setError(null);
+      readAt.current = Date.now();
 
       try {
         // Fetch all data in parallel
@@ -251,8 +267,9 @@ export function ApartmentProvider({ children }) {
         setParkingData(parking || defaultParkingFallback);
 
         // Use fetched data or fallback for Многофамилна сграда
-        setMnogoAData(mnogoA || getMnogoAFallbackData());
-        setMnogoBData(mnogoB || getMnogoBFallbackData());
+        const mnogoFallback = mnogoA && mnogoB ? null : await loadMnogoFallback();
+        setMnogoAData(mnogoA || mnogoFallback.A);
+        setMnogoBData(mnogoB || mnogoFallback.B);
 
       } catch (err) {
         console.error('Error loading data:', err);
@@ -262,8 +279,9 @@ export function ApartmentProvider({ children }) {
         setBlockBData(getBlockBFallbackData());
         setGaragesData(defaultGaragesFallback);
         setParkingData(defaultParkingFallback);
-        setMnogoAData(getMnogoAFallbackData());
-        setMnogoBData(getMnogoBFallbackData());
+        const mnogoFallback = await loadMnogoFallback();
+        setMnogoAData(mnogoFallback.A);
+        setMnogoBData(mnogoFallback.B);
         setUsingFallback(true);
       } finally {
         setLoading(false);
@@ -277,6 +295,7 @@ export function ApartmentProvider({ children }) {
   // load: it never touches `loading` (no spinner mid-browse) and never falls
   // back to the bundled data — a failed refresh just keeps the last good rows.
   const backgroundRefresh = useCallback(async () => {
+    readAt.current = Date.now();
     try {
       clearCache();
       const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
@@ -301,13 +320,14 @@ export function ApartmentProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      // Nothing to see on a backgrounded tab; the next visible tick catches up.
-      if (typeof document !== 'undefined' && document.hidden) return;
+    const refreshIfStale = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - readAt.current <= STALE_AFTER_MS) return;
       backgroundRefresh();
-    }, REFRESH_INTERVAL_MS);
+    };
 
-    return () => clearInterval(id);
+    document.addEventListener('visibilitychange', refreshIfStale);
+    return () => document.removeEventListener('visibilitychange', refreshIfStale);
   }, [backgroundRefresh]);
 
   // Calculate combined stats for Golden Residence
@@ -372,11 +392,12 @@ export function ApartmentProvider({ children }) {
     return parkingData || defaultParkingFallback;
   };
 
-  // Get floor data scoped to a project + block
+  // Get floor data scoped to a project + block. Многофамилна has no floors
+  // until its data has loaded: its fallback is a chunk of its own.
   const getProjectFloorData = (projectId, blockId) => {
     if (projectId === 'mnogofamilna-sgrada') {
-      if (blockId === 'block-a' || blockId === 'A') return mnogoAData || getMnogoAFallbackData();
-      return mnogoBData || getMnogoBFallbackData();
+      if (blockId === 'block-a' || blockId === 'A') return mnogoAData || {};
+      return mnogoBData || {};
     }
     return getFloorData(blockId);
   };

@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { getLenis } from '../utils/lenis'
+import { acquireScrollLock, releaseScrollLock } from '../utils/lenis'
 
 // A modal overlay must not scroll the page. From golden-residence
 // src/hooks/useScrollLock.js @944bb03: it stops Lenis while it runs and hides
-// the page's overflow.
+// the page's overflow. Locks can overlap; src/utils/lenis.js counts them, so
+// Lenis starts again only when the last one is released.
 //
 // `background`: hiding the overflow hides the scrollbar, and where the page
 // keeps the scrollbar's gutter (`scrollbar-gutter: stable`, which stops the
@@ -12,8 +13,7 @@ import { getLenis } from '../utils/lenis'
 // takes while the lock holds; one that matches the page passes none.
 export default function useScrollLock(background) {
   useEffect(() => {
-    const lenis = getLenis()
-    lenis?.stop()
+    acquireScrollLock()
 
     const root = document.documentElement
     const originalOverflow = root.style.overflow
@@ -24,7 +24,7 @@ export default function useScrollLock(background) {
     return () => {
       root.style.overflow = originalOverflow
       if (background) root.style.backgroundColor = originalBackground
-      lenis?.start()
+      releaseScrollLock()
     }
   }, [background])
 }

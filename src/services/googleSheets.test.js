@@ -1,5 +1,5 @@
 import { afterEach, vi } from 'vitest'
-import { parseCSV, transformToApartmentData } from './googleSheets'
+import { normalizeFloorData, parseCSV, transformToApartmentData } from './googleSheets'
 
 const CSV = `Етаж,Апартамент,Вид,Застроена,Идеални,Обща,Изложение,Статус
 1,А 101,2-стаен,57.46,8.22,65.68,Юг,Свободен
@@ -45,15 +45,51 @@ test('the row mapping normalises the status next to the price', () => {
   ])
 })
 
+test('a sheet drops floor 0', () => {
+  const data = transformToApartmentData(parseCSV(`Етаж,Апартамент,Статус
+0,Гараж А-1,Свободен
+3,А-301,Продаден`))
+  expect(data).toEqual({ 3: [expect.objectContaining({ apartment: 'А-301', status: 'Продадени' })] })
+})
+
+// The Многофамилна data built into the site goes through the same step as a
+// sheet's rows (ApartmentContext), so both read the same way.
+test('normalizeFloorData drops floor 0 and normalises every status', () => {
+  const fallback = {
+    0: [{ apartment: 'Гараж А-1', status: 'Свободен' }],
+    3: [
+      { apartment: 'А-301', вид: '2-стаен', status: 'Продаден' },
+      { apartment: 'А-302', вид: '3-стаен', status: '' },
+      { apartment: 'А-303', вид: '3-стаен', status: 'Скоро' },
+    ],
+  }
+  expect(normalizeFloorData(fallback)).toEqual({
+    3: [
+      { apartment: 'А-301', вид: '2-стаен', status: 'Продадени' },
+      { apartment: 'А-302', вид: '3-стаен', status: 'Свободен' },
+      { apartment: 'А-303', вид: '3-стаен', status: 'Скоро' },
+    ],
+  })
+  // The data built into the site is never changed in place.
+  expect(fallback[3][0].status).toBe('Продаден')
+})
+
 // Google occasionally answers a published-sheet URL with 200 + an HTML error
 // or sign-in page. That must engage the fallback data, not blank the site.
 const HTML_ERROR_PAGE = `<!DOCTYPE html>
 <html><head><title>Error 404 (Not Found)</title></head>
 <body><h1>Тази страница не е достъпна</h1></body></html>`
 
+const GARAGES = `Номер,Застроена,Идеални,Обща,Тип,Статус
+Г-001,21.07,12.94,34.01,Гараж,Продадени`
+
+// The service reports every fetch and every failure on the console; these
+// tests check what it returns.
 async function loadServiceWithSheet(envKey, body) {
   vi.stubEnv(envKey, 'https://docs.google.com/spreadsheets/d/e/x/pub?gid=0&single=true&output=csv')
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => body })))
+  vi.spyOn(console, 'log').mockImplementation(() => {})
+  vi.spyOn(console, 'error').mockImplementation(() => {})
   vi.resetModules()
   return import('./googleSheets')
 }
@@ -69,6 +105,7 @@ const SHEET_ENV = [
 afterEach(() => {
   for (const name of SHEET_ENV) vi.stubEnv(name, '')
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
   vi.resetModules()
 })
 
@@ -78,10 +115,45 @@ test('fetchApartmentData falls back when a 200 parses to zero floors', async () 
   expect(fetch).toHaveBeenCalled()
 })
 
-test('fetchGarageData falls back when a 200 parses to zero rows', async () => {
-  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_GARAGES', '<html>oops</html>')
+// Each line of the page parses as a row with no Номер: kept, every one of them
+// was a phantom „Свободен" garage.
+test('fetchGarageData falls back when a 200 is an HTML page', async () => {
+  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_GARAGES', HTML_ERROR_PAGE)
   await expect(svc.fetchGarageData('garages')).resolves.toBeNull()
   expect(fetch).toHaveBeenCalled()
+})
+
+test('fetchGarageData keeps only the rows with a Номер', async () => {
+  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_PARKING', `${GARAGES}
+,,,,,
+ ,1,1,1,Гараж,Свободен`)
+  const rows = await svc.fetchGarageData('parking')
+  expect(rows.map((row) => [row.number, row.status])).toEqual([['Г-001', 'Продадени']])
+})
+
+// Sheet columns are never renamed (spec §6.4). Without Статус every place
+// would read as free; without Номер no row names a place.
+test.each([
+  ['Статус', 'Номер,Застроена,Идеални,Обща,Тип\nГ-001,21.07,12.94,34.01,Гараж'],
+  ['Номер', 'Гараж,Застроена,Идеални,Обща,Тип,Статус\nГ-001,21.07,12.94,34.01,Гараж,Продадени'],
+])('fetchGarageData falls back when the tab has no %s column', async (_column, body) => {
+  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_GARAGES', body)
+  await expect(svc.fetchGarageData('garages')).resolves.toBeNull()
+})
+
+// The Многофамилна sheets are optional: skipping them must not log twice a
+// page load (finding 5 of the M0 review).
+test('an unconfigured sheet is skipped silently, without a request', async () => {
+  vi.stubGlobal('fetch', vi.fn())
+  const log = vi.spyOn(console, 'log')
+  vi.resetModules()
+  const svc = await import('./googleSheets')
+
+  await expect(svc.fetchApartmentData('mnogoA')).resolves.toBeNull()
+  await expect(svc.fetchGarageData('parking')).resolves.toBeNull()
+
+  expect(fetch).not.toHaveBeenCalled()
+  expect(log).not.toHaveBeenCalled()
 })
 
 test('a good sheet still returns data (guard does not over-reach)', async () => {
@@ -98,6 +170,7 @@ test('a good sheet still returns data (guard does not over-reach)', async () => 
 test('sheets are fetched with no custom request headers', async () => {
   vi.stubEnv('VITE_GOOGLE_SHEET_PARKING', 'https://docs.google.com/spreadsheets/d/e/x/pub?gid=3&single=true&output=csv')
   const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_BLOCK_A', CSV)
+  fetch.mockImplementation(async (url) => ({ ok: true, text: async () => (url.includes('gid=3') ? GARAGES : CSV) }))
 
   await expect(svc.fetchApartmentData('blockA')).resolves.not.toBeNull()
   await expect(svc.fetchGarageData('parking')).resolves.not.toBeNull()

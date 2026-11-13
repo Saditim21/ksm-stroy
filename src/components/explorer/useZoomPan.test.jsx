@@ -33,15 +33,15 @@ function setup() {
   stage.setPointerCapture = vi.fn(() => { holder = stage })
   stage.releasePointerCapture = vi.fn(() => { holder = null })
   const route = (target) => holder ?? target
-  const at = (x, y, buttons = 1) => ({ pointerId: 1, pointerType: 'mouse', clientX: x, clientY: y, buttons })
+  const at = (x, y, buttons = 1, pointerType = 'mouse') => ({ pointerId: 1, pointerType, clientX: x, clientY: y, buttons })
 
   // One press: down on `target`, the moves, up, then the click.
-  const press = (target, moves = []) => {
-    fireEvent.pointerDown(target, at(0, 0))
-    for (const [x, y] of moves) fireEvent.pointerMove(route(target), at(x, y))
+  const press = (target, moves = [], pointerType = 'mouse') => {
+    fireEvent.pointerDown(target, at(0, 0, 1, pointerType))
+    for (const [x, y] of moves) fireEvent.pointerMove(route(target), at(x, y, 1, pointerType))
     const [x, y] = moves.at(-1) ?? [0, 0]
     const end = route(target)
-    fireEvent.pointerUp(end, at(x, y, 0))
+    fireEvent.pointerUp(end, at(x, y, 0, pointerType))
     holder = null // a pointerup releases the capture
     fireEvent.click(end)
   }
@@ -75,13 +75,48 @@ test('a click on a zoomed plan reaches the unit too', () => {
 test('a tap that drifts less than the drag threshold still selects, zoomed or not', () => {
   const { onSelect, stage, unit, press, zoomIn } = setup()
 
-  press(unit, [[5, 4]]) // 9 px at scale 1: a finger's drift, nothing to pan
+  press(unit, [[5, 4]], 'touch') // 6.4 px at scale 1: a finger's drift, nothing to pan
   expect(onSelect).toHaveBeenCalledTimes(1)
 
   zoomIn()
-  press(unit, [[2, 2]]) // 4 px on a zoomed plan: not yet a drag
+  press(unit, [[2, 2]]) // 2.8 px of a mouse on a zoomed plan: not yet a drag
   expect(onSelect).toHaveBeenCalledTimes(2)
   expect(stage.setPointerCapture).not.toHaveBeenCalled()
+})
+
+// Small units are tapped while zoomed, and a finger drifts more than a mouse
+// (finding 8 of the M0 review: a 6 px drift selected nothing).
+test('a touch tap that drifts 6 px on a zoomed plan selects the unit; a 12 px drift pans', () => {
+  const { onSelect, stage, unit, press, zoomIn } = setup()
+  zoomIn()
+
+  press(unit, [[6, 0]], 'touch')
+  expect(onSelect).toHaveBeenCalledTimes(1)
+  expect(stage.setPointerCapture).not.toHaveBeenCalled()
+
+  press(unit, [[12, 0]], 'touch')
+  expect(onSelect).toHaveBeenCalledTimes(1)
+  expect(stage.setPointerCapture).toHaveBeenCalledTimes(1)
+})
+
+// TAP_TOLERANCE: mouse 4 px, pen 6 px, touch 8 px, in a straight line. Each
+// tap drifts diagonally just inside its tolerance, where |dx| + |dy| would
+// already be past it.
+test.each([
+  ['mouse', [2, 3], [3, 3]], // 3.6 px taps, 4.2 px pans
+  ['pen', [4, 4], [5, 4]], // 5.7 px taps, 6.4 px pans
+  ['touch', [5, 6], [6, 6]], // 7.8 px taps, 8.5 px pans
+])('on a zoomed plan a %s tap may drift %j and still select; %j pans', (pointerType, tap, pan) => {
+  const { onSelect, stage, unit, press, zoomIn } = setup()
+  zoomIn()
+
+  press(unit, [tap], pointerType)
+  expect(onSelect).toHaveBeenCalledTimes(1)
+  expect(stage.setPointerCapture).not.toHaveBeenCalled()
+
+  press(unit, [pan], pointerType)
+  expect(onSelect).toHaveBeenCalledTimes(1)
+  expect(stage.setPointerCapture).toHaveBeenCalledTimes(1)
 })
 
 test('a pan on a zoomed plan captures the pointer once it passes 4 px, and selects nothing', () => {

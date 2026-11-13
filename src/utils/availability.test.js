@@ -1,4 +1,5 @@
 import { STATUS, statusOf, summarizeFloor, matchesFilter } from './availability'
+import { toApartment } from './units'
 
 // Production's status rules (src/utils/propertyStatus.js, main @7a741d5):
 // sold > reserved > blocked > available, an empty cell is available, and text
@@ -90,6 +91,14 @@ describe('matchesFilter', () => {
   test('onlyAvailable keeps available units, an empty status cell included', () => {
     expect(matchesFilter(apt, { onlyAvailable: true })).toBe(true)
     expect(matchesFilter({ ...apt, status: '' }, { onlyAvailable: true })).toBe(true)
+  })
+  // The explorer's units keep the sheet's text beside the key (units.js): a
+  // „Скоро" unit shows „Скоро", but it is still not free.
+  test('onlyAvailable rejects an unknown unit that keeps its text', () => {
+    const unit = (status) => toApartment({ 'Етаж': '3', 'Апартамент': 'А 303', 'Статус': status }, 'A')
+    expect(unit('Скоро')).toMatchObject({ status: 'unknown', statusText: 'Скоро' })
+    expect(matchesFilter(unit('Скоро'), { onlyAvailable: true })).toBe(false)
+    expect(matchesFilter(unit(''), { onlyAvailable: true })).toBe(true)
   })
   test('type filter is substring, case-insensitive', () => {
     expect(matchesFilter(apt, { type: '2-стаен' })).toBe(true)

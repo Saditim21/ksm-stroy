@@ -99,7 +99,6 @@ export function transformToApartmentData(rawData) {
 
   rawData.forEach(row => {
     const floor = parseInt(row['Етаж'] || row['Floor'] || '0', 10);
-    if (floor === 0) return;
 
     if (!floorData[floor]) {
       floorData[floor] = [];
@@ -112,12 +111,30 @@ export function transformToApartmentData(rawData) {
       вид: row['Вид'] || row['Type'] || '',
       total: row['Обща'] || row['Total'] || '',
       изложение: row['Изложение'] || row['Exposure'] || '',
-      status: normalizeStatus(row['Статус'] || row['Status']),
+      status: row['Статус'] || row['Status'],
       цена: row['Цена'] || row['Price'] || '',
     });
   });
 
-  return floorData;
+  return normalizeFloorData(floorData);
+}
+
+/**
+ * The last step for every floor map the site shows, a sheet's rows or the
+ * Многофамилна data built into the site (ApartmentContext): floor 0, the
+ * Многофамилна garages that no page lists, is dropped, and every status goes
+ * through normalizeStatus(). Returns new rows; the input is left as it was.
+ */
+export function normalizeFloorData(floorData) {
+  const normalized = {};
+  for (const [floor, apartments] of Object.entries(floorData)) {
+    if (Number(floor) === 0) continue;
+    normalized[floor] = apartments.map((apartment) => ({
+      ...apartment,
+      status: normalizeStatus(apartment.status),
+    }));
+  }
+  return normalized;
 }
 
 /**
@@ -146,11 +163,9 @@ async function fetchSheetCSV(sheetUrl) {
 export async function fetchApartmentData(block = 'blockA') {
   const sheetUrl = SHEET_URLS[block];
 
-  // If no URL configured, return null (will use fallback data)
-  if (!sheetUrl) {
-    console.log(`No Google Sheet URL configured for ${block}, using fallback data`);
-    return null;
-  }
+  // No URL configured (the Многофамилна sheets are optional): return null, and
+  // the caller uses the data built into the site. Silently, as it is no error.
+  if (!sheetUrl) return null;
 
   // Check cache
   const cached = cache[block];
@@ -205,7 +220,8 @@ export function calculateStats(floorData) {
 }
 
 /**
- * Transform raw sheet data to garage/parking format (flat list)
+ * Transform raw sheet data to garage/parking format (flat list). A row with no
+ * Номер names no place (a blank line), so it is left out.
  */
 function transformToGarageData(rawData) {
   return rawData.map(row => ({
@@ -215,8 +231,13 @@ function transformToGarageData(rawData) {
     total: row['Обща'] || row['Total'] || '',
     type: row['Тип'] || row['Type'] || 'Гараж',
     status: normalizeStatus(row['Статус'] || row['Status']),
-  }));
+  })).filter(item => item.number !== '');
 }
+
+// The columns a garage or parking tab must have. Sheet columns are never
+// renamed, so a body without them is not the tab: Google's HTML error page has
+// neither, and without Статус every place would read as free.
+const GARAGE_COLUMNS = ['Номер', 'Статус'];
 
 /**
  * Fetch garage or parking data from Google Sheets
@@ -224,10 +245,8 @@ function transformToGarageData(rawData) {
 export async function fetchGarageData(type = 'garages') {
   const sheetUrl = SHEET_URLS[type];
 
-  if (!sheetUrl) {
-    console.log(`No Google Sheet URL configured for ${type}, using fallback data`);
-    return null;
-  }
+  // No URL configured: return null, silently; the caller uses the built-in list.
+  if (!sheetUrl) return null;
 
   const cached = cache[type];
   if (cached.data && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -237,8 +256,13 @@ export async function fetchGarageData(type = 'garages') {
 
   try {
     const csvText = await fetchSheetCSV(sheetUrl);
-    const rawData = parseCSV(csvText);
-    const garageData = transformToGarageData(rawData);
+    const header = parseCSVLine(csvText.trim().split('\n')[0]).map((name) => name.trim());
+    const missing = GARAGE_COLUMNS.filter((column) => !header.includes(column));
+    if (missing.length > 0) {
+      throw new Error(`Sheet response has no ${missing.join(' or ')} column`);
+    }
+
+    const garageData = transformToGarageData(parseCSV(csvText));
 
     // Same trap as above: [] is truthy, so an unparsable 200 would silently
     // replace the fallback list with nothing.

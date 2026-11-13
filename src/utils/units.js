@@ -1,10 +1,12 @@
 // Unit ids, areas and the unit model, from the Golden Residence landing
 // (golden-residence src/utils/units.js and unitButtonLabel from status.js,
 // @944bb03), on this site's status rules (propertyStatus.js): a unit's status
-// is a STATUS_KEY, and an empty Статус cell is available.
+// is a STATUS_KEY, and an empty Статус cell is available. Beside it the unit
+// keeps the canonical text (`statusText`), so a status the rules do not know
+// („Скоро") is shown as the owner wrote it, as production does.
 //
 // Explicit .js extensions: scripts/validate-maps.mjs loads this file in Node.
-import { STATUS_LABEL, statusKey, summarizeStatuses } from './propertyStatus.js'
+import { STATUS_LABEL, normalizeStatus, statusKey, summarizeStatuses } from './propertyStatus.js'
 import { formatArea } from './format.js'
 
 const LATIN_TO_CYRILLIC = { A: 'А', B: 'Б' }
@@ -45,6 +47,7 @@ export function toApartment(row, block) {
     type: text(row['Вид']),
     exposure: text(row['Изложение']),
     status: statusKey(row['Статус']),
+    statusText: normalizeStatus(row['Статус']),
   }
 }
 
@@ -61,6 +64,7 @@ export function toParkingUnit(row, kind) {
     totalArea: parseArea(row['Обща']),
     type: text(row['Тип']) || (kind === 'garage' ? 'Гараж' : 'Паркомясто'),
     status: statusKey(row['Статус']),
+    statusText: normalizeStatus(row['Статус']),
   }
 }
 
@@ -86,13 +90,14 @@ export function sortUnits(units) {
 // The accessible name of a unit's button, shared by every unit list:
 // "А 306, 3-стаен, 98,40 м², Свободен". A button's content is presentational, so
 // the type and area shown on it are named too (WCAG 1.3.1). Missing parts are
-// skipped; a status that is not a STATUS_KEY reads as unknown.
+// skipped; a status that is not a STATUS_KEY reads as unknown, and an unknown
+// status reads as the unit's own text („Скоро"), or „Няма информация" without one.
 export function unitButtonLabel(unit) {
   const status = Object.prototype.hasOwnProperty.call(STATUS_LABEL, unit.status) ? unit.status : 'unknown'
   return [
     unit.label,
     unit.type,
     unit.totalArea != null ? formatArea(unit.totalArea) : null,
-    STATUS_LABEL[status],
+    (status === 'unknown' && unit.statusText) || STATUS_LABEL[status],
   ].filter(Boolean).join(', ')
 }
