@@ -1,9 +1,12 @@
 // Cross-checks the traced floor maps against the apartment data: every unit in
 // the data must have a shape, and every shape must resolve to a real unit.
 // Usage: node scripts/validate-maps.mjs
+//
+// It finds maps and keys shapes with the explorer's own functions, so it
+// checks exactly what the page will look up.
 import { readFileSync } from 'node:fs'
-
-const norm = (s) => (s ?? '').toString().toUpperCase().replace(/[\s\-–—.]/g, '').replace(/A/g, 'А').replace(/B/g, 'Б')
+import { findFloorMap, unitKeyForShape } from '../src/utils/buildingMaps.js'
+import { normalizeUnitId } from '../src/utils/units.js'
 
 // The fallback modules import nothing but images-free plain data, yet they are
 // ESM with `export`, so load them through a tiny eval shim rather than adding a
@@ -48,15 +51,13 @@ for (const p of PROJECTS) {
     for (const [floorKey, rows] of Object.entries(floorData)) {
       const floor = Number(floorKey)
       if (p.skipFloors.includes(floor)) continue
-      const map = maps.find(
-        (m) => m.appliesTo.project === p.id && m.appliesTo.blocks.includes(letter) && m.appliesTo.floors.includes(floor),
-      )
+      const map = findFloorMap(maps, p.id, letter, floor)
       if (!map) { console.error(`MISSING MAP: ${p.id} ${letter} floor ${floor}`); failures++; continue }
-      const keyOf = (s) => norm(s.unit ?? `${letter}${p.unitFloor(floor)}${s.unitSuffix}`)
+      const keyOf = (s) => unitKeyForShape(s, letter, p.unitFloor(floor))
       const shapeKeys = new Set(map.shapes.map(keyOf))
-      const dataKeys = new Set(rows.map((r) => norm(r.apartment)))
+      const dataKeys = new Set(rows.map((r) => normalizeUnitId(r.apartment)))
       for (const row of rows) {
-        if (!shapeKeys.has(norm(row.apartment))) {
+        if (!shapeKeys.has(normalizeUnitId(row.apartment))) {
           console.error(`NO SHAPE for ${row.apartment} (${p.id} ${letter} floor ${floor})`)
           failures++
         }

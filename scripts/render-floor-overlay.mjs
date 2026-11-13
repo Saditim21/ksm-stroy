@@ -6,6 +6,8 @@
 import sharp from 'sharp'
 import { readFileSync, mkdirSync, existsSync } from 'node:fs'
 import { basename, join } from 'node:path'
+// The page's own outline maths (import-free), so labels land where the page puts them.
+import { centroid, toPoints } from '../src/utils/polygon.js'
 
 // imageDir may be a comma-separated list — Golden Residence keeps its Block A and
 // Block B plans in sibling directories, so one map file spans several dirs.
@@ -19,9 +21,10 @@ const resolve = (name) => {
 const maps = JSON.parse(readFileSync(mapFile, 'utf8'))
 mkdirSync(outDir, { recursive: true })
 
-// The app labels a shape at its vertex-average centroid (utils/buildingMaps
-// polygonCentroid), so warn when that point falls outside the polygon — those
-// labels would render on top of a neighbouring apartment.
+// The app labels a shape at its area centroid (utils/buildingMaps
+// polygonCentroid, from utils/polygon.js), so warn when that point falls
+// outside the polygon — those labels would render on top of a neighbouring
+// apartment.
 const inside = ([px, py], poly) => {
   let hit = false
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -34,13 +37,12 @@ const inside = ([px, py], poly) => {
 for (const [i, m] of maps.entries()) {
   for (const s of m.shapes) {
     for (const p of s.polygons) {
-      const c = p.reduce(([ax, ay], [x, y]) => [ax + x / p.length, ay + y / p.length], [0, 0])
-      if (!inside(c, p)) console.warn(`WARN centroid outside polygon: map ${i} shape ${s.unit ?? s.unitSuffix}`)
+      if (!inside(centroid(p), p)) console.warn(`WARN centroid outside polygon: map ${i} shape ${s.unit ?? s.unitSuffix}`)
     }
   }
   const svgShapes = m.shapes.flatMap((s) => s.polygons.map((p) => {
-    const pts = p.map(([x, y]) => `${x},${y}`).join(' ')
-    const c = p.reduce(([ax, ay], [x, y]) => [ax + x / p.length, ay + y / p.length], [0, 0])
+    const pts = toPoints(p)
+    const c = centroid(p)
     const label = s.unit ?? s.unitSuffix
     return `<polygon points="${pts}" fill="rgba(16,185,129,0.35)" stroke="red" stroke-width="3"/>` +
       `<text x="${c[0]}" y="${c[1]}" font-size="${m.imageWidth / 50}" text-anchor="middle" fill="black">${label}</text>`

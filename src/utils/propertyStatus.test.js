@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { STATUS, normalizeStatus, summarizeStatuses } from './propertyStatus'
+import { STATUS, STATUS_KEY, STATUS_LABEL, normalizeStatus, statusKey, summarizeStatuses } from './propertyStatus'
 
 // Production contract (main @7a741d5): the owner picks one of four values in
 // the "Статус" column of the Google Sheets. Sold beats reserved beats blocked
@@ -85,5 +85,69 @@ describe('summarizeStatuses', () => {
 
   it('returns zeros for an empty list', () => {
     expect(summarizeStatuses([])).toEqual({ total: 0, available: 0, reserved: 0, sold: 0, blocked: 0 })
+  })
+
+  it('counts status keys the same way as sheet text', () => {
+    expect(summarizeStatuses(['available', 'reserved', 'sold', 'blocked', 'unknown'])).toEqual({
+      total: 5, available: 1, reserved: 1, sold: 1, blocked: 1,
+    })
+  })
+})
+
+// The explorer's view of the same column: one key per status, from the same
+// rules, so the explorer and the production pages never disagree about a unit.
+describe('statusKey', () => {
+  it('exposes the five keys as STATUS_KEY', () => {
+    expect(STATUS_KEY).toEqual({
+      AVAILABLE: 'available', RESERVED: 'reserved', SOLD: 'sold', BLOCKED: 'blocked', UNKNOWN: 'unknown',
+    })
+  })
+
+  it.each([
+    ['Свободен', 'available'],
+    ['  свободен ', 'available'],
+    ['Резервиран', 'reserved'],
+    ['Продаден', 'sold'],
+    ['Продадени', 'sold'],
+    ['Блокиран', 'blocked'],
+    ['BLOCKED', 'blocked'],
+    ['free', 'available'],
+  ])('%j is %s', (raw, key) => {
+    expect(statusKey(raw)).toBe(key)
+  })
+
+  it('treats an empty cell as available, as normalizeStatus does', () => {
+    expect(statusKey('')).toBe('available')
+    expect(statusKey('   ')).toBe('available')
+    expect(statusKey(null)).toBe('available')
+    expect(statusKey(undefined)).toBe('available')
+  })
+
+  it('applies the same precedence: sold, reserved, blocked, available', () => {
+    expect(statusKey('Свободен - блокиран')).toBe('blocked')
+    expect(statusKey('Резервиран (блокиран)')).toBe('reserved')
+    expect(statusKey('Резервиран - продаден')).toBe('sold')
+  })
+
+  it('reads text it does not know as unknown', () => {
+    expect(statusKey('Скоро')).toBe('unknown')
+    expect(statusKey('В строеж')).toBe('unknown')
+    expect(statusKey('constructor')).toBe('unknown')
+  })
+
+  it('maps every canonical value and every key onto itself', () => {
+    expect(Object.values(STATUS).map(statusKey)).toEqual(['available', 'reserved', 'sold', 'blocked'])
+    for (const key of Object.values(STATUS_KEY)) expect(statusKey(key)).toBe(key)
+  })
+
+  it('has a label for every key, with the singular "Продаден"', () => {
+    expect(STATUS_LABEL).toEqual({
+      available: 'Свободен',
+      reserved: 'Резервиран',
+      sold: 'Продаден',
+      blocked: 'Блокиран',
+      unknown: 'Няма информация',
+    })
+    expect(Object.isFrozen(STATUS_LABEL)).toBe(true)
   })
 })

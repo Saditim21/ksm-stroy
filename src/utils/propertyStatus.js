@@ -2,13 +2,17 @@
  * Property status — the single source of truth for the "Статус" column.
  *
  * The owner picks one of four dropdown values in the Google Sheets tabs
- * (Блок А, Блок Б, Гаражи, Паркоместа):
+ * (Блок А, Блок Б, Гаражи, Паркоместа, Многофамилна Вход А / Вход Б):
  *
  *   Свободен · Резервиран · Продаден · Блокиран
  *
  * Every value the site renders or counts passes through normalizeStatus()
  * first, so casing, stray whitespace, the plural "Продадени" and the English
  * equivalents all collapse to one canonical value per status.
+ *
+ * The explorer works with status keys (STATUS_KEY) rather than the Bulgarian
+ * values; statusKey() derives them from the same rules, so the two never
+ * disagree about a unit.
  */
 
 export const STATUS = Object.freeze({
@@ -19,14 +23,47 @@ export const STATUS = Object.freeze({
   BLOCKED: 'Блокиран',
 });
 
-// Order matters only in that "свободен" is checked last, so a value such as
-// "Свободен - блокиран" resolves to the more restrictive status.
+/**
+ * One key per canonical status, plus "unknown" for text normalizeStatus()
+ * passes through. UI code keys its colours and labels by these.
+ */
+export const STATUS_KEY = Object.freeze({
+  AVAILABLE: 'available',
+  RESERVED: 'reserved',
+  SOLD: 'sold',
+  BLOCKED: 'blocked',
+  UNKNOWN: 'unknown',
+});
+
+/**
+ * What a visitor, or a screen reader, is told for each key. "Продаден" is
+ * singular here because a label names one unit. Folded in from the Golden
+ * Residence landing (golden-residence src/utils/status.js @944bb03).
+ */
+export const STATUS_LABEL = Object.freeze({
+  available: 'Свободен',
+  reserved: 'Резервиран',
+  sold: 'Продаден',
+  blocked: 'Блокиран',
+  unknown: 'Няма информация',
+});
+
+// Sold beats reserved beats blocked beats available: "свободен" is checked
+// last, so a value such as "Свободен - блокиран" resolves to the more
+// restrictive status.
 const MATCHERS = [
   [STATUS.SOLD, ['продаден', 'sold']],
   [STATUS.RESERVED, ['резервиран', 'reserved']],
   [STATUS.BLOCKED, ['блокиран', 'blocked']],
   [STATUS.AVAILABLE, ['свободен', 'available', 'free']],
 ];
+
+const KEY_OF = new Map([
+  [STATUS.AVAILABLE, STATUS_KEY.AVAILABLE],
+  [STATUS.RESERVED, STATUS_KEY.RESERVED],
+  [STATUS.SOLD, STATUS_KEY.SOLD],
+  [STATUS.BLOCKED, STATUS_KEY.BLOCKED],
+]);
 
 /**
  * Map a raw sheet cell to a canonical status.
@@ -46,21 +83,26 @@ export function normalizeStatus(raw) {
 }
 
 /**
- * Count a list of raw or canonical statuses.
- * Returns { total, available, reserved, sold, blocked }.
+ * Map a raw sheet cell, a canonical status or a key to its STATUS_KEY.
+ * Same rules as normalizeStatus(): an empty cell is available, and text it
+ * passes through is "unknown".
+ */
+export function statusKey(raw) {
+  return KEY_OF.get(normalizeStatus(raw)) ?? STATUS_KEY.UNKNOWN;
+}
+
+/**
+ * Count a list of raw or canonical statuses (or keys).
+ * Returns { total, available, reserved, sold, blocked }; unknown text counts
+ * in the total only.
  */
 export function summarizeStatuses(statuses) {
   const summary = { total: 0, available: 0, reserved: 0, sold: 0, blocked: 0 };
 
   for (const raw of statuses) {
     summary.total += 1;
-    switch (normalizeStatus(raw)) {
-      case STATUS.AVAILABLE: summary.available += 1; break;
-      case STATUS.RESERVED: summary.reserved += 1; break;
-      case STATUS.SOLD: summary.sold += 1; break;
-      case STATUS.BLOCKED: summary.blocked += 1; break;
-      default: break;
-    }
+    const key = statusKey(raw);
+    if (key !== STATUS_KEY.UNKNOWN) summary[key] += 1;
   }
 
   return summary;

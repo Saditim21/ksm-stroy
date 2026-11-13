@@ -1,13 +1,19 @@
-import { normalizeUnitId } from './availability'
+// Lookups over the explorer maps in src/data/maps. The outline maths is
+// polygon.js's and the unit ids are units.js's, so the page, the tracer and
+// scripts/validate-maps.mjs all agree. Explicit .js extensions: that script
+// loads this file in Node.
+import { centroid, toPoints } from './polygon.js'
+import { normalizeUnitId } from './units.js'
 
 export function polygonToPoints(polygon) {
-  return polygon.map(([x, y]) => `${x},${y}`).join(' ')
+  return toPoints(polygon)
 }
 
+// Where a shape's label goes: its area centroid. A mean of the vertices drifts
+// toward whichever side has more points.
 export function polygonCentroid(polygon) {
-  const n = polygon.length || 1
-  const [sx, sy] = polygon.reduce(([ax, ay], [x, y]) => [ax + x, ay + y], [0, 0])
-  return { x: sx / n, y: sy / n }
+  const [x, y] = centroid(polygon)
+  return { x, y }
 }
 
 export function findFloorMap(floorMaps, projectId, blockLetter, floor) {
