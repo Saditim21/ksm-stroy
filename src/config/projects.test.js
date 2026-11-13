@@ -50,3 +50,16 @@ test('the base image dims mirror the building map coordinate space', () => {
     expect(project.building.image.height).toBe(project.building.map.imageHeight)
   }
 })
+
+// Redesign v1 showed Block А's floor-2 drawing on floor 1, title block "етаж 2"
+// included, although the floor-1 drawing exists.
+test('every Golden Residence floor shows its own drawing', () => {
+  const plans = PROJECTS['golden-residence'].planImages
+  for (const [block, letter] of [['block-a', 'a'], ['block-b', 'b']]) {
+    for (const floor of PROJECTS['golden-residence'].floors[block]) {
+      expect(decodeURI(plans[block][floor]), `${block} floor ${floor}`).toMatch(
+        new RegExp(`/architecture-${letter}-floor-${floor}\\.webp$`),
+      )
+    }
+  }
+})

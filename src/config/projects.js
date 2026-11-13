@@ -11,7 +11,9 @@ import goldenFloorMaps from '../data/maps/golden-residence.floors.json'
 import mnogoBuildingMap from '../data/maps/mnogofamilna.building.json'
 import mnogoFloorMaps from '../data/maps/mnogofamilna.floors.json'
 
-// Golden Residence architecture plans (imported so Vite bundles them for production)
+// Golden Residence architecture plans (imported so Vite bundles them for production).
+// Block А's floor-1 drawing sits in the project folder itself, not in architectures-a/.
+import archA1 from '../assets/продажби/project 2/architecture-a-floor-1.webp'
 import archA2 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-2.webp'
 import archA3 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-3.webp'
 import archA4 from '../assets/продажби/project 2/architectures-a/architecture-a-floor-4.webp'
@@ -42,10 +44,11 @@ const GOLDEN_FLOORS = [1, 2, 3, 4, 5, 6, 7, 8]
 // the first residential level of Многофамилна сграда is key 2.
 const MNOGO_FLOORS = [2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-// Block A of Golden Residence has no floor-1 plan drawing; its layout is
-// identical to floor 2, so floor 2's plan is reused. (The drawing's title block
-// still reads "етаж 2" — a known cosmetic compromise.)
-const goldenPlansA = { 1: archA2, 2: archA2, 3: archA3, 4: archA4, 5: archA5, 6: archA6, 7: archA7, 8: archA8 }
+// Every floor shows its own drawing. Each block's apartment outlines were
+// traced on its floor-2 drawing and serve floors 1-8 (golden-residence.floors.json):
+// the partitions are the same on every floor, floor 1 included; only floor 1's
+// terraces differ, and they lie outside the outlines.
+const goldenPlansA = { 1: archA1, 2: archA2, 3: archA3, 4: archA4, 5: archA5, 6: archA6, 7: archA7, 8: archA8 }
 const goldenPlansB = { 1: archB1, 2: archB2, 3: archB3, 4: archB4, 5: archB5, 6: archB6, 7: archB7, 8: archB8 }
 
 const mnogoPlans = Object.fromEntries(MNOGO_FLOORS.map((floor) => [floor, mnogoFloorPlan]))
