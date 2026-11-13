@@ -90,3 +90,22 @@ test('a good sheet still returns data (guard does not over-reach)', async () => 
     1: [expect.objectContaining({ apartment: 'А 101' }), expect.anything()],
   })
 })
+
+// A custom request header (there used to be Cache-Control: no-cache) makes the
+// fetch a non-simple CORS request, so the browser preflights every sheet with
+// an OPTIONS request, twice because Google redirects the published URL. A
+// GET with only cache: 'no-store' and the _cb cache-buster needs none.
+test('sheets are fetched with no custom request headers', async () => {
+  vi.stubEnv('VITE_GOOGLE_SHEET_PARKING', 'https://docs.google.com/spreadsheets/d/e/x/pub?gid=3&single=true&output=csv')
+  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_BLOCK_A', CSV)
+
+  await expect(svc.fetchApartmentData('blockA')).resolves.not.toBeNull()
+  await expect(svc.fetchGarageData('parking')).resolves.not.toBeNull()
+
+  expect(fetch).toHaveBeenCalledTimes(2)
+  for (const [url, init] of fetch.mock.calls) {
+    expect(typeof url).toBe('string')
+    expect(url).toMatch(/^https:\/\/docs\.google\.com\/.*&_cb=\d+$/)
+    expect(init).toEqual({ cache: 'no-store' })
+  }
+})

@@ -121,6 +121,26 @@ export function transformToApartmentData(rawData) {
 }
 
 /**
+ * Fetch a published sheet's CSV text, past every cache on the way.
+ *
+ * No custom request header on purpose: one (it used to be Cache-Control)
+ * turns the fetch into a non-simple CORS request, which the browser preflights
+ * with an OPTIONS request, once for docs.google.com and once more after it
+ * redirects to googleusercontent.com. cache: 'no-store' and the _cb
+ * cache-buster keep the data fresh without it.
+ */
+async function fetchSheetCSV(sheetUrl) {
+  // Add cache-busting parameter to bypass Google's CDN cache
+  const response = await fetch(`${sheetUrl}&_cb=${Date.now()}`, { cache: 'no-store' });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sheet: ${response.status}`);
+  }
+
+  return response.text();
+}
+
+/**
  * Fetch apartment data from Google Sheets
  */
 export async function fetchApartmentData(block = 'blockA') {
@@ -140,22 +160,7 @@ export async function fetchApartmentData(block = 'blockA') {
   }
 
   try {
-    // Add cache-busting parameter to bypass Google's CDN cache
-    const cacheBuster = `&_cb=${Date.now()}`;
-    const urlWithCacheBuster = sheetUrl + cacheBuster;
-
-    const response = await fetch(urlWithCacheBuster, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch sheet: ${response.status}`);
-    }
-
-    const csvText = await response.text();
+    const csvText = await fetchSheetCSV(sheetUrl);
     const rawData = parseCSV(csvText);
     const apartmentData = transformToApartmentData(rawData);
 
@@ -231,22 +236,7 @@ export async function fetchGarageData(type = 'garages') {
   }
 
   try {
-    // Add cache-busting parameter to bypass Google's CDN cache
-    const cacheBuster = `&_cb=${Date.now()}`;
-    const urlWithCacheBuster = sheetUrl + cacheBuster;
-
-    const response = await fetch(urlWithCacheBuster, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch sheet: ${response.status}`);
-    }
-
-    const csvText = await response.text();
+    const csvText = await fetchSheetCSV(sheetUrl);
     const rawData = parseCSV(csvText);
     const garageData = transformToGarageData(rawData);
 
