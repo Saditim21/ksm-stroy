@@ -45,5 +45,14 @@ export default defineConfig({
     treeShaking: true,
     // Remove unused code in development for faster builds
     legalComments: 'none'
+  },
+  // Vitest. tests/ holds the production contract tests; api/ must never hold
+  // a test, because Vercel deploys every file in api/ as a serverless function.
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.js'],
+    include: ['src/**/*.test.{js,jsx}', 'tests/**/*.test.{js,jsx}'],
+    css: false,
   }
 })
