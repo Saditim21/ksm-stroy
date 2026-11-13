@@ -1,3 +1,5 @@
+import { gsap, ScrollTrigger } from '../utils/gsap'
+
 // Copied from the Golden Residence landing (src/test/media.js @944bb03).
 //
 // jsdom has no window.matchMedia, so by default every component sees motion as
@@ -9,11 +11,6 @@
 // Each query gets one list for the life of the mock, so a test can fetch it
 // with window.matchMedia(query), set `matches` and dispatch a `change` event,
 // the way a browser does when the visitor changes the setting.
-//
-// Not yet here: golden-residence's copy also calls
-// gsap.registerPlugin(ScrollTrigger) after installing the mock, because its
-// src/utils/gsap.js skips ScrollTrigger in a window without matchMedia. Add
-// that line back when src/utils/gsap.js is ported.
 export function mockMatchMedia({ reduce = false, fine = false, coarse = false } = {}) {
   const had = Object.prototype.hasOwnProperty.call(window, 'matchMedia')
   const previous = window.matchMedia
@@ -28,6 +25,9 @@ export function mockMatchMedia({ reduce = false, fine = false, coarse = false } 
     if (!lists.has(query)) lists.set(query, mediaList(query, answer(query)))
     return lists.get(query)
   }
+  // src/utils/gsap.js skips ScrollTrigger in a window without matchMedia; this
+  // window has one now. A second registration is a no-op.
+  gsap.registerPlugin(ScrollTrigger)
   return function restore() {
     if (had) window.matchMedia = previous
     else delete window.matchMedia
