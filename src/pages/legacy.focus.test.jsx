@@ -123,3 +123,20 @@ it.each([
   }
   expect(onDusk(within(viewer).getByRole('button', { name: 'Контакт' }))).toBe(false)
 }, 30000)
+
+// A project page's block cards: each card sits on the light page, so its own
+// ring stays ink; „Преглед на блока“ inside it sits on the photo's dark
+// overlay. (framer-motion makes both focusable: they respond to a tap.)
+it.each([
+  { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection },
+  { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
+])('$path: „Преглед на блока“ on each card’s photo is on dusk; the cards are not', ({ Page }) => {
+  renderPage(Page)
+
+  const pills = screen.getAllByText('Преглед на блока').map((label) => label.parentElement)
+  expect(pills).toHaveLength(2)
+  for (const pill of pills) expect(onDusk(pill)).toBe(true)
+  for (const name of ['БЛОК А', 'БЛОК Б']) {
+    expect(onDusk(screen.getByRole('heading', { name }).closest('.cursor-pointer')), name).toBe(false)
+  }
+})

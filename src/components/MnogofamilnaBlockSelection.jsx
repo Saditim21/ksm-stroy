@@ -146,7 +146,10 @@ const MnogofamilnaBlockSelection = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
 
               <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                <div className="text-center text-white max-w-sm">
+                {/* On the photo's dark overlay (.on-dusk): „Преглед на блока“
+                    gets the paper focus ring. The card's own ring is drawn on
+                    the light page and stays ink. Block Б's card likewise. */}
+                <div className="on-dusk text-center text-white max-w-sm">
                   <motion.div
                     initial={false}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -205,7 +208,7 @@ const MnogofamilnaBlockSelection = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
 
               <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                <div className="text-center text-white max-w-sm">
+                <div className="on-dusk text-center text-white max-w-sm">
                   <motion.div
                     initial={false}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
