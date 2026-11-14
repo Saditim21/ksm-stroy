@@ -1,9 +1,6 @@
-import { EASE_OUT, EASE_IN_OUT, EASE_FOLLOW, LINE_STAGGER, CHAR_STAGGER, MD_UP, CLIP_HIDDEN, CLIP_SHOWN, scrubDrift } from './motion'
+import { EASE_OUT, EASE_IN_OUT, EASE_FOLLOW, LINE_STAGGER, CHAR_STAGGER, MD_UP, CLIP_HIDDEN, CLIP_SHOWN } from './motion'
 
 // From golden-residence src/utils/motion.test.js @944bb03.
-
-// The gsap a useMotion setup is handed, as far as scrubDrift uses it.
-const fakeGsap = (tween = {}) => ({ fromTo: vi.fn(() => tween) })
 
 test('the GSAP eases and staggers are the landing\'s', () => {
   expect(EASE_OUT).toBe('expo.out')
@@ -32,29 +29,4 @@ test('no source file but motion.js spells the md query out', () => {
 test('the clip constants are a bottom-up inset uncover', () => {
   expect(CLIP_HIDDEN).toBe('inset(100% 0% 0% 0%)')
   expect(CLIP_SHOWN).toBe('inset(0% 0% 0% 0%)')
-})
-
-test('scrubDrift scrubs a held-scale drift and merges the caller trigger', () => {
-  const tween = {}
-  const gsap = fakeGsap(tween)
-  const el = document.createElement('div')
-  const frame = document.createElement('div')
-  expect(scrubDrift(gsap, el, { trigger: frame, start: 'top bottom', end: 'bottom top' })).toBe(tween)
-  expect(gsap.fromTo).toHaveBeenCalledTimes(1)
-  expect(gsap.fromTo).toHaveBeenCalledWith(
-    el,
-    { yPercent: -6, scale: 1.14 },
-    {
-      yPercent: 6,
-      scale: 1.14,
-      ease: 'none',
-      scrollTrigger: { scrub: true, trigger: frame, start: 'top bottom', end: 'bottom top' },
-    },
-  )
-})
-
-test('scrubDrift lets the caller turn scrub off or soften it', () => {
-  const gsap = fakeGsap()
-  scrubDrift(gsap, document.createElement('div'), { scrub: 0.5 })
-  expect(gsap.fromTo.mock.calls[0][2].scrollTrigger).toEqual({ scrub: 0.5 })
 })

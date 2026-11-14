@@ -74,9 +74,10 @@ pages still animate with framer-motion; Lenis runs on every page.
   hidden or offset values. With reduced motion, in tests and without
   JavaScript the page renders complete and static, so markup never ships
   `opacity: 0`.
-- Scroll drift (`scrubDrift`, called with the setup's `gsap`) runs from `md`
-  up only, through `gsap.matchMedia()` and `MD_UP`; `src/utils/motion.js`
-  holds those and the shared eases and staggers.
+- `src/utils/motion.js` holds the shared eases and staggers, the clip-path
+  pair of an uncover, and `MD_UP`, the `md` breakpoint as a media query for
+  `gsap.matchMedia()`. There is no generic scroll drift (parallax): spec
+  §5.2.5 rules it out.
 - Hooks that ask the browser (`useMotionAllowed`, `useMediaQuery`,
   `useCoarsePointer`, `useFinePointer`) answer `false` on the server and while
   the page hydrates, then the browser's answer. A view that shows something

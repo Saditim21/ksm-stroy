@@ -110,7 +110,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'framer-motion', 'swiper/react', 'swiper/modules', 'react-hook-form', '@emailjs/browser',
-      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', '@gsap/react', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
+      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
     ],
   },
   // No manualChunks: React Router splits the build per route.
