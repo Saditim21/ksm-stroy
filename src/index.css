@@ -267,19 +267,16 @@
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* Utility to prevent iOS overscroll whitespace flashes under fixed elements */
-html, body, #root {
-  height: 100%;
-  /* Prevent pull-to-refresh and overscroll effects */
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
-}
+/* html and body are as tall as their content, never `height: 100%`. With
+   that height, once useScrollLock hid <html>'s overflow, the body became a
+   scroller one screen tall, the page lost its length and jumped to the top:
+   opening the phone menu without Lenis (reduced motion, Save-Data, the motion
+   engine not loaded) sent the reader to the top. Lenis needs the page as tall
+   as its content too. */
 
 /* Lenis (src/motion/SmoothScroll.jsx) puts these classes on <html> while it
-   runs, from the React Router spike. The page must be as tall as its content
-   for Lenis to scroll it, and a stopped Lenis (a scroll lock) leaves the page
-   still. */
-html.lenis, html.lenis body { height: auto; }
+   runs, from the React Router spike. A stopped Lenis (a scroll lock) leaves
+   the page still. */
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 

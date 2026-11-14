@@ -24,8 +24,7 @@ const LAG_ADJUSTED = 33
 //
 // GSAP's ticker drives Lenis (`autoRaf: false`), so the scroll position and
 // every ScrollTrigger move in the same frame, and Lenis' scroll events update
-// ScrollTrigger. While Lenis runs, it puts the class `lenis` on <html>, which
-// lets the page grow past the viewport (src/index.css), and
+// ScrollTrigger. While Lenis runs, it puts the class `lenis` on <html>, and
 // `<html data-motion="on">` tells the CSS that motion is on.
 export default function SmoothScroll({ children }) {
   const motionOk = useMotionAllowed()
@@ -82,11 +81,10 @@ function start({ gsap, ScrollTrigger, Lenis }, content) {
   // the page grows: the availability data arriving, an image landing above a
   // trigger, a route's page replacing the last one. ScrollTrigger does not
   // watch for that. Lenis watches `document.documentElement`, 250 ms
-  // debounced, and that box grows with the page only because Lenis' class
-  // releases the `height: 100%` src/index.css gives html and body. (Redesign
-  // v1, 5cecebb, had no such release: Lenis measured once, while the route was
-  // still a loader, and every wheel gesture on the real page stopped dead at
-  // 388px.)
+  // debounced, which grows with the page because src/index.css never fixes
+  // the height of html or body. (Redesign v1, 5cecebb, kept them at
+  // `height: 100%`: Lenis measured once, while the route was still a loader,
+  // and every wheel gesture on the real page stopped dead at 388px.)
   //
   // The wrapper SmoothScroll renders is the first box in the tree whose height
   // IS the content height. Observing it re-measures both, within a frame of

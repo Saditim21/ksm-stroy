@@ -22,6 +22,10 @@
 //     to, must be visible too. jsdom cannot see CSS hide anything; this can.
 // And a path fails when its HTML, loaded with JavaScript off, has no H1.
 //
+// One more check, the scroll lock: on a phone with reduced motion (so without
+// Lenis), the page scrolled to y=1500, the menu opens and Esc closes it; the
+// page must stay at y=1500 throughout.
+//
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
 // 3.5 s after the load event in Chrome 157 (for an as="fetch" preload, such
@@ -31,8 +35,9 @@
 // <os tmpdir>/ksmstroy-smoke). Chrome is $CHROME_PATH, else its usual place
 // on Windows and macOS, else `google-chrome` on the PATH.
 //
-// usage: node scripts/smoke/smoke.mjs [path …]
-//   with paths, only those (a path not listed below is expected to answer 200).
+// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock]
+//   with arguments, only the paths given (a path not listed below is
+//   expected to answer 200), and the scroll lock only with --scroll-lock.
 
 import fs from 'node:fs'
 import os from 'node:os'
@@ -42,7 +47,7 @@ import config from '../../react-router.config.js'
 import { BUILD_DIR, DEFAULT_PORT, createStaticServer } from './static-server.mjs'
 
 // The functions handed to page.evaluate() run in the page, with its globals.
-/* global document, getComputedStyle, innerHeight, innerWidth, scrollY */
+/* global document, getComputedStyle, innerHeight, innerWidth, scrollY, window */
 
 const ORIGIN = `http://127.0.0.1:${DEFAULT_PORT}`
 const SHOTS = path.resolve(process.env.SMOKE_SHOTS || path.join(os.tmpdir(), 'ksmstroy-smoke'))
@@ -81,8 +86,14 @@ const VISITS = [
   { path: '/index.html', redirect: { status: 308, to: '/' } },
   { path: '/About', status: 404, text: NOT_FOUND_TEXT },
 ]
-const ONLY = process.argv.slice(2)
-const RUN = ONLY.length === 0 ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path === only) ?? { path: only })
+const ARGS = process.argv.slice(2)
+const FULL_RUN = ARGS.length === 0
+const ONLY = ARGS.filter((arg) => arg !== '--scroll-lock')
+const RUN = FULL_RUN ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path === only) ?? { path: only })
+const RUN_SCROLL_LOCK = FULL_RUN || ARGS.includes('--scroll-lock')
+
+// The scroll lock check: where the page is scrolled to when the menu opens.
+const SCROLL_LOCK = { path: '/about', y: 1500 }
 
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH
@@ -295,6 +306,55 @@ async function headingWithoutJs(browser, pathname) {
   }
 }
 
+// The scroll lock (useScrollLock) on a phone with reduced motion, where Lenis
+// does not run: the page scrolled to SCROLL_LOCK.y, the menu opened from its
+// button and closed with Esc. The page must not move. The button is clicked
+// in the page (the header has slid away by then), as a tap on it would.
+async function scrollLock(browser, userAgents) {
+  const { y } = SCROLL_LOCK
+  const problems = []
+  const context = await browser.createBrowserContext()
+  try {
+    const page = await context.newPage()
+    page.on('pageerror', (error) => problems.push(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
+    await page.setViewport(VIEWPORTS[1].viewport)
+    await page.setUserAgent(userAgents.mobile)
+    await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }])
+    await page.goto(`${ORIGIN}${SCROLL_LOCK.path}`, { waitUntil: 'load', timeout: 30000 })
+    await page.waitForFunction(() => {
+      const main = document.getElementById('main')
+      return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
+    }, { timeout: HYDRATION_TIMEOUT_MS })
+    // Scrolled there once the page has loaded what it shows near that point,
+    // so nothing loading above moves it afterwards.
+    const scrollTo = (to) => page.evaluate((top) => window.scrollTo(0, top), to)
+    await scrollTo(y)
+    await page.waitForNetworkIdle({ idleTime: 500, timeout: 10000 }).catch(() => {})
+    await scrollTo(y)
+    await delay(300)
+    const at = () => page.evaluate(() => Math.round(scrollY))
+    const before = await at()
+    if (before !== y) return [`the page scrolled to ${before}, not ${y}: is it shorter than that?`]
+
+    await page.evaluate(() => document.querySelector('button[aria-label="Меню"]').click())
+    await page.waitForSelector('[role="dialog"][aria-label="Меню"]', { timeout: 5000 })
+    await delay(300)
+    const open = await at()
+    if (open !== y) problems.push(`scrollY ${open} while the menu is open, not ${y}`)
+
+    await page.keyboard.press('Escape')
+    await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), { timeout: 5000 })
+    await delay(300)
+    const closed = await at()
+    if (closed !== y) problems.push(`scrollY ${closed} after Esc closed the menu, not ${y}`)
+  } catch (error) {
+    problems.push(`the check stopped: ${error.message.split('\n')[0]}`)
+  } finally {
+    await context.close()
+  }
+  return problems
+}
+
 const COLUMNS = [44, 11, 42, 10, 10]
 const row = (cells) => `  ${cells.map((cell, i) => String(cell).padEnd(COLUMNS[i])).join(' ').trimEnd()}`
 const clip = (value, width) => (value.length > width ? `${value.slice(0, width - 1)}…` : value)
@@ -357,6 +417,13 @@ async function main() {
       const cells = results.map(({ problems }) => (problems.length === 0 ? 'ok' : `FAIL (${problems.length})`))
       console.log(row([clip(entry.path, COLUMNS[0]), results[0].statuses, heading.cell, ...cells]))
     }
+
+    if (RUN_SCROLL_LOCK) {
+      const label = `scroll lock: ${SCROLL_LOCK.path} at ${VIEWPORTS[1].label}, reduced motion, menu at y=${SCROLL_LOCK.y}`
+      const problems = await scrollLock(browser, userAgents)
+      for (const problem of problems) failures.push(`${label}: ${problem}`)
+      console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
+    }
   } finally {
     await browser?.close()
     server.closeAllConnections()
@@ -369,7 +436,7 @@ async function main() {
     for (const failure of failures) console.error(`  ${failure}`)
     return 1
   }
-  console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes (${seconds} s)`)
+  console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes${RUN_SCROLL_LOCK ? ' and the scroll lock' : ''} (${seconds} s)`)
   return 0
 }
 
