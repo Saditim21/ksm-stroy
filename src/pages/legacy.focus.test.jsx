@@ -2,7 +2,9 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { goOffline } from '../../tests/contracts/site'
+import { goOffline, renderSiteAt } from '../../tests/contracts/site'
+import GoldenResidenceBlockSelection from '../components/GoldenResidenceBlockSelection'
+import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 import HeroCarousel from '../components/ui/HeroCarousel'
 import { ApartmentProvider } from '../context/ApartmentContext'
 import Blog from './Blog'
@@ -82,3 +84,42 @@ it('/contact: the closing band is on dusk; the form is not', () => {
   }
   expect(onDusk(screen.getByRole('button', { name: /Изпрати съобщение/ }))).toBe(false)
 })
+
+// A project page's photo gallery and its full-screen viewer: dark throughout.
+it.each([
+  { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection },
+  { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
+])('$path: the photo gallery and its full-screen viewer are on dusk', async ({ Page }) => {
+  renderPage(Page)
+
+  fireEvent.click(screen.getByRole('button', { name: /Снимки/ }))
+  const gallery = (await screen.findByText('Галерия със снимки')).closest('.fixed')
+  const galleryControls = within(gallery).getAllByRole('button')
+  expect(galleryControls.length).toBeGreaterThan(0)
+  for (const control of galleryControls) expect(onDusk(control)).toBe(true)
+
+  fireEvent.click(within(gallery).getAllByRole('img')[0])
+  const viewer = (await screen.findByText('Кликнете навсякъде за затваряне')).closest('.fixed')
+  const viewerControls = within(viewer).getAllByRole('button')
+  expect(viewerControls.length).toBeGreaterThan(0)
+  for (const control of viewerControls) expect(onDusk(control)).toBe(true)
+})
+
+// A block page's full-screen floor plan, opened from a free apartment: its
+// bar and zoom controls sit on black; the gold card of the chosen apartment
+// does not, and its „Контакт“ keeps the ink ring.
+it.each([
+  { path: '/projects/golden-residence/block-a', floor: '1 етаж', apartment: 'А 101' },
+  { path: '/projects/mnogofamilna-sgrada/block-a', floor: 'Етаж 9', apartment: 'А-802' },
+])('$path: the full-screen plan’s bar and zoom controls are on dusk; the apartment’s gold card is not', async ({ path, floor, apartment }) => {
+  renderSiteAt(path)
+
+  fireEvent.click(await screen.findByText(floor, {}, { timeout: 15000 }))
+  const row = (await screen.findAllByText(apartment)).map((cell) => cell.closest('tr')).find(Boolean)
+  fireEvent.click(row)
+  const viewer = (await screen.findByRole('button', { name: '✕' })).closest('.fixed')
+  for (const name of ['✕', 'Увеличи', 'Намали', 'Нулирай']) {
+    expect(onDusk(within(viewer).getByRole('button', { name })), name).toBe(true)
+  }
+  expect(onDusk(within(viewer).getByRole('button', { name: 'Контакт' }))).toBe(false)
+}, 30000)

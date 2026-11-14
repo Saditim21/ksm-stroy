@@ -240,11 +240,12 @@ const GoldenResidenceBlockSelection = () => {
           </motion.div>
         </div>
 
-        {/* Creative Full-Page Gallery */}
+        {/* Creative Full-Page Gallery: dark throughout, so all of it is
+            .on-dusk (paper focus rings, src/index.css), as is the viewer. */}
         <AnimatePresence>
           {showGallery && (
             <motion.div
-              className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-50 overflow-y-auto"
+              className="on-dusk fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 z-50 overflow-y-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -335,7 +336,7 @@ const GoldenResidenceBlockSelection = () => {
         <AnimatePresence>
           {fullscreenImage && showGallery && (
             <motion.div
-              className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
+              className="on-dusk fixed inset-0 bg-black/95 z-[60] flex items-center justify-center p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

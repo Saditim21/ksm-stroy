@@ -730,12 +730,15 @@ const MnogofamilnaSingleBlock = ({ block }) => {
           </div>
         )}
 
-        {/* Fullscreen Architecture Plan Modal */}
+        {/* Fullscreen Architecture Plan Modal. Its header and zoom controls
+            sit on black and are .on-dusk (paper focus rings, src/index.css);
+            the modal as a whole is not, because the chosen apartment's card
+            on it is gold, where „Контакт“ keeps the ink ring. */}
         {isArchitecturePlanFullscreen && (
           <div className="fixed inset-0 bg-black bg-opacity-95 z-50">
             <div className="w-full h-full relative">
               {/* Header */}
-              <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-50 z-10 p-4 flex justify-between items-center text-white">
+              <div className="on-dusk absolute top-0 left-0 right-0 bg-black bg-opacity-50 z-10 p-4 flex justify-between items-center text-white">
                 <div className="flex items-center gap-4">
                   <h3 className="text-xl font-bold">
                     {blockTitle} - {selectedFloor === 10 ? 'Тавански етаж' : `Етаж ${selectedFloor}`} - Архитектурен план
@@ -790,7 +793,7 @@ const MnogofamilnaSingleBlock = ({ block }) => {
               </div>
 
               {/* Fullscreen Zoom Controls */}
-              <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+              <div className="on-dusk absolute bottom-4 right-4 flex flex-col gap-2 z-10">
                 <button
                   onClick={() => setFullscreenZoom(Math.min(fullscreenZoom + 0.2, 5))}
                   className="bg-white/90 hover:bg-white text-black p-3 rounded-lg shadow-lg transition-colors"
