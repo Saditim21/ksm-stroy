@@ -17,6 +17,8 @@
 
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
+import http from 'node:http'
+import https from 'node:https'
 import os from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -86,15 +88,27 @@ function lighthouse(url, output) {
   })
 }
 
+// Whether anything answers at `url`. Not fetch(): it refuses port 4190, the
+// smoke server's, which the Fetch standard lists as a bad port (Chrome loads it).
+function answers(url) {
+  return new Promise((resolve) => {
+    const request = (url.startsWith('https:') ? https : http).request(url, { method: 'HEAD', timeout: 5000 }, (response) => {
+      response.resume()
+      resolve(true)
+    })
+    request.on('timeout', () => request.destroy())
+    request.on('error', () => resolve(false))
+    request.end()
+  })
+}
+
 async function main(urls) {
   if (urls.length === 0) {
     console.error('usage: node scripts/perf/lighthouse.mjs <url> [url …]')
     return 1
   }
   for (const url of urls) {
-    try {
-      await fetch(url, { method: 'HEAD' })
-    } catch {
+    if (!(await answers(url))) {
       console.error(`perf: ${url} does not answer. Serve the build first: node scripts/smoke/static-server.mjs`)
       return 1
     }
