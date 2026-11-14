@@ -92,6 +92,12 @@
   .hero-title {
     @apply font-display text-display font-[420];
   }
+
+  /* The site's 12-column frame (spec §3.4): at most 1440 px wide, with 20 px
+     gutters on a phone, 32 px on a tablet and 56 px on a desktop. */
+  .site-wrap {
+    @apply mx-auto w-full max-w-[1440px] px-5 md:px-8 lg:px-14;
+  }
 }
 
 /* Custom scrollbar utilities for mobile responsiveness */
@@ -161,8 +167,12 @@
 }
 
 :root {
-  /* Adjusted by JS to match sticky header height */
-  --header-h: 56px;
+  /* The site header (src/shell/SiteHeader.jsx): the EU line and the bar under
+     it. The page starts below both, or below the EU line alone under an
+     overlay header (root.jsx). */
+  --eu-h: 36px;
+  --bar-h: 72px;
+  --header-h: calc(var(--eu-h) + var(--bar-h));
 }
 
 /* Safe-area aware horizontal + bottom padding helpers */
@@ -215,6 +225,16 @@ html.lenis, html.lenis body { height: auto; }
 ::view-transition-old(.page-out),
 ::view-transition-new(.page-in) {
   animation-duration: 260ms;
+}
+
+/* The header (src/shell/SiteHeader.jsx, view-transition-name: site-header)
+   stays out of the crossfade: it takes the new page's look at once, so paper
+   text over a hero never fades into ink text on paper (§5.2.10). */
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

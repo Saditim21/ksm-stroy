@@ -935,6 +935,9 @@ const MnogofamilnaSingleBlock = () => {
 
 export default MnogofamilnaSingleBlock;
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
+
 // The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
 // the page itself does.
 export const meta = ({ params }) => {

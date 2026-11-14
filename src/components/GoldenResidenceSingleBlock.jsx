@@ -1638,6 +1638,9 @@ const GoldenResidenceSingleBlock = () => {
 
 export default GoldenResidenceSingleBlock;
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence' }
+
 // The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
 // the page itself does.
 export const meta = ({ params }) => {

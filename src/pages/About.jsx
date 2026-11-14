@@ -884,6 +884,9 @@ const About = () => {
 
 export default About
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'solid' }
+
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({
   title: seoData.about.title,

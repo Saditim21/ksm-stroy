@@ -451,6 +451,12 @@ const MnogofamilnaBlockSelection = () => {
 
 export default MnogofamilnaBlockSelection;
 
+// How the site's shell frames this page (src/shell/handle.js). Solid until
+// the page is rebuilt around its hero (M2), and overlay from then on: this
+// legacy page opens on a light ground, where the see-through header's paper
+// text would not read.
+export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
+
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({
   title: 'Многофамилна жилищна сграда - KSM Stroy',

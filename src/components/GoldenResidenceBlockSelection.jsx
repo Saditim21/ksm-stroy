@@ -384,6 +384,12 @@ const GoldenResidenceBlockSelection = () => {
 
 export default GoldenResidenceBlockSelection;
 
+// How the site's shell frames this page (src/shell/handle.js). Solid until
+// the page is rebuilt around its hero (M2), and overlay from then on: this
+// legacy page opens on a light ground, where the see-through header's paper
+// text would not read.
+export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence' }
+
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({
   title: 'Golden Residence - KSM Stroy',

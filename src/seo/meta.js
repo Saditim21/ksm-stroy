@@ -1,6 +1,8 @@
+import { SITE } from '../config/site'
+
 // The live site's origin: canonical links and Open Graph URLs point here.
 // (Production's head pointed at ksmstroy.bg, which does not resolve.)
-export const SITE_URL = 'https://www.ksmstroy.com'
+export const SITE_URL = SITE.origin
 
 // Production's fallback share image (src/components/common/SEO.jsx on main).
 const DEFAULT_IMAGE = '/assets/images/slider01.jpg'

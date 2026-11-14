@@ -18,6 +18,8 @@ export default [
   route('projects/:id', 'routes/projects-id-redirect.jsx'),
   route('contact', 'pages/Contact.jsx'),
   route('blog', 'pages/Blog.jsx'),
+  // The page about the EU project, which the EU line on every page links to.
+  route('eu-proekt', 'routes/eu-proekt.jsx'),
   // Under the dev server only: the polygon tracer for the explorer maps
   // (src/data/maps) and the gallery of the shared primitives
   // (src/components/ui). A production build has neither route;

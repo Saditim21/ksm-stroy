@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useState, ViewTransition } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation } from 'react-router'
-import Navbar from './components/common/Navbar'
-import Footer from './components/common/Footer'
 import { ApartmentProvider } from './context/ApartmentContext'
 import LenisScrollSync from './motion/LenisScrollSync'
 import SmoothScroll from './motion/SmoothScroll'
 import { SITE_URL } from './seo/meta'
+import SiteFooter from './shell/SiteFooter'
+import SiteHeader from './shell/SiteHeader'
+import { useRouteHandle } from './shell/handle'
 import { SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { seoData } from './utils/seo'
@@ -69,7 +70,9 @@ const LOCAL_BUSINESS = {
   },
 }
 
-const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#fafafa}'
+// The page's ground from the first paint, before the stylesheet: paper
+// (spec §3.1), the colour of the header's EU line and its solid bar.
+const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#F1F2EF}'
 
 export function Layout({ children }) {
   return (
@@ -136,19 +139,30 @@ function RouteTransition() {
   )
 }
 
+// The site's shell (src/shell) around every page: the fixed header with the
+// EU line, the page, the footer. The header is out of the flow, so the page
+// starts below it, or, under an overlay header (the route's handle,
+// src/shell/handle.js), right below the EU line, its hero running under the
+// see-through bar.
+//
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
 // scrolls natively and SmoothScroll is a plain wrapper.
 export default function App() {
+  const { header } = useRouteHandle()
   return (
     <ApartmentProvider>
       <SmoothScroll>
-        <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
-          <Navbar />
-          <main className="flex-1 overscroll-none">
+        <div className="flex min-h-screen flex-col overscroll-none">
+          <SiteHeader />
+          <main
+            id="main"
+            tabIndex={-1}
+            className={`flex-1 overscroll-none focus:outline-none ${header === 'overlay' ? 'pt-[var(--eu-h)]' : 'pt-[var(--header-h)]'}`}
+          >
             <RouteTransition />
           </main>
-          <Footer />
+          <SiteFooter />
         </div>
       </SmoothScroll>
       <ConditionalAnalytics />

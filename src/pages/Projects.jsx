@@ -1467,6 +1467,9 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
 
 export default Sales
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'solid' }
+
 // The page's head (root.jsx <Meta/>): production's strings for this page, and
 // its first property's photo, as before.
 export const meta = () => pageMeta({

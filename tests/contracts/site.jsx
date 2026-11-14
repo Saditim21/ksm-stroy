@@ -12,7 +12,8 @@ import routes from '../../src/routes'
 const modules = import.meta.glob(['/src/**/*.jsx', '!/src/**/*.test.jsx'], { eager: true })
 
 // One entry of src/routes.js as the route the browser runs: the module's page,
-// with its clientLoader as the loader.
+// with its clientLoader as the loader and its handle, which the site's shell
+// reads (src/shell/handle.js).
 function toRoute({ path, index, file, children }) {
   const module = modules[`/src/${file}`]
   if (!module) throw new Error(`src/routes.js names ${file}, which is not a .jsx module under src/`)
@@ -21,6 +22,7 @@ function toRoute({ path, index, file, children }) {
     index,
     Component: module.default,
     loader: module.clientLoader,
+    handle: module.handle,
     HydrateFallback: module.HydrateFallback,
     ErrorBoundary: module.ErrorBoundary,
     children: children?.map(toRoute),
@@ -63,3 +65,29 @@ export function goOffline() {
 // All the text on the page with whitespace collapsed. It ignores the markup,
 // so a redesign that keeps the words keeps these tests green.
 export const pageText = () => document.body.textContent.replace(/\s+/g, ' ')
+
+// The same for the page alone: the first <main>, without the header and the
+// footer every page shares. The shell carries the EU project number on every
+// page and a project's name on its pages, so a check of what a page shows must
+// not let the shell answer for it.
+export const mainText = () => (document.querySelector('main')?.textContent ?? '').replace(/\s+/g, ' ')
+
+// "Блок А" / "БЛОК A" (Cyrillic or Latin letter), but not the word "блока".
+const BLOCK_A = /блок\s+[аa](?![а-яёa-z])/i
+const BLOCK_B = /блок\s+[бb](?![а-яёa-z])/i
+
+// Every URL the site serves today that shows a page (production contract,
+// main @151c060), with text that page shows. /contact is checked by its form
+// in routes.test.jsx.
+export const ROUTES = [
+  { path: '/', shows: [/BG16RFPR001-1\.012-1485-C01/] },
+  { path: '/about', shows: [/основана през месец септември 2008/i] },
+  { path: '/projects', shows: [/Golden Residence/i, /Многофамилна/i] },
+  { path: '/projects/golden-residence', shows: [/Golden Residence/i, BLOCK_A, BLOCK_B] },
+  { path: '/projects/golden-residence/block-a', shows: [/Golden Residence/i, BLOCK_A] },
+  { path: '/projects/golden-residence/block-b', shows: [/Golden Residence/i, BLOCK_B] },
+  { path: '/projects/mnogofamilna-sgrada', shows: [/Многофамилна/i, BLOCK_A, BLOCK_B] },
+  { path: '/projects/mnogofamilna-sgrada/block-a', shows: [/Многофамилна/i, BLOCK_A] },
+  { path: '/projects/mnogofamilna-sgrada/block-b', shows: [/Многофамилна/i, BLOCK_B] },
+  { path: '/blog', shows: [/Айвазовски Парк/i] },
+]

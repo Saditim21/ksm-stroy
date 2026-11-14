@@ -79,11 +79,11 @@ function unitEntry(label) {
   return screen.queryAllByRole('row', { name })[0] ?? screen.getAllByRole('button', { name })[0]
 }
 
-// The inquiry actions a unit offers. The explorer's header carries a
-// „Запитване" of its own on every page, so when the unit opens in a dialog,
-// only the dialog counts.
+// The inquiry actions a unit offers. The site's header carries a „Запитване"
+// on every page (src/shell), and the explorer's header one of its own, so only
+// the page counts, and when the unit opens in a dialog, only the dialog.
 function inquiryActions() {
-  const scope = within(screen.queryByRole('dialog') ?? document.body)
+  const scope = within(screen.queryByRole('dialog') ?? document.querySelector('main'))
   return [
     ...scope.queryAllByRole('button', { name: INQUIRY }),
     ...scope.queryAllByRole('link', { name: INQUIRY }),

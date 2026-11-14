@@ -772,6 +772,9 @@ const ProjectCard = ({ project, index, onClick }) => {
 
 export default Projects
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'solid' }
+
 // The page's head (root.jsx <Meta/>): production's strings for this page, and
 // its first project's photo, as before.
 export const meta = () => pageMeta({

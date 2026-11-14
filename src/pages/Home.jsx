@@ -174,6 +174,9 @@ const Home = () => {
 
 export default Home
 
+// How the site's shell frames this page (src/shell/handle.js).
+export const handle = { header: 'overlay' }
+
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({
   title: seoData.home.title,
