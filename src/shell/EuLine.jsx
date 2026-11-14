@@ -9,22 +9,38 @@ import images from '../data/images/shell.json'
 // seen on landing without scrolling; the mobile menu and the footer carry it
 // on dusk.
 //
-// tone 'paper' is the header's strip: one row, 36 px, on paper. Its text box
-// is the room the logos and „За проекта“ leave, and it shows the longest
-// version of the text whose project number fits there whole, with an
-// ellipsis for the rest (src/index.css, .eu-line-text): the full text on a
-// desktop, the short one on a tablet. On a phone not even the short text's
-// number fits beside the two logos, so the box stays empty, and the lockup
-// and „За проекта“ remain. The number never shows cut. The menu and the
-// footer give the whole text at every width.
+// tone 'paper' is the header's strip on paper (src/index.css, .eu-line). From
+// 640 px it is one 36 px row, and its text box, the room the logos and
+// „За проекта“ leave, shows the longest version of the text whose project
+// number fits there whole, with an ellipsis for the rest: the short text on a
+// tablet, the full one on a desktop. Under 640 px the logos and „За проекта“
+// keep the 36 px row and the short text takes a second row, whole, in two
+// lines. The number never shows cut, and never breaks at its hyphens.
 //
 // tone 'dusk' sets both logos on a paper plate, because their lettering is
 // dark on a transparent ground and would vanish on dusk, and lets the text
 // wrap beside or under it, the short version under 640 px.
 //
 // Spec §3.2: a non-breaking space after „№“ and after the one-letter words.
-const TEXT = 'Проект „Дигитализация на предприятията“, №\u00a0BG16RFPR001-1.012-1485-C01, по Програма „Конкурентоспособност и\u00a0иновации в\u00a0предприятията“ 2021-2027.'
-const SHORT_TEXT = 'Проект №\u00a0BG16RFPR001-1.012-1485-C01, съфинансиран от ЕС.'
+
+const NUMBER = <span className="whitespace-nowrap">№&nbsp;BG16RFPR001-1.012-1485-C01</span>
+
+function FullText() {
+  return (
+    <>
+      Проект „Дигитализация на предприятията“, {NUMBER}, по Програма „Конкурентоспособност и&nbsp;иновации в&nbsp;предприятията“ 2021-2027.
+    </>
+  )
+}
+
+// In two spans, which are its two lines in the header under 640 px.
+function ShortText() {
+  return (
+    <>
+      <span>Проект {NUMBER},</span> <span>съфинансиран от ЕС.</span>
+    </>
+  )
+}
 
 // The logos at a fixed height; `sizes` is the width that height gives each.
 const LOGOS = {
@@ -59,8 +75,12 @@ function Logos({ tone }) {
 function Text() {
   return (
     <>
-      <span className="sm:hidden">{SHORT_TEXT}</span>
-      <span className="hidden sm:inline">{TEXT}</span>
+      <span className="sm:hidden">
+        <ShortText />
+      </span>
+      <span className="hidden sm:inline">
+        <FullText />
+      </span>
     </>
   )
 }
@@ -87,19 +107,23 @@ export default function EuLine({ tone = 'paper' }) {
 
   return (
     <div className="bg-paper font-text text-graphite">
-      <div className="site-wrap flex h-[var(--eu-h)] items-center gap-3.5">
-        <span className="flex shrink-0 items-center gap-2.5">
+      <div className="eu-line site-wrap">
+        <span className="eu-line-logos flex items-center gap-2.5">
           <Logos tone="paper" />
         </span>
-        {/* Both versions stay in the page; the box's width picks the one
-            shown (src/index.css), and a screen reader reads that one. */}
-        <p className="eu-line-text min-w-0 flex-1 truncate text-[12px] leading-tight">
-          <span className="eu-line-short">{SHORT_TEXT}</span>
-          <span className="eu-line-full">{TEXT}</span>
+        {/* Both versions stay in the page; CSS shows one (src/index.css), and
+            a screen reader reads that one. */}
+        <p className="eu-line-text text-[12px] leading-tight">
+          <span className="eu-line-short">
+            <ShortText />
+          </span>
+          <span className="eu-line-full">
+            <FullText />
+          </span>
         </p>
         <Link
           to="/eu-proekt"
-          className="ml-auto flex h-full shrink-0 items-center text-[12.5px] font-medium text-ink underline decoration-gold-ink decoration-1 underline-offset-[3px] hover:decoration-2"
+          className="eu-line-more flex h-full items-center text-[12.5px] font-medium text-ink underline decoration-gold-ink decoration-1 underline-offset-[3px] hover:decoration-2"
         >
           За проекта
         </Link>

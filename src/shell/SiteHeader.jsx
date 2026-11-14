@@ -10,9 +10,10 @@ import MobileMenu from './MobileMenu'
 import { inquiryHref, useRouteHandle } from './handle'
 import { NAV, currentFor } from './nav'
 
-// The site's header (spec §8.1): one fixed element holding the EU line (36 px,
-// on paper) and the 72 px bar, so it moves as one, with one translateY. It is
-// excluded from the route crossfade (view-transition-name, spec §5.3).
+// The site's header (spec §8.1): one fixed element holding the EU line (on
+// paper, 36 px; 72 px under 640 px, where its text takes a second row) and the
+// 72 px bar, so it moves as one, with one translateY. It is excluded from the
+// route crossfade (view-transition-name, spec §5.3).
 //
 // The bar is see-through, with paper text, over a page whose route handle
 // asks for an overlay (src/shell/handle.js), until the page has scrolled

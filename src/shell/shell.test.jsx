@@ -78,9 +78,10 @@ describe('the header', () => {
   })
 
   // The EU line rides in the header on every page (spec §8.1, §14.1), not
-  // only in the footer. Both versions of its text stay in the page; CSS shows
-  // the one whose project number fits the room (src/index.css), which no
-  // test here can see.
+  // only in the footer. Both versions of its text stay in the page, and CSS
+  // shows one (src/index.css): under 640 px the short text, whole, in a row
+  // of its own; from 640 px the longest one whose project number fits the
+  // row. No test here can see that; this one checks what the header holds.
   it('carries the EU line: the lockup, the programme, the project number and „За проекта“', async () => {
     renderSiteAt('/about')
     const banner = await siteHeader()
@@ -93,6 +94,10 @@ describe('the header', () => {
       'Проект „Дигитализация на предприятията“, № BG16RFPR001-1.012-1485-C01, по Програма „Конкурентоспособност и иновации в предприятията“ 2021-2027.',
     )
     expect(textOf(banner)).toContain('Проект № BG16RFPR001-1.012-1485-C01, съфинансиран от ЕС.')
+    // Wherever a version wraps, the number stays in one piece.
+    const numbers = header.getAllByText('№ BG16RFPR001-1.012-1485-C01')
+    expect(numbers).toHaveLength(2)
+    for (const number of numbers) expect(number).toHaveClass('whitespace-nowrap')
   })
 
   it('lets a keyboard skip straight to the page', async () => {
@@ -113,8 +118,8 @@ describe('the header as the page scrolls', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, writable: true, value: 0 })
   })
 
-  it('is see-through over the home page until 80 px down, then paper', async () => {
-    renderSiteAt('/')
+  it.each(['/', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is see-through over %s until 80 px down, then paper', async (path) => {
+    renderSiteAt(path)
     const header = await siteHeader()
     expect(header).toHaveAttribute('data-look', 'overlay')
 
@@ -147,23 +152,19 @@ describe('the header as the page scrolls', () => {
 })
 
 // How each page of src/routes.js frames the shell: its module's `handle`
-// (src/shell/handle.js), read from the real modules.
-//
-// The Golden Residence and Многофамилна pages are solid in M1, where the plan
-// asks for overlay. Their legacy pages open on a light ground with no hero:
-// the see-through bar's paper text would not read there, and with the page
-// starting under the bar, the bar would cover their back button and title.
-// When M2 rebuilds both pages around their heroes, they switch to overlay
-// (spec §8.1), and this table with them.
+// (src/shell/handle.js), read from the real modules (plan Task 9, Step 2).
+// Home and the two project pages run under the see-through header: Home's
+// hero and the project pages' dusk openings carry its paper text. The
+// explorers and every other page are solid.
 const GOLDEN_RESIDENCE = { project: 'golden-residence', object: 'Golden Residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
 const HANDLES = {
   '/': { header: 'overlay' },
   '/about': { header: 'solid' },
   '/projects': { header: 'solid' },
-  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE },
+  '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE },
   '/projects/golden-residence/:block': { header: 'solid', ...GOLDEN_RESIDENCE },
-  '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA },
+  '/projects/mnogofamilna-sgrada': { header: 'overlay', ...MNOGOFAMILNA },
   '/projects/mnogofamilna-sgrada/:block': { header: 'solid', ...MNOGOFAMILNA },
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
