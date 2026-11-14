@@ -26,6 +26,12 @@
 // Lenis), the page scrolled to y=1500, the menu opens and Esc closes it; the
 // page must stay at y=1500 throughout.
 //
+// And the focus ring on a dark legacy ground: on / at 1440×900, Tab from the
+// top of the page reaches the hero's „Свържи се с нас“, whose ring must be
+// paper, the text colour of a dark ground (.on-dusk, src/index.css); the next
+// Tab reaches the white availability card's „Виж проектите в продажба“, whose
+// ring stays ink. jsdom cannot compute a ring's colour; Chrome can.
+//
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
 // 3.5 s after the load event in Chrome 157 (for an as="fetch" preload, such
@@ -35,9 +41,10 @@
 // <os tmpdir>/ksmstroy-smoke). Chrome is $CHROME_PATH, else its usual place
 // on Windows and macOS, else `google-chrome` on the PATH.
 //
-// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock]
+// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock] [--focus-ring]
 //   with arguments, only the paths given (a path not listed below is
-//   expected to answer 200), and the scroll lock only with --scroll-lock.
+//   expected to answer 200), the scroll lock only with --scroll-lock and the
+//   focus ring only with --focus-ring.
 
 import fs from 'node:fs'
 import os from 'node:os'
@@ -88,12 +95,24 @@ const VISITS = [
 ]
 const ARGS = process.argv.slice(2)
 const FULL_RUN = ARGS.length === 0
-const ONLY = ARGS.filter((arg) => arg !== '--scroll-lock')
+const ONLY = ARGS.filter((arg) => arg !== '--scroll-lock' && arg !== '--focus-ring')
 const RUN = FULL_RUN ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path === only) ?? { path: only })
 const RUN_SCROLL_LOCK = FULL_RUN || ARGS.includes('--scroll-lock')
+const RUN_FOCUS_RING = FULL_RUN || ARGS.includes('--focus-ring')
 
 // The scroll lock check: where the page is scrolled to when the menu opens.
 const SCROLL_LOCK = { path: '/about', y: 1500 }
+
+// The focus ring check: the controls Tab reaches on the page, in order, and
+// the ring each must show, solid, 2 px, in its ground's text colour.
+const FOCUS_RING = {
+  path: '/',
+  stops: [
+    { text: 'Свържи се с нас', ring: 'rgb(241, 242, 239)', ground: 'the hero, a dark ground: paper' },
+    { text: 'Виж проектите в продажба', ring: 'rgb(20, 32, 47)', ground: 'the white availability card: ink' },
+  ],
+}
+const MAX_TABS = 60
 
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH
@@ -355,6 +374,68 @@ async function scrollLock(browser, userAgents) {
   return problems
 }
 
+// In the page: the focused element's text.
+function focusedText() {
+  return document.activeElement.textContent.replace(/\s+/g, ' ').trim()
+}
+
+// In the page: the focused element's text and ring, once the ring has settled.
+// A legacy control's transition-all eases the ring in over 300 ms, from its
+// text colour and the initial 3 px; until then it is neither colour.
+async function focusedRing() {
+  const element = document.activeElement
+  await Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => {})))
+  const style = getComputedStyle(element)
+  return {
+    text: element.textContent.replace(/\s+/g, ' ').trim(),
+    visible: element.matches(':focus-visible'),
+    ring: `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor}`,
+  }
+}
+
+// The focus ring on a dark legacy ground (FOCUS_RING): the keyboard tabs from
+// the top of the page to each stop in turn, and each must show its ring. The
+// hero's first slide stays 5 s; the stops are a dozen Tabs from the top.
+async function focusRing(browser, userAgents) {
+  const problems = []
+  const context = await browser.createBrowserContext()
+  try {
+    const page = await context.newPage()
+    page.on('pageerror', (error) => problems.push(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
+    await page.setViewport(VIEWPORTS[0].viewport)
+    await page.setUserAgent(userAgents.desktop)
+    await page.goto(`${ORIGIN}${FOCUS_RING.path}`, { waitUntil: 'load', timeout: 30000 })
+    await page.waitForFunction(() => {
+      const main = document.getElementById('main')
+      return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
+    }, { timeout: HYDRATION_TIMEOUT_MS })
+
+    for (const { text, ring, ground } of FOCUS_RING.stops) {
+      let reached
+      for (let tabs = 0; tabs < MAX_TABS && reached !== text; tabs += 1) {
+        await page.keyboard.press('Tab')
+        reached = await page.evaluate(focusedText)
+      }
+      if (reached !== text) {
+        problems.push(`${MAX_TABS} Tabs never reached „${text}“ (focus on „${reached}“)`)
+        break
+      }
+      const focused = await page.evaluate(focusedRing)
+      const expected = `solid 2px ${ring}`
+      if (focused.text !== text || !focused.visible) {
+        problems.push(`„${text}“ lost its focus or :focus-visible (now „${focused.text}“)`)
+      } else if (focused.ring !== expected) {
+        problems.push(`„${text}“ shows a ${focused.ring} ring, not ${expected} (${ground})`)
+      }
+    }
+  } catch (error) {
+    problems.push(`the check stopped: ${error.message.split('\n')[0]}`)
+  } finally {
+    await context.close()
+  }
+  return problems
+}
+
 const COLUMNS = [44, 11, 42, 10, 10]
 const row = (cells) => `  ${cells.map((cell, i) => String(cell).padEnd(COLUMNS[i])).join(' ').trimEnd()}`
 const clip = (value, width) => (value.length > width ? `${value.slice(0, width - 1)}…` : value)
@@ -424,6 +505,13 @@ async function main() {
       for (const problem of problems) failures.push(`${label}: ${problem}`)
       console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
     }
+
+    if (RUN_FOCUS_RING) {
+      const label = `focus ring: ${FOCUS_RING.path} at ${VIEWPORTS[0].label}, Tab to ${FOCUS_RING.stops.map(({ text }) => `„${text}“`).join(', then ')}`
+      const problems = await focusRing(browser, userAgents)
+      for (const problem of problems) failures.push(`${label}: ${problem}`)
+      console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
+    }
   } finally {
     await browser?.close()
     server.closeAllConnections()
@@ -436,7 +524,8 @@ async function main() {
     for (const failure of failures) console.error(`  ${failure}`)
     return 1
   }
-  console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes${RUN_SCROLL_LOCK ? ' and the scroll lock' : ''} (${seconds} s)`)
+  const checks = [RUN_SCROLL_LOCK && 'the scroll lock', RUN_FOCUS_RING && 'the focus ring'].filter(Boolean)
+  console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes${checks.map((check) => ` and ${check}`).join('')} (${seconds} s)`)
   return 0
 }
 

@@ -275,9 +275,10 @@ const Sales = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Call to Action, on a near-black ground: .on-dusk makes its focus
+          rings paper (src/index.css). */}
       <section
-        className="py-10 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
+        className="on-dusk py-10 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
 
@@ -309,7 +310,9 @@ const Sales = () => {
         </div>
       </section>
 
-      {/* Enhanced Property Modal */}
+      {/* Enhanced Property Modal. Its header, arrows and thumbnails sit on
+          black and are .on-dusk (paper focus rings); the modal as a whole is
+          not, because the floor details open on white inside it. */}
       {selectedProject && (
           <div
             ref={modalRef}
@@ -318,7 +321,7 @@ const Sales = () => {
           >
             <div className="h-full flex flex-col max-h-screen">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 bg-black/50 backdrop-blur-lg border-b border-white/10">
+              <div className="on-dusk flex items-center justify-between p-4 bg-black/50 backdrop-blur-lg border-b border-white/10">
                 <div className="flex items-center space-x-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                     selectedProject.status === 'За продажба' 
@@ -546,9 +549,11 @@ const Sales = () => {
                       />
                     </div>
                     
-                    {/* Navigation Arrows - Fixed Position */}
+                    {/* Navigation Arrows - Fixed Position. The wrapper only
+                        names their dark ground (.on-dusk); `contents` gives
+                        it no box. */}
                     {selectedProject.images.length > 1 && (
-                      <>
+                      <div className="on-dusk contents">
                         <button
                           onClick={prevImage}
                           className="fixed left-8 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm transition-all duration-200 text-white border border-white/20 hover:border-gold-400 z-10"
@@ -575,7 +580,7 @@ const Sales = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
-                      </>
+                      </div>
                     )}
                   </>
                 )}
@@ -583,7 +588,7 @@ const Sales = () => {
               
               {/* Thumbnail Gallery */}
               {!showBuildingView && selectedProject.images.length > 1 && (
-                <div className="bg-black/50 backdrop-blur-lg border-t border-white/10 p-4">
+                <div className="on-dusk bg-black/50 backdrop-blur-lg border-t border-white/10 p-4">
                   <div className="max-w-7xl mx-auto">
                     <div className="flex space-x-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {selectedProject.images.map((image, index) => (

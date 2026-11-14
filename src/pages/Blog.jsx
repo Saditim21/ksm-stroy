@@ -378,8 +378,9 @@ const Projects = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
+      {/* Call to Action, on a near-black ground: .on-dusk makes its focus
+          rings paper (src/index.css). */}
+      <section className="on-dusk py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -414,12 +415,13 @@ const Projects = () => {
         </div>
       </section>
 
-      {/* Enhanced Project Modal */}
+      {/* Enhanced Project Modal: black throughout, so all of it is .on-dusk
+          (paper focus rings). */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
             ref={modalRef}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
+            className="on-dusk fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -123,8 +123,11 @@ const HeroCarousel = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-center">
             
-            {/* Left Content - Text */}
-            <div className="lg:col-span-7 text-center lg:text-left px-2 sm:px-0">
+            {/* Left Content - Text. The photo under its dark overlay is a dark
+                ground, so the column is .on-dusk and its links' focus rings
+                are paper (src/index.css). The availability card beside it is
+                white: its rings stay ink, so the marker is not on the grid. */}
+            <div className="on-dusk lg:col-span-7 text-center lg:text-left px-2 sm:px-0">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={currentSlide}
@@ -321,8 +324,9 @@ const HeroCarousel = () => {
         </div>
       </div>
 
-      {/* Carousel Dots - Below stats box on mobile, at bottom center on desktop */}
-      <div className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+      {/* Carousel Dots - Below stats box on mobile, at bottom center on desktop.
+          On the photo, a dark ground (.on-dusk), as are the arrows below. */}
+      <div className="on-dusk absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
         <div className="flex space-x-2 sm:space-x-3">
           {slides.map((_, index) => (
             <button
@@ -339,26 +343,30 @@ const HeroCarousel = () => {
         </div>
       </div>
 
-      {/* Navigation Arrows - Hidden on mobile (swipe gesture), visible on tablet+ */}
-      <button
-        onClick={prevSlide}
-        className="hidden md:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
-        aria-label="Предишен слайд"
-      >
-        <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+      {/* Navigation Arrows - Hidden on mobile (swipe gesture), visible on tablet+.
+          The wrapper only names their dark ground (.on-dusk): `contents`
+          gives it no box, so each arrow still sits on the section. */}
+      <div className="on-dusk contents">
+        <button
+          onClick={prevSlide}
+          className="hidden md:flex absolute left-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
+          aria-label="Предишен слайд"
+        >
+          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-      <button
-        onClick={nextSlide}
-        className="hidden md:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
-        aria-label="Следващ слайд"
-      >
-        <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+        <button
+          onClick={nextSlide}
+          className="hidden md:flex absolute right-4 top-1/2 transform -translate-y-1/2 z-20 p-3 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 text-white hover:text-gold-400"
+          aria-label="Следващ слайд"
+        >
+          <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     </section>
   )
 }
