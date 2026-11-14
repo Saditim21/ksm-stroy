@@ -43,6 +43,8 @@ function ShortText() {
 }
 
 // The logos at a fixed height; `sizes` is the width that height gives each.
+// They load at once (`eager`): the header shows them in every first viewport.
+// The menu and the footer ask for the same files, which have loaded by then.
 const LOGOS = {
   paper: { height: 'h-6', emblem: '109px', programme: '87px' },
   dusk: { height: 'h-[26px]', emblem: '119px', programme: '94px' },
@@ -56,6 +58,7 @@ function Logos({ tone }) {
         image={images['eu-cofunded-bg']}
         alt="Съфинансирано от Европейския съюз"
         sizes={emblem}
+        eager
         className="shrink-0"
         imgClassName={`${height} w-auto`}
       />
@@ -63,6 +66,7 @@ function Logos({ tone }) {
         image={images['eu-pkip']}
         alt="Програма „Конкурентоспособност и иновации в предприятията“"
         sizes={programme}
+        eager
         className="shrink-0"
         imgClassName={`${height} w-auto`}
       />

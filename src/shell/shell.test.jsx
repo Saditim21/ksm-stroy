@@ -100,6 +100,20 @@ describe('the header', () => {
     for (const number of numbers) expect(number).toHaveClass('whitespace-nowrap')
   })
 
+  // The logos are in every first viewport: lazy loading only held them back
+  // (Chrome's LazyLoadImageIssue). They are no page's LCP image, so they take
+  // no fetch priority from it.
+  it('loads the EU logos at once, with no fetch priority', async () => {
+    renderSiteAt('/about')
+    const header = within(await siteHeader())
+
+    for (const name of ['Съфинансирано от Европейския съюз', 'Програма „Конкурентоспособност и иновации в предприятията“']) {
+      const logo = header.getByRole('img', { name })
+      expect(logo).toHaveAttribute('loading', 'eager')
+      expect(logo).not.toHaveAttribute('fetchpriority')
+    }
+  })
+
   it('lets a keyboard skip straight to the page', async () => {
     renderSiteAt('/about')
 

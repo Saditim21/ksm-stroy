@@ -37,6 +37,15 @@ test('priority: fetched first, eagerly, decoded off the main thread', () => {
   expect(img).toHaveAttribute('decoding', 'async')
 })
 
+// A picture that is in every first viewport but is no page's LCP image (the
+// EU line's logos): loaded at once, without taking the LCP image's priority.
+test('eager: loaded at once, with no fetch priority', () => {
+  const { container } = render(<ResponsivePicture image={IMAGE} alt="" sizes="100vw" eager />)
+  const { img } = parts(container)
+  expect(img).toHaveAttribute('loading', 'eager')
+  expect(img).not.toHaveAttribute('fetchpriority')
+})
+
 test('otherwise lazy, with no fetch priority', () => {
   const { container } = render(<ResponsivePicture image={IMAGE} alt="" sizes="100vw" />)
   const { img } = parts(container)

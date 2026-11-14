@@ -9,8 +9,10 @@ import { useEffect, useRef, useState } from 'react'
 // <img> needs no srcset of its own (golden-residence
 // src/components/ui/ResponsivePicture.jsx @944bb03).
 //
-// `priority` is for a route's LCP image: fetched first and at once. Any other
-// picture waits until it nears the viewport.
+// `priority` is for a route's LCP image: fetched first and at once. `eager` is
+// for a picture in every first viewport that is no LCP image (the EU line's
+// logos): fetched at once, without the LCP image's priority. Any other picture
+// waits until it nears the viewport.
 //
 // Until the image has loaded, the picture shows the image's dominant colour.
 // After that it shows none, so an image with transparent parts never sits on
@@ -28,7 +30,7 @@ function ArtSources({ art, sizes }) {
   ))
 }
 
-export default function ResponsivePicture({ image, alt, sizes, priority = false, className = '', imgClassName = '', art }) {
+export default function ResponsivePicture({ image, alt, sizes, priority = false, eager = false, className = '', imgClassName = '', art }) {
   const imgRef = useRef(null)
   // The path of the image that has loaded: a new image shows its own colour.
   const [loadedPath, setLoadedPath] = useState(null)
@@ -53,7 +55,7 @@ export default function ResponsivePicture({ image, alt, sizes, priority = false,
         width={image.w}
         height={image.h}
         alt={alt}
-        loading={priority ? 'eager' : 'lazy'}
+        loading={priority || eager ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : undefined}
         decoding="async"
         onLoad={() => setLoadedPath(image.path)}
