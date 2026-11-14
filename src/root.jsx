@@ -23,6 +23,7 @@ export const meta = () => [
 ]
 
 export const links = () => [
+  { rel: 'preload', href: '/fonts/ksm-display.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
   { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon.png' },
   { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon.png' },
 ]
