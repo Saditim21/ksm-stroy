@@ -24,8 +24,10 @@ export const meta = () => [
 
 export const links = () => [
   { rel: 'preload', href: '/fonts/ksm-display.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
-  { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon.png' },
-  { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon.png' },
+  { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+  { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+  { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+  { rel: 'manifest', href: '/site.webmanifest' },
 ]
 
 // Production's structured data (index.html on main), on the live domain.

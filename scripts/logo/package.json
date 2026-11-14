@@ -1,0 +1,13 @@
+{
+  "name": "ksm-logo-vector",
+  "private": true,
+  "type": "module",
+  "description": "Rebuilds the KSM Stroy vector logo from the 621x402 bitmap (emblem fit + wordmark trace)",
+  "scripts": {
+    "build": "node build.mjs",
+    "fit": "node fit-emblem.mjs"
+  },
+  "devDependencies": {
+    "potrace": "2.1.8"
+  }
+}

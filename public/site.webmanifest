@@ -1,0 +1,14 @@
+{
+  "name": "КСМ Строй",
+  "short_name": "КСМ Строй",
+  "lang": "bg",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#F1F2EF",
+  "theme_color": "#F1F2EF",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

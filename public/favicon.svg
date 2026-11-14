@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 174.55 174.55">
+<style>svg{color:#7A6336}@media (prefers-color-scheme:dark){svg{color:#F1F2EF}}@media (max-width:24px){g{stroke-width:13}.top{display:none}}</style>
+<g fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+  <path class="ring" d="M28.5 58.3A70.61 70.61 0 1 0 111.27 31.03"/>
+  <path class="tower" d="M58.71 162.02L83.75 6.5H87.27"/>
+  <path class="tower" d="M115.84 162.02L90.8 6.5H87.27"/>
+  <path class="rung" d="M75.38 145.43H99.17"/>
+  <path class="rung" d="M79.02 122.82H95.53"/>
+  <path class="rung top" d="M82.66 100.2H91.89"/>
+  <path class="sun" d="M21.16 42.15A21.43 21.43 0 0 1 64.02 42.15A21.43 21.43 0 0 1 21.16 42.15"/>
+</g>
+</svg>
