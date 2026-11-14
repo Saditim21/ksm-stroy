@@ -11,6 +11,11 @@
 //     in any console line (HYDRATION);
 //   - a same-origin request that fails or answers 400 or more;
 //   - the wrong status, redirect or final URL;
+//   - two copies of the site: more than one main#main, or a tree at the top
+//     of <body> (or a main#main) that React does not own. That is what a
+//     page shows when the host answers with HTML the client router does not
+//     match to the same route: React skips the prerendered tree and renders
+//     the live one beside it, with no error in the console;
 //   - the EU line's „За проекта“ link not visible in the first viewport,
 //     without scrolling: a box of its own inside the viewport, opacity 1 up
 //     its ancestors, visibility visible. On / the poster PDF links, scrolled
@@ -67,6 +72,14 @@ const VISITS = [
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },
   { path: '/nope', status: 404, text: NOT_FOUND_TEXT },
+  // URLs a client route could match although the host answers them with the
+  // 404 page or with another page's HTML: a block that does not exist, a
+  // file's own name, a name in the wrong case (the host's lookup is
+  // case-sensitive).
+  { path: '/projects/golden-residence/block-c', status: 404, text: NOT_FOUND_TEXT },
+  { path: '/projects/mnogofamilna-sgrada/x', status: 404, text: NOT_FOUND_TEXT },
+  { path: '/index.html', redirect: { status: 308, to: '/' } },
+  { path: '/About', status: 404, text: NOT_FOUND_TEXT },
 ]
 const ONLY = process.argv.slice(2)
 const RUN = ONLY.length === 0 ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path === only) ?? { path: only })
@@ -127,6 +140,27 @@ async function inspectLinks({ pathname, text, scroll }) {
     states.push({ index: states.length, issues })
   }
   return states
+}
+
+// In the page: the problems with its trees. One main#main, owned by React (a
+// fiber on the node), and no element at the top of <body> that React does not
+// own, as the prerendered tree is when React has skipped it.
+function appTrees() {
+  const owned = (node) => Object.keys(node).some((key) => key.startsWith('__reactFiber$'))
+  const name = (node) => `<${node.tagName.toLowerCase()}${node.id ? `#${node.id}` : ''}>`
+  const mains = [...document.querySelectorAll('main#main')]
+  const problems = []
+  if (mains.length > 1) problems.push(`the DOM holds ${mains.length} main#main: two copies of the site`)
+  for (const [index, main] of mains.entries()) {
+    if (!owned(main)) problems.push(`main#main ${index + 1} of ${mains.length} has no React fiber`)
+  }
+  const skip = ['SCRIPT', 'LINK', 'STYLE', 'TEMPLATE', 'NOSCRIPT']
+  for (const node of document.body.children) {
+    if (!skip.includes(node.tagName) && !owned(node)) {
+      problems.push(`a tree without a React fiber at the top of <body>: ${name(node)}, ${node.querySelectorAll('main#main').length} main#main inside`)
+    }
+  }
+  return problems
 }
 
 // One visit at one size: every problem found, and the first viewport's shot.
@@ -202,6 +236,7 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       await page.waitForNetworkIdle({ idleTime: 500, timeout: 10000 }).catch(() => {})
       await delay(Math.max(0, loadedAt + UNUSED_PRELOAD_WINDOW_MS - Date.now()))
 
+      problems.push(...await page.evaluate(appTrees))
       const finalPath = relative(page.url())
       const expectedPath = redirect?.to ?? pathname
       if (finalPath !== expectedPath) problems.push(`ended at ${finalPath}, expected ${expectedPath}`)

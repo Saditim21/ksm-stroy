@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { pageMeta } from '../seo/meta';
+import { useNavigate } from 'react-router';
 import { FLOOR_DATA } from './FourTowersFloorMap';
 import buildingAllFloorsArchitectureImage from '../assets/продажби/project 1/building-all-floors-architecture.webp';
 
@@ -80,8 +79,9 @@ import apartmentB801Floor8 from '../assets/продажби/project 1/apartment-
 import apartmentB803Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b803-floor8.webp';
 import apartmentB807Floor8 from '../assets/продажби/project 1/apartment-B-floor 1/apartment-b807-floor8.webp';
 
-const MnogofamilnaSingleBlock = () => {
-  const { block } = useParams();
+// `block` is the block's id in src/config/blocks.js: src/routes/mnogofamilna-block.jsx
+// passes it.
+const MnogofamilnaSingleBlock = ({ block }) => {
   const navigate = useNavigate();
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [selectedApartment, setSelectedApartment] = useState(null);
@@ -934,17 +934,3 @@ const MnogofamilnaSingleBlock = () => {
 };
 
 export default MnogofamilnaSingleBlock;
-
-// How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
-
-// The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
-// the page itself does.
-export const meta = ({ params }) => {
-  const letter = params.block === 'block-a' ? 'А' : 'Б';
-  return pageMeta({
-    title: `Многофамилна жилищна сграда, блок ${letter} - KSM Stroy`,
-    description: `Етажите и апартаментите на многофамилната жилищна сграда в ж.к. Връбница-1, гр. София, блок ${letter}: 72 апартамента на 9 етажа.`,
-    path: `/projects/mnogofamilna-sgrada/${params.block}`,
-  });
-};

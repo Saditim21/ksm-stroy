@@ -13,13 +13,15 @@ const modules = import.meta.glob(['/src/**/*.jsx', '!/src/**/*.test.jsx'], { eag
 
 // One entry of src/routes.js as the route the browser runs: the module's page,
 // with its clientLoader as the loader and its handle, which the site's shell
-// reads (src/shell/handle.js).
-function toRoute({ path, index, file, children }) {
+// reads (src/shell/handle.js), and its id and case-sensitive matching.
+function toRoute({ id, path, index, caseSensitive, file, children }) {
   const module = modules[`/src/${file}`]
   if (!module) throw new Error(`src/routes.js names ${file}, which is not a .jsx module under src/`)
   return {
+    id,
     path,
     index,
+    caseSensitive,
     Component: module.default,
     loader: module.clientLoader,
     handle: module.handle,

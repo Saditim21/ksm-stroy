@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { pageMeta } from '../seo/meta';
+import { useNavigate } from 'react-router';
 import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
 import { useApartments } from '../context/ApartmentContext';
 import { normalizeStatus } from '../utils/propertyStatus';
@@ -33,8 +32,9 @@ import archB8 from '../assets/продажби/project 2/architectures-b/archite
 import archBGround from '../assets/продажби/project 2/architectures-b/приземен-b.webp';
 import archBUnderground from '../assets/продажби/project 2/architectures-b/подземен-b.webp';
 
-const GoldenResidenceSingleBlock = () => {
-  const { block } = useParams();
+// `block` is the block's id in src/config/blocks.js: src/routes/golden-residence-block.jsx
+// passes it.
+const GoldenResidenceSingleBlock = ({ block }) => {
   const navigate = useNavigate();
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [selectedApartment, setSelectedApartment] = useState(null);
@@ -1637,17 +1637,3 @@ const GoldenResidenceSingleBlock = () => {
 };
 
 export default GoldenResidenceSingleBlock;
-
-// How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence' }
-
-// The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
-// the page itself does.
-export const meta = ({ params }) => {
-  const letter = params.block === 'block-a' ? 'А' : 'Б';
-  return pageMeta({
-    title: `Golden Residence, блок ${letter} - KSM Stroy`,
-    description: `Етажите и апартаментите на Golden Residence, блок ${letter}: 96 апартамента на 8 етажа в жк Левски Г, гр. София.`,
-    path: `/projects/golden-residence/${params.block}`,
-  });
-};

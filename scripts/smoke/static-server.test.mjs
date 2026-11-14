@@ -121,6 +121,23 @@ describe('vercel.json', () => {
     }
   })
 
+  // A file's own name serves the page under a URL the browser's router does
+  // not know, which would leave the prerendered page dead with the live one
+  // beside it.
+  it('sends /index.html to / and <path>/index.html to <path> with a permanent redirect, keeping the query', async () => {
+    for (const [from, to] of [
+      ['/index.html', '/'],
+      ['/about/index.html', '/about'],
+      ['/projects/index.html', '/projects'],
+      ['/projects/golden-residence/block-a/index.html', '/projects/golden-residence/block-a'],
+      ['/about/index.html?ref=menu', '/about?ref=menu'],
+    ]) {
+      const response = await get(from)
+      expect(response.status, from).toBe(308)
+      expect(response.headers.get('location'), from).toBe(to)
+    }
+  })
+
   it('sends /home to / with a permanent redirect', async () => {
     const response = await get('/home')
     expect(response.status).toBe(308)

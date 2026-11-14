@@ -3,6 +3,13 @@
 // build/client/<path>/index.html. The host serves no SPA fallback
 // (vercel.json): any other path gets build/client/404.html, which
 // scripts/postbuild.mjs copies from the prerendered /404.
+//
+// Each block's page comes from src/config/blocks.js, as its route in
+// src/routes.js does, so every block route is prerendered and no other.
+
+import { blockPaths } from './src/config/blocks.js'
+
+const blockPages = (project) => blockPaths(project).map((path) => `/${path}`)
 
 /** @type {import('@react-router/dev/config').Config} */
 export default {
@@ -15,11 +22,9 @@ export default {
     '/contact',
     '/blog',
     '/projects/golden-residence',
-    '/projects/golden-residence/block-a',
-    '/projects/golden-residence/block-b',
+    ...blockPages('golden-residence'),
     '/projects/mnogofamilna-sgrada',
-    '/projects/mnogofamilna-sgrada/block-a',
-    '/projects/mnogofamilna-sgrada/block-b',
+    ...blockPages('mnogofamilna-sgrada'),
     '/eu-proekt',
     // The page of the `*` route (src/routes/not-found.jsx), for the host to
     // serve on unknown URLs.

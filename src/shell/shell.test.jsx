@@ -163,9 +163,11 @@ const HANDLES = {
   '/about': { header: 'solid' },
   '/projects': { header: 'solid' },
   '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE },
-  '/projects/golden-residence/:block': { header: 'solid', ...GOLDEN_RESIDENCE },
+  '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE },
+  '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE },
   '/projects/mnogofamilna-sgrada': { header: 'overlay', ...MNOGOFAMILNA },
-  '/projects/mnogofamilna-sgrada/:block': { header: 'solid', ...MNOGOFAMILNA },
+  '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA },
+  '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA },
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
   '/contact': { header: 'solid' },

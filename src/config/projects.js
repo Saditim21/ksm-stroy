@@ -39,6 +39,9 @@ import mnogoFloorPlan from '../assets/продажби/project 1/building-all-fl
 // master's coordinate space, mirrored below from the map JSONs.
 import { GOLDEN_RENDER, MNOGO_RENDER } from '../constants/buildingRenders'
 
+// The blocks, which src/routes.js and react-router.config.js read too.
+import { PROJECT_BLOCKS } from './blocks'
+
 const GOLDEN_FLOORS = [1, 2, 3, 4, 5, 6, 7, 8]
 // Floor key 0 holds the garages (shown separately) and there is no key 1 —
 // the first residential level of Многофамилна сграда is key 2.
@@ -57,10 +60,7 @@ export const PROJECTS = {
   'golden-residence': {
     id: 'golden-residence',
     name: 'Golden Residence',
-    blocks: [
-      { id: 'block-a', letter: 'А', label: 'Блок А' },
-      { id: 'block-b', letter: 'Б', label: 'Блок Б' },
-    ],
+    blocks: PROJECT_BLOCKS['golden-residence'],
     floors: { 'block-a': GOLDEN_FLOORS, 'block-b': GOLDEN_FLOORS },
     // Unit ids are "А 101" … "А 812": the floor digit equals the display floor.
     unitFloor: (floor) => floor,
@@ -79,10 +79,7 @@ export const PROJECTS = {
   'mnogofamilna-sgrada': {
     id: 'mnogofamilna-sgrada',
     name: 'Многофамилна сграда',
-    blocks: [
-      { id: 'block-a', letter: 'А', label: 'Блок А' },
-      { id: 'block-b', letter: 'Б', label: 'Блок Б' },
-    ],
+    blocks: PROJECT_BLOCKS['mnogofamilna-sgrada'],
     floors: { 'block-a': MNOGO_FLOORS, 'block-b': MNOGO_FLOORS },
     // Floor key 10 holds units А-901…А-908: the floor digit is one below the key.
     unitFloor: (floor) => floor - 1,
