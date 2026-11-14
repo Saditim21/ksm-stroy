@@ -71,8 +71,9 @@ pages still animate with framer-motion; Lenis runs on every page, and
   element up to date, changing it only when ScrollTrigger re-measures too.
 - Lenis' settings live in `src/utils/smoothScroll.js`: a slower wheel (lerp
   0.07, 80% per notch), and touch scrolling left to the browser
-  (`syncTouch: false`). A pinch, and any gesture while the page is zoomed in,
-  stays the browser's.
+  (`syncTouch: false`). A panel that scrolls on its own keeps the wheel while
+  it can scroll (`allowNestedScroll`). A pinch, and any gesture while the page
+  is zoomed in, stays the browser's.
 - `src/motion/SmoothScroll.jsx` runs Lenis around the site shell
   (`src/root.jsx`) once the engine has loaded; content that grows re-measures
   Lenis and ScrollTrigger. On a route change React Router's

@@ -11,10 +11,19 @@
 // natively (spec §5.1). The landing had it on, for a desktop-like glide after
 // a flick; native touch scrolling keeps iOS ProMotion and the in-app browsers
 // (Facebook, Instagram, Viber) as smooth as the browser makes them.
+//
+// allowNestedScroll: a panel that scrolls on its own (a modal, a floor's
+// apartment list) keeps the wheel while it can still scroll that way, and at
+// its end the page scrolls on. Lenis takes the wheel on the window, so
+// without it Lenis cancels the wheel and scrolls the page behind the panel:
+// on the Golden Residence block A page (2026-11-14) the apartment list stayed
+// put while the page moved 478 px. Lenis caches each element's overflow for
+// 2 s, so the check costs little per wheel event.
 export const LENIS_OPTIONS = {
   lerp: 0.07,
   wheelMultiplier: 0.8,
   syncTouch: false,
+  allowNestedScroll: true,
   // GSAP's ticker drives Lenis (SmoothScroll.jsx).
   autoRaf: false,
 }

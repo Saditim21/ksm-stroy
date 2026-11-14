@@ -4,9 +4,10 @@ import { LENIS_OPTIONS, createGestureFilter } from './smoothScroll'
 
 // The landing's wheel, tuned there on 2026-10-08: Lenis eases it more gently
 // than its default and travels less per notch. Touch scrolling stays the
-// browser's own (spec §5.1), and GSAP's ticker drives Lenis.
+// browser's own (spec §5.1), a panel that scrolls on its own keeps the wheel
+// while it can scroll, and GSAP's ticker drives Lenis.
 test('Lenis smooths the wheel only, slower than its default, on GSAP\'s ticker', () => {
-  expect(LENIS_OPTIONS).toEqual({ lerp: 0.07, wheelMultiplier: 0.8, syncTouch: false, autoRaf: false })
+  expect(LENIS_OPTIONS).toEqual({ lerp: 0.07, wheelMultiplier: 0.8, syncTouch: false, allowNestedScroll: true, autoRaf: false })
 })
 
 const touch = (type, fingers) => ({ event: { type, touches: Array.from({ length: fingers }, () => ({})) } })
