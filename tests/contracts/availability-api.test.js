@@ -195,6 +195,29 @@ describe('GET', () => {
     expect(res.headers.get('cache-control')).toBe('public, s-maxage=30, stale-while-revalidate=300')
   })
 
+  // A tab in error shows the built-in rows (src/data/availability). Kept as
+  // long as a good answer, one tab's brief error would keep them on screen
+  // for minutes; the edge asks again within seconds instead.
+  it('keeps an answer with a tab in error for 5 s only, and serves it stale for 30 s', async () => {
+    configure()
+    google({ BLOCK_B: { status: 500, body: 'Internal Server Error' } })
+
+    const res = await handler.fetch(get())
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('cache-control')).toBe('public, s-maxage=5, stale-while-revalidate=30')
+  })
+
+  // A tab with no address is no error: the Многофамилна tabs are optional.
+  it('keeps an answer whose other tabs have no address as long as a good one', async () => {
+    configure(['BLOCK_A', 'BLOCK_B', 'GARAGES', 'PARKING'])
+    google()
+
+    const res = await handler.fetch(get())
+
+    expect(res.headers.get('cache-control')).toBe('public, s-maxage=30, stale-while-revalidate=300')
+  })
+
   it('skips a tab with no address silently: missing, no request, no log', async () => {
     configure(['BLOCK_A', 'BLOCK_B', 'GARAGES', 'PARKING'])
     const fetch = google()
@@ -299,15 +322,35 @@ describe('a body that is not the tab is an error, never rows', () => {
   })
 })
 
+// HEAD answers as GET does, without the body: a monitor or a link checker
+// sees the real status.
+describe('HEAD', () => {
+  it.each([
+    ['every tab is read', {}],
+    ['a tab is in error', { BLOCK_B: { status: 500, body: 'Internal Server Error' } }],
+    ['no tab can be read', everyTab({ status: 500, body: 'Internal Server Error' })],
+  ])('answers with GET\'s status and headers and no body when %s', async (_, answers) => {
+    configure()
+    google(answers)
+
+    const viaGet = await handler.fetch(get())
+    const viaHead = await handler.fetch(new Request(ENDPOINT, { method: 'HEAD' }))
+
+    expect(viaHead.status).toBe(viaGet.status)
+    expect([...viaHead.headers]).toEqual([...viaGet.headers])
+    expect(viaHead.body).toBeNull()
+  })
+})
+
 describe('other methods', () => {
-  it.each(['POST', 'PUT', 'DELETE', 'PATCH'])('answers %s with 405 and names GET as allowed', async (method) => {
+  it.each(['POST', 'PUT', 'DELETE', 'PATCH'])('answers %s with 405 and names GET and HEAD as allowed', async (method) => {
     configure()
     const fetch = google()
 
     const res = await handler.fetch(new Request(ENDPOINT, { method }))
 
     expect(res.status).toBe(405)
-    expect(res.headers.get('allow')).toBe('GET')
+    expect(res.headers.get('allow')).toBe('GET, HEAD')
     expect(fetch).not.toHaveBeenCalled()
   })
 })

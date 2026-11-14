@@ -12,8 +12,11 @@
  * the browser uses. A tab that is not 'ok' gives null, never an empty list: an
  * empty list would read as every unit gone. The store shows the built-in rows
  * for a Golden Residence slot that is null, marked as such. The edge keeps a
- * 200 for 30 s and serves it stale for 5 more minutes while it refreshes. When
- * no tab could be read, 503, never cached.
+ * 200 for 30 s and serves it stale for 5 more minutes while it refreshes; one
+ * with a tab in error, whose slot shows the built-in rows, for 5 s and stale
+ * for 30 s, so a brief error does not stay on screen for minutes. When no tab
+ * could be read, 503, never cached. HEAD answers with GET's status and
+ * headers and no body.
  *
  * Settings: the Vercel environment variables the client build reads too,
  * VITE_GOOGLE_SHEET_BLOCK_A, _BLOCK_B, _GARAGES, _PARKING, _MNOGO_A and
@@ -27,6 +30,7 @@ import { apartmentRows, spotRows } from '../src/services/sheetsCore.js'
 
 const TAB_TIMEOUT_MS = 8000
 const CACHE_OK = 'public, s-maxage=30, stale-while-revalidate=300'
+const CACHE_PARTIAL = 'public, s-maxage=5, stale-while-revalidate=30'
 
 // Each tab: its key in `sources` (and its variable's suffix), where its rows
 // go, and how a tab of its kind reads.
@@ -75,27 +79,36 @@ async function loadTab({ key, read }) {
   }
 }
 
+// Every tab, read now, as GET's answer.
+async function availability() {
+  const results = await Promise.all(TABS.map(loadTab))
+
+  const sources = {}
+  const projects = { 'golden-residence': {}, 'mnogofamilna-sgrada': {} }
+  TABS.forEach(({ key, project, slot }, index) => {
+    sources[key] = results[index].source
+    projects[project][slot] = results[index].rows
+  })
+  const body = { updatedAt: new Date().toISOString(), sources, projects }
+
+  // Nothing read, so nothing worth keeping at the edge; the site reads the
+  // sheets itself.
+  if (!results.some((result) => result.source === 'ok')) {
+    return json(body, 503, { 'Cache-Control': 'no-store' })
+  }
+  // A tab in error ('missing' is none) shows the built-in rows: the edge
+  // asks again soon.
+  const partial = results.some((result) => result.source === 'error')
+  return json(body, 200, { 'Cache-Control': partial ? CACHE_PARTIAL : CACHE_OK })
+}
+
 export default {
   async fetch(request) {
-    if (request.method !== 'GET') {
-      return json({ error: 'Method not allowed' }, 405, { Allow: 'GET' })
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return json({ error: 'Method not allowed' }, 405, { Allow: 'GET, HEAD' })
     }
-
-    const results = await Promise.all(TABS.map(loadTab))
-
-    const sources = {}
-    const projects = { 'golden-residence': {}, 'mnogofamilna-sgrada': {} }
-    TABS.forEach(({ key, project, slot }, index) => {
-      sources[key] = results[index].source
-      projects[project][slot] = results[index].rows
-    })
-    const body = { updatedAt: new Date().toISOString(), sources, projects }
-
-    // Nothing read, so nothing worth keeping at the edge; the site reads the
-    // sheets itself.
-    if (!results.some((result) => result.source === 'ok')) {
-      return json(body, 503, { 'Cache-Control': 'no-store' })
-    }
-    return json(body, 200, { 'Cache-Control': CACHE_OK })
+    const response = await availability()
+    if (request.method === 'HEAD') return new Response(null, { status: response.status, headers: response.headers })
+    return response
   },
 }
