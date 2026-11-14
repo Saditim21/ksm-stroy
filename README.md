@@ -52,8 +52,7 @@ sitemap.
 Motion is GSAP 3 (ScrollTrigger and SplitText, under GSAP's standard no-charge
 licence), with Lenis for smooth scrolling, driven by GSAP's ticker. It comes
 from the Golden Residence landing (golden-residence @944bb03). The current
-pages still animate with framer-motion; Lenis runs on every page, and
-`trackScreenHeight()` is not called yet.
+pages still animate with framer-motion; Lenis runs on every page.
 
 - GSAP and Lenis are one deferred chunk. `src/motion/engine.js` is the only
   module that imports `gsap`, `gsap/*` or `lenis`, and only
@@ -90,8 +89,9 @@ pages still animate with framer-motion; Lenis runs on every page, and
   toolbars slide, so a `vh` height moves everything below it under the
   reader's finger. An inline script in `<head>` (`SCREEN_HEIGHT_SCRIPT`,
   `src/utils/screenHeight.js`) writes `--screen-h` into
-  `<style id="screen-h">` before first paint. `trackScreenHeight()` keeps that
-  element up to date, changing it only when ScrollTrigger re-measures too.
+  `<style id="screen-h">` before first paint. From app start (`src/root.jsx`),
+  `trackScreenHeight()` keeps that element up to date, changing it only when
+  ScrollTrigger re-measures too.
 - Lenis' settings live in `src/utils/smoothScroll.js`: a slower wheel (lerp
   0.07, 80% per notch), and touch scrolling left to the browser
   (`syncTouch: false`). A panel that scrolls on its own keeps the wheel while

@@ -10,6 +10,7 @@ import SiteHeader from './shell/SiteHeader'
 import { useRouteHandle } from './shell/handle'
 import { SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
+import { trackScreenHeight } from './utils/screenHeight'
 import { seoData } from './utils/seo'
 import './index.css'
 
@@ -117,8 +118,14 @@ function RouteTransition() {
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
 // scrolls natively and SmoothScroll is a plain wrapper.
+//
+// --screen-h, which the head script wrote before first paint, follows the
+// screen from the moment the app has hydrated (trackScreenHeight(),
+// src/utils/screenHeight.js). Not where there is no matchMedia to ask about
+// the pointer: jsdom, in the tests.
 export default function App() {
   const { header } = useRouteHandle()
+  useEffect(() => (typeof window.matchMedia === 'function' ? trackScreenHeight() : undefined), [])
   return (
     <ApartmentProvider>
       <SmoothScroll>
