@@ -28,6 +28,41 @@ test('two overlapping locks: releasing the inner one keeps Lenis stopped', () =>
   expect(start).toHaveBeenCalledTimes(1)
 })
 
+// The menu and a unit's panel can close in one commit (a link in the panel
+// navigates away). Whatever order React runs their cleanups in, <html> must
+// end up as it was before either opened.
+test('two locks released in one commit leave <html> as it was', () => {
+  const root = document.documentElement
+  root.style.overflow = 'auto'
+  const { unmount } = renderHook(() => {
+    useScrollLock()
+    useScrollLock('#1F3A63')
+  })
+  expect(root.style.overflow).toBe('hidden')
+
+  unmount()
+  expect(root.style.overflow).toBe('auto')
+  expect(root.style.backgroundColor).toBe('')
+  root.style.overflow = ''
+})
+
+// The overlay opened first can close first: the one still open keeps its
+// colour on <html>.
+test('a lock released out of order hands <html> to the one still held', () => {
+  const root = document.documentElement
+  const first = renderHook(() => useScrollLock('#F6F5F1'))
+  const second = renderHook(() => useScrollLock('#1F3A63'))
+  expect(root.style.backgroundColor).toBe('rgb(31, 58, 99)')
+
+  first.unmount()
+  expect(root.style.backgroundColor).toBe('rgb(31, 58, 99)')
+  expect(root.style.overflow).toBe('hidden')
+
+  second.unmount()
+  expect(root.style.backgroundColor).toBe('')
+  expect(root.style.overflow).toBe('')
+})
+
 test('calls stop on Lenis when mounted', () => {
   const stop = vi.fn()
   const start = vi.fn()
