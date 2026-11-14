@@ -24,6 +24,29 @@ HTML at build time (`react-router.config.js`); the routes are in
   `npm run build` first
 - `npm run lint`: ESLint
 
+## Indexing
+
+Only the production site is indexed. One decision, `isProductionStage()` in
+`src/seo/stage.js`, made at build time by `vite.config.js` (every page's
+robots meta) and `scripts/postbuild.mjs` (`robots.txt` and `sitemap.xml`),
+reads these variables from the build's environment:
+
+- `VERCEL_ENV` and `VERCEL_PROJECT_PRODUCTION_URL`, which Vercel sets on every
+  build. A build is production when it is the production deployment
+  (`VERCEL_ENV=production`) of the project whose production domain is
+  ksmstroy.com (`VERCEL_PROJECT_PRODUCTION_URL` is `ksmstroy.com` or
+  `www.ksmstroy.com`; Vercel names the project's shortest custom domain, and
+  sets it on previews too).
+- `VITE_SITE_STAGE`, an override: `review` makes any build noindex, and
+  `production` makes any build indexable, to check the production output
+  locally.
+
+Every other build is noindex: previews, local builds, and any other Vercel
+project, such as a client review project whose production branch is
+`redesign-v2`, whose production URL is a `*.vercel.app` domain. Its pages get
+`noindex, nofollow`, `robots.txt` disallows everything, and there is no
+sitemap.
+
 ## Motion
 
 Motion is GSAP 3 (ScrollTrigger and SplitText, under GSAP's standard no-charge
