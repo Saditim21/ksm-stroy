@@ -56,6 +56,15 @@ describe('the header', () => {
     expect(header.getByRole('link', { name: 'Начало' })).not.toHaveAttribute('aria-current')
   })
 
+  // A project's pages sit under Продажби, which marks itself as their section.
+  it('marks Продажби as the section of a project page', async () => {
+    renderSiteAt('/projects/golden-residence/block-a')
+    const header = within(await siteHeader())
+
+    expect(header.getByRole('link', { name: 'Продажби' })).toHaveAttribute('aria-current', 'true')
+    expect(header.getByRole('link', { name: 'Начало' })).not.toHaveAttribute('aria-current')
+  })
+
   it.each([
     ['/', '/contact'],
     ['/projects/golden-residence', '/contact?project=golden-residence'],
