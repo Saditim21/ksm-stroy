@@ -9,7 +9,7 @@ test('freeApartmentsLine handles no data, zero, one and many', () => {
 })
 
 test('formatArea uses the Bulgarian decimal comma', () => {
-  expect(formatArea(65.68)).toBe('65,68 м²')
+  expect(formatArea(65.68)).toBe('65,68\u00a0м²')
   expect(formatArea(null)).toBe('—')
 })
 

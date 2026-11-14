@@ -126,32 +126,32 @@ describe('unitButtonLabel', () => {
   const unit = { label: 'А 306', type: '3-стаен', totalArea: 98.4 }
 
   test.each([
-    ['available', 'А 306, 3-стаен, 98,40 м², Свободен'],
-    ['reserved', 'А 306, 3-стаен, 98,40 м², Резервиран'],
-    ['sold', 'А 306, 3-стаен, 98,40 м², Продаден'],
-    ['blocked', 'А 306, 3-стаен, 98,40 м², Блокиран'],
-    ['unknown', 'А 306, 3-стаен, 98,40 м², Няма информация'],
+    ['available', 'А 306, 3-стаен, 98,40\u00a0м², Свободен'],
+    ['reserved', 'А 306, 3-стаен, 98,40\u00a0м², Резервиран'],
+    ['sold', 'А 306, 3-стаен, 98,40\u00a0м², Продаден'],
+    ['blocked', 'А 306, 3-стаен, 98,40\u00a0м², Блокиран'],
+    ['unknown', 'А 306, 3-стаен, 98,40\u00a0м², Няма информация'],
   ])('a %s unit reads "%s"', (status, expected) => {
     expect(unitButtonLabel({ ...unit, status })).toBe(expected)
   })
 
   test('missing parts are skipped', () => {
     expect(unitButtonLabel({ label: 'А 306', status: 'available' })).toBe('А 306, Свободен')
-    expect(unitButtonLabel({ label: 'А 306', type: '', totalArea: 65.68, status: 'sold' })).toBe('А 306, 65,68 м², Продаден')
+    expect(unitButtonLabel({ label: 'А 306', type: '', totalArea: 65.68, status: 'sold' })).toBe('А 306, 65,68\u00a0м², Продаден')
     expect(unitButtonLabel({ label: 'Г-001', type: 'Гараж', totalArea: null, status: 'available' })).toBe('Г-001, Гараж, Свободен')
   })
 
   test('an unknown status reads as the text the unit keeps', () => {
-    expect(unitButtonLabel({ ...unit, status: 'unknown', statusText: 'Скоро' })).toBe('А 306, 3-стаен, 98,40 м², Скоро')
+    expect(unitButtonLabel({ ...unit, status: 'unknown', statusText: 'Скоро' })).toBe('А 306, 3-стаен, 98,40\u00a0м², Скоро')
   })
 
   test('a unit with no text, or a status outside the five keys, reads as „Няма информация"', () => {
-    expect(unitButtonLabel({ ...unit, status: 'unknown' })).toBe('А 306, 3-стаен, 98,40 м², Няма информация')
-    expect(unitButtonLabel({ ...unit, status: 'constructor' })).toBe('А 306, 3-стаен, 98,40 м², Няма информация')
+    expect(unitButtonLabel({ ...unit, status: 'unknown' })).toBe('А 306, 3-стаен, 98,40\u00a0м², Няма информация')
+    expect(unitButtonLabel({ ...unit, status: 'constructor' })).toBe('А 306, 3-стаен, 98,40\u00a0м², Няма информация')
     expect(unitButtonLabel({ label: 'А 306' })).toBe('А 306, Няма информация')
   })
 
   test('a known status reads its own label, not the sheet\'s spelling', () => {
-    expect(unitButtonLabel({ ...unit, status: 'sold', statusText: 'Продадени' })).toBe('А 306, 3-стаен, 98,40 м², Продаден')
+    expect(unitButtonLabel({ ...unit, status: 'sold', statusText: 'Продадени' })).toBe('А 306, 3-стаен, 98,40\u00a0м², Продаден')
   })
 })

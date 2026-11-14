@@ -9,9 +9,10 @@ export function freeApartmentsLine(n) {
   return `${n} свободни апартамента`
 }
 
+// A non-breaking space before „м²“ (spec §3.2), so the unit never starts a line.
 export function formatArea(n) {
   if (n == null) return '—'
-  return `${n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} м²`
+  return `${n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\u00a0м²`
 }
 
 // Bulgarian counts take the singular for exactly one and the plural otherwise.
