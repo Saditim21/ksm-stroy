@@ -111,15 +111,30 @@ describe('vt-cut, the hero move and Back/Forward', () => {
     expect(declared(':root.vt-cut::view-transition-new(.page-in)').display).toBeUndefined()
   })
 
-  // The root and a menu then fade as the browser does, at 200 ms.
-  it('leaves the root and a menu out of the doors', () => {
+  // Back and Forward are instant (spec §5.6), as a browser's own Back from its
+  // page cache is: the root (the ground, the footer) switches with the page. A
+  // root that faded would hold the old ground under the new page's text for a
+  // moment: ivory on a legacy page's light ground, or a legacy page's dark text
+  // on onyx. The hero move's two roots are both onyx.
+  it('switches the root at once', () => {
+    expect(declared(':root.vt-cut::view-transition-old(root)').display).toBe('none')
+    expect(declared(':root.vt-cut::view-transition-new(root)').animation).toBe('none')
+    const root = [...rulesFor(rules, ':root.vt-cut::view-transition-old(root)'), ...rulesFor(rules, ':root.vt-cut::view-transition-new(root)')]
+    for (const rule of root) expect(rule.atRules, rule.selector).toEqual([NO_PREFERENCE])
+  })
+
+  // The root and a menu stay out of the doors. An open menu fades out as the
+  // browser does, at 200 ms, over the new page.
+  it('leaves the root and a menu out of the doors, and lets a menu fade', () => {
     expect(rules.some((rule) => rule.selectors.some((selector) => /:root\.js::view-transition-(old|new)\((root|site-menu)\)/.test(selector)))).toBe(false)
+    expect(rules.some((rule) => rule.selectors.some((selector) => selector.startsWith(':root.vt-cut') && selector.includes('(site-menu)')))).toBe(false)
   })
 })
 
 describe('without the doors', () => {
-  // Reduced motion, Save-Data, no matchMedia, or the cut: the browser's own
-  // crossfade, at 200 ms.
+  // Reduced motion, Save-Data, no matchMedia: the browser's own crossfade, at
+  // 200 ms. Under the cut, an open menu still fades at that speed, while the
+  // page and the root switch at once.
   it('is a 200 ms crossfade of the page, the root and a menu', () => {
     const plain = rules.find((rule) => valueOf(rule, 'animation-duration') === '200ms')
     expect(plain.atRules).toEqual([])
@@ -133,10 +148,16 @@ describe('without the doors', () => {
   })
 
   // The header (src/shell/SiteHeader.jsx) is a group of its own: it takes the
-  // new page's look at once, over the doors.
-  it('switches the header at once', () => {
+  // new page's look at once, and stays on top (spec §5.6). The browser stacks
+  // a name only the new view has, such as the arriving page's, above the
+  // others, so an arriving page that runs under the header (Home's hero, under
+  // the see-through bar) would cover it for the whole transition.
+  it('switches the header at once, on top', () => {
     expect(valueOf(only('::view-transition-old(site-header)'), 'display')).toBe('none')
     expect(valueOf(only('::view-transition-new(site-header)'), 'animation')).toBe('none')
+    const group = only('::view-transition-group(site-header)')
+    expect(valueOf(group, 'z-index')).toBe('1')
+    expect(group.atRules).toEqual([])
   })
 })
 

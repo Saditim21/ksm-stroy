@@ -13,7 +13,9 @@
 
    Without motion (reduced motion, Save-Data, no matchMedia), a 200 ms
    crossfade. `vt-cut` on <html> (src/utils/viewTransition.js) turns the doors
-   off for one change: the hero move, and Back and Forward.
+   off for one change: the hero move, and Back and Forward. Without a
+   reduced-motion preference that change is instant; with one, it keeps the
+   crossfade.
 
    Not in a Tailwind layer: these rules are never purged, and nothing else
    styles the view transition (src/index.css). */
@@ -47,14 +49,21 @@
     background: linear-gradient(var(--door-seam), var(--door-seam)) 50% 0 / 1px 100% no-repeat;
     animation: door-seam 1120ms linear both;
   }
-  /* The hero move and Back/Forward: the new page at once; the root and a menu fade as the browser does. */
+  /* The hero move and Back/Forward: the new page and the root at once, as a
+     browser's own Back from its page cache would show them; an open menu
+     fades as the browser does. */
   :root.vt-cut::view-transition-old(.page-out),
   :root.vt-cut::view-transition-new(.page-in),
-  :root.vt-cut::view-transition-image-pair(.page-in) { animation: none; }
-  /* A page has no ground of its own: the old page's snapshot, left in place,
-     would show through the new one for the whole transition (React runs one
-     on Back and Forward too). It goes at once. */
-  :root.vt-cut::view-transition-old(.page-out) { display: none; }
+  :root.vt-cut::view-transition-image-pair(.page-in),
+  :root.vt-cut::view-transition-new(root) { animation: none; }
+  /* The old snapshots go at once. A page has no ground of its own: the old
+     page, left in place, would show through the new one for the whole
+     transition (React runs one on Back and Forward too). And the old root
+     holds the old ground: fading out, it would keep the new page's text on it
+     for a moment, ivory on a legacy page's light ground, or a legacy page's
+     dark text on onyx. */
+  :root.vt-cut::view-transition-old(.page-out),
+  :root.vt-cut::view-transition-old(root) { display: none; }
 }
 
 @keyframes door-close { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 50% 0 50%); } }
@@ -69,6 +78,11 @@
 
 /* The header (src/shell/SiteHeader.jsx, view-transition-name: site-header)
    stays out of the doors and the crossfade: it takes the new page's look at
-   once. */
+   once, and stays on top. The browser stacks the transition's groups as the
+   view being left painted them, and puts a name only the new view has, such
+   as the arriving page's, above them all: an arriving page that runs under
+   the header (Home's hero, under the see-through bar) would cover the bar for
+   the whole transition. */
+::view-transition-group(site-header) { z-index: 1; }
 ::view-transition-old(site-header) { display: none; }
 ::view-transition-new(site-header) { animation: none; }

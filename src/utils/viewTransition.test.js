@@ -48,19 +48,24 @@ it('keeps the root in every view transition until removed', () => {
   expect(html.getAttribute('style')).toBe('')
 })
 
-// React Router listens for popstate on window too, and its listener may lead
-// to a commit before a later listener runs. A capturing listener on window
-// runs before every bubbling one, whenever it was added.
-it('cuts before a popstate listener that was there first', () => {
-  const seen = []
-  const router = () => seen.push(html.classList.contains('vt-cut'))
-  window.addEventListener('popstate', router)
-  const remove = cutOnPop()
+// A fragment the browser follows (the skip link, a legacy page's #section)
+// fires a popstate too, and keeps the page: it has no doors to cut, and a cut
+// it left would wait for a route change to clear it. So the caller says, as
+// each popstate arrives, whether it brings another page (src/root.jsx asks the
+// address bar). Whether this runs before React Router's own listener or after
+// it is the browser's affair (src/utils/viewTransition.js); root.test.jsx
+// runs both orders.
+it('cuts on a popstate only when it brings another page', () => {
+  let anotherPage = false
+  const remove = cutOnPop(() => anotherPage)
   try {
     window.dispatchEvent(new PopStateEvent('popstate'))
-    expect(seen).toEqual([true])
+    expect(html.classList.contains('vt-cut')).toBe(false)
+
+    anotherPage = true
+    window.dispatchEvent(new PopStateEvent('popstate'))
+    expect(html.classList.contains('vt-cut')).toBe(true)
   } finally {
     remove()
-    window.removeEventListener('popstate', router)
   }
 })

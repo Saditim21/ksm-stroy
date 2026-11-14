@@ -52,6 +52,11 @@ function renderSync(path = '/') {
 const go = (to) => act(() => navigate(to))
 const settle = () => act(async () => {})
 
+// The entry a fragment the browser follows leaves (the skip link's #main, a
+// legacy page's #section): it has no state, so React Router keys it
+// "default", the key it gives the first entry too.
+const FRAGMENT_ENTRY = { pathname: '/', hash: '#main', key: 'default' }
+
 // The animations document.getAnimations() reports: the transition's own run
 // on its pseudo-elements; any other animation on the page is no part of it.
 function deferred() {
@@ -131,6 +136,24 @@ describe('the scroll position', () => {
 
     expect(lenis.start).not.toHaveBeenCalled()
     expect(lenis.isStopped).toBe(true)
+  })
+
+  // A fragment the browser follows keeps the location key (see the doors' cut
+  // below), and the router has scrolled to it all the same.
+  test('a change that keeps the location key hands Lenis the position too', () => {
+    const lenis = { dimensions: { resize: vi.fn() }, scrollTo: vi.fn() }
+    lenisHandle.setLenis(lenis)
+    render(
+      <MemoryRouter initialEntries={['/', FRAGMENT_ENTRY]} initialIndex={0}>
+        <Navigator />
+        <LenisScrollSync />
+      </MemoryRouter>,
+    )
+    lenis.scrollTo.mockClear()
+
+    scrolledTo(320)
+    go(1)
+    expect(lenis.scrollTo.mock.calls).toEqual([[320, { immediate: true, force: true }]])
   })
 
   test('without Lenis, the router\'s scroll stands alone', () => {
@@ -362,6 +385,32 @@ describe('the doors\' cut', () => {
 
     html.classList.add('vt-cut')
     go('/about')
+    await act(() => vi.advanceTimersByTimeAsync(1400))
+    expect(html.classList.contains('vt-cut')).toBe(false)
+  })
+
+  // From the first entry to a fragment's, or between two fragments' entries,
+  // the key stays "default" while the location moves. The cut is cleared once
+  // that change is over too.
+  test('clears the cut after a change that keeps the location key', async () => {
+    vi.useFakeTimers()
+    let location
+    function Shown() {
+      location = useLocation()
+      return null
+    }
+    render(
+      <MemoryRouter initialEntries={['/', FRAGMENT_ENTRY]} initialIndex={0}>
+        <Navigator />
+        <Shown />
+        <LenisScrollSync />
+      </MemoryRouter>,
+    )
+    expect(location).toMatchObject({ pathname: '/', hash: '', key: 'default' })
+
+    html.classList.add('vt-cut')
+    go(1)
+    expect(location).toMatchObject({ pathname: '/', hash: '#main', key: 'default' })
     await act(() => vi.advanceTimersByTimeAsync(1400))
     expect(html.classList.contains('vt-cut')).toBe(false)
   })

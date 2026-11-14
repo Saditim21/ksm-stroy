@@ -5,7 +5,10 @@
 //   and must not close doors over it;
 // - Back and Forward, which are instant.
 // LenisScrollSync clears the cut once that change's transition is over, or
-// after TRANSITION_MAX_MS where none settles, so it never sticks.
+// after TRANSITION_MAX_MS where none settles, so it never sticks. A cut left
+// over from a change that never came (Back to a page still loading when a link
+// was followed, a hero move given up) is lifted by the next page the doors
+// bring, before its doors are set up (root.jsx).
 export const VT_CUT = 'vt-cut'
 
 export function cutNextTransition() {
@@ -35,15 +38,27 @@ export function keepRootSnapshot() {
   return () => style.removeProperty('view-transition-name')
 }
 
-// Every popstate (Back, Forward, a fragment the browser followed) cuts the
-// doors of the change it brings. A popstate fires before the router commits
-// that change; React Router listens on window too, and its listener may lead
-// to a commit before a later listener runs (React renders a transition started
-// during popstate at once). A capturing listener on window runs before every
-// bubbling one there, whenever each was added, so the cut is always in place
-// first. Returns the remover.
-export function cutOnPop() {
-  const cut = () => cutNextTransition()
+// Every popstate that brings another page (Back, Forward) cuts that change's
+// doors. `bringsAnotherPage`, asked as each popstate arrives, says whether it
+// does; without it, every popstate cuts. A fragment the browser follows (a
+// plain #… link, the skip link among them) fires a popstate too, and keeps the
+// page: it has no doors to cut, and a cut it set would wait for the next route
+// change to clear it, and that change would run without its doors.
+//
+// React Router listens for popstate on window as well, from the moment the
+// router is made, so before this. Which listener runs first is the browser's
+// affair: the DOM standard (and jsdom) runs a capturing listener on window
+// before the bubbling ones; Chrome runs window's listeners in the order they
+// were added, whatever their phase, so there the router has handled the
+// popstate when this runs, and React has often committed the change already
+// (it renders a transition started during a popstate at once). Either way the
+// cut is in time: React applies a route change to the page, and the browser
+// sets up its doors, in the view transition a frame later. A change that runs
+// no view transition has no doors to cut. Returns the remover.
+export function cutOnPop(bringsAnotherPage = () => true) {
+  const cut = () => {
+    if (bringsAnotherPage()) cutNextTransition()
+  }
   window.addEventListener('popstate', cut, true)
   return () => window.removeEventListener('popstate', cut, true)
 }

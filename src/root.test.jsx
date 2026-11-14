@@ -173,16 +173,74 @@ describe('arrival and focus', () => {
     expect(html.style.viewTransitionName).toBe('')
   })
 
-  // A popstate comes before the router's commit (src/utils/viewTransition.js).
-  it('cuts the doors on every popstate while the app is up', () => {
+  // `vt-cut` turns a route change's doors off (src/utils/viewTransition.js).
+  // In the browser the address bar is the router's location; here the memory
+  // router stands in for it, so each popstate sets the address it leaves.
+  describe('the doors’ cut', () => {
     const html = document.documentElement
-    const { unmount } = renderApp('/eu-proekt')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-    expect(html.classList.contains('vt-cut')).toBe(true)
+    const pop = (url) => {
+      window.history.replaceState(null, '', url)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+    afterEach(() => window.history.replaceState(null, '', '/'))
 
-    html.classList.remove('vt-cut')
-    unmount()
-    window.dispatchEvent(new PopStateEvent('popstate'))
-    expect(html.classList.contains('vt-cut')).toBe(false)
+    // Back and Forward bring another page, and are instant.
+    it('cuts the doors on a popstate that brings another page, while the app is up', () => {
+      const { unmount } = renderApp('/eu-proekt')
+      pop('/about')
+      expect(html.classList.contains('vt-cut')).toBe(true)
+
+      html.classList.remove('vt-cut')
+      unmount()
+      pop('/eu-proekt')
+      expect(html.classList.contains('vt-cut')).toBe(false)
+    })
+
+    // A fragment the browser follows (the skip link, a legacy page's
+    // #section) fires a popstate and keeps the page: no doors to cut, and a cut
+    // would wait for the next route change to clear it, which would then run
+    // without its doors. The DOM standard (and jsdom) runs the app's capturing
+    // listener before the router's; Chrome runs window's listeners in the
+    // order they were added, the router's first, and React has applied a change
+    // that runs no view transition by the time the app's listener runs.
+    it('leaves no cut for a fragment the browser follows, before or after the router has it', async () => {
+      const { router } = renderApp('/eu-proekt')
+      pop('/eu-proekt#main')
+      expect(html.classList.contains('vt-cut')).toBe(false)
+      await act(() => router.navigate('/eu-proekt#main'))
+      expect(html.classList.contains('vt-cut')).toBe(false)
+
+      await act(() => router.navigate('/eu-proekt#kontakt'))
+      pop('/eu-proekt#kontakt')
+      expect(html.classList.contains('vt-cut')).toBe(false)
+    })
+
+    // A cut still on when a link is followed was left by a change that never
+    // came (Back to a page still loading when the link was followed, a hero
+    // move given up). The page the doors bring lifts it as React applies the
+    // page, before the view transition sets up the doors.
+    it('lifts a cut left over when a page comes through the doors', async () => {
+      renderApp('/eu-proekt')
+      html.classList.add('vt-cut')
+      fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('link', { name: 'За нас' }))
+      await shows('Страницата за нас')
+      expect(frame()).toHaveAttribute('data-arrive', 'doors')
+      expect(html.classList.contains('vt-cut')).toBe(false)
+    })
+
+    // The hero move's cut and Back's are theirs to keep, until LenisScrollSync
+    // clears them once their change is over.
+    it('keeps the cut of a page the hero move or Back brings', async () => {
+      const { router } = renderApp('/')
+      html.classList.add('vt-cut')
+      await act(() => router.navigate('/about', { state: { arrive: 'hero' } }))
+      await shows('Страницата за нас')
+      expect(html.classList.contains('vt-cut')).toBe(true)
+
+      await act(() => router.navigate(-1))
+      await shows('Начало')
+      expect(frame()).toHaveAttribute('data-arrive', 'pop')
+      expect(html.classList.contains('vt-cut')).toBe(true)
+    })
   })
 })

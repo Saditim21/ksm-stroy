@@ -44,9 +44,16 @@ function viewTransitionDone() {
 //
 // Without Lenis (no motion, or the engine not loaded yet) the router's scroll
 // stands alone, and there is no ScrollTrigger to re-measure.
+//
+// Both run on every change of the location, not only of its key. A fragment
+// the browser follows (a plain #… link: the skip link, a legacy page's
+// #section) leaves an entry with no state, which React Router keys "default",
+// as it keys the first entry: from the first entry to such an entry, between
+// two of them, or by Back or Forward across them, the key stays while the
+// location moves.
 export default function LenisScrollSync() {
-  const { key } = useLocation()
-  const shownKey = useRef(key)
+  const location = useLocation()
+  const shownLocation = useRef(location)
 
   useLayoutEffect(() => {
     const lenis = getLenis()
@@ -70,13 +77,13 @@ export default function LenisScrollSync() {
       lenis.start()
     }
     lenis.scrollTo(y, { immediate: true, force: true })
-  }, [key])
+  }, [location])
 
   useEffect(() => {
     // The first page's triggers are measured as they are created, and once
     // more when the idle queue drains (runtime.js).
-    if (shownKey.current === key) return undefined
-    shownKey.current = key
+    if (shownLocation.current === location) return undefined
+    shownLocation.current = location
     let live = true
     viewTransitionDone().then(() => {
       if (!live) return
@@ -86,7 +93,7 @@ export default function LenisScrollSync() {
     return () => {
       live = false
     }
-  }, [key])
+  }, [location])
 
   return null
 }

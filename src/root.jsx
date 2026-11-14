@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, ViewTransition } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, ViewTransition } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation, useNavigationType } from 'react-router'
 import { ApartmentProvider } from './context/ApartmentContext'
 import LenisScrollSync from './motion/LenisScrollSync'
@@ -12,7 +12,7 @@ import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { trackScreenHeight } from './utils/screenHeight'
 import { seoData } from './utils/seo'
-import { cutOnPop, keepRootSnapshot } from './utils/viewTransition'
+import { clearTransitionCut, cutOnPop, keepRootSnapshot } from './utils/viewTransition'
 import './index.css'
 
 // The root route: the document around every page (Layout), the site shell
@@ -119,17 +119,28 @@ function ConditionalAnalytics() {
 // - 'hero' for the hero move's target (location.state.arrive);
 // - 'doors' for any other client navigation.
 //
-// Back and Forward are instant: every popstate cuts the doors before the
-// router commits. And the root snapshot takes part in every route change, so
-// the doors close it with the page (src/utils/viewTransition.js).
+// Back and Forward are instant: a popstate that brings another page cuts its
+// doors (src/utils/viewTransition.js). The page it brings is told by the
+// address bar, which a popstate has already moved, against the page on screen.
+// That is the page React last applied: within a view transition React applies
+// a commit a frame after making it, so a popstate whose listener runs after
+// React Router's, and after React's commit (Chrome's order), still finds the
+// page being left there, while a fragment the browser follows finds the page
+// it keeps. And the root snapshot takes part in every route change, so the
+// doors close it with the page (src/utils/viewTransition.js).
 function RouteTransition() {
   const location = useLocation()
   const navigationType = useNavigationType()
+  const page = normalizePathname(location.pathname)
   const firstRender = useRef(true)
+  const shownPage = useRef(page)
+  useLayoutEffect(() => {
+    shownPage.current = page
+  }, [page])
   useEffect(() => {
     firstRender.current = false
   }, [])
-  useEffect(() => cutOnPop(), [])
+  useEffect(() => cutOnPop(() => normalizePathname(window.location.pathname) !== shownPage.current), [])
   useEffect(() => keepRootSnapshot(), [])
 
   let arrive
@@ -138,7 +149,7 @@ function RouteTransition() {
     else arrive = location.state?.arrive === 'hero' ? 'hero' : 'doors'
   }
   return (
-    <ViewTransition key={normalizePathname(location.pathname)} enter="page-in" exit="page-out" default="none">
+    <ViewTransition key={page} enter="page-in" exit="page-out" default="none">
       <PageFrame arrive={arrive} />
     </ViewTransition>
   )
@@ -151,8 +162,17 @@ function RouteTransition() {
 // the app mounted after the first takes the focus to <main>, without
 // scrolling (spec §5.6); a hash or query change keeps the frame, and the
 // focus where it is.
+//
+// A page the doors bring has its doors. A cut still on then was left by a
+// change that never came (Back to a page still loading when a link was
+// followed, a hero move given up), so the frame lifts it as React applies the
+// page: in a view transition, before the browser sets up the doors. The hero
+// move's target and a page Back or Forward brings keep theirs.
 function PageFrame({ arrive: arrival }) {
   const [arrive] = useState(arrival)
+  useLayoutEffect(() => {
+    if (arrive === 'doors') clearTransitionCut()
+  }, [arrive])
   useEffect(() => {
     if (arrive !== undefined) document.getElementById('main')?.focus({ preventScroll: true })
   }, [arrive])
