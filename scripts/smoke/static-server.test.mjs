@@ -26,6 +26,19 @@ const PAGES = {
 
 const get = (pathname, init) => fetch(`${origin}${pathname}`, { redirect: 'manual', ...init })
 
+// A second server on the same build with a vercel.json of the test's own;
+// `check` gets its `get`.
+async function withConfig(config, check) {
+  const custom = createStaticServer({ root, config })
+  await new Promise((resolve) => custom.listen(0, '127.0.0.1', resolve))
+  try {
+    await check((pathname) => fetch(`http://127.0.0.1:${custom.address().port}${pathname}`, { redirect: 'manual' }))
+  } finally {
+    custom.closeAllConnections()
+    await new Promise((resolve) => custom.close(resolve))
+  }
+}
+
 beforeAll(async () => {
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'ksm-static-server-'))
   for (const [name, body] of Object.entries(PAGES)) {
@@ -62,6 +75,16 @@ describe('the filesystem', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toMatch(/^text\/html/)
     expect(await response.text()).toBe('')
+  })
+
+  // Vercel looks files up by their exact name. Windows and macOS disks do not,
+  // and serving /about's page at /About would hide what a visitor gets there:
+  // the 404 page.
+  it('matches a name by its exact case, even on a disk that ignores case', async () => {
+    for (const pathname of ['/About', '/ABOUT', '/projects/golden-residence/Block-A', '/assets/Entry-abc123.js']) {
+      expect((await get(pathname)).status, pathname).toBe(404)
+    }
+    expect(await (await get('/About')).text()).toBe('<h1>Тази страница я няма в чертежа.</h1>')
   })
 
   it('never serves a file outside the build', async () => {
@@ -138,8 +161,21 @@ it('compresses text as the edge does', async () => {
   expect(await response.text()).toBe(PAGES['assets/entry-abc123.js'])
 })
 
+// path-to-regexp's :name+ is one path segment or more, its "/" between them
+// included, and a destination repeats it as :name+.
+it('follows a :name+ source into its destination, one segment or more, never none', async () => {
+  await withConfig({ redirects: [{ source: '/old/:rest+', destination: '/new/:rest+' }] }, async (at) => {
+    expect((await at('/old/a')).headers.get('location')).toBe('/new/a')
+    expect((await at('/old/a/b/c?q=1')).headers.get('location')).toBe('/new/a/b/c?q=1')
+    expect((await at('/old')).status).toBe(404)
+  })
+})
+
 it('refuses vercel.json rules it cannot emulate, rather than ignore them', () => {
   expect(() => createStaticServer({ root, config: { redirects: [{ source: '/blog/:slug*', destination: '/blog' }] } }))
     .toThrow(/\/blog\/:slug\*/)
+  // A repeated param must follow a "/", as path-to-regexp's prefix.
+  expect(() => createStaticServer({ root, config: { redirects: [{ source: '/v:n+', destination: '/' }] } }))
+    .toThrow(/\/v:n\+/)
   expect(() => createStaticServer({ root, config: { cleanUrls: true } })).toThrow(/cleanUrls/)
 })

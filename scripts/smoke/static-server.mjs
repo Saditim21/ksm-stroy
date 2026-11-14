@@ -6,7 +6,9 @@
 //   1. "trailingSlash": false: /about/ answers 308 to /about;
 //   2. "redirects", in order: 308 when permanent (the default), else 307, or
 //      the rule's statusCode;
-//   3. the filesystem: the file itself, or <path>/index.html;
+//   3. the filesystem: the file itself, or <path>/index.html, by the exact
+//      case of every name, as Vercel looks them up (a Windows or macOS disk
+//      would find /About as about/);
 //   4. "rewrites", in order. /api/* is a Vercel Function, which this server
 //      does not run: it answers 501;
 //   5. nothing matched: 404.html with a 404 status. There is no SPA fallback.
@@ -17,8 +19,10 @@
 //
 // A source follows path-to-regexp as Vercel compiles it (strict and case
 // sensitive), in the forms vercel.json uses: literal text, :name,
-// :name(pattern) and (pattern). Any other form, and any vercel.json key that
-// changes routing and is not emulated here, throws rather than be ignored.
+// :name(pattern), (pattern), and :name+ after a "/" (one segment or more,
+// repeated as :name+ in a destination). Any other form, and any vercel.json
+// key that changes routing and is not emulated here, throws rather than be
+// ignored.
 //
 // usage: node scripts/smoke/static-server.mjs [root] [port] [--latency=ms]
 //   root defaults to build/client, port to 4190; --latency delays each answer.
@@ -79,12 +83,20 @@ function compileSource(source) {
     if (ch === ':') {
       const name = /^\w+/.exec(source.slice(i + 1))?.[0]
       if (!name) throw unsupported(source)
+      const afterSlash = source[i - 1] === '/'
       i += 1 + name.length
       let group = '[^\\/#\\?]+?'
       if (source[i] === '(') {
         const end = groupEnd(source, i)
         group = source.slice(i + 1, end)
         i = end + 1
+      }
+      // :name+ repeats the param with the "/" before it, its prefix in
+      // path-to-regexp: one segment or more.
+      if (source[i] === '+') {
+        if (!afterSlash) throw unsupported(source)
+        group = `(?:${group})(?:\\/(?:${group}))*`
+        i += 1
       }
       names.push(name)
       pattern += `(${group})`
@@ -110,14 +122,27 @@ function compileRules(config, key) {
   })
 }
 
-// The destination of a rule that matched, with its groups filled in.
+// The destination of a rule that matched, with its groups filled in. A
+// destination names a repeated param as the source does (:name+).
 function destinationOf(rule, groups) {
   return rule.destination
     .replace(/\$(\d+)/g, (_, n) => groups[Number(n) - 1] ?? '')
-    .replace(/:(\w+)/g, (whole, name) => (rule.names.includes(name) ? groups[rule.names.indexOf(name)] : whole))
+    .replace(/:(\w+)\+?/g, (whole, name) => (rule.names.includes(name) ? groups[rule.names.indexOf(name)] : whole))
 }
 
 const matchOf = (rule, pathname) => rule.regex.exec(pathname)?.slice(1) ?? null
+
+// Whether every name from root down to abs is spelled exactly as on disk.
+// Vercel's lookup is case-sensitive; a Windows or macOS disk's is not, and
+// statSync() would find /About as about/.
+function exactCase(root, abs) {
+  let dir = root
+  for (const name of path.relative(root, abs).split(path.sep).filter(Boolean)) {
+    if (!fs.readdirSync(dir).includes(name)) return false
+    dir = path.join(dir, name)
+  }
+  return true
+}
 
 // The file a path names inside root: the file itself, or <path>/index.html.
 function resolveFile(root, pathname) {
@@ -131,6 +156,7 @@ function resolveFile(root, pathname) {
   if (abs !== root && !abs.startsWith(root + path.sep)) return null
   try {
     const stat = fs.statSync(abs)
+    if (!exactCase(root, abs)) return null
     if (stat.isFile()) return abs
     const index = path.join(abs, 'index.html')
     if (stat.isDirectory() && fs.existsSync(index)) return index
