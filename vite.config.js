@@ -16,10 +16,12 @@ const isVitest = process.env.VITEST === 'true'
 const API_FUNCTIONS = ['/api/availability', '/api/odoo-lead']
 
 // Dev server only: answers the Vercel Functions in api/ as Vercel does, so
-// `react-router dev` has the same-origin API a deploy has. Every request loads
-// the function through Vite, so an edit applies on the next request, and
-// calls its Web Handler, handler.fetch(request).
-function devApi() {
+// `react-router dev` has the same-origin API a deploy has, except that an
+// inquiry reaches Odoo only when ODOO_URL is set (answerInquiryInDev). Every
+// request loads the function through Vite, so an edit applies on the next
+// request, and calls its Web Handler, handler.fetch(request). Exported for
+// tests/contracts/dev-api.test.js.
+export function devApi() {
   return {
     name: 'ksm-dev-api',
     apply: 'serve',
@@ -33,6 +35,10 @@ function devApi() {
         const url = new URL(req.originalUrl ?? req.url, `http://${req.headers.host ?? 'localhost'}`)
         if (!API_FUNCTIONS.includes(url.pathname)) return next()
         try {
+          if (url.pathname === '/api/odoo-lead' && req.method === 'POST' && !process.env.ODOO_URL?.trim()) {
+            await answerInquiryInDev(req, res, server.config.logger)
+            return
+          }
           const { default: handler } = await server.ssrLoadModule(`${url.pathname}.js`)
           const response = await handler.fetch(await toFetchRequest(req, url))
           res.statusCode = response.status
@@ -46,6 +52,31 @@ function devApi() {
   }
 }
 
+// api/odoo-lead.js turns a valid inquiry into a lead in Odoo, and without
+// ODOO_URL it posts to the client's production CRM, whose public form
+// endpoint needs no credentials. So the dev server passes an inquiry on only
+// when ODOO_URL is set, in the shell or in .env. Otherwise it answers as the
+// function does on success and logs what came in. Every other method still
+// reaches the function: GET is its health check, which creates nothing, and
+// PUT gets its 405.
+async function answerInquiryInDev(req, res, logger) {
+  const body = (await readBody(req)).toString('utf8')
+  logger.info(
+    `[dev-api] POST /api/odoo-lead answered by the dev server; nothing was sent to Odoo (set ODOO_URL to send it): ${body.slice(0, 2000)}`,
+    { timestamp: true },
+  )
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+  res.setHeader('Cache-Control', 'no-store')
+  res.end(JSON.stringify({ ok: true, dev: true }))
+}
+
+async function readBody(req) {
+  const chunks = []
+  for await (const chunk of req) chunks.push(chunk)
+  return Buffer.concat(chunks)
+}
+
 // A Node request as the Fetch API Request a Vercel Function receives.
 async function toFetchRequest(req, url) {
   const headers = new Headers()
@@ -53,14 +84,11 @@ async function toFetchRequest(req, url) {
     if (value === undefined || name.startsWith(':')) continue
     for (const item of [value].flat()) headers.append(name, item)
   }
-  const chunks = []
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    for await (const chunk of req) chunks.push(chunk)
-  }
+  const body = req.method !== 'GET' && req.method !== 'HEAD' ? await readBody(req) : null
   return new Request(url, {
     method: req.method,
     headers,
-    body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
+    body: body?.length > 0 ? body : undefined,
   })
 }
 

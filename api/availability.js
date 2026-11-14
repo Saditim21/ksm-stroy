@@ -10,9 +10,10 @@
  *                 'mnogofamilna-sgrada': { 'block-a', 'block-b' } } }
  * The rows and statuses come from src/services/sheetsCore.js, the same reader
  * the browser uses. A tab that is not 'ok' gives null, never an empty list: an
- * empty list would read as every unit gone. The edge keeps a 200 for 30 s and
- * serves it stale for 5 more minutes while it refreshes. When no tab could be
- * read, 503, never cached.
+ * empty list would read as every unit gone. The store shows the built-in rows
+ * for a Golden Residence slot that is null, marked as such. The edge keeps a
+ * 200 for 30 s and serves it stale for 5 more minutes while it refreshes. When
+ * no tab could be read, 503, never cached.
  *
  * Settings: the Vercel environment variables the client build reads too,
  * VITE_GOOGLE_SHEET_BLOCK_A, _BLOCK_B, _GARAGES, _PARKING, _MNOGO_A and

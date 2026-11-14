@@ -8,13 +8,23 @@
 //      themselves, through the browser's fetchers in googleSheets.js;
 //   3. if those read nothing either, the data built into the site, as
 //      'fallback'.
-// `data` has the API's `projects` shape on every path. A slot without live
-// rows is null: a Многофамилна block without a sheet, or a tab that failed.
+// `data` has the API's `projects` shape on every path, and `origin`, in the
+// same shape, says where each slot's rows come from: 'live' (a sheet), or
+// 'built-in', or null where there are none.
+// - Golden Residence's counts arrive at hydration, so each of its slots has
+//   rows: a tab the read had none for (the API or its fetcher could not read
+//   it) shows the built-in rows, as ApartmentContext shows them, marked
+//   'built-in' so the page can show them as dated.
+// - A Многофамилна block without a live sheet has no rows after a live read:
+//   its dated data is static and prerendered (spec §6.4). Only the fallback
+//   carries it.
 //
 // It reads again when the visitor comes back to the tab and what it shows is
-// more than a minute old; never on a timer. A refresh never shows 'loading',
-// never falls back to the built-in data, and keeps a tab's last rows when only
-// that tab fails, as ApartmentContext does.
+// more than a minute old, and when a page that reads it opens after the store
+// had no reader (it hears no tab switch then) and what it shows is that old;
+// never on a timer. A refresh never shows 'loading', never falls back to the
+// built-in data wholesale, and keeps a tab's last live rows when only that tab
+// fails, as ApartmentContext does.
 
 import { normalizeStatus } from '../../utils/propertyStatus'
 import { clearCache, fetchApartmentData, fetchGarageData, normalizeFloorData } from '../../services/googleSheets'
@@ -34,8 +44,12 @@ export const availabilityPreload = Object.freeze({
 
 const STALE_AFTER_MS = 60 * 1000
 
-const IDLE = Object.freeze({ status: 'idle', data: null, updatedAt: null })
-const LOADING = Object.freeze({ status: 'loading', data: null, updatedAt: null })
+const GOLDEN_RESIDENCE = 'golden-residence'
+const MNOGOFAMILNA = 'mnogofamilna-sgrada'
+
+const IDLE = Object.freeze({ status: 'idle', data: null, origin: null, updatedAt: null })
+const LOADING = Object.freeze({ status: 'loading', data: null, origin: null, updatedAt: null })
+const ERROR = Object.freeze({ status: 'error', data: null, origin: null, updatedAt: null })
 
 let snapshot = IDLE
 const listeners = new Set()
@@ -76,14 +90,38 @@ function spotsOf(places) {
 
 function projectsOf({ blockA, blockB, garages, parking, mnogoA, mnogoB }) {
   return {
-    'golden-residence': {
+    [GOLDEN_RESIDENCE]: {
       'block-a': rowsOf(blockA),
       'block-b': rowsOf(blockB),
       garages: spotsOf(garages),
       parking: spotsOf(parking),
     },
-    'mnogofamilna-sgrada': { 'block-a': rowsOf(mnogoA), 'block-b': rowsOf(mnogoB) },
+    [MNOGOFAMILNA]: { 'block-a': rowsOf(mnogoA), 'block-b': rowsOf(mnogoB) },
   }
+}
+
+// `projects` with each slot replaced by fn(value, project, slot).
+const eachSlot = (projects, fn) =>
+  Object.fromEntries(Object.entries(projects).map(([project, slots]) => [
+    project,
+    Object.fromEntries(Object.entries(slots).map(([slot, value]) => [slot, fn(value, project, slot)])),
+  ]))
+
+// The store works on cells, { rows, from }: a slot's rows and where they come
+// from. A slot without rows comes from nowhere (null).
+const cellsOf = (projects, from) => eachSlot(projects, (rows) => ({ rows, from: rows ? from : null }))
+
+// What the page shows now, as cells; null before the first load ends.
+const shownCells = () =>
+  snapshot.data && eachSlot(snapshot.data, (rows, project, slot) => ({ rows, from: snapshot.origin[project][slot] }))
+
+function publishCells(status, cells, updatedAt) {
+  publish({
+    status,
+    data: eachSlot(cells, ({ rows }) => rows),
+    origin: eachSlot(cells, ({ from }) => from),
+    updatedAt,
+  })
 }
 
 async function fromApi() {
@@ -91,7 +129,7 @@ async function fromApi() {
     const response = await fetch(AVAILABILITY_URL, { mode: 'cors', credentials: 'same-origin' })
     if (response.status !== 200) return null
     const { updatedAt, projects } = await response.json()
-    if (!projects?.['golden-residence'] || !projects['mnogofamilna-sgrada']) return null
+    if (!projects?.[GOLDEN_RESIDENCE] || !projects[MNOGOFAMILNA]) return null
     return { data: projects, updatedAt }
   } catch {
     return null
@@ -119,54 +157,79 @@ async function fromSheets({ refresh }) {
   }
 }
 
-// The data built into the site, loaded only on this path. Многофамилна's
-// dated data goes through normalizeFloorData() like a sheet's rows; if its
-// chunk fails to load, Многофамилна has no rows and the rest stands.
-async function fromBuiltIn() {
-  const [goldenResidence, mnogo] = await Promise.all([
-    import('../../constants/apartmentFallbackData'),
-    import('../../constants/mnogofamilnaFallbackData').catch(() => null),
-  ])
-  return projectsOf({
-    blockA: normalizeFloorData(goldenResidence.getBlockAFallbackData()),
-    blockB: normalizeFloorData(goldenResidence.getBlockBFallbackData()),
-    garages: goldenResidence.getGaragesFallbackData(),
-    parking: goldenResidence.getParkingFallbackData(),
-    mnogoA: mnogo && normalizeFloorData(mnogo.getMnogoAFallbackData()),
-    mnogoB: mnogo && normalizeFloorData(mnogo.getMnogoBFallbackData()),
-  })
-}
-
 async function readLive({ refresh }) {
   return (await fromApi()) ?? (await fromSheets({ refresh }))
+}
+
+// The data built into the site, normalised like a sheet's rows (floor 0 out,
+// statuses through normalizeStatus()). Each project's is a chunk of its own,
+// loaded only when a slot needs it.
+async function builtInGoldenResidence() {
+  const data = await import('../../constants/apartmentFallbackData')
+  return projectsOf({
+    blockA: normalizeFloorData(data.getBlockAFallbackData()),
+    blockB: normalizeFloorData(data.getBlockBFallbackData()),
+    garages: data.getGaragesFallbackData(),
+    parking: data.getParkingFallbackData(),
+  })[GOLDEN_RESIDENCE]
+}
+
+async function builtInMnogofamilna() {
+  const data = await import('../../constants/mnogofamilnaFallbackData')
+  return projectsOf({
+    mnogoA: normalizeFloorData(data.getMnogoAFallbackData()),
+    mnogoB: normalizeFloorData(data.getMnogoBFallbackData()),
+  })[MNOGOFAMILNA]
+}
+
+// Every slot from the built-in data. If Многофамилна's chunk fails to load,
+// it has no rows and the rest stands; if Golden Residence's fails, this throws.
+async function fromBuiltIn() {
+  const [goldenResidence, mnogofamilna] = await Promise.all([
+    builtInGoldenResidence(),
+    builtInMnogofamilna().catch(() => ({ 'block-a': null, 'block-b': null })),
+  ])
+  return cellsOf({ [GOLDEN_RESIDENCE]: goldenResidence, [MNOGOFAMILNA]: mnogofamilna }, 'built-in')
+}
+
+// Each Golden Residence slot without rows takes the built-in ones. If even
+// those fail to load, the slot stays empty until a later read fills it.
+async function withBuiltInGoldenResidence(cells) {
+  const slots = cells[GOLDEN_RESIDENCE]
+  if (Object.values(slots).every((cell) => cell.rows)) return cells
+  const builtIn = await builtInGoldenResidence().catch(() => null)
+  if (!builtIn) return cells
+  return {
+    ...cells,
+    [GOLDEN_RESIDENCE]: Object.fromEntries(Object.entries(slots).map(([slot, cell]) => [
+      slot,
+      cell.rows ? cell : { rows: builtIn[slot], from: 'built-in' },
+    ])),
+  }
 }
 
 async function load() {
   publish(LOADING)
   try {
     const live = await readLive({ refresh: false })
-    if (live) publish({ status: 'ready', ...live })
-    else publish({ status: 'fallback', data: await fromBuiltIn(), updatedAt: null })
+    if (live) publishCells('ready', await withBuiltInGoldenResidence(cellsOf(live.data, 'live')), live.updatedAt)
+    else publishCells('fallback', await fromBuiltIn(), null)
   } catch {
     // Not even the built-in data loaded.
-    publish({ status: 'error', data: null, updatedAt: null })
+    publish(ERROR)
   }
 }
-
-// A slot the new read has no rows for keeps the rows it showed.
-const keepLastRows = (shown, read) =>
-  Object.fromEntries(Object.entries(read).map(([project, slots]) => [
-    project,
-    Object.fromEntries(Object.entries(slots).map(([slot, rows]) => [slot, rows ?? shown[project]?.[slot] ?? null])),
-  ]))
 
 async function refresh() {
   const live = await readLive({ refresh: true })
   if (!live) return
-  // Live rows only ever merge with live rows: built-in data is never kept
-  // behind a 'ready'.
-  const data = snapshot.status === 'ready' ? keepLastRows(snapshot.data, live.data) : live.data
-  publish({ status: 'ready', data, updatedAt: live.updatedAt })
+  // A slot the new read has no rows for keeps its last live rows. Anything
+  // else is as after a first load: built-in rows behind 'ready' only where
+  // Golden Residence has nothing live.
+  const shown = shownCells()
+  const lastLive = (project, slot) => (shown?.[project][slot].from === 'live' ? shown[project][slot] : null)
+  const cells = eachSlot(cellsOf(live.data, 'live'), (cell, project, slot) => (cell.rows ? cell : lastLive(project, slot) ?? cell))
+  publishCells('ready', await withBuiltInGoldenResidence(cells), live.updatedAt)
 }
 
 function start(read) {
@@ -177,7 +240,9 @@ function start(read) {
   })
 }
 
-function onVisibilityChange() {
+// Reads again if the tab is in view and what the page shows is more than a
+// minute old.
+function refreshIfStale() {
   if (document.visibilityState !== 'visible' || reading) return
   if (Date.now() - readAt <= STALE_AFTER_MS) return
   start(refresh)
@@ -185,11 +250,17 @@ function onVisibilityChange() {
 
 export function subscribe(listener) {
   listeners.add(listener)
-  if (listeners.size === 1) document.addEventListener('visibilitychange', onVisibilityChange)
-  if (snapshot === IDLE) start(load)
+  // The first reader, on the first page that shows availability or on one the
+  // visitor opens after pages without it. The store heard no tab switch while
+  // it had no reader, so it checks the age of what it has now.
+  if (listeners.size === 1) {
+    document.addEventListener('visibilitychange', refreshIfStale)
+    if (snapshot === IDLE) start(load)
+    else refreshIfStale()
+  }
   return () => {
     listeners.delete(listener)
-    if (listeners.size === 0) document.removeEventListener('visibilitychange', onVisibilityChange)
+    if (listeners.size === 0) document.removeEventListener('visibilitychange', refreshIfStale)
   }
 }
 
