@@ -43,6 +43,11 @@ const SHEET_URLS = {
 // Cache duration in milliseconds (30 seconds for faster updates)
 const CACHE_DURATION = 30 * 1000;
 
+// A sheet that does not answer within this has failed: a stalled connection
+// must not keep the page loading for minutes. (Safari before 16 has no
+// AbortSignal.timeout; there the request waits, as it always did.)
+const FETCH_TIMEOUT_MS = 10 * 1000;
+
 // In-memory cache
 const cache = {
   blockA: { data: null, timestamp: 0 },
@@ -119,7 +124,10 @@ export function normalizeFloorData(floorData) {
  */
 async function fetchSheetCSV(sheetUrl) {
   // Add cache-busting parameter to bypass Google's CDN cache
-  const response = await fetch(`${sheetUrl}&_cb=${Date.now()}`, { cache: 'no-store' });
+  const response = await fetch(`${sheetUrl}&_cb=${Date.now()}`, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout?.(FETCH_TIMEOUT_MS),
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch sheet: ${response.status}`);

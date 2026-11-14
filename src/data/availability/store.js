@@ -43,6 +43,10 @@ export const availabilityPreload = Object.freeze({
 })
 
 const STALE_AFTER_MS = 60 * 1000
+// A stalled connection gives up after this and takes the failure path: the
+// sheets, then the built-in data. (No timeout where the browser has no
+// AbortSignal.timeout, Safari before 16: the request waits, as it always did.)
+const FETCH_TIMEOUT_MS = 10 * 1000
 
 const GOLDEN_RESIDENCE = 'golden-residence'
 const MNOGOFAMILNA = 'mnogofamilna-sgrada'
@@ -126,7 +130,11 @@ function publishCells(status, cells, updatedAt) {
 
 async function fromApi() {
   try {
-    const response = await fetch(AVAILABILITY_URL, { mode: 'cors', credentials: 'same-origin' })
+    const response = await fetch(AVAILABILITY_URL, {
+      mode: 'cors',
+      credentials: 'same-origin',
+      signal: AbortSignal.timeout?.(FETCH_TIMEOUT_MS),
+    })
     if (response.status !== 200) return null
     const { updatedAt, projects } = await response.json()
     if (!projects?.[GOLDEN_RESIDENCE] || !projects[MNOGOFAMILNA]) return null
@@ -193,7 +201,8 @@ async function fromBuiltIn() {
 }
 
 // Each Golden Residence slot without rows takes the built-in ones. If even
-// those fail to load, the slot stays empty until a later read fills it.
+// those fail to load, the slot stays empty until a later read fills it, and so
+// does a slot the built-in data has none for (one a deploy has added).
 async function withBuiltInGoldenResidence(cells) {
   const slots = cells[GOLDEN_RESIDENCE]
   if (Object.values(slots).every((cell) => cell.rows)) return cells
@@ -203,7 +212,7 @@ async function withBuiltInGoldenResidence(cells) {
     ...cells,
     [GOLDEN_RESIDENCE]: Object.fromEntries(Object.entries(slots).map(([slot, cell]) => [
       slot,
-      cell.rows ? cell : { rows: builtIn[slot], from: 'built-in' },
+      cell.rows || !builtIn[slot] ? cell : { rows: builtIn[slot], from: 'built-in' },
     ])),
   }
 }
@@ -225,17 +234,22 @@ async function refresh() {
   if (!live) return
   // A slot the new read has no rows for keeps its last live rows. Anything
   // else is as after a first load: built-in rows behind 'ready' only where
-  // Golden Residence has nothing live.
+  // Golden Residence has nothing live. A slot or project the page has never
+  // shown (a deploy added it) has no last rows.
   const shown = shownCells()
-  const lastLive = (project, slot) => (shown?.[project][slot].from === 'live' ? shown[project][slot] : null)
+  const lastLive = (project, slot) => (shown?.[project]?.[slot]?.from === 'live' ? shown[project][slot] : null)
   const cells = eachSlot(cellsOf(live.data, 'live'), (cell, project, slot) => (cell.rows ? cell : lastLive(project, slot) ?? cell))
   publishCells('ready', await withBuiltInGoldenResidence(cells), live.updatedAt)
 }
 
+// load() and refresh() handle every failure they expect. Anything else is a
+// bug: it is reported, and the next tab switch reads again all the same.
 function start(read) {
   readAt = Date.now()
   reading = true
-  read().catch(() => {}).finally(() => {
+  read().catch((error) => {
+    console.error('[availability] the read failed:', error)
+  }).finally(() => {
     reading = false
   })
 }

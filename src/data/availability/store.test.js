@@ -52,6 +52,10 @@ API_NO_BLOCK_B.projects['golden-residence']['block-b'] = null
 const api = (body = API_BODY, status = 200) =>
   vi.fn(async () => ({ ok: status >= 200 && status < 300, status, json: async () => body }))
 const unreachable = () => vi.fn(async () => { throw new TypeError('Failed to fetch') })
+// A stalled connection: no answer, until the request's signal aborts it.
+const stalled = () => vi.fn((url, init) => new Promise((_, reject) => {
+  init?.signal?.addEventListener('abort', () => reject(init.signal.reason))
+}))
 
 // Rows of the data built into the site, as the store gives them.
 const BUILT_IN = {
@@ -294,7 +298,30 @@ describe('the first load', () => {
     await waitFor(() => expect(seen.status).toBe('ready'))
 
     expect(availabilityPreload).toEqual({ rel: 'preload', href: '/api/availability', as: 'fetch', crossOrigin: 'anonymous' })
-    expect(fetch).toHaveBeenCalledWith('/api/availability', { mode: 'cors', credentials: 'same-origin' })
+    // The signal is the request's timeout; it is no part of what the
+    // preload matches on.
+    expect(fetch).toHaveBeenCalledWith('/api/availability', { mode: 'cors', credentials: 'same-origin', signal: expect.any(AbortSignal) })
+  })
+
+  // A stalled connection must not keep the page loading for minutes: the
+  // API's fetch gives up after 10 s, and the store takes the path it takes on
+  // any failure, the sheets, then the data built into the site. Never zeros.
+  it('gives up on an API that never answers after 10 s, and falls back as on any failure', async () => {
+    const timer = new AbortController()
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(timer.signal)
+    vi.stubGlobal('fetch', stalled())
+
+    render(createElement(Probe))
+    await waitFor(() => expect(timeout).toHaveBeenCalledWith(10_000))
+    expect(seen.status).toBe('loading')
+
+    await act(async () => timer.abort(new DOMException('The operation timed out.', 'TimeoutError')))
+    await waitFor(() => expect(seen.status).toBe('fallback'))
+
+    expect(sheets.fetchApartmentData).toHaveBeenCalled()
+    const gr = seen.data['golden-residence']
+    expect([gr['block-a'], gr['block-b'], gr.garages, gr.parking].map((rows) => rows.length)).toEqual([96, 96, 113, 68])
+    expect(seen.origin).toEqual(origin(ALL_BUILT_IN, { 'block-a': 'built-in', 'block-b': 'built-in' }))
   })
 
   it.each([
@@ -444,6 +471,64 @@ describe('refresh', () => {
     expect(seen.data['golden-residence']['block-b']).toEqual(API_BODY.projects['golden-residence']['block-b'])
     expect(seen.origin).toEqual(origin(ALL_LIVE))
     expect(seen.updatedAt).toBe(partial.updatedAt)
+  })
+
+  // A deploy can add a tab, or a project, the API could not read yet: a slot
+  // with no rows that the page has never shown. A refresh takes it as it
+  // comes, and the next refresh still runs.
+  it('takes a slot it has never shown on a refresh, and keeps refreshing', async () => {
+    const fetch = api()
+    await renderLoaded(fetch)
+    const grown = structuredClone(API_BODY)
+    grown.updatedAt = '2026-11-14T08:01:01.000Z'
+    grown.projects['golden-residence']['block-a'] = [row('А 301', '3', 'Свободен')]
+    grown.projects['golden-residence']['block-c'] = null
+    grown.projects['third-project'] = { 'block-a': null }
+    fetch.mockImplementation(api(grown))
+    const logged = vi.spyOn(console, 'error')
+
+    await awayFor(61_000)
+    // block-c has no rows, so the store loads the built-in chunk to look for
+    // some, which takes a moment.
+    await waitFor(() => expect(seen.updatedAt).toBe(grown.updatedAt))
+
+    expect(seen.data['golden-residence']['block-a']).toEqual([row('А 301', '3', 'Свободен')])
+    expect(seen.data['golden-residence']['block-c']).toBeNull()
+    expect(seen.data['third-project']).toEqual({ 'block-a': null })
+    expect(seen.origin['golden-residence']).toEqual({ ...ALL_LIVE, 'block-c': null })
+    expect(seen.origin['third-project']).toEqual({ 'block-a': null })
+    expect(logged).not.toHaveBeenCalled()
+
+    const later = structuredClone(grown)
+    later.updatedAt = '2026-11-14T08:02:30.000Z'
+    fetch.mockImplementation(api(later))
+    await awayFor(61_000)
+
+    await waitFor(() => expect(seen.updatedAt).toBe(later.updatedAt))
+  })
+
+  // Should a refresh fail where nothing expects it to, it says so on the
+  // console, and the store still refreshes the next time.
+  it('reports a refresh that fails unexpectedly, and refreshes the next time', async () => {
+    const fetch = api()
+    await renderLoaded(fetch)
+    const broken = structuredClone(API_BODY)
+    broken.updatedAt = '2026-11-14T08:01:01.000Z'
+    Object.defineProperty(broken.projects['golden-residence'], 'block-a', { enumerable: true, get: () => { throw new Error('unreadable slot') } })
+    fetch.mockImplementation(vi.fn(async () => ({ ok: true, status: 200, json: async () => broken })))
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await awayFor(61_000)
+
+    expect(logged).toHaveBeenCalledWith(expect.stringMatching(/availability/), expect.any(Error))
+    expect(seen.updatedAt).toBe(API_BODY.updatedAt)
+
+    const fixed = structuredClone(API_BODY)
+    fixed.updatedAt = '2026-11-14T08:02:30.000Z'
+    fetch.mockImplementation(api(fixed))
+    await awayFor(61_000)
+
+    expect(seen.updatedAt).toBe(fixed.updatedAt)
   })
 
   it('marks a tab live once a refresh reads it', async () => {

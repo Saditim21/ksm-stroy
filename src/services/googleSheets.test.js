@@ -167,6 +167,27 @@ test('an unconfigured sheet is skipped silently, without a request', async () =>
   expect(log).not.toHaveBeenCalled()
 })
 
+// A stalled connection: the sheet's fetch gives up after 10 s, and the fetcher
+// answers as on any failure, null with no cache to fall back on (the store
+// then shows the data built into the site), never an empty sheet.
+test.each([
+  ['fetchApartmentData', 'VITE_GOOGLE_SHEET_BLOCK_A', 'blockA'],
+  ['fetchGarageData', 'VITE_GOOGLE_SHEET_GARAGES', 'garages'],
+])('%s gives up on a sheet that does not answer within 10 s', async (fetcher, envKey, key) => {
+  const svc = await loadServiceWithSheet(envKey, CSV)
+  const timer = new AbortController()
+  const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(timer.signal)
+  fetch.mockImplementation((url, init) => new Promise((_, reject) => {
+    init?.signal?.addEventListener('abort', () => reject(init.signal.reason))
+  }))
+
+  const read = svc[fetcher](key)
+  await vi.waitFor(() => expect(timeout).toHaveBeenCalledWith(10_000))
+  timer.abort(new DOMException('The operation timed out.', 'TimeoutError'))
+
+  await expect(read).resolves.toBeNull()
+})
+
 test('a good sheet still returns data (guard does not over-reach)', async () => {
   const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_BLOCK_A', CSV)
   await expect(svc.fetchApartmentData('blockA')).resolves.toMatchObject({
@@ -177,7 +198,8 @@ test('a good sheet still returns data (guard does not over-reach)', async () => 
 // A custom request header (there used to be Cache-Control: no-cache) makes the
 // fetch a non-simple CORS request, so the browser preflights every sheet with
 // an OPTIONS request, twice because Google redirects the published URL. A
-// GET with only cache: 'no-store' and the _cb cache-buster needs none.
+// GET with only cache: 'no-store' and the _cb cache-buster needs none. (The
+// signal, the request's timeout, is no header.)
 test('sheets are fetched with no custom request headers', async () => {
   vi.stubEnv('VITE_GOOGLE_SHEET_PARKING', 'https://docs.google.com/spreadsheets/d/e/x/pub?gid=3&single=true&output=csv')
   const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_BLOCK_A', CSV)
@@ -190,6 +212,6 @@ test('sheets are fetched with no custom request headers', async () => {
   for (const [url, init] of fetch.mock.calls) {
     expect(typeof url).toBe('string')
     expect(url).toMatch(/^https:\/\/docs\.google\.com\/.*&_cb=\d+$/)
-    expect(init).toEqual({ cache: 'no-store' })
+    expect(init).toEqual({ cache: 'no-store', signal: expect.any(AbortSignal) })
   }
 })
