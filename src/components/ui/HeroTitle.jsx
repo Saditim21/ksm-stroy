@@ -13,10 +13,13 @@ import { Fragment } from 'react'
 // lines keep their spacing and no descender (р, у, щ, the Bulgarian з) is
 // clipped. No more than that: on the first frame the line sits 105% of its
 // height lower, and a deeper mask would show the tops of its tallest letters.
+//
+// `hero-title` (index.css) gives it the display role, Playfair at the display
+// size; a size class in `className` overrides it.
 export default function HeroTitle({ as = 'h1', lines, className = '' }) {
   const Tag = as === 'h2' ? 'h2' : 'h1'
   return (
-    <Tag className={`font-display text-display font-[420] ${className}`}>
+    <Tag className={`hero-title ${className}`.trim()}>
       {lines.map((line, i) => (
         <Fragment key={i}>
           {i > 0 ? ' ' : null}

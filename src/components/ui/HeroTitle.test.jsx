@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { cwd } from 'node:process'
 import { render, screen } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 import config from '../../../tailwind.config.js'
@@ -15,6 +18,16 @@ test('an h1 whose text is both lines joined', () => {
   render(<HeroTitle lines={LINES} />)
   const heading = screen.getByRole('heading', { level: 1, name: JOINED })
   expect(heading.textContent).toBe(JOINED)
+})
+
+// Tailwind emits @layer components before its utilities, so a caller's size
+// class still wins, even one it sorts before text-display (text-count).
+test('the display role is a default in the components layer, which className overrides', () => {
+  render(<HeroTitle lines={LINES} className="text-count" />)
+  expect(screen.getByRole('heading', { level: 1 })).toHaveClass('hero-title', 'text-count')
+  const css = readFileSync(join(cwd(), 'src/index.css'), 'utf8')
+  const components = css.slice(css.indexOf('@layer components'), css.indexOf('@layer utilities'))
+  expect(components).toMatch(/\.hero-title\s*{\s*@apply font-display text-display font-\[420\];\s*}/)
 })
 
 test('as="h2" renders an h2', () => {

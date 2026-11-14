@@ -83,6 +83,15 @@
     content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
     white-space: pre;
   }
+
+  /* HeroTitle (src/components/ui/HeroTitle.jsx): the display role of spec
+     §3.2 as a default. In this layer it yields to any size, line-height or
+     weight utility a caller passes in className. As a utility, text-display
+     would beat every size utility Tailwind emits before it, and it sorts them
+     by name: text-body and text-count would lose to it. */
+  .hero-title {
+    @apply font-display text-display font-[420];
+  }
 }
 
 /* Custom scrollbar utilities for mobile responsiveness */
