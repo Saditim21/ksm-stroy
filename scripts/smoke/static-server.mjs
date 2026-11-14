@@ -47,7 +47,7 @@ const DEFAULT_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
 // The vercel.json keys that change routing and that this server does not emulate.
 const NOT_EMULATED = ['routes', 'cleanUrls']
 
-export function readVercelConfig() {
+function readVercelConfig() {
   return JSON.parse(fs.readFileSync(path.join(REPO, 'vercel.json'), 'utf8'))
 }
 

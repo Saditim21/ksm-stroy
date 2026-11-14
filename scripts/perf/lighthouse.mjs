@@ -58,7 +58,7 @@ export function metricsOf(report) {
   }
 }
 
-const describe = ({ lcp, cls, tbt, bytesBeforeLcp, score }) =>
+const summary = ({ lcp, cls, tbt, bytesBeforeLcp, score }) =>
   `LCP ${(lcp / 1000).toFixed(2)} s, CLS ${cls.toFixed(3)}, TBT ${Math.round(tbt)} ms, `
   + `before LCP ${(bytesBeforeLcp / KIB).toFixed(1)} KiB, score ${score}`
 
@@ -117,6 +117,7 @@ async function main(urls) {
   console.log(`perf: Lighthouse 13, mobile, ${RUNS} runs per URL; reports in ${REPORTS}`)
 
   const rows = []
+  let version
   for (const url of urls) {
     const slug = new URL(url).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'
     const runs = []
@@ -124,16 +125,17 @@ async function main(urls) {
       const output = path.join(REPORTS, `${slug}-${run}.json`)
       fs.rmSync(output, { force: true })
       await lighthouse(url, output)
-      const metrics = metricsOf(JSON.parse(fs.readFileSync(output, 'utf8')))
-      console.log(`  ${url} run ${run}: ${describe(metrics)}`)
+      const report = JSON.parse(fs.readFileSync(output, 'utf8'))
+      version = report.lighthouseVersion
+      const metrics = metricsOf(report)
+      console.log(`  ${url} run ${run}: ${summary(metrics)}`)
       runs.push(metrics)
     }
-    const middle = Object.fromEntries(Object.keys(runs[0]).map((key) => [key, median(runs.map((r) => r[key]))]))
-    rows.push({ url, middle, lighthouseVersion: JSON.parse(fs.readFileSync(path.join(REPORTS, `${slug}-1.json`), 'utf8')).lighthouseVersion })
+    rows.push({ url, middle: Object.fromEntries(Object.keys(runs[0]).map((key) => [key, median(runs.map((r) => r[key]))])) })
   }
 
-  console.log(`perf: median of ${RUNS} runs (Lighthouse ${rows[0].lighthouseVersion}):`)
-  for (const { url, middle } of rows) console.log(`  ${url}: ${describe(middle)}`)
+  console.log(`perf: median of ${RUNS} runs (Lighthouse ${version}):`)
+  for (const { url, middle } of rows) console.log(`  ${url}: ${summary(middle)}`)
   return 0
 }
 
