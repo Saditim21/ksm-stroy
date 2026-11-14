@@ -276,7 +276,7 @@ const Sales = () => {
       </section>
 
       {/* Call to Action, on a near-black ground: .on-dusk makes its focus
-          rings paper (src/index.css). */}
+          rings ivory (src/index.css). */}
       <section
         className="on-dusk py-10 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden"
       >
@@ -311,7 +311,7 @@ const Sales = () => {
       </section>
 
       {/* Enhanced Property Modal. Its header, arrows and thumbnails sit on
-          black and are .on-dusk (paper focus rings); the modal as a whole is
+          black and are .on-dusk (ivory focus rings); the modal as a whole is
           not, because the floor details open on white inside it. */}
       {selectedProject && (
           <div
@@ -1475,7 +1475,7 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
 export default Sales
 
 // How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid' }
+export const handle = { header: 'solid', legacy: true }
 
 // The page's head (root.jsx <Meta/>): production's strings for this page, and
 // its first property's photo, as before.

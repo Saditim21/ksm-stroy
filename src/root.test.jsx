@@ -27,13 +27,21 @@ afterEach(() => {
 
 const documentHtml = () => renderToStaticMarkup(<MemoryRouter><Layout><p>Страница</p></Layout></MemoryRouter>)
 
-// The browser's bar takes the page's ground, paper (spec §3.1), as the web
+// The browser's bar takes the page's ground, onyx (spec §2.1), as the web
 // manifest says.
-it('gives the browser the paper theme colour, the manifest’s', () => {
+it('gives the browser the onyx theme colour, the manifest’s', () => {
   const manifest = JSON.parse(readFileSync(join(cwd(), 'public/site.webmanifest'), 'utf8'))
 
-  expect(manifest.theme_color).toBe('#F1F2EF')
-  expect(documentHtml()).toContain('<meta name="theme-color" content="#F1F2EF"/>')
+  expect(manifest.theme_color).toBe('#0E0D0B')
+  expect(manifest.background_color).toBe('#0E0D0B')
+  expect(documentHtml()).toContain('<meta name="theme-color" content="#0E0D0B"/>')
+})
+
+// Onyx from the first paint, before the stylesheet has loaded.
+it('paints the onyx ground before the stylesheet', () => {
+  const critical = /<style>([^<]*)<\/style>/.exec(documentHtml())?.[1]
+
+  expect(critical).toContain('background-color:#0E0D0B')
 })
 
 // --screen-h (src/utils/screenHeight.js): the head script writes it before

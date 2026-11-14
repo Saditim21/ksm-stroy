@@ -14,7 +14,7 @@ import { Fragment } from 'react'
 // clipped. No more than that: on the first frame the line sits 105% of its
 // height lower, and a deeper mask would show the tops of its tallest letters.
 //
-// `hero-title` (index.css) gives it the display role, Playfair at the display
+// `hero-title` (index.css) gives it the display role, KSM Display at the display
 // size; a size class in `className` overrides it.
 export default function HeroTitle({ as = 'h1', lines, className = '' }) {
   const Tag = as === 'h2' ? 'h2' : 'h1'

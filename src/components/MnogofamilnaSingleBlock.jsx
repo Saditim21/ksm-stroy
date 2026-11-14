@@ -731,9 +731,9 @@ const MnogofamilnaSingleBlock = ({ block }) => {
         )}
 
         {/* Fullscreen Architecture Plan Modal. Its header and zoom controls
-            sit on black and are .on-dusk (paper focus rings, src/index.css);
+            sit on black and are .on-dusk (ivory focus rings, src/index.css);
             the modal as a whole is not, because the chosen apartment's card
-            on it is gold, where „Контакт“ keeps the ink ring. */}
+            on it is gold, where „Контакт“ keeps the onyx ring. */}
         {isArchitecturePlanFullscreen && (
           <div className="fixed inset-0 bg-black bg-opacity-95 z-50">
             <div className="w-full h-full relative">

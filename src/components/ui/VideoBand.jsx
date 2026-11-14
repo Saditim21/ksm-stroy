@@ -152,7 +152,7 @@ export default function VideoBand({ sources, poster, alt, priority = false, clas
           type="button"
           aria-label={paused ? 'Пусни' : 'Пауза'}
           onClick={() => setPaused((was) => !was)}
-          className="absolute bottom-4 right-4 inline-flex h-11 w-11 items-center justify-center rounded-ui bg-paper/85 text-ink transition-colors duration-200 hover:bg-paper"
+          className="absolute bottom-4 right-4 inline-flex h-11 w-11 items-center justify-center rounded-ui bg-onyx/85 text-ivory transition-colors duration-200 hover:bg-onyx"
         >
           {paused ? <PlayIcon /> : <PauseIcon />}
         </button>

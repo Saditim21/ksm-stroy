@@ -125,8 +125,8 @@ const HeroCarousel = () => {
             
             {/* Left Content - Text. The photo under its dark overlay is a dark
                 ground, so the column is .on-dusk and its links' focus rings
-                are paper (src/index.css). The availability card beside it is
-                white: its rings stay ink, so the marker is not on the grid. */}
+                are ivory (src/index.css). The availability card beside it is
+                white: its rings stay onyx, so the marker is not on the grid. */}
             <div className="on-dusk lg:col-span-7 text-center lg:text-left px-2 sm:px-0">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div

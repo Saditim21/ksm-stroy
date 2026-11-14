@@ -7,9 +7,9 @@ import images from '../data/images/shell.json'
 // the programme's logo, one line about the project and „За проекта“, which
 // opens the page about it. The header carries it on every page, where it is
 // seen on landing without scrolling; the mobile menu and the footer carry it
-// on dusk.
+// on umber.
 //
-// tone 'paper' is the header's strip on paper (src/index.css, .eu-line). From
+// tone 'paper' is the header's strip, on onyx (src/index.css, .eu-line). From
 // 640 px it is one 36 px row, and its text box, the room the logos and
 // „За проекта“ leave, shows the longest version of the text whose project
 // number fits there whole, with an ellipsis for the rest: the short text on a
@@ -17,9 +17,11 @@ import images from '../data/images/shell.json'
 // keep the 36 px row and the short text takes a second row, whole, in two
 // lines. The number never shows cut, and never breaks at its hyphens.
 //
-// tone 'dusk' sets both logos on a paper plate, because their lettering is
-// dark on a transparent ground and would vanish on dusk, and lets the text
-// wrap beside or under it, the short version under 640 px.
+// tone 'dusk' lets the text wrap beside or under the logos, the short version
+// under 640 px.
+//
+// Both set the logos on the light plate (#F7F4EE, spec §6.3): their lettering
+// is dark on a transparent ground and would vanish on the dark grounds.
 //
 // Spec §3.2: a non-breaking space after „№“ and after the one-letter words.
 
@@ -74,8 +76,8 @@ function Logos({ tone }) {
   )
 }
 
-// The text on dusk, short under 640 px. The other version is display: none,
-// so a screen reader reads one.
+// The text in the menu and the footer, short under 640 px. The other version
+// is display: none, so a screen reader reads one.
 function Text() {
   return (
     <>
@@ -92,15 +94,15 @@ function Text() {
 export default function EuLine({ tone = 'paper' }) {
   if (tone === 'dusk') {
     return (
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 font-text text-[13px] leading-[1.45] text-paper/80">
-        <span className="flex shrink-0 items-center gap-3.5 bg-paper px-3 py-2">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3 font-text text-[13px] leading-[1.45] text-ivory/80">
+        <span className="flex shrink-0 items-center gap-3.5 bg-[#F7F4EE] px-3 py-2">
           <Logos tone="dusk" />
         </span>
         <p className="max-w-[46em]">
           <Text />{' '}
           <Link
             to="/eu-proekt"
-            className="font-medium text-paper underline decoration-paper/50 decoration-1 underline-offset-[3px] hover:decoration-paper"
+            className="font-medium text-ivory underline decoration-brass decoration-1 underline-offset-[3px] hover:decoration-brass-l"
           >
             За проекта
           </Link>
@@ -110,9 +112,9 @@ export default function EuLine({ tone = 'paper' }) {
   }
 
   return (
-    <div className="bg-paper font-text text-graphite">
+    <div className="bg-onyx font-text text-stone">
       <div className="eu-line site-wrap">
-        <span className="eu-line-logos flex items-center gap-2.5">
+        <span className="eu-line-logos flex items-center gap-2.5 bg-[#F7F4EE] px-2 py-1">
           <Logos tone="paper" />
         </span>
         {/* Both versions stay in the page; CSS shows one (src/index.css), and
@@ -127,7 +129,7 @@ export default function EuLine({ tone = 'paper' }) {
         </p>
         <Link
           to="/eu-proekt"
-          className="eu-line-more flex h-full items-center text-[12.5px] font-medium text-ink underline decoration-gold-ink decoration-1 underline-offset-[3px] hover:decoration-2"
+          className="eu-line-more flex h-full items-center text-[12.5px] font-medium text-ivory underline decoration-brass decoration-1 underline-offset-[3px] hover:decoration-2"
         >
           За проекта
         </Link>

@@ -26,11 +26,12 @@
 // Lenis), the page scrolled to y=1500, the menu opens and Esc closes it; the
 // page must stay at y=1500 throughout.
 //
-// And the focus ring on a dark legacy ground: on / at 1440×900, Tab from the
-// top of the page reaches the hero's „Свържи се с нас“, whose ring must be
-// paper, the text colour of a dark ground (.on-dusk, src/index.css); the next
-// Tab reaches the white availability card's „Виж проектите в продажба“, whose
-// ring stays ink. jsdom cannot compute a ring's colour; Chrome can.
+// And the focus ring on the legacy home page, a light ground inside the dark
+// site (.on-light, src/index.css): on / at 1440×900, Tab from the top of the
+// page reaches the hero's „Свържи се с нас“, on a dark region of it (.on-dusk),
+// whose ring must be ivory; the next Tab reaches the white availability card's
+// „Виж проектите в продажба“, whose ring is onyx. jsdom cannot compute a
+// ring's colour; Chrome can.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
@@ -108,8 +109,8 @@ const SCROLL_LOCK = { path: '/about', y: 1500 }
 const FOCUS_RING = {
   path: '/',
   stops: [
-    { text: 'Свържи се с нас', ring: 'rgb(241, 242, 239)', ground: 'the hero, a dark ground: paper' },
-    { text: 'Виж проектите в продажба', ring: 'rgb(20, 32, 47)', ground: 'the white availability card: ink' },
+    { text: 'Свържи се с нас', ring: 'rgb(239, 233, 221)', ground: 'the hero, a dark region of the light ground: ivory' },
+    { text: 'Виж проектите в продажба', ring: 'rgb(14, 13, 11)', ground: 'the white availability card on the light ground: onyx' },
   ],
 }
 const MAX_TABS = 60
@@ -393,7 +394,7 @@ async function focusedRing() {
   }
 }
 
-// The focus ring on a dark legacy ground (FOCUS_RING): the keyboard tabs from
+// The focus ring on the legacy home page (FOCUS_RING): the keyboard tabs from
 // the top of the page to each stop in turn, and each must show its ring. The
 // hero's first slide stays 5 s; the stops are a dozen Tabs from the top.
 async function focusRing(browser, userAgents) {

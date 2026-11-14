@@ -5,11 +5,12 @@ import Logo from '../components/brand/Logo'
 import Button from '../components/ui/Button'
 import { PRIMARY_PHONE, SITE } from '../config/site'
 import useScrollLock from '../hooks/useScrollLock'
+import { PALETTE } from '../styles/palette'
 import EuLine from './EuLine'
 import Icon, { CLOSE } from './Icon'
 import { NAV, currentFor } from './nav'
 
-// The mobile menu (spec §8.1): a full-screen sheet on dusk, the site's pages
+// The mobile menu (spec §8.1): a full-screen sheet on umber, the site's pages
 // set large in the display face, then „Запитване“, the phone, the email, both
 // offices and the EU line. The header renders it only while it is open, so it
 // is never in the prerendered HTML.
@@ -23,15 +24,14 @@ import { NAV, currentFor } from './nav'
 // - The page under it holds still (useScrollLock, which stops Lenis); the
 //   sheet scrolls on its own when it is taller than the screen, so Lenis must
 //   leave its wheel alone (data-lenis-prevent).
-// dusk (tailwind.config.js): <html> takes it while the lock holds, so the
-// scrollbar's strip matches the sheet.
-const DUSK = '#1F3A63'
+// <html> takes the sheet's umber while the lock holds, so the scrollbar's
+// strip matches the sheet.
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export default function MobileMenu({ id, pathname, inquiry, onClose }) {
   const sheet = useRef(null)
   const closeButton = useRef(null)
-  useScrollLock(DUSK)
+  useScrollLock(PALETTE.umber)
 
   useEffect(() => {
     closeButton.current?.focus()
@@ -78,7 +78,7 @@ export default function MobileMenu({ id, pathname, inquiry, onClose }) {
       aria-label="Меню"
       data-lenis-prevent=""
       onClick={onClick}
-      className="on-dusk fixed inset-0 z-50 flex flex-col overflow-y-auto overscroll-contain bg-dusk font-text text-paper"
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto overscroll-contain bg-umber font-text text-ivory"
     >
       <div className="site-wrap flex h-[var(--header-h)] shrink-0 items-center justify-between pt-[var(--eu-h)]">
         <Link to="/" aria-label="КСМ Строй, начална страница" className="shrink-0">
@@ -106,7 +106,7 @@ export default function MobileMenu({ id, pathname, inquiry, onClose }) {
                     to={href}
                     aria-current={current}
                     className={`block py-1 font-display text-[40px] font-[450] leading-[1.15] ${
-                      current ? 'underline decoration-paper/50 decoration-1 underline-offset-[0.16em]' : ''
+                      current ? 'underline decoration-ivory/50 decoration-1 underline-offset-[0.16em]' : ''
                     }`}
                   >
                     {label}
@@ -118,7 +118,7 @@ export default function MobileMenu({ id, pathname, inquiry, onClose }) {
         </nav>
         {/* On a phone the menu is the one way to the form that is always at
             hand, so „Запитване“ follows the pages at once. */}
-        <Button to={inquiry} tone="dusk" className="mt-7 w-full">
+        <Button to={inquiry} className="mt-7 w-full">
           Запитване
         </Button>
         <div className="mt-8 grid gap-4 pb-7 text-[15px]">
@@ -132,14 +132,14 @@ export default function MobileMenu({ id, pathname, inquiry, onClose }) {
             {SITE.email}
           </a>
           {SITE.offices.map((office) => (
-            <p key={office} className="text-paper/75">
+            <p key={office} className="text-ivory/75">
               {office}
             </p>
           ))}
         </div>
       </div>
 
-      <div className="site-wrap mt-auto border-t border-paper/15 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-6">
+      <div className="site-wrap mt-auto border-t border-ivory/15 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-6">
         <EuLine tone="dusk" />
       </div>
     </div>,

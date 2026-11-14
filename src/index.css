@@ -1,4 +1,5 @@
 @import './styles/fonts.css';
+@import './styles/diptych.css';
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +7,53 @@
 
 /* Base layer improvements for better mobile responsiveness */
 @layer base {
+  /* Diptych's tokens (spec §2, §3.2, §5.4). The colours are
+     src/styles/palette.js's, which Tailwind carries too, and the type stacks
+     tailwind.config.js's fontFamily; src/styles/tokens.test.js holds each copy
+     to its source. The site is dark: native controls and scrollbars take the
+     dark scheme, except on a light ground (.on-light, src/styles/diptych.css). */
+  :root {
+    --onyx: #0E0D0B;
+    --umber: #1A1714;
+    --umber-2: #211D19;
+    --ivory: #EFE9DD;
+    --ivory-2: rgba(239, 233, 221, 0.82);
+    --ivory-3: rgba(239, 233, 221, 0.62);
+    --stone: #9B9488;
+    --hair: rgba(155, 148, 136, 0.3);
+    --hair-2: rgba(155, 148, 136, 0.16);
+    --hair-ctl: rgba(155, 148, 136, 0.62);
+    --brass: #B8954A;
+    --brass-l: #D8BD7A;
+    --status-free: #4FBF85;
+    --status-reserved: #E9953F;
+    --status-sold: #D4574E;
+    --status-blocked: #8A867D;
+
+    --gut: clamp(20px, 3.6vw, 60px);
+
+    /* expo.out for entrances, power2.out for hovers, expo.inOut for doors,
+       wipes and morphs, expo.in for what leaves. */
+    --e-out: cubic-bezier(.16, 1, .3, 1);
+    --e-soft: cubic-bezier(.33, 1, .68, 1);
+    --e-io: cubic-bezier(.87, 0, .13, 1);
+    --e-in: cubic-bezier(.7, 0, .84, 0);
+
+    --serif: "KSM Display", "KSM Display Fallback Georgia", "KSM Display Fallback Times", "KSM Display Fallback Noto", serif;
+    --sans: "KSM Text", "KSM Text Fallback Segoe", "KSM Text Fallback Arial", "KSM Text Fallback Roboto", sans-serif;
+
+    /* The display sizes: Home's slogan, Golden Residence's title, h2, h3, the
+       motto and the lead (phone sizes come with each component). */
+    --fs-slogan: clamp(46px, 5.7vw, 98px);
+    --fs-title: clamp(54px, 8.6vw, 148px);
+    --fs-h2: clamp(40px, 4.6vw, 76px);
+    --fs-h3: clamp(30px, 2.6vw, 44px);
+    --fs-motto: clamp(48px, 6vw, 104px);
+    --fs-lead: clamp(16px, 1.16vw, 18px);
+
+    color-scheme: dark;
+  }
+
   /* Better text rendering and prevent overscroll */
   html {
     -webkit-font-smoothing: antialiased;
@@ -26,31 +74,51 @@
     overflow-x: hidden;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    /* Paper background from first paint, no flash */
-    background: theme(colors.paper);
-    color: theme(colors.ink);
+    /* Onyx from the first paint, ivory text in Manrope (spec §2.1, §3.1); no
+       face is ever slanted or emboldened by the browser. */
+    background: var(--onyx);
+    color: var(--ivory);
+    font-family: var(--sans);
+    font-synthesis: none;
   }
 
-  /* The focus ring (decision of 2026-11-14): 2 px, 2 px off the element, in
-     the ground's text colour, ink on paper and paper on a dusk ground
-     (.on-dusk). Never currentColor: a filled button's label is the ground's
-     own colour, and its ring would vanish into it. Button (src/components/ui)
-     sets the same colour by its tone, for a button on a ground no .on-dusk
-     names. Under forced colours the ring is the system's Highlight. */
+  ::selection {
+    background: rgba(184, 149, 74, .35);
+  }
+
+  /* The focus ring (spec §11): 2 px, 3 px off the element, in the text colour
+     of the ground it sits on. The site is dark, so it is ivory. Inside
+     .on-light, a light plate or the legacy pages' light ground (src/root.jsx),
+     it is onyx, and a dark region of a legacy page (.on-dusk) gives ivory
+     back. Never currentColor: a filled button's label is the ground's own
+     colour, and its ring would vanish into it. Under forced colours the ring
+     is the system's Highlight. */
   :focus-visible {
-    outline: 2px solid theme(colors.ink);
-    outline-offset: 2px;
+    outline: 2px solid var(--ivory);
+    outline-offset: 3px;
   }
 
-  .on-dusk :focus-visible {
-    outline-color: theme(colors.paper);
+  .on-light :focus-visible {
+    outline-color: var(--onyx);
+  }
+
+  .on-light .on-dusk :focus-visible {
+    outline-color: var(--ivory);
   }
 
   @media (forced-colors: active) {
     :focus-visible,
-    .on-dusk :focus-visible {
+    .on-light :focus-visible,
+    .on-light .on-dusk :focus-visible {
       outline-color: Highlight;
     }
+  }
+
+  /* The ring's corners, the one radius Diptych draws (spec §2.2): 1 px, which
+     the offset rounds out. Not on the legacy pages, whose controls keep the
+     radii they have. */
+  :focus-visible:not(.on-light *) {
+    border-radius: 1px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -292,14 +360,6 @@
    the page still. */
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
-
-/* Additional mobile overscroll prevention */
-#root {
-  /* Ensure consistent background - matches primary-50 */
-  background-color: #fafafa;
-  /* Prevent content from causing overscroll */
-  position: relative;
-}
 
 /* Enhanced smooth zoom animation - more noticeable */
 @keyframes smoothZoom {

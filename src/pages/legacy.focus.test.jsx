@@ -11,13 +11,13 @@ import Blog from './Blog'
 import Contact from './Contact'
 import Projects from './Projects'
 
-// A focus ring takes the colour of its ground's text (src/index.css; decision
-// of 2026-11-14): ink, or paper under an ancestor that names a dark ground
-// with .on-dusk. The legacy pages' near-black grounds (#1a1a1a, #2c2c2c,
-// black overlays) are dark grounds, where an ink ring measures about 1.1:1
-// and cannot be seen (WCAG 2.4.7). So each marks itself .on-dusk, or a tighter
-// wrapper does, and never a light card inside it: the card's controls keep
-// the ink ring. jsdom applies no CSS: src/styles/focus-ring.test.js pins the
+// A focus ring takes the colour of its ground's text (src/index.css; spec
+// §11). A legacy page is a light ground inside the dark site (.on-light), so
+// its rings are onyx, or ivory under an ancestor that names a dark ground with
+// .on-dusk. The legacy pages' near-black grounds (#1a1a1a, #2c2c2c, black
+// overlays) are dark grounds, where an onyx ring cannot be seen (WCAG 2.4.7).
+// So each marks itself .on-dusk, or a tighter wrapper does, and never a light
+// card inside it: the card's controls keep the onyx ring. jsdom applies no CSS: src/styles/focus-ring.test.js pins the
 // rules, and the smoke run measures the ring in Chrome.
 
 const onDusk = (element) => element.closest('.on-dusk') !== null
@@ -107,7 +107,7 @@ it.each([
 
 // A block page's full-screen floor plan, opened from a free apartment: its
 // bar and zoom controls sit on black; the gold card of the chosen apartment
-// does not, and its „Контакт“ keeps the ink ring.
+// does not, and its „Контакт“ keeps the onyx ring.
 it.each([
   { path: '/projects/golden-residence/block-a', floor: '1 етаж', apartment: 'А 101' },
   { path: '/projects/mnogofamilna-sgrada/block-a', floor: 'Етаж 9', apartment: 'А-802' },
@@ -125,7 +125,7 @@ it.each([
 }, 30000)
 
 // A project page's block cards: each card sits on the light page, so its own
-// ring stays ink; „Преглед на блока“ inside it sits on the photo's dark
+// ring stays onyx; „Преглед на блока“ inside it sits on the photo's dark
 // overlay. (framer-motion makes both focusable: they respond to a tap.)
 it.each([
   { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection },

@@ -496,7 +496,7 @@ const Contact = () => {
         </section>
 
         {/* Call to Action Section, on a near-black ground: .on-dusk makes its
-            focus rings paper (src/index.css). */}
+            focus rings ivory (src/index.css). */}
         <section className="on-dusk py-8 sm:py-10 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
           {/* Gold accent overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
@@ -533,7 +533,7 @@ const Contact = () => {
 export default Contact
 
 // How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid' }
+export const handle = { header: 'solid', legacy: true }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({

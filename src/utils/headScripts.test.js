@@ -69,7 +69,7 @@ describe('SCREEN_HEIGHT_SCRIPT', () => {
   // In <head>, React 19 hydrates a <style> it rendered into the next <style>
   // it finds. The script's own <style> must not be the one it finds.
   it('leaves React its own <style> when the page hydrates', async () => {
-    const html = renderToString(h(Page, { css: 'main{color:#14202F}' }))
+    const html = renderToString(h(Page, { css: 'main{color:#EFE9DD}' }))
     parse(html)
     const screenH = document.getElementById('screen-h')
     const height = screenH.textContent
@@ -79,7 +79,7 @@ describe('SCREEN_HEIGHT_SCRIPT', () => {
     const logged = vi.spyOn(console, 'error')
     let root
     await act(async () => {
-      root = hydrateRoot(document, h(Page, { css: 'main{color:#14202F}' }), {
+      root = hydrateRoot(document, h(Page, { css: 'main{color:#EFE9DD}' }), {
         onRecoverableError: (error) => errors.push(error),
       })
     })
@@ -87,10 +87,10 @@ describe('SCREEN_HEIGHT_SCRIPT', () => {
     expect(logged.mock.calls).toEqual([])
 
     // A change to React's <style> lands in React's <style>.
-    await act(async () => root.render(h(Page, { css: 'main{color:#1F3A63}' })))
+    await act(async () => root.render(h(Page, { css: 'main{color:#0E0D0B}' })))
     expect(document.getElementById('screen-h')).toBe(screenH)
     expect([...document.head.querySelectorAll('style')].map((style) => style.textContent))
-      .toEqual([height, 'main{color:#1F3A63}'])
+      .toEqual([height, 'main{color:#0E0D0B}'])
     await act(async () => root.unmount())
   })
 })

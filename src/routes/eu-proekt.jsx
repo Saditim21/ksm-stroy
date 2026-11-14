@@ -6,8 +6,9 @@ import { pageMeta } from '../seo/meta'
 // The page about the EU project (spec §8.10, §14.1), which the EU line on
 // every page links to: the teammate's text, word for word
 // (origin/vidimost-es src/pages/EuProekt.jsx), with the logos and the A3
-// poster, set as a document on paper. Spec §3.2: non-breaking spaces after
-// „№“, after the one-letter words and inside the amounts.
+// poster, set as a document on onyx. Spec §3.2: non-breaking spaces after
+// „№“, after the one-letter words and inside the amounts. The logos sit on
+// their light plate (#F7F4EE, spec §6.3): their lettering is dark.
 export const meta = () => pageMeta({
   title: 'Дигитализация на предприятията | КСМ Строй',
   description:
@@ -28,9 +29,9 @@ const BUDGET = [
 
 export default function EuProekt() {
   return (
-    <article className="site-wrap font-text py-[clamp(56px,8vw,120px)] text-body text-ink">
+    <article className="site-wrap font-text py-[clamp(56px,8vw,120px)] text-body text-ivory">
       <div className="max-w-[68ch]">
-        <div className="flex flex-wrap items-center gap-x-10 gap-y-6">
+        <div className="inline-flex flex-wrap items-center gap-x-10 gap-y-6 bg-[#F7F4EE] px-6 py-5">
           <ResponsivePicture
             image={images['eu-cofunded-bg']}
             alt="Съфинансирано от Европейския съюз"
@@ -45,7 +46,7 @@ export default function EuProekt() {
           />
         </div>
 
-        <h1 className="mt-12 font-display text-h2 font-[480]">Дигитализация на предприятията</h1>
+        <h1 className="mt-12 font-display text-h2 font-medium">Дигитализация на предприятията</h1>
 
         <p className="mt-8">
           КСМ СТРОЙ ООД изпълнява проект №&nbsp;BG16RFPR001-1.012-1485-C01 „Дигитализация на предприятията“ по Програма
@@ -59,19 +60,19 @@ export default function EuProekt() {
           а&nbsp;решенията се вземат по актуални данни.
         </p>
 
-        <ul className="nums mt-8 list-disc space-y-1.5 pl-5 marker:text-graphite">
+        <ul className="nums mt-8 list-disc space-y-1.5 pl-5 marker:text-stone">
           {BUDGET.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
 
         <div className="mt-10">
-          <Button href={POSTER} variant="secondary" download="Плакат A3 - КСМ Строй.pdf">
+          <Button href={POSTER} download="Плакат A3 - КСМ Строй.pdf">
             Изтегли плаката (PDF)
           </Button>
         </div>
 
-        <p className="mt-12 max-w-[60ch] text-small text-graphite">
+        <p className="mt-12 max-w-[60ch] text-small text-stone">
           Цялата отговорност за съдържанието се носи от КСМ СТРОЙ ООД и&nbsp;при никакви обстоятелства не може да се
           приема, че този документ отразява официалното становище на Европейския съюз и&nbsp;Управляващия орган.
         </p>

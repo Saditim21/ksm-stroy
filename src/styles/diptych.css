@@ -1,0 +1,106 @@
+/* Diptych's type roles, the heading's italic word, the actions and the two
+   grounds (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md,
+   §3, §6.1, §11), ported from the concept's css/diptych.css:59-94 with the
+   tokens of src/index.css.
+
+   In Tailwind's components layer: after the base styles, so Preflight's
+   `[type='button'] { background-color: transparent }` never beats a solid
+   action, and before the utilities, so a utility a caller passes still wins.
+
+   Hover effects only where a pointer hovers (spec §2.2): a tap never leaves
+   one behind. */
+
+@layer components {
+  /* ---------- type (spec §3.2) ---------- */
+  .serif,
+  .h2,
+  .h3,
+  .num {
+    font-family: var(--serif);
+    font-weight: 500;
+    letter-spacing: -.005em;
+    font-variant-numeric: lining-nums;
+  }
+  .h2 { font-size: var(--fs-h2); line-height: 1; }
+  .h3 { font-size: var(--fs-h3); line-height: 1.05; }
+  .lead { font-size: var(--fs-lead); line-height: 1.65; color: var(--ivory-2); max-width: 34em; }
+  .small { font-size: 13px; line-height: 1.5; color: var(--stone); }
+  .tab { font-variant-numeric: tabular-nums lining-nums; }
+
+  /* A heading's one italic word (spec §3.3): brass in h2 and h3. Display
+     titles (the H1s, the motto, panel, stage and sheet titles, the unit id,
+     the block name) set it in brass-l in their own stylesheets. Italic only
+     from 28 px up. */
+  em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    color: var(--brass);
+  }
+
+  /* ---------- actions (spec §6.1; Button.jsx) ---------- */
+  /* Outline, the default: a brass border, an ivory label. */
+  .btn {
+    --b: var(--brass);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 28px;
+    border: 1px solid var(--b);
+    color: var(--ivory);
+    font: 500 14px/1 var(--sans);
+    letter-spacing: .03em;
+    white-space: nowrap;
+    transition: border-color .25s var(--e-soft), background-color .25s var(--e-soft), color .25s var(--e-soft);
+  }
+  /* Solid: an ivory fill, an onyx label. */
+  .btn--solid { background-color: var(--ivory); color: var(--onyx); border-color: var(--ivory); }
+  .btn--sm { min-height: 40px; padding: 0 18px; font-size: 13px; }
+  /* Link: text over a 1 px brass underline. */
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    color: var(--ivory);
+    font-weight: 500;
+    background: linear-gradient(var(--brass), var(--brass)) 0 100% / 100% 1px no-repeat;
+    transition: background-size .35s var(--e-out), color .2s;
+  }
+  /* The arrow `arrow` draws (18 × 10), which moves 4 px on hover. */
+  .arr { width: 18px; height: 10px; transition: transform .3s var(--e-out); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover { --b: var(--brass-l); background-color: rgba(184, 149, 74, .09); }
+    .btn--solid:hover { background-color: #fff; border-color: #fff; color: var(--onyx); }
+    .link:hover { background-image: linear-gradient(var(--brass-l), var(--brass-l)); color: #fff; }
+    .btn:hover .arr,
+    .link:hover .arr { transform: translateX(4px); }
+  }
+
+  /* A label stays on one line on a desktop; on a phone it may wrap. */
+  @media (max-width: 900px) {
+    .btn { white-space: normal; text-align: center; line-height: 1.25; padding-block: 8px; }
+  }
+
+  /* ---------- grounds (spec §11) ---------- */
+  /* A light ground inside the dark site: a light plate, or the legacy pages'
+     ground. Its text is onyx, its native controls light, and its focus rings
+     onyx (src/index.css). */
+  .on-light {
+    color: var(--onyx);
+    color-scheme: light;
+  }
+
+  /* The ground of a page M2 has not rebuilt yet (src/root.jsx, the route
+     handle's `legacy`): production's light page, its text colour and its
+     fonts, as production shows them. */
+  .legacy-ground {
+    background: #fafafa;
+    color: #1a1a1a;
+    font-family: theme(fontFamily.sans);
+  }
+}

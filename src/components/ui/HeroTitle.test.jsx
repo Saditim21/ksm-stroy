@@ -36,9 +36,9 @@ test('as="h2" renders an h2', () => {
 })
 
 test('each line is a span.block inside an overflow-hidden mask, staggered by --i', () => {
-  render(<HeroTitle lines={LINES} className="text-ink" />)
+  render(<HeroTitle lines={LINES} className="text-ivory" />)
   const heading = screen.getByRole('heading', { level: 1 })
-  expect(heading).toHaveClass('text-ink')
+  expect(heading).toHaveClass('text-ivory')
   const masks = [...heading.children]
   expect(masks).toHaveLength(2)
   masks.forEach((mask, i) => {

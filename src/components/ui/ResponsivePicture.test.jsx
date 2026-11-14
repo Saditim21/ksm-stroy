@@ -64,8 +64,8 @@ test('the wrapper shows the dominant colour until the image loads', () => {
 test('a new image shows its own colour until it loads', () => {
   const { container, rerender } = render(<ResponsivePicture image={IMAGE} alt="" sizes="100vw" />)
   fireEvent.load(parts(container).img)
-  rerender(<ResponsivePicture image={{ ...IMAGE, path: '/img/y', color: '#1F3A63' }} alt="" sizes="100vw" />)
-  expect(parts(container).picture.style.backgroundColor).toBe('rgb(31, 58, 99)')
+  rerender(<ResponsivePicture image={{ ...IMAGE, path: '/img/y', color: '#1A1714' }} alt="" sizes="100vw" />)
+  expect(parts(container).picture.style.backgroundColor).toBe('rgb(26, 23, 20)')
 })
 
 test('className reaches the picture and imgClassName the img', () => {

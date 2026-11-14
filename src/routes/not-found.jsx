@@ -27,16 +27,16 @@ export default function NotFound() {
     <section className="site-wrap font-text py-[clamp(72px,10vw,160px)]">
       {/* Two lines, so no line ends on „в“; the heading's name stays one
           sentence, which the tests look it up by. */}
-      <h1 className="font-display text-h2 font-[480] text-ink">
+      <h1 className="font-display text-h2 font-medium text-ivory">
         <span className="block">Тази страница</span> <span className="block">я няма в чертежа.</span>
       </h1>
-      <p className="mt-6 max-w-[60ch] text-body text-graphite">
+      <p className="mt-6 max-w-[60ch] text-body text-stone">
         Проверете адреса или започнете от някоя от страниците по-долу.
       </p>
       <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-2">
         {WAYS_BACK.map(({ label, to }) => (
           <li key={to}>
-            <Button to={to} variant="quiet">
+            <Button to={to} variant="link">
               {label}
             </Button>
           </li>

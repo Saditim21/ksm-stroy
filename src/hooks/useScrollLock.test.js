@@ -36,7 +36,7 @@ test('two locks released in one commit leave <html> as it was', () => {
   root.style.overflow = 'auto'
   const { unmount } = renderHook(() => {
     useScrollLock()
-    useScrollLock('#1F3A63')
+    useScrollLock('#0E0D0B')
   })
   expect(root.style.overflow).toBe('hidden')
 
@@ -51,11 +51,11 @@ test('two locks released in one commit leave <html> as it was', () => {
 test('a lock released out of order hands <html> to the one still held', () => {
   const root = document.documentElement
   const first = renderHook(() => useScrollLock('#F6F5F1'))
-  const second = renderHook(() => useScrollLock('#1F3A63'))
-  expect(root.style.backgroundColor).toBe('rgb(31, 58, 99)')
+  const second = renderHook(() => useScrollLock('#0E0D0B'))
+  expect(root.style.backgroundColor).toBe('rgb(14, 13, 11)')
 
   first.unmount()
-  expect(root.style.backgroundColor).toBe('rgb(31, 58, 99)')
+  expect(root.style.backgroundColor).toBe('rgb(14, 13, 11)')
   expect(root.style.overflow).toBe('hidden')
 
   second.unmount()

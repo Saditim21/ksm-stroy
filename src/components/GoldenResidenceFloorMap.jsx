@@ -702,7 +702,7 @@ const GoldenResidenceFloorMap = ({ onHoverChange, currentImage, onFloorSelect })
         </div>
 
         {/* Fullscreen Architecture Plan Modal: black throughout, so all of it
-            is .on-dusk (paper focus rings, src/index.css). */}
+            is .on-dusk (ivory focus rings, src/index.css). */}
         {isArchitecturePlanFullscreen && (
           <div className="on-dusk fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
             <div className="relative w-full h-full">

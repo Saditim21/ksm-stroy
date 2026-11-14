@@ -11,13 +11,13 @@ import { inquiryHref, useRouteHandle } from './handle'
 import { NAV, currentFor } from './nav'
 
 // The site's header (spec §8.1): one fixed element holding the EU line (on
-// paper, 36 px; 72 px under 640 px, where its text takes a second row) and the
+// onyx, 36 px; 72 px under 640 px, where its text takes a second row) and the
 // 72 px bar, so it moves as one, with one translateY. It is excluded from the
 // route crossfade (view-transition-name, spec §5.3).
 //
-// The bar is see-through, with paper text, over a page whose route handle
+// The bar is see-through, with ivory text, over a page whose route handle
 // asks for an overlay (src/shell/handle.js), until the page has scrolled
-// 80 px; from there, and on any other page, it is paper with ink text. Past
+// 80 px; from there, and on any other page, it is onyx with ivory text. Past
 // the first screen it slides away while the page scrolls down and comes back
 // as soon as it scrolls up, and whenever the keyboard moves into it.
 //
@@ -86,7 +86,7 @@ export default function SiteHeader() {
   const navLink = (active) =>
     `whitespace-nowrap py-1.5 underline decoration-1 underline-offset-[9px] transition-[text-decoration-color] duration-200 ${
       active
-        ? overlay ? 'decoration-current' : 'text-gold-ink decoration-gold-ink'
+        ? overlay ? 'decoration-current' : 'text-brass decoration-brass'
         : 'decoration-transparent hover:decoration-current'
     }`
 
@@ -94,7 +94,7 @@ export default function SiteHeader() {
     <>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:bg-paper focus:px-3.5 focus:py-2.5 focus:font-text focus:text-small focus:font-medium focus:text-ink focus:shadow-[0_0_0_1px_theme(colors.ink)]"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:bg-ivory focus:px-3.5 focus:py-2.5 focus:font-text focus:text-small focus:font-medium focus:text-onyx"
       >
         Към съдържанието
       </a>
@@ -106,11 +106,11 @@ export default function SiteHeader() {
         }`}
       >
         <EuLine />
-        {/* See-through over a dark hero, the bar is a dusk ground (.on-dusk),
-            so its focus rings are paper (src/index.css). */}
-        <div className={overlay ? 'on-dusk text-paper' : 'bg-paper text-ink shadow-[0_1px_0_theme(colors.rule)]'}>
+        {/* See-through over a dark hero, or onyx: a dark ground either way,
+            so its focus rings are ivory (src/index.css). */}
+        <div className={overlay ? 'text-ivory' : 'bg-onyx text-ivory shadow-[0_1px_0_var(--hair-2)]'}>
           <div className="site-wrap flex h-[var(--bar-h)] items-center gap-1 lg:gap-5 xl:gap-7">
-            <Link to="/" aria-label="КСМ Строй, начална страница" className={`shrink-0 ${overlay ? '' : 'text-gold-ink'}`}>
+            <Link to="/" aria-label="КСМ Строй, начална страница" className={`shrink-0 ${overlay ? '' : 'text-brass'}`}>
               <Logo className="h-[46px] w-auto stroke-[3.45]" />
             </Link>
             <nav aria-label="Основна навигация" className="hidden lg:ml-3 lg:block xl:ml-7">
@@ -130,7 +130,7 @@ export default function SiteHeader() {
             <a href={`tel:${PRIMARY_PHONE.tel}`} className="nums ml-auto hidden whitespace-nowrap text-[15px] hover:underline lg:inline">
               {PRIMARY_PHONE.label}
             </a>
-            <Button to={inquiry} tone={overlay ? 'dusk' : 'paper'} className="hidden lg:inline-flex">
+            <Button to={inquiry} size="sm" className="hidden lg:inline-flex">
               Запитване
             </Button>
             <a

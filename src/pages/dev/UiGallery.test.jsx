@@ -3,8 +3,8 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, expect, it, vi } from 'vitest'
 import UiGallery from './UiGallery'
 
-// /dev/ui shows every shared primitive (src/components/ui) on paper and on
-// dusk, for review. Like /dev/tracer, src/routes.js routes it only under the
+// /dev/ui shows every shared primitive (src/components/ui) on Diptych's two
+// grounds, onyx and umber, for review. Like /dev/tracer, src/routes.js routes it only under the
 // dev server; scripts/check-dist.mjs fails if any of it reaches the build.
 
 // vi.unstubAllEnvs() would also undo the blank sheet URLs of src/test/setup.js,
@@ -15,10 +15,10 @@ afterEach(() => {
   vi.resetModules()
 })
 
-it('shows every primitive on paper and on dusk', () => {
+it('shows every primitive on onyx and on umber', () => {
   render(<MemoryRouter><UiGallery /></MemoryRouter>)
   expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
-  for (const ground of ['paper', 'dusk']) {
+  for (const ground of ['onyx', 'umber']) {
     const section = screen.getByRole('region', { name: `On ${ground}` })
     const inside = within(section)
     expect(inside.getByRole('heading', { level: 2, name: 'Създаваме пространства за мечтания живот' })).toBeInTheDocument()
@@ -30,7 +30,8 @@ it('shows every primitive on paper and on dusk', () => {
     expect(inside.getAllByText('—').length).toBeGreaterThan(0)
     expect(section.querySelector('picture img')).not.toBeNull()
   }
-  expect(screen.getByRole('region', { name: 'On dusk' })).toHaveClass('on-dusk', 'bg-dusk', 'text-paper')
+  expect(screen.getByRole('region', { name: 'On onyx' })).toHaveClass('bg-onyx', 'text-ivory')
+  expect(screen.getByRole('region', { name: 'On umber' })).toHaveClass('bg-umber', 'text-ivory')
 })
 
 it('routes /dev/ui under the dev server only', async () => {

@@ -148,8 +148,8 @@ const GoldenResidenceBlockSelection = () => {
               
               <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
                 {/* On the photo's dark overlay (.on-dusk): „Преглед на блока“
-                    gets the paper focus ring. The card's own ring is drawn on
-                    the light page and stays ink. Block Б's card likewise. */}
+                    gets the ivory focus ring. The card's own ring is drawn on
+                    the light page and stays onyx. Block Б's card likewise. */}
                 <div className="on-dusk text-center text-white max-w-sm">
                   <motion.div
                     initial={false}
@@ -244,7 +244,7 @@ const GoldenResidenceBlockSelection = () => {
         </div>
 
         {/* Creative Full-Page Gallery: dark throughout, so all of it is
-            .on-dusk (paper focus rings, src/index.css), as is the viewer. */}
+            .on-dusk (ivory focus rings, src/index.css), as is the viewer. */}
         <AnimatePresence>
           {showGallery && (
             <motion.div
@@ -391,7 +391,7 @@ export default GoldenResidenceBlockSelection;
 // How the site's shell frames this page (src/shell/handle.js): the solid
 // header, as on every legacy page; the page opens below it, on production's
 // light ground.
-export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence' }
+export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence', legacy: true }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({

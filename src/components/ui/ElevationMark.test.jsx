@@ -25,8 +25,8 @@ test('the кота is bg-BG with two decimals', () => {
   expect(screen.getByText('кота +8,70')).toBeInTheDocument()
 })
 
-// scripts/fonts/REPORT.md: Playfair's + ± − are hairline-thin at display size.
-test('the кота is set in Geologica whatever the row’s face', () => {
+// scripts/fonts/REPORT.md: the display face's + ± − are light strokes.
+test('the кота is set in the text face whatever the row’s face', () => {
   render(<ElevationMark floor={1} elevation={3.06} className="font-display" />)
   expect(screen.getByText('кота +3,06')).toHaveClass('font-text')
 })
@@ -38,6 +38,6 @@ test('the zero level reads ±0,00 and a level below it −3,00, as on drawings',
 })
 
 test('numbers take lining tabular figures, and className reaches the mark', () => {
-  const { container } = render(<ElevationMark floor={2} className="text-graphite" />)
-  expect(container.firstChild).toHaveClass('nums', 'text-graphite')
+  const { container } = render(<ElevationMark floor={2} className="text-stone" />)
+  expect(container.firstChild).toHaveClass('nums', 'text-stone')
 })

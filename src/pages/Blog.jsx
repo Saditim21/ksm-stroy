@@ -379,7 +379,7 @@ const Projects = () => {
       </section>
 
       {/* Call to Action, on a near-black ground: .on-dusk makes its focus
-          rings paper (src/index.css). */}
+          rings ivory (src/index.css). */}
       <section className="on-dusk py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-gold-900/10 via-transparent to-gold-900/5"></div>
         
@@ -416,7 +416,7 @@ const Projects = () => {
       </section>
 
       {/* Enhanced Project Modal: black throughout, so all of it is .on-dusk
-          (paper focus rings). */}
+          (ivory focus rings). */}
       <AnimatePresence>
         {selectedProject && (
           <motion.div
@@ -778,7 +778,7 @@ const ProjectCard = ({ project, index, onClick }) => {
 export default Projects
 
 // How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid' }
+export const handle = { header: 'solid', legacy: true }
 
 // The page's head (root.jsx <Meta/>): production's strings for this page, and
 // its first project's photo, as before.

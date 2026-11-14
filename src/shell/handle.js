@@ -6,6 +6,7 @@ import { useMatches } from 'react-router'
 //     header: 'overlay' | 'solid',
 //     project?: 'golden-residence' | 'mnogofamilna-sgrada',
 //     object?: string,
+//     legacy?: true,
 //   }
 //
 // - header: 'overlay' for a page whose hero runs under the header, which stays
@@ -13,7 +14,9 @@ import { useMatches } from 'react-router'
 //   'solid' for any other page;
 // - project: the project the page belongs to; „Запитване“ carries it to the
 //   form as /contact?project=…;
-// - object: the project's name, for the footer's title block.
+// - object: the project's name, for the footer's title block;
+// - legacy: a page M2 has not rebuilt yet. It keeps production's light look
+//   inside the dark shell (src/root.jsx).
 //
 // The shell reads the deepest route's handle. A route without one is solid.
 const DEFAULT_HANDLE = Object.freeze({ header: 'solid' })

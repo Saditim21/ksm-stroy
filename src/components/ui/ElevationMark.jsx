@@ -5,8 +5,8 @@
 // explorer header and the Rise gauge, in the colour and size of its row.
 //
 // The level is signed as on the drawings: +3,06 above the zero level, ±0,00 on
-// it, −3,00 below it. The кота is always set in Geologica: Playfair's + ± −
-// are hairline-thin at display size (scripts/fonts/REPORT.md).
+// it, −3,00 below it. The кота is always set in KSM Text: the display face
+// draws + ± − as light strokes beside its figures (scripts/fonts/REPORT.md).
 function formatElevation(level) {
   const sign = level > 0 ? '+' : level < 0 ? '−' : '±'
   return sign + Math.abs(level).toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

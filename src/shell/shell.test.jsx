@@ -132,7 +132,7 @@ describe('the header as the page scrolls', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, writable: true, value: 0 })
   })
 
-  it('is see-through over the home page’s hero until 80 px down, then paper', async () => {
+  it('is see-through over the home page’s hero until 80 px down, then solid', async () => {
     renderSiteAt('/')
     const header = await siteHeader()
     expect(header).toHaveAttribute('data-look', 'overlay')
@@ -143,35 +143,12 @@ describe('the header as the page scrolls', () => {
     await waitFor(() => expect(header).toHaveAttribute('data-look', 'overlay'))
   })
 
-  // The project pages open on production's light ground, so the bar is paper
+  // The project pages open on production's light ground, so the bar is solid
   // over them from the top, as on every page with no hero under it.
-  it.each(['/about', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is paper from the top of %s', async (path) => {
+  it.each(['/about', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is solid from the top of %s', async (path) => {
     renderSiteAt(path)
 
     expect(await siteHeader()).toHaveAttribute('data-look', 'solid')
-  })
-
-  // A focus ring is the ground's text colour (src/index.css): over the hero
-  // the see-through bar is a dusk ground, so its rings are paper, „Запитване“
-  // included; once solid it is paper again. The EU line above it is always on
-  // paper.
-  it('is a dusk ground for focus rings while see-through, and paper once solid', async () => {
-    renderSiteAt('/')
-    const header = await siteHeader()
-    const inHeader = within(header)
-    const bar = inHeader.getByRole('link', { name: 'КСМ Строй, начална страница' }).closest('.site-wrap').parentElement
-    const inquiry = inHeader.getByRole('link', { name: 'Запитване' })
-    const euLink = inHeader.getByRole('link', { name: 'За проекта' })
-
-    expect(bar).toHaveClass('on-dusk')
-    expect(inquiry).toHaveClass('focus-visible:outline-paper')
-    expect(euLink.closest('.on-dusk')).toBeNull()
-
-    scrollTo(81)
-    await waitFor(() => expect(header).toHaveAttribute('data-look', 'solid'))
-    expect(bar).not.toHaveClass('on-dusk')
-    expect(inquiry).toHaveClass('focus-visible:outline-ink')
-    expect(euLink.closest('.on-dusk')).toBeNull()
   })
 
   it('after the first screen, hides going down and comes back going up', async () => {
@@ -192,25 +169,26 @@ describe('the header as the page scrolls', () => {
 
 // How each page of src/routes.js frames the shell: its module's `handle`
 // (src/shell/handle.js), read from the real modules (plan Task 9, Step 2).
-// Home runs under the see-through header: its hero carries the header's paper
+// Home runs under the see-through header: its hero carries the header's light
 // text. The two project pages open on production's light ground, so they are
-// solid, as are the explorers and every other page.
+// solid, as are the explorers and every other page. The pages M2 has not yet
+// rebuilt are legacy: they keep production's light look (M2 plan, Task 0).
 const GOLDEN_RESIDENCE = { project: 'golden-residence', object: 'Golden Residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
 const HANDLES = {
-  '/': { header: 'overlay' },
-  '/about': { header: 'solid' },
-  '/projects': { header: 'solid' },
-  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE },
-  '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE },
-  '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE },
-  '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA },
-  '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA },
-  '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA },
+  '/': { header: 'overlay', legacy: true },
+  '/about': { header: 'solid', legacy: true },
+  '/projects': { header: 'solid', legacy: true },
+  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
+  '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
+  '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
+  '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
+  '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
+  '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
-  '/contact': { header: 'solid' },
-  '/blog': { header: 'solid' },
+  '/contact': { header: 'solid', legacy: true },
+  '/blog': { header: 'solid', legacy: true },
   '/eu-proekt': { header: 'solid' },
   '/*': { header: 'solid' },
 }
@@ -228,6 +206,27 @@ describe('each page’s handle', () => {
 
   it.each(pages)('%s (%s)', (path, file) => {
     expect(modules[`/src/${file}`].handle).toEqual(HANDLES[path])
+  })
+})
+
+// The ground the shell gives a page (src/root.jsx): dark by default, and
+// production's light ground on a legacy page, where focus rings turn onyx
+// (.on-light, src/index.css).
+describe('the page’s ground', () => {
+  it('is production’s light ground on a legacy page', async () => {
+    renderSiteAt('/about')
+    await screen.findByText(/основана през месец септември 2008/)
+
+    expect(document.getElementById('main')).toHaveClass('on-light', 'legacy-ground')
+  })
+
+  it('is the dark ground on a rebuilt page', async () => {
+    renderSiteAt('/eu-proekt')
+    await screen.findByRole('heading', { level: 1, name: 'Дигитализация на предприятията' })
+
+    const main = document.getElementById('main')
+    expect(main).not.toHaveClass('on-light')
+    expect(main).not.toHaveClass('legacy-ground')
   })
 })
 

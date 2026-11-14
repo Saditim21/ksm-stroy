@@ -7,7 +7,7 @@ import TitleBlock from './TitleBlock'
 import { useRouteHandle } from './handle'
 import { NAV } from './nav'
 
-// The site's footer (spec §8.1), on dusk: two calm columns, then the EU line,
+// The site's footer (spec §8.1), on umber: two calm columns, then the EU line,
 // the copyright and, bottom right, the title block (§3.3).
 // - left: the logo and production's blurb (Footer on main), then the phones,
 //   the email and the working hours;
@@ -19,11 +19,11 @@ import { NAV } from './nav'
 const BLURB =
   'Водеща строителна компания в\u00a0България с\u00a0над 15 години опит. Специализираме се в\u00a0жилищно и\u00a0комерсиално строителство, предлагайки иновативни решения и\u00a0високо качество на изпълнение.'
 
-const LINK = 'underline decoration-transparent decoration-1 underline-offset-[3px] hover:decoration-paper/55'
+const LINK = 'underline decoration-transparent decoration-1 underline-offset-[3px] hover:decoration-ivory/55'
 
 function Label({ id, children }) {
   return (
-    <h2 id={id} className="mb-1.5 text-label font-medium text-paper/60">
+    <h2 id={id} className="mb-1.5 text-label font-medium text-ivory/60">
       {children}
     </h2>
   )
@@ -34,14 +34,14 @@ export default function SiteFooter() {
   const linksLabel = useId()
 
   return (
-    <footer className="on-dusk bg-dusk font-text text-[15px] leading-[1.55] text-paper">
+    <footer className="bg-umber font-text text-[15px] leading-[1.55] text-ivory">
       <div className="site-wrap pb-10 pt-[clamp(64px,8vw,120px)]">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-x-6">
           <div className="lg:col-span-5">
             <Link to="/" aria-label="КСМ Строй, начална страница" className="inline-block">
               <Logo className="h-14 w-auto" />
             </Link>
-            <p className="mt-6 max-w-[30em] text-paper/80">{BLURB}</p>
+            <p className="mt-6 max-w-[30em] text-ivory/80">{BLURB}</p>
             <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:w-max sm:gap-x-14">
               <div>
                 <Label>Телефон</Label>
@@ -79,7 +79,7 @@ export default function SiteFooter() {
                       href={mapsUrl(office)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline decoration-paper/40 decoration-1 underline-offset-[3px] hover:decoration-paper"
+                      className="underline decoration-ivory/40 decoration-1 underline-offset-[3px] hover:decoration-ivory"
                     >
                       Отвори в Google Maps
                     </a>
@@ -111,7 +111,7 @@ export default function SiteFooter() {
         <div className="mt-[clamp(64px,8vw,112px)] grid items-end gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_auto]">
           <div>
             <EuLine tone="dusk" />
-            <p className="mt-4 text-[13px] text-paper/60">© 2026 КСМ Строй</p>
+            <p className="mt-4 text-[13px] text-ivory/60">© 2026 КСМ Строй</p>
           </div>
           <TitleBlock object={project ? object : undefined} />
         </div>

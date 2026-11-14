@@ -34,9 +34,9 @@ export const links = () => [
   { rel: 'manifest', href: '/site.webmanifest' },
 ]
 
-// The page's ground from the first paint, before the stylesheet: paper
-// (spec §3.1), the colour of the header's EU line and its solid bar.
-const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#F1F2EF}'
+// The page's ground from the first paint, before the stylesheet: onyx with
+// ivory text (spec §2.1), the colours of the shell around every page.
+const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#0E0D0B;color:#EFE9DD}'
 
 export function Layout({ children }) {
   return (
@@ -50,8 +50,8 @@ export function Layout({ children }) {
         <meta property="og:site_name" content="KSM Stroy" />
         <meta name="geo.region" content="BG-22" />
         <meta name="geo.placename" content="София" />
-        {/* Paper (spec §3.1), as public/site.webmanifest says. */}
-        <meta name="theme-color" content="#F1F2EF" />
+        {/* Onyx (spec §2.1), as public/site.webmanifest says. */}
+        <meta name="theme-color" content="#0E0D0B" />
         <meta name="format-detection" content="telephone=no" />
         {/* Pre-paint (src/utils/headScripts.js): after the viewport meta, and
             before the stylesheet, which would hold it back until it loaded. */}
@@ -115,6 +115,11 @@ function RouteTransition() {
 // src/shell/handle.js), right below the EU line, its hero running under the
 // see-through bar.
 //
+// The site is dark (spec §2.1). A page M2 has not rebuilt yet (its handle's
+// `legacy`) keeps production's light ground inside the dark shell: its <main>
+// is .legacy-ground, and .on-light turns its focus rings onyx
+// (src/styles/diptych.css, src/index.css).
+//
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
 // scrolls natively and SmoothScroll is a plain wrapper.
@@ -124,7 +129,7 @@ function RouteTransition() {
 // src/utils/screenHeight.js). Not where there is no matchMedia to ask about
 // the pointer: jsdom, in the tests.
 export default function App() {
-  const { header } = useRouteHandle()
+  const { header, legacy } = useRouteHandle()
   useEffect(() => (typeof window.matchMedia === 'function' ? trackScreenHeight() : undefined), [])
   return (
     <ApartmentProvider>
@@ -134,7 +139,7 @@ export default function App() {
           <main
             id="main"
             tabIndex={-1}
-            className={`flex-1 overscroll-none focus:outline-none ${header === 'overlay' ? 'pt-[var(--eu-h)]' : 'pt-[var(--header-h)]'}`}
+            className={`flex-1 overscroll-none focus:outline-none ${legacy ? 'on-light legacy-ground ' : ''}${header === 'overlay' ? 'pt-[var(--eu-h)]' : 'pt-[var(--header-h)]'}`}
           >
             <RouteTransition />
           </main>

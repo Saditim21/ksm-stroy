@@ -12,8 +12,8 @@ import { formatArea, plural } from '../../utils/format'
 import { MD_UP } from '../../utils/motion'
 import { pageMeta } from '../../seo/meta'
 
-// Dev-only gallery of the shared primitives (src/components/ui), each on paper
-// and on dusk, for review (plan Task 7). src/routes.js routes /dev/ui only
+// Dev-only gallery of the shared primitives (src/components/ui), each on
+// Diptych's two grounds, onyx and umber, for review (plan Task 7). src/routes.js routes /dev/ui only
 // under the dev server; scripts/check-dist.mjs fails if any of it reaches the
 // build.
 //
@@ -44,34 +44,39 @@ const ROW = 'col-span-2 grid grid-cols-subgrid'
 
 export const meta = () => pageMeta({
   title: 'UI primitives (dev) - KSM Stroy',
-  description: 'Dev-only gallery of the shared primitives (src/components/ui) on paper and on dusk.',
+  description: 'Dev-only gallery of the shared primitives (src/components/ui) on onyx and on umber.',
   path: '/dev/ui',
 })
 
 function Specimen({ name, children }) {
   return (
     <div className="space-y-5">
-      <p className="text-label text-graphite [.on-dusk_&]:text-paper/75">{name}</p>
+      <p className="text-label text-stone">{name}</p>
       {children}
     </div>
   )
 }
 
+const GROUNDS = { onyx: 'bg-onyx text-ivory', umber: 'bg-umber text-ivory' }
+
 function Specimens({ ground, count }) {
-  const tone = ground
   const freeLabel = plural(count, 'свободен апартамент', 'свободни апартамента')
   return (
-    <section aria-label={`On ${ground}`} className={ground === 'dusk' ? 'on-dusk bg-dusk text-paper' : 'bg-paper text-ink'}>
+    <section aria-label={`On ${ground}`} className={GROUNDS[ground]}>
       <div className="mx-auto max-w-[1440px] space-y-16 px-5 py-16 md:px-12">
         <Specimen name="HeroTitle (as h2)">
           <HeroTitle as="h2" lines={['Създаваме пространства', 'за мечтания живот']} />
         </Specimen>
 
-        <Specimen name="Button: primary with arrow (Link), secondary (tel:), quiet (button)">
+        <Specimen name="Button: outline with arrow (Link), solid (tel:), link (button); then the small sizes">
           <div className="flex flex-wrap items-center gap-4">
-            <Button to="/contact" tone={tone} arrow>Запитване</Button>
-            <Button href="tel:+359887886166" variant="secondary" tone={tone}>Обадете се</Button>
-            <Button variant="quiet" tone={tone}>Вижте свободните на етажа</Button>
+            <Button to="/contact" arrow>Запитване</Button>
+            <Button href="tel:+359887886166" variant="solid">Обадете се</Button>
+            <Button variant="link" arrow>Вижте свободните на етажа</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <Button to="/contact" size="sm">Запитване</Button>
+            <Button href="tel:+359887886166" variant="solid" size="sm">Обадете се</Button>
           </div>
         </Specimen>
 
@@ -131,19 +136,19 @@ export default function UiGallery() {
   const count = COUNTS[step % COUNTS.length]
   return (
     <div className="font-text">
-      <header className="bg-paper text-ink">
+      <header className="bg-onyx text-ivory">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-12 md:px-12">
           <div className="space-y-2">
             <h1 className="font-display text-h2">UI primitives</h1>
-            <p className="text-small text-graphite">src/components/ui on paper and on dusk. Dev server only.</p>
+            <p className="text-small text-stone">src/components/ui on onyx and on umber. Dev server only.</p>
           </div>
-          <Button variant="secondary" onClick={() => setStep((n) => n + 1)}>
+          <Button size="sm" onClick={() => setStep((n) => n + 1)}>
             Next count ({count ?? '—'})
           </Button>
         </div>
       </header>
-      <Specimens ground="paper" count={count} />
-      <Specimens ground="dusk" count={count} />
+      <Specimens ground="onyx" count={count} />
+      <Specimens ground="umber" count={count} />
     </div>
   )
 }

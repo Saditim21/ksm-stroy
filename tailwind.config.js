@@ -1,26 +1,38 @@
+import { PALETTE } from './src/styles/palette.js'
+
+// The Diptych palette, less ivory, which joins the legacy ivory shades below.
+const { ivory, ...diptych } = PALETTE
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  // Tailwind's hover: utilities only where a pointer can hover (spec §2.2), so
+  // a tap never leaves a hover state behind. Hand-written CSS gates its own.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
+    // Tailwind's screens, plus `split`: from 901 px a section's two halves sit
+    // side by side; below that they stack (spec §2.2).
+    screens: {
+      sm: '640px',
+      md: '768px',
+      split: '901px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
+    // The legacy pages' .container keeps its widths: no step at `split`.
+    container: {
+      screens: { sm: '640px', md: '768px', lg: '1024px', xl: '1280px', '2xl': '1536px' },
+    },
     extend: {
       colors: {
-        // v2 tokens
-        paper: '#F1F2EF',
-        ink: '#14202F',
-        dusk: '#1F3A63',
-        light: '#F5D88F',
-        'gold-ink': '#7A6336',
-        graphite: '#4A5462',
-        rule: '#CBD0D4',
-        'bronze-ink': '#7A6549',
-        'status-free': '#3F8F55',
-        'status-free-deep': '#2F6E41',
-        'status-reserved': '#C9962E',
-        'status-sold': '#B23A30',
-        'status-blocked': '#7A828C',
+        // Diptych (src/styles/palette.js, spec §2.1).
+        ...diptych,
 
         // Primary Brand Colors - Luxury Enterprise
         primary: {
@@ -106,29 +118,36 @@ export default {
           50: '#f9fafb',
         },
         
-        // Warm backgrounds
+        // Warm backgrounds: the legacy shades, with Diptych's ivory as the
+        // DEFAULT (text-ivory, bg-ivory).
         ivory: {
+          DEFAULT: ivory,
           50: '#f8f8f6',  // Warm Ivory
           100: '#f3f3f1',
           200: '#e8e8e4',
         }
       },
-      
+
+      // KSM Display is Cormorant Garamond, KSM Text is Manrope (spec §3.1;
+      // src/styles/fonts.css), each followed by its metric-matched fallbacks.
+      // src/index.css names the same stacks as --serif and --sans.
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
         'serif': ['Playfair Display', 'Georgia', 'serif'],
-        'display': ['"KSM Display"', '"KSM Display Fallback Georgia"', '"KSM Display Fallback Times"', 'serif'],
-        'text': ['"KSM Text"', '"KSM Text Fallback Segoe"', '"KSM Text Fallback Arial"', 'sans-serif'],
+        'display': ['"KSM Display"', '"KSM Display Fallback Georgia"', '"KSM Display Fallback Times"', '"KSM Display Fallback Noto"', 'serif'],
+        'text': ['"KSM Text"', '"KSM Text Fallback Segoe"', '"KSM Text Fallback Arial"', '"KSM Text Fallback Roboto"', 'sans-serif'],
       },
-      
+
+      // Diptych's roles (spec §3.2). The legacy display, hero and display-*
+      // sizes stay for the legacy pages and .hero-title (src/index.css).
       fontSize: {
-        'body': ['17px', { lineHeight: '1.6' }],
-        'small': ['14.5px', { lineHeight: '1.45' }],
-        'label': ['12.5px', { lineHeight: '1.4' }],
-        'h3': ['24px', { lineHeight: '1.25' }],
-        'h2': ['clamp(34px, 4.2vw, 58px)', { lineHeight: '1.06' }],
+        'body': ['16px', { lineHeight: '1.6' }],
+        'small': ['13px', { lineHeight: '1.5' }],
+        'label': ['13px', { lineHeight: '1.3', letterSpacing: '0.02em' }],
+        'h3': ['clamp(30px, 2.6vw, 44px)', { lineHeight: '1.05' }],
+        'h2': ['clamp(40px, 4.6vw, 76px)', { lineHeight: '1' }],
         'display': ['clamp(44px, 7.6vw, 120px)', { lineHeight: '0.98' }],
-        'count': ['clamp(56px, 9vw, 140px)', { lineHeight: '0.9' }],
+        'count': ['clamp(40px, 3.6vw, 60px)', { lineHeight: '0.9' }],
         'hero': ['3.5rem', { lineHeight: '1.1', fontWeight: '700' }],
         'display-1': ['2.5rem', { lineHeight: '1.2', fontWeight: '700' }],
         'display-2': ['2rem', { lineHeight: '1.3', fontWeight: '600' }],

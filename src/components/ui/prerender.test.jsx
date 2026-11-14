@@ -22,8 +22,8 @@ const prerender = () => renderToString(
   <MemoryRouter>
     <HeroTitle lines={['Създаваме пространства', 'за мечтания живот']} />
     <Button to="/contact" arrow>Запитване</Button>
-    <Button href="tel:+359887886166" variant="secondary" tone="dusk">Обадете се</Button>
-    <Button variant="quiet">Вижте свободните на етажа</Button>
+    <Button href="tel:+359887886166" variant="solid" size="sm">Обадете се</Button>
+    <Button variant="link">Вижте свободните на етажа</Button>
     <DimensionLine value="2008 – 2026" draw />
     <DimensionLine value="57,46 м²" label="Застроена" />
     <ElevationMark floor={1} elevation={3.06} />

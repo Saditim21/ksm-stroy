@@ -1,21 +1,20 @@
 import { STATUS_LABEL } from '../../utils/propertyStatus'
 
 // A unit's status (plan Task 7): a dot in the status colour, then the label.
-// Colour never stands alone (spec §3.1). The dot is round, the one shape §3.4
-// lets be round besides the window glyph. Free, reserved, sold and blocked take
-// the status tokens; unknown is a hollow ring in the text colour. On dusk, where
-// sold red measures 1.9:1 and the others under 3:1, a filled dot gets a thin
-// paper ring to stand out from the ground.
+// Colour never stands alone (spec §7.9). The dot is round, the one shape
+// Diptych lets be round besides the focus ring (spec §2.2). Free, reserved,
+// sold and blocked take the status tokens, each at least 3:1 on onyx and on
+// umber (src/styles/tokens.test.js); unknown is a hollow ring in the text
+// colour.
 //
 // Ruling R1: a status the rules do not know shows the text the owner wrote in
 // the sheet (the unit's statusText, „Скоро"), as production does; without it,
 // „Няма информация". Every known status keeps its own label.
-const ON_DUSK = '[.on-dusk_&]:ring-1 [.on-dusk_&]:ring-paper/70'
 const DOT = {
-  available: `bg-status-free ${ON_DUSK}`,
-  reserved: `bg-status-reserved ${ON_DUSK}`,
-  sold: `bg-status-sold ${ON_DUSK}`,
-  blocked: `bg-status-blocked ${ON_DUSK}`,
+  available: 'bg-status-free',
+  reserved: 'bg-status-reserved',
+  sold: 'bg-status-sold',
+  blocked: 'bg-status-blocked',
   unknown: 'border border-current',
 }
 
