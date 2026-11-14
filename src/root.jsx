@@ -49,7 +49,8 @@ export function Layout({ children }) {
         <meta property="og:site_name" content="KSM Stroy" />
         <meta name="geo.region" content="BG-22" />
         <meta name="geo.placename" content="София" />
-        <meta name="theme-color" content="#2563eb" />
+        {/* Paper (spec §3.1), as public/site.webmanifest says. */}
+        <meta name="theme-color" content="#F1F2EF" />
         <meta name="format-detection" content="telephone=no" />
         {/* Pre-paint (src/utils/headScripts.js): after the viewport meta, and
             before the stylesheet, which would hold it back until it loaded. */}

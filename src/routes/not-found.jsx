@@ -1,14 +1,18 @@
 import Button from '../components/ui/Button'
-import { pageMeta } from '../seo/meta'
+import { robotsMeta } from '../seo/meta'
 
 // Any URL no other route matches (spec §8.1). Prerendered as /404;
 // scripts/postbuild.mjs copies it to build/client/404.html, which the host
 // serves, with a 404 status, for any URL that has no page of its own.
-export const meta = () => pageMeta({
-  title: 'Страницата не е намерена - KSM Stroy',
-  description: 'Тази страница я няма в чертежа.',
-  path: '/404',
-})
+//
+// Its head is noindex in every build, production included, with no canonical
+// link and no og:url: /404 itself answers 200, and the same HTML answers every
+// unknown URL, so there is no page here to index or to point at.
+export const meta = () => [
+  { title: 'Страницата не е намерена - KSM Stroy' },
+  robotsMeta(false),
+  { name: 'description', content: 'Тази страница я няма в чертежа.' },
+]
 
 export const handle = { header: 'solid' }
 
