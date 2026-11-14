@@ -1,5 +1,6 @@
 @import './styles/fonts.css';
 @import './styles/diptych.css';
+@import './styles/motion.css';
 
 @tailwind base;
 @tailwind components;
@@ -118,8 +119,8 @@
 
   /* The ring's corners, the one radius Diptych draws (spec §2.2): 1 px, which
      the offset rounds out. Not on the legacy pages, whose controls keep the
-     radii they have. */
-  :focus-visible:not(.on-light *) {
+     radii they have; a light plate on a Diptych page keeps it. */
+  :focus-visible:not(.legacy-ground *) {
     border-radius: 1px;
   }
 
@@ -373,29 +374,5 @@
   }
 }
 
-/* Route change: a 260 ms crossfade of the outlet (spec §5.3). root.jsx keys a
-   React <ViewTransition enter="page-in" exit="page-out"> on the pathname, so
-   the old page leaves and the new one arrives in one view transition; the
-   browser's own fade-out and fade-in run at this duration. */
-::view-transition-old(.page-out),
-::view-transition-new(.page-in) {
-  animation-duration: 260ms;
-}
-
-/* The header (src/shell/SiteHeader.jsx, view-transition-name: site-header)
-   stays out of the crossfade: it takes the new page's look at once, so paper
-   text over a hero never fades into ink text on paper (§5.2.10). */
-::view-transition-old(site-header) {
-  display: none;
-}
-::view-transition-new(site-header) {
-  animation: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
-}
+/* The route change (the doors, or a 200 ms crossfade) and the entrance
+   delay are src/styles/motion.css's. */

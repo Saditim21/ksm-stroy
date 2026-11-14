@@ -7,9 +7,10 @@ import config from '../../../tailwind.config.js'
 import HeroTitle from './HeroTitle'
 
 // HeroTitle (plan Task 7, spec §5.2.2 and §5.4): the page's load moment is
-// CSS only. Each authored line rises once from its mask under
-// prefers-reduced-motion: no-preference; the markup is the final state, with no
-// JS and nothing hidden in it.
+// CSS only. Each authored line rises once from its mask where the motion gate
+// has marked <html> with `js` (Diptych spec §5.2: motion allowed, no
+// Save-Data); the markup is the final state, with no JS and nothing hidden in
+// it.
 
 const LINES = ['Създаваме пространства', 'за мечтания живот']
 const JOINED = 'Създаваме пространства за мечтания живот'
@@ -46,10 +47,19 @@ test('each line is a span.block inside an overflow-hidden mask, staggered by --i
     expect(mask).toHaveClass('block', 'overflow-hidden')
     const line = mask.firstElementChild
     expect(line.tagName).toBe('SPAN')
-    expect(line).toHaveClass('block', 'motion-safe:animate-hero-rise')
+    expect(line).toHaveClass('block', 'js:animate-hero-rise')
+    expect(line.className).not.toContain('motion-safe:')
     expect(line).toHaveTextContent(LINES[i])
     expect(line.style.getPropertyValue('--i')).toBe(String(i))
   })
+})
+
+// Tailwind's `js:` variant: a utility that applies only under the gate's
+// class, which the reduced-motion media query alone cannot see (Save-Data).
+test('the js variant applies under :root.js', () => {
+  const variants = []
+  for (const { handler } of config.plugins) handler({ addVariant: (name, definition) => variants.push([name, definition]) })
+  expect(variants).toEqual([['js', ':root.js &']])
 })
 
 test('the markup is the final state: no inline opacity, nothing moved', () => {

@@ -1,11 +1,11 @@
-// Lenis' settings (src/motion/SmoothScroll.jsx). The wheel is the Golden
-// Residence landing's (golden-residence src/utils/smoothScroll.js @944bb03),
-// tuned there on 2026-10-08 to scroll slower and smoother.
+// Lenis' settings (src/motion/SmoothScroll.jsx), from the Golden Residence
+// landing (golden-residence src/utils/smoothScroll.js @944bb03), with the
+// wheel of the Diptych concept (Diptych spec §5.3, decision 8).
 //
 // lerp: how much of the remaining distance the page covers per 60th of a
-// second. Lenis' default 0.1 settles a wheel step in about 0.5 s; 0.07 takes
-// about 0.7 s, a softer landing. wheelMultiplier 0.8: each wheel notch or
-// trackpad swipe travels 80% as far.
+// second. 0.1, Lenis' default and the concept's, settles a wheel step in
+// about 0.5 s. wheelMultiplier 1: each wheel notch or trackpad swipe travels
+// its full distance. (The landing's 0.07 and 0.8 were slower and shorter.)
 //
 // syncTouch off: Lenis smooths the wheel only, and a finger scrolls the page
 // natively (spec §5.1). The landing had it on, for a desktop-like glide after
@@ -20,8 +20,8 @@
 // put while the page moved 478 px. Lenis caches each element's overflow for
 // 2 s, so the check costs little per wheel event.
 export const LENIS_OPTIONS = {
-  lerp: 0.07,
-  wheelMultiplier: 0.8,
+  lerp: 0.1,
+  wheelMultiplier: 1,
   syncTouch: false,
   allowNestedScroll: true,
   // GSAP's ticker drives Lenis (SmoothScroll.jsx).

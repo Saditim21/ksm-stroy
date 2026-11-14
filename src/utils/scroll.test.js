@@ -1,7 +1,9 @@
-import { scrollToId } from './scroll'
+import { glideToHash, scrollToId } from './scroll'
 import { setLenis } from './lenis'
+import { EXPO_IN_OUT } from './motion'
 
-// From golden-residence src/utils/scroll.test.js @944bb03.
+// From golden-residence src/utils/scroll.test.js @944bb03, with Diptych's
+// glide (spec §5.3) and the same-page link handler.
 
 test('scrolls natively when Lenis is not running', () => {
   document.body.innerHTML = '<section id="contact"></section>'
@@ -63,6 +65,70 @@ describe('the target handed to Lenis', () => {
     const scrollTo = setup(14388.5)
     scrollToId('contact')
     expect(scrollTo.mock.calls[0][0]).toBe(14317)
+  })
+
+  // Spec §5.3: an in-page jump glides 1.5 s on expo.inOut, as the concept's.
+  test('is reached in a 1.5 s glide on expo.inOut', () => {
+    const scrollTo = setup(1000)
+    scrollToId('contact')
+    expect(scrollTo).toHaveBeenCalledWith(928, expect.objectContaining({ duration: 1.5, easing: EXPO_IN_OUT }))
+  })
+})
+
+// GSAP's expo.inOut as a function of time, for Lenis' easing.
+test('EXPO_IN_OUT starts at 0, passes 0.5 halfway and ends at 1', () => {
+  expect(EXPO_IN_OUT(0)).toBe(0)
+  expect(EXPO_IN_OUT(0.5)).toBe(0.5)
+  expect(EXPO_IN_OUT(1)).toBe(1)
+  expect(EXPO_IN_OUT(0.25)).toBeCloseTo(2 ** -5 / 2)
+  expect(EXPO_IN_OUT(0.75)).toBeCloseTo(1 - 2 ** -5 / 2)
+})
+
+// The one handler for a link to a section of the same page (spec §5.3).
+// Button attaches it to every href that starts with #; its own tests follow
+// a click through the router (src/components/ui/Button.test.jsx).
+describe('glideToHash', () => {
+  const click = (init = {}) => {
+    const link = document.querySelector('a')
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ...init })
+    link.addEventListener('click', (e) => glideToHash(e), { once: true })
+    link.dispatchEvent(event)
+    return event
+  }
+  afterEach(() => {
+    setLenis(null)
+    document.body.innerHTML = ''
+  })
+
+  test('keeps a tabindex the target already has', () => {
+    document.body.innerHTML = '<a href="#form">Запитване</a><form id="form" tabindex="0"></form>'
+    expect(click().defaultPrevented).toBe(true)
+    expect(document.getElementById('form').getAttribute('tabindex')).toBe('0')
+    expect(document.activeElement).toBe(document.getElementById('form'))
+  })
+
+  test('reads an encoded id', () => {
+    document.body.innerHTML = '<a href="#%D0%B7%D0%B0%D0%BF%D0%B8%D1%82%D0%B2%D0%B0%D0%BD%D0%B5">Запитване</a><section id="запитване"></section>'
+    const scrollTo = vi.fn()
+    setLenis({ scrollTo })
+    expect(click().defaultPrevented).toBe(true)
+    expect(scrollTo).toHaveBeenCalledTimes(1)
+  })
+
+  // Nothing to glide to: the browser keeps the link.
+  test('leaves a link whose target is not on the page, or a bare #, to the browser', () => {
+    document.body.innerHTML = '<a href="#nowhere">Никъде</a>'
+    expect(click().defaultPrevented).toBe(false)
+    document.body.innerHTML = '<a href="#">Нагоре</a>'
+    expect(click().defaultPrevented).toBe(false)
+  })
+
+  test('leaves a click with a modifier key, or another button, to the browser', () => {
+    document.body.innerHTML = '<a href="#form">Запитване</a><form id="form"></form>'
+    for (const init of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }]) {
+      expect(click(init).defaultPrevented, JSON.stringify(init)).toBe(false)
+    }
+    expect(document.getElementById('form').hasAttribute('tabindex')).toBe(false)
   })
 })
 

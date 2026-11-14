@@ -1,12 +1,14 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import { getLenis } from '../utils/lenis'
+import { clearTransitionCut } from '../utils/viewTransition'
 import { getMotion } from './runtime'
 
-// The longest a route change's view transition runs (the 260 ms crossfade in
-// src/index.css, with room to spare). ScrollTrigger re-measures by then at the
-// latest, even where a transition never settles.
-const TRANSITION_MAX_MS = 350
+// The longest a route change's view transition runs (the doors' 1120 ms in
+// src/styles/motion.css, with room to spare). ScrollTrigger re-measures, and
+// the doors' cut comes off, by then at the latest, even where a transition
+// never settles.
+const TRANSITION_MAX_MS = 1400
 
 const isViewTransition = (animation) => animation.effect?.pseudoElement?.startsWith('::view-transition') === true
 
@@ -33,7 +35,12 @@ function viewTransitionDone() {
 //
 // Then, once the view transition is over, ScrollTrigger re-measures: every
 // trigger caches its start and end in pixels, and the new page has moved
-// those that outlive the route change, such as one in the footer.
+// those that outlive the route change, such as one in the footer. And the
+// doors' cut (`vt-cut`, src/utils/viewTransition.js), set for this change by
+// the hero move or a popstate, comes off, so the next change has its doors.
+// Only then: taken off mid-transition, it would start the doors there. A
+// newer change waits for its own transition, and its own cut stays on until
+// that is over.
 //
 // Without Lenis (no motion, or the engine not loaded yet) the router's scroll
 // stands alone, and there is no ScrollTrigger to re-measure.
@@ -72,7 +79,9 @@ export default function LenisScrollSync() {
     shownKey.current = key
     let live = true
     viewTransitionDone().then(() => {
-      if (live) getMotion()?.ScrollTrigger.refresh()
+      if (!live) return
+      clearTransitionCut()
+      getMotion()?.ScrollTrigger.refresh()
     })
     return () => {
       live = false

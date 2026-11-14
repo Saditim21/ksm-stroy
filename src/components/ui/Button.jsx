@@ -1,7 +1,11 @@
 import { Link } from 'react-router'
+import { glideToHash } from '../../utils/scroll'
 
 // The site's actions (spec §6.1). A router Link for `to`, a plain anchor for
-// `href` (tel:, mailto:, a PDF), a <button> otherwise. The look is
+// `href` (tel:, mailto:, a PDF, a section of the page), a <button> otherwise.
+// An href that starts with "#" glides to its section (glideToHash,
+// src/utils/scroll.js, spec §5.3), after any onClick of the caller's, which
+// can keep the browser's own jump by preventing the default. The look is
 // src/styles/diptych.css's:
 // - outline (the default): a 1 px brass border and an ivory label, 52 px tall;
 //   on hover the border turns brass-l over a faint brass ground;
@@ -51,6 +55,18 @@ export default function Button({
     </>
   )
   if (to !== undefined) return <Link to={to} {...props}>{content}</Link>
-  if (href !== undefined) return <a href={href} {...props}>{content}</a>
+  if (href !== undefined) {
+    const onClick = typeof href === 'string' && href.startsWith('#') ? glidingClick(rest.onClick) : rest.onClick
+    return <a href={href} {...props} onClick={onClick}>{content}</a>
+  }
   return <button type={type} {...props}>{content}</button>
+}
+
+// The caller's onClick, then the glide (which leaves a click the caller has
+// prevented alone).
+function glidingClick(onClick) {
+  return (event) => {
+    onClick?.(event)
+    glideToHash(event)
+  }
 }

@@ -11,13 +11,15 @@ test('every module of the motion runtime and its foundation imports with no wind
   expect(typeof window).toBe('undefined')
   const modules = await Promise.all([
     import('./runtime'), import('./useMotion'), import('./SmoothScroll'), import('./LenisScrollSync'),
+    import('./useReveals'), import('./useMotionNow'), import('./flip'),
     import('../utils/motion'), import('../utils/smoothScroll'), import('../utils/lenis'), import('../utils/scroll'),
     import('../utils/screenHeight'), import('../utils/rolling'), import('../utils/viewer'),
+    import('../utils/motionGate'), import('../utils/viewTransition'),
     import('../hooks/useMotionAllowed'), import('../hooks/useMediaQuery'),
     import('../hooks/useFinePointer'), import('../hooks/useCoarsePointer'),
     import('../hooks/useScrollLock'), import('../hooks/useSwipe'), import('../hooks/useUnitPanel'),
   ])
-  expect(modules).toHaveLength(18)
+  expect(modules).toHaveLength(23)
   modules.forEach((module) => expect(Object.keys(module).length).toBeGreaterThan(0))
 })
 

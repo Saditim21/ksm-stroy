@@ -1,0 +1,74 @@
+/* The route change and the entrance delay (spec §5.5, §5.6). All CSS: the
+   route change runs through React's <ViewTransition> (src/root.jsx), keyed by
+   the page's path, which names the leaving page `page-out` and the arriving
+   one `page-in`.
+
+   With motion (the gate's `:root.js`, src/utils/motionGate.js, and no
+   reduced-motion preference), the doors: the old view closes onto the seam
+   (0–400 ms), a 1 px brass seam appears (0–120 ms) and glints (400–520 ms),
+   and the new view opens from it (520–1120 ms) as the seam fades. The doors
+   close the whole view: the page, the root snapshot (the footer, the grain,
+   the ground) and an open menu (its group, `site-menu`), and uncover onyx.
+   The header is a group of its own and switches at once, over them.
+
+   Without motion (reduced motion, Save-Data, no matchMedia), a 200 ms
+   crossfade. `vt-cut` on <html> (src/utils/viewTransition.js) turns the doors
+   off for one change: the hero move, and Back and Forward.
+
+   Not in a Tailwind layer: these rules are never purged, and nothing else
+   styles the view transition (src/index.css). */
+
+/* --arrive delays every entrance of the page's first viewport (spec §5.5):
+   the first page the app renders, which has no data-arrive, inherits 0s, or
+   .95s under the intro; a page the doors bring waits .52s for them to open;
+   the hero move's target and a page Back or Forward brings start at once. */
+:root { --arrive: 0s; }
+:root.intro { --arrive: .95s; }
+[data-arrive="doors"] { --arrive: .52s; }
+[data-arrive="hero"], [data-arrive="pop"] { --arrive: 0s; }
+
+/* The seam's colour, registered so that it animates between keyframes. */
+@property --door-seam { syntax: '<color>'; inherits: false; initial-value: rgba(184, 149, 74, 0); }
+
+/* Without the doors: the browser's own crossfade, at 200 ms. */
+::view-transition-old(.page-out), ::view-transition-new(.page-in),
+::view-transition-old(site-menu), ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 200ms; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* What the doors uncover. */
+  :root.js::view-transition { background: var(--onyx); }
+  /* The page, the root snapshot (footer, grain, ground) and an open menu close together. */
+  :root.js::view-transition-old(.page-out),
+  :root.js:not(.vt-cut)::view-transition-old(site-menu),
+  :root.js:not(.vt-cut)::view-transition-old(root) { animation: door-close 400ms var(--e-io) both; }
+  :root.js::view-transition-new(.page-in),
+  :root.js:not(.vt-cut)::view-transition-new(root) { animation: door-open 600ms var(--e-out) 520ms both; }
+  :root.js::view-transition-image-pair(.page-in) {
+    background: linear-gradient(var(--door-seam), var(--door-seam)) 50% 0 / 1px 100% no-repeat;
+    animation: door-seam 1120ms linear both;
+  }
+  /* The hero move and Back/Forward: the new page at once; the root and a menu fade as the browser does. */
+  :root.vt-cut::view-transition-old(.page-out),
+  :root.vt-cut::view-transition-new(.page-in),
+  :root.vt-cut::view-transition-image-pair(.page-in) { animation: none; }
+  /* A page has no ground of its own: the old page's snapshot, left in place,
+     would show through the new one for the whole transition (React runs one
+     on Back and Forward too). It goes at once. */
+  :root.vt-cut::view-transition-old(.page-out) { display: none; }
+}
+
+@keyframes door-close { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 50% 0 50%); } }
+@keyframes door-open { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
+@keyframes door-seam {
+  0% { --door-seam: rgba(184, 149, 74, 0); }
+  10.7%, 35.7% { --door-seam: #B8954A; filter: none; }
+  35.8%, 41% { --door-seam: #D8BD7A; filter: drop-shadow(0 0 8px rgba(216,189,122,.7)); }
+  41.1%, 59.8% { --door-seam: #B8954A; filter: none; }
+  86.6%, 100% { --door-seam: rgba(184, 149, 74, 0); }
+}
+
+/* The header (src/shell/SiteHeader.jsx, view-transition-name: site-header)
+   stays out of the doors and the crossfade: it takes the new page's look at
+   once. */
+::view-transition-old(site-header) { display: none; }
+::view-transition-new(site-header) { animation: none; }

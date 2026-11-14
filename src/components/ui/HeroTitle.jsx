@@ -3,9 +3,10 @@ import { Fragment } from 'react'
 // A hero heading authored as lines (plan Task 7, spec §5.2.2 and §5.4). The
 // page's load moment is CSS only: each line rises once out of its mask, 60 ms
 // after the one above it, from the first paint. tailwind.config.js holds the
-// `hero-rise` keyframes; the `motion-safe:` variant runs them only under
-// prefers-reduced-motion: no-preference. There is no JS, so nothing replays
-// when hydration lands, and the markup is the final state.
+// `hero-rise` keyframes; the `js:` variant runs them only once the motion gate
+// has marked <html> (src/utils/motionGate.js: motion allowed, no Save-Data;
+// Diptych spec §5.2). There is no JS of its own, so nothing replays when
+// hydration lands, and the markup is the final state.
 //
 // A space between the lines keeps them two words apart in the heading's text
 // and accessible name; between two blocks it takes no room. Each mask reaches
@@ -24,7 +25,7 @@ export default function HeroTitle({ as = 'h1', lines, className = '' }) {
         <Fragment key={i}>
           {i > 0 ? ' ' : null}
           <span className="-mb-[0.05em] block overflow-hidden pb-[0.05em]">
-            <span className="block motion-safe:animate-hero-rise" style={{ '--i': i }}>
+            <span className="block js:animate-hero-rise" style={{ '--i': i }}>
               {line}
             </span>
           </span>

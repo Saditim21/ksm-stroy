@@ -2,12 +2,12 @@ import { LENIS_OPTIONS, createGestureFilter } from './smoothScroll'
 
 // From golden-residence src/utils/smoothScroll.test.js @944bb03.
 
-// The landing's wheel, tuned there on 2026-10-08: Lenis eases it more gently
-// than its default and travels less per notch. Touch scrolling stays the
-// browser's own (spec §5.1), a panel that scrolls on its own keeps the wheel
-// while it can scroll, and GSAP's ticker drives Lenis.
-test('Lenis smooths the wheel only, slower than its default, on GSAP\'s ticker', () => {
-  expect(LENIS_OPTIONS).toEqual({ lerp: 0.07, wheelMultiplier: 0.8, syncTouch: false, allowNestedScroll: true, autoRaf: false })
+// Diptych's wheel (spec §5.3): Lenis' own lerp, 0.1, and the full distance
+// per notch, as the concept has them. Touch scrolling stays the browser's
+// own, a panel that scrolls on its own keeps the wheel while it can scroll,
+// and GSAP's ticker drives Lenis.
+test('Lenis smooths the wheel only, with the concept\'s feel, on GSAP\'s ticker', () => {
+  expect(LENIS_OPTIONS).toEqual({ lerp: 0.1, wheelMultiplier: 1, syncTouch: false, allowNestedScroll: true, autoRaf: false })
 })
 
 const touch = (type, fingers) => ({ event: { type, touches: Array.from({ length: fingers }, () => ({})) } })

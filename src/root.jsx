@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useState, ViewTransition } from 'react'
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation } from 'react-router'
+import { lazy, Suspense, useEffect, useRef, useState, ViewTransition } from 'react'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation, useNavigationType } from 'react-router'
 import { ApartmentProvider } from './context/ApartmentContext'
 import LenisScrollSync from './motion/LenisScrollSync'
 import SmoothScroll from './motion/SmoothScroll'
@@ -8,10 +8,11 @@ import { robotsMeta } from './seo/meta'
 import SiteFooter from './shell/SiteFooter'
 import SiteHeader from './shell/SiteHeader'
 import { useRouteHandle } from './shell/handle'
-import { SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
+import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { trackScreenHeight } from './utils/screenHeight'
 import { seoData } from './utils/seo'
+import { cutOnPop, keepRootSnapshot } from './utils/viewTransition'
 import './index.css'
 
 // The root route: the document around every page (Layout), the site shell
@@ -41,9 +42,12 @@ export const links = () => [
 // ivory text (spec §2.1), the colours of the shell around every page.
 const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#0E0D0B;color:#EFE9DD}'
 
+// <html> carries no className: the motion gate's class is the one attribute a
+// script writes there, before React hydrates (src/utils/motionGate.js), and
+// suppressHydrationWarning keeps that from counting as a mismatch.
 export function Layout({ children }) {
   return (
-    <html lang="bg">
+    <html lang="bg" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -57,8 +61,10 @@ export function Layout({ children }) {
         <meta name="theme-color" content="#0E0D0B" />
         <meta name="format-detection" content="telephone=no" />
         {/* Pre-paint (src/utils/headScripts.js): after the viewport meta, and
-            before the stylesheet, which would hold it back until it loaded. */}
+            before the stylesheet, which would hold them back until it loaded.
+            The screen height first, then the motion gate. */}
         <script dangerouslySetInnerHTML={{ __html: SCREEN_HEIGHT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: MOTION_GATE_SCRIPT }} />
         <Links />
         <style dangerouslySetInnerHTML={{ __html: CRITICAL_CSS }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />
@@ -98,17 +104,62 @@ function ConditionalAnalytics() {
 
 // React Router runs every navigation in a Transition, so a <ViewTransition>
 // keyed by the page's path exits with the old page and enters with the new one
-// as one crossfade (src/index.css). One persistent boundary would also animate
-// the router's "loading" commit while a route chunk downloads, and play two
-// transitions on a cold navigation (React Router spike, gotcha 9).
+// in one view transition: the doors (src/styles/motion.css, spec §5.6). One
+// persistent boundary would also animate the router's "loading" commit while
+// a route chunk downloads, and play two transitions on a cold navigation
+// (React Router spike, gotcha 9).
+//
+// How each page arrived, decided as it mounts (spec §5.5, §5.6):
+// - undefined for the first page this app renders, the prerendered page that
+//   hydrates. Only a first-render ref can tell: React Router gives the first
+//   entry the key "default" and Back restores it, so comparing keys would take
+//   Back to the first page for a first load (and replay the intro there). No
+//   module state either, so every mounted app starts fresh;
+// - 'pop' for a page Back or Forward brought;
+// - 'hero' for the hero move's target (location.state.arrive);
+// - 'doors' for any other client navigation.
+//
+// Back and Forward are instant: every popstate cuts the doors before the
+// router commits. And the root snapshot takes part in every route change, so
+// the doors close it with the page (src/utils/viewTransition.js).
 function RouteTransition() {
-  const pathname = normalizePathname(useLocation().pathname)
+  const location = useLocation()
+  const navigationType = useNavigationType()
+  const firstRender = useRef(true)
+  useEffect(() => {
+    firstRender.current = false
+  }, [])
+  useEffect(() => cutOnPop(), [])
+  useEffect(() => keepRootSnapshot(), [])
+
+  let arrive
+  if (!firstRender.current) {
+    if (navigationType === 'POP') arrive = 'pop'
+    else arrive = location.state?.arrive === 'hero' ? 'hero' : 'doors'
+  }
   return (
-    <ViewTransition key={pathname} enter="page-in" exit="page-out" default="none">
-      <div>
-        <Outlet />
-      </div>
+    <ViewTransition key={normalizePathname(location.pathname)} enter="page-in" exit="page-out" default="none">
+      <PageFrame arrive={arrive} />
     </ViewTransition>
+  )
+}
+
+// The page's frame, mounted with its keyed <ViewTransition>. It keeps the
+// arrival it mounted with as data-arrive, which sets the page's entrance
+// delay (--arrive, src/styles/motion.css), through any later render; the
+// prerender and the hydration both render the first page, with none. A page
+// the app mounted after the first takes the focus to <main>, without
+// scrolling (spec §5.6); a hash or query change keeps the frame, and the
+// focus where it is.
+function PageFrame({ arrive: arrival }) {
+  const [arrive] = useState(arrival)
+  useEffect(() => {
+    if (arrive !== undefined) document.getElementById('main')?.focus({ preventScroll: true })
+  }, [arrive])
+  return (
+    <div data-arrive={arrive}>
+      <Outlet />
+    </div>
   )
 }
 

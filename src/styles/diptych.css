@@ -1,7 +1,8 @@
-/* Diptych's type roles, the heading's italic word, the actions and the two
-   grounds (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md,
-   §3, §6.1, §11), ported from the concept's css/diptych.css:59-94 with the
-   tokens of src/index.css.
+/* Diptych's type roles, the heading's italic word, the actions, the two
+   grounds and the seam's layout primitives (spec
+   docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md, §3, §4,
+   §6.1, §11), ported from the concept's css/diptych.css:59-98, :188-195 and
+   :731-735 with the tokens of src/index.css.
 
    In Tailwind's components layer: after the base styles, so Preflight's
    `[type='button'] { background-color: transparent }` never beats a solid
@@ -61,6 +62,7 @@
   .btn--sm { min-height: 40px; padding: 0 18px; font-size: 13px; }
   /* Link: text over a 1 px brass underline. */
   .link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -69,6 +71,13 @@
     font-weight: 500;
     background: linear-gradient(var(--brass), var(--brass)) 0 100% / 100% 1px no-repeat;
     transition: background-size .35s var(--e-out), color .2s;
+  }
+  /* Its hit box (spec §11): at least 44 × 44 px, centred on the link, which
+     itself is its text and 6 px above and below. Nothing is drawn. */
+  .link::before {
+    content: '';
+    position: absolute;
+    inset: min(0px, (100% - 44px) / 2);
   }
   /* The arrow `arrow` draws (18 × 10), which moves 4 px on hover. */
   .arr { width: 18px; height: 10px; transition: transform .3s var(--e-out); }
@@ -98,11 +107,75 @@
   /* The ground of a page M2 has not rebuilt yet (src/root.jsx, the route
      handle's `legacy`): production's light page, with the text colour, face
      and leading it had before the site turned dark (the legacy sans stack,
-     Preflight's 1.5), so its layout stays as it was. */
+     Preflight's 1.5), so its layout stays as it was. A system face with no
+     italic or bold of its own is slanted and emboldened again, as it was:
+     body's `font-synthesis: none` (src/index.css) is for Diptych's faces. */
   .legacy-ground {
     background: #fafafa;
     color: #1a1a1a;
     font-family: theme(fontFamily.sans);
     line-height: 1.5;
+    font-synthesis: initial;
+  }
+
+  /* ---------- the seam (spec §4) ---------- */
+  /* 1 px of brass down the middle of its section (<Seam>): the halves are
+     two equal columns, so it is the page's centre. With data-draw it draws
+     down from the top as its section comes into view (useReveals). */
+  .seam {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -.5px;
+    background: var(--brass);
+    transform-origin: 50% 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* A section in two halves, its seam over them. */
+  .split {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .split > .seam { z-index: 4; }
+
+  /* The hinged heading: the title ends at the seam, the lead starts after it,
+     and the seam overshoots both by 18 px. */
+  .hinge {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    margin-bottom: clamp(56px, calc(var(--screen-h) * .09), 104px);
+  }
+  .hinge > :first-child { text-align: right; padding-right: clamp(24px, 3vw, 52px); }
+  .hinge > :nth-child(2) { padding-left: clamp(24px, 3vw, 52px); }
+  .hinge .seam { top: -18px; bottom: -18px; }
+
+  /* At 900 px and under the halves stack and the seams hide. The hinge's
+     lead goes under a brass rule; a section's second half takes its own rule
+     and inset from its component's stylesheet, as in the concept. */
+  @media (max-width: 900px) {
+    .split,
+    .hinge { grid-template-columns: 1fr; }
+    .split > .seam,
+    .hinge > .seam { display: none; }
+    .hinge { padding: 0 var(--gut); }
+    .hinge > :first-child { text-align: left; padding: 0 0 22px; }
+    .hinge > :nth-child(2) { padding: 22px 0 0; border-top: 1px solid var(--brass); }
+  }
+
+  /* A line's mask (a line that rises into view; SplitText's split-line-mask)
+     reaches past the descenders and an italic's overhang, and gives the room
+     back, so the line keeps its place and no glyph is clipped (spec §3.3). */
+  .line-mask,
+  .split-line-mask {
+    display: block;
+    padding: .12em .14em .26em;
+    margin: -.12em -.14em -.26em;
   }
 }

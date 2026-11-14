@@ -1,12 +1,17 @@
 import { getLenis } from './lenis'
+import { EXPO_IN_OUT } from './motion'
 
 // Scrolling the page to a section by id, through Lenis when it runs, from the
-// Golden Residence landing (golden-residence src/utils/scroll.js @944bb03).
+// Golden Residence landing (golden-residence src/utils/scroll.js @944bb03),
+// with Diptych's glide (spec §5.3), and the one handler for a link to a
+// section of the same page.
 
 // How far the target may drift during a glide before the jump is re-issued.
 const DRIFT_PX = 4
 // The room left under an element brought up from below the fold.
 const REVEAL_GAP = 16
+// Every jump to a section glides 1.5 s on expo.inOut, as the concept's do.
+const GLIDE = { duration: 1.5, easing: EXPO_IN_OUT }
 
 const pageTop = (el) => el.getBoundingClientRect().top + window.scrollY
 
@@ -58,7 +63,7 @@ export function scrollToId(id, { reveal } = {}) {
   if (lenis) {
     const jump = (options) => {
       lenis.dimensions?.resize()
-      lenis.scrollTo(restingTop(el, shown), options)
+      lenis.scrollTo(restingTop(el, shown), { ...GLIDE, ...options })
     }
     const startTop = pageTop(el)
     jump({
@@ -72,4 +77,34 @@ export function scrollToId(id, { reveal } = {}) {
     if (shown) window.scrollTo({ top: restingTop(el, shown), behavior })
     else el.scrollIntoView({ behavior, block: 'start' })
   }
+}
+
+// The one handler for a link to a section of the same page (spec §5.3).
+// Button attaches it to every href that starts with "#"; a plain anchor to a
+// section of its page calls it from its own onClick.
+//
+// For a plain left click (a modifier key opens a tab or a window) on a link
+// to an element on this page, it takes the click from the browser and the
+// router: their jump is instant, and the router's new location would have
+// LenisScrollSync cut any glide short. It glides there instead (scrollToId),
+// and moves the focus there without a scroll of its own, so a keyboard or a
+// screen reader lands there too; an element that takes no focus gets
+// tabindex="-1" for it. The address stays as it is. Anything else, such as a
+// link to an element the page does not have, stays the browser's.
+export function glideToHash(event) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  const href = event.currentTarget.getAttribute('href') ?? ''
+  if (!href.startsWith('#') || href.length === 1) return
+  let id
+  try {
+    id = decodeURIComponent(href.slice(1))
+  } catch {
+    return
+  }
+  const target = document.getElementById(id)
+  if (!target) return
+  event.preventDefault()
+  scrollToId(id)
+  if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+  target.focus({ preventScroll: true })
 }

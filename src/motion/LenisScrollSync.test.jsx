@@ -283,26 +283,27 @@ describe('ScrollTrigger', () => {
     expect(motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1)
   })
 
-  test('waits 350 ms at most', async () => {
+  // The doors run 1120 ms (src/styles/motion.css); 1400 leaves room to spare.
+  test('waits 1400 ms at most', async () => {
     vi.useFakeTimers()
     runningAnimations(transitionAnimation(new Promise(() => {})))
     renderSync('/')
 
     go('/about')
-    await act(() => vi.advanceTimersByTimeAsync(349))
+    await act(() => vi.advanceTimersByTimeAsync(1399))
     expect(motion.ScrollTrigger.refresh).not.toHaveBeenCalled()
     await act(() => vi.advanceTimersByTimeAsync(1))
     expect(motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1)
   })
 
   // jsdom, for one.
-  test('where the browser cannot list its animations, it waits the 350 ms', async () => {
+  test('where the browser cannot list its animations, it waits the 1400 ms', async () => {
     vi.useFakeTimers()
     expect(document.getAnimations).toBeUndefined()
     renderSync('/')
 
     go('/about')
-    await act(() => vi.advanceTimersByTimeAsync(349))
+    await act(() => vi.advanceTimersByTimeAsync(1399))
     expect(motion.ScrollTrigger.refresh).not.toHaveBeenCalled()
     await act(() => vi.advanceTimersByTimeAsync(1))
     expect(motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1)
@@ -315,9 +316,9 @@ describe('ScrollTrigger', () => {
     go('/about')
     await act(() => vi.advanceTimersByTimeAsync(200))
     go('/contact')
-    await act(() => vi.advanceTimersByTimeAsync(200))
+    await act(() => vi.advanceTimersByTimeAsync(1300))
     expect(motion.ScrollTrigger.refresh).not.toHaveBeenCalled()
-    await act(() => vi.advanceTimersByTimeAsync(150))
+    await act(() => vi.advanceTimersByTimeAsync(100))
     expect(motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1)
   })
 
@@ -328,6 +329,57 @@ describe('ScrollTrigger', () => {
     renderSync('/about')
     await act(() => vi.advanceTimersByTimeAsync(1000))
     expect(motion.ScrollTrigger.refresh).not.toHaveBeenCalled()
+  })
+})
+
+// `vt-cut` (src/utils/viewTransition.js) turns the doors off for one route
+// change: the hero move's, or Back's and Forward's. Once that change is over,
+// the next one has its doors again.
+describe('the doors\' cut', () => {
+  const html = document.documentElement
+  afterEach(() => html.classList.remove('vt-cut'))
+
+  test('is cleared once the transition has finished', async () => {
+    const transition = deferred()
+    runningAnimations(transitionAnimation(transition.promise))
+    renderSync('/')
+
+    html.classList.add('vt-cut')
+    go('/about')
+    await settle()
+    expect(html.classList.contains('vt-cut')).toBe(true)
+
+    transition.resolve()
+    await settle()
+    expect(html.classList.contains('vt-cut')).toBe(false)
+  })
+
+  // Back and Forward: React may start no view transition at all, and a
+  // transition can fail to settle. The cut never sticks.
+  test('clears vt-cut when no transition runs', async () => {
+    vi.useFakeTimers()
+    renderSync('/')
+
+    html.classList.add('vt-cut')
+    go('/about')
+    await act(() => vi.advanceTimersByTimeAsync(1400))
+    expect(html.classList.contains('vt-cut')).toBe(false)
+  })
+
+  // A popstate during the doors cuts the next change. The end of the first
+  // change must not clear that cut while the next transition runs.
+  test('a navigation during the transition keeps its cut until its own end', async () => {
+    vi.useFakeTimers()
+    renderSync('/')
+
+    go('/about')
+    await act(() => vi.advanceTimersByTimeAsync(200))
+    html.classList.add('vt-cut')
+    go('/contact')
+    await act(() => vi.advanceTimersByTimeAsync(1300))
+    expect(html.classList.contains('vt-cut')).toBe(true)
+    await act(() => vi.advanceTimersByTimeAsync(100))
+    expect(html.classList.contains('vt-cut')).toBe(false)
   })
 })
 

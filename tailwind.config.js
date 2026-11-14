@@ -1,3 +1,4 @@
+import plugin from 'tailwindcss/plugin'
 import { PALETTE } from './src/styles/palette.js'
 
 // The Diptych palette, less ivory, which joins the legacy ivory shades below.
@@ -9,6 +10,9 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  // SplitText makes its line masks at runtime (src/motion/useReveals.js), so
+  // no source names their class: keep their rule (src/styles/diptych.css).
+  safelist: ['split-line-mask'],
   // Tailwind's hover: utilities only where a pointer can hover (spec §2.2), so
   // a tap never leaves a hover state behind. Hand-written CSS gates its own.
   future: {
@@ -187,7 +191,7 @@ export default {
         'float': 'float 6s ease-in-out infinite',
         // HeroTitle's load moment (src/components/ui/HeroTitle.jsx): each line
         // rises out of its mask, --i lines times 60 ms late, held below its
-        // mask until its turn. Used only as motion-safe:animate-hero-rise.
+        // mask until its turn. Used only as js:animate-hero-rise.
         'hero-rise': 'hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 60ms) backwards',
       },
       
@@ -219,5 +223,11 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // `js:`, for CSS motion: a utility that applies only once the motion gate
+    // has marked <html> (src/utils/motionGate.js; spec §5.2), so its hidden
+    // starting state exists only where the motion runs. The reduced-motion
+    // media query alone cannot see Save-Data.
+    plugin(({ addVariant }) => addVariant('js', ':root.js &')),
+  ],
 }

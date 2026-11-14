@@ -12,15 +12,22 @@
 // 3. Prints the total gzip size of the JavaScript in build/client/assets, for
 //    information only.
 // 4. Prints, for every prerendered page (each index.html), its first-load JS:
-//    every module script and modulepreload the page names, gzipped (spec §10,
-//    at most 160 KiB). Over that, a route in V2_ROUTES fails; any other route
-//    is a legacy page that M2 to M4 replace, and gets a WARN line (Ruling R2).
+//    every module script and modulepreload the page names, gzipped (spec §12,
+//    at most 160 KiB). A route is legacy when its first-load JS carries
+//    framer-motion or swiper (LEGACY_LIBRARIES): over budget, it gets a WARN
+//    line, until M2 to M4 replace it (Ruling R2). Any other route fails over
+//    budget. A route in MUST_BE_V2 has been rebuilt and fails if it carries a
+//    legacy library at all, so it can never slip into a WARN.
 // 5. Fails when the first-load JS of any route carries GSAP, ScrollTrigger,
-//    SplitText or Lenis. They are the motion chunk's alone (spec §5.1).
-// 6. Prints the motion chunk's gzip size, failing above 60 KiB (spec §10).
+//    SplitText, Lenis or Flip. They load after the page (spec §5.1).
+// 6. Prints the motion chunk's gzip size, failing above 60 KiB (spec §12).
+// 7. Prints the Flip chunk's gzip size, failing above 10 KiB, or when Flip is
+//    in more than one chunk (spec §12); until a page loads Flip, a note.
+// Before it reads build/client/, it checks its first-load and library
+// verdicts against planted pages and scripts (PLANTED_PAGE, PLANTED_SCRIPTS).
 //
-// 160 kB and 60 kB in the spec are read as KiB, as the plan reads its font
-// budget (90 kB = 92,160 B).
+// 160 kB, 60 kB and 10 kB in the spec are read as KiB, as the plan reads its
+// font budget (90 kB = 92,160 B).
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
@@ -69,11 +76,23 @@ const PLANTED = [
 const KIB = 1024
 const FIRST_LOAD_BUDGET = 160 * KIB
 const MOTION_BUDGET = 60 * KIB
+const FLIP_BUDGET = 10 * KIB
 
-// The routes rebuilt for v2: their first-load JS fails the check above the
-// budget. M2 to M4 add each route they rebuild. A route listed here before it
-// is prerendered gets a note.
-const V2_ROUTES = ['/eu-proekt', '/404']
+// The routes rebuilt for v2. Each must carry no legacy library in its
+// first-load JS, so the budget always holds for it: a shared module that
+// pulled framer-motion or swiper in would otherwise turn its FAIL into a
+// WARN. M2 adds each route it rebuilds: Task 3 `/`, Task 5
+// `/projects/golden-residence`, Task 7 both Golden Residence block routes. A
+// route listed here before it is prerendered gets a note.
+const MUST_BE_V2 = ['/eu-proekt', '/404']
+
+// What each legacy library leaves in minified code (spec §12): framer-motion
+// the data attribute of its optimised appear animations, swiper its slide
+// element's name. No v2 code writes either.
+const LEGACY_LIBRARIES = [
+  { label: 'framer-motion', pattern: /framerAppearId/ },
+  { label: 'swiper', pattern: /swiper-slide/ },
+]
 
 // The motion chunk: src/motion/engine.js, which only an import() reaches
 // (src/motion/runtime.js), with the libraries only it imports.
@@ -95,6 +114,10 @@ const MOTION_LIBRARIES = [
   { label: 'Lenis', pattern: /lenisVersion/ },
 ]
 
+// Flip (gsap/Flip), a lazy chunk of its own (src/motion/flip.js): the
+// attribute it puts on the elements it tracks. No code of ours writes it.
+const FLIP = { label: 'Flip', pattern: /data-flip-id/ }
+
 // A page the first-load parser must read in full: a modulepreload, a module
 // script with a src, an inline module script's static and dynamic imports.
 // It must skip a classic script and a stylesheet.
@@ -104,6 +127,14 @@ const PLANTED_PAGE = {
     + 'import("/assets/e.js");</script><script>import("/assets/classic.js")</script>'
     + '<link rel="stylesheet" href="/assets/f.css"/>',
   scripts: ['/assets/a.js', '/assets/b.js', '/assets/c.js', '/assets/d.js', '/assets/e.js'],
+}
+
+// Scripts the library verdicts must catch, as minified code writes the
+// fingerprints: framer-motion's (it builds its data attribute from the name)
+// and Flip's.
+const PLANTED_SCRIPTS = {
+  framer: { name: 'assets/planted-framer.js', bytes: Buffer.from('const sa="framerAppearId",fi="data-"+en(sa);', 'utf8') },
+  flip: { name: 'assets/planted-flip.js', bytes: Buffer.from('var i=t.getAttribute("data-flip-id");i||t.setAttribute("data-flip-id",i="auto-"+n++)', 'utf8') },
 }
 
 function filesUnder(dir) {
@@ -153,6 +184,50 @@ function firstLoadScripts(html) {
   return [...urls]
 }
 
+const labelsIn = (patterns, content) => patterns.filter(({ pattern }) => pattern.test(content)).map(({ label }) => label)
+
+// One script: its gzip size, and the motion and legacy libraries and Flip
+// it carries.
+function inspect(name, bytes) {
+  const content = bytes.toString('utf8')
+  return {
+    name,
+    gzip: gzipSync(bytes).length,
+    motion: labelsIn(MOTION_LIBRARIES, content),
+    legacy: labelsIn(LEGACY_LIBRARIES, content),
+    flip: FLIP.pattern.test(content),
+  }
+}
+
+// One route's verdict from its first-load scripts (inspect()): their gzip
+// total, the legacy libraries in them, the status line and the failures.
+function judgeRoute(route, scripts) {
+  const failures = []
+  const total = scripts.reduce((sum, script) => sum + script.gzip, 0)
+  for (const script of scripts) {
+    for (const label of script.motion) failures.push(`${route}: first-load ${script.name} carries ${label}`)
+    if (script.flip) failures.push(`${route}: first-load ${script.name} carries ${FLIP.label}`)
+  }
+  const legacy = [...new Set(scripts.flatMap((script) => script.legacy))]
+  const rebuilt = MUST_BE_V2.includes(route)
+  let status = 'OK'
+  let warned = false
+  if (rebuilt && legacy.length > 0) {
+    status = 'FAIL, legacy code in a rebuilt route'
+    const carriers = scripts.filter((script) => script.legacy.length > 0).map((script) => script.name)
+    failures.push(`${route}: rebuilt, but its first-load JS carries ${legacy.join(' and ')} (${carriers.join(', ')})`)
+  } else if (total > FIRST_LOAD_BUDGET && legacy.length > 0) {
+    status = `WARN, over budget (legacy: ${legacy.join(', ')})`
+    warned = true
+  } else if (total > FIRST_LOAD_BUDGET) {
+    status = 'FAIL, over budget'
+    failures.push(`${route}: first-load JS ${formatKiB(total)} gzip, over the ${formatKiB(FIRST_LOAD_BUDGET)} budget`)
+  } else if (legacy.length > 0) {
+    status = `OK (legacy: ${legacy.join(', ')})`
+  }
+  return { total, legacy, status, warned, failures }
+}
+
 const missed = PLANTED.filter(({ name, bytes }) => {
   const found = []
   scan(FORBIDDEN, name, decode(name, bytes), found)
@@ -169,6 +244,24 @@ if (plantedScripts.join(' ') !== PLANTED_PAGE.scripts.join(' ')) {
   console.error('check:dist: FAILED, the self-check misread the scripts of a planted page:')
   console.error(`  expected ${PLANTED_PAGE.scripts.join(' ')}`)
   console.error(`  read     ${plantedScripts.join(' ')}`)
+  process.exit(1)
+}
+
+// A planted framer-motion script is legacy, a planted Flip script is Flip,
+// and a rebuilt route whose first-load JS carries the planted framer-motion
+// script fails.
+const plantedFramer = inspect(PLANTED_SCRIPTS.framer.name, PLANTED_SCRIPTS.framer.bytes)
+const plantedFlip = inspect(PLANTED_SCRIPTS.flip.name, PLANTED_SCRIPTS.flip.bytes)
+const plantedRoute = judgeRoute(MUST_BE_V2[0], [plantedFramer])
+const misjudged = [
+  !plantedFramer.legacy.includes('framer-motion') && `${plantedFramer.name}: framer-motion not seen`,
+  !plantedFlip.flip && `${plantedFlip.name}: Flip not seen`,
+  (plantedRoute.failures.length === 0 || !plantedRoute.status.startsWith('FAIL'))
+    && `${MUST_BE_V2[0]} with ${plantedFramer.name} in its first-load JS: ${plantedRoute.status}, not a failure`,
+].filter(Boolean)
+if (misjudged.length > 0) {
+  console.error('check:dist: FAILED, the self-check misjudged planted scripts:')
+  for (const line of misjudged) console.error(`  ${line}`)
   process.exit(1)
 }
 
@@ -206,18 +299,10 @@ console.log(`check:dist: build/client/assets/*.js: ${scripts.length} files, ${fo
 
 const failures = []
 
-// Each script's gzip size and the motion libraries in it, read once: most
-// routes share most of their scripts.
+// Each script inspected once: most routes share most of their scripts.
 const scriptInfo = new Map()
 function readScript(name) {
-  if (!scriptInfo.has(name)) {
-    const bytes = readFileSync(join(DIST, ...name.split('/')))
-    const content = bytes.toString('utf8')
-    scriptInfo.set(name, {
-      gzip: gzipSync(bytes).length,
-      libraries: MOTION_LIBRARIES.filter(({ pattern }) => pattern.test(content)).map(({ label }) => label),
-    })
-  }
+  if (!scriptInfo.has(name)) scriptInfo.set(name, inspect(name, readFileSync(join(DIST, ...name.split('/')))))
   return scriptInfo.get(name)
 }
 
@@ -234,37 +319,29 @@ for (const { name, route } of pages) {
   const base = new URL(route === '/' ? '/' : `${route}/`, 'https://site.invalid')
   const urls = firstLoadScripts(readFileSync(join(DIST, ...name.split('/')), 'utf8'))
   if (urls.length === 0) failures.push(`${route}: no first-load JS found in ${name}; the page parser no longer reads it`)
-  let total = 0
+  const loaded = []
   for (const url of urls) {
     const script = decodeURIComponent(new URL(url, base).pathname).slice(1)
     if (!names.has(script)) {
       failures.push(`${route}: ${name} loads ${url}, which is not in build/client/`)
       continue
     }
-    const { gzip: size, libraries } = readScript(script)
-    total += size
-    for (const label of libraries) failures.push(`${route}: first-load ${script} carries ${label}`)
+    loaded.push(readScript(script))
   }
-  const v2 = V2_ROUTES.includes(route)
-  let status = 'OK'
-  if (total > FIRST_LOAD_BUDGET && v2) {
-    status = 'FAIL, over budget'
-    failures.push(`${route}: first-load JS ${formatKiB(total)} gzip, over the ${formatKiB(FIRST_LOAD_BUDGET)} budget`)
-  } else if (total > FIRST_LOAD_BUDGET) {
-    status = 'WARN, over budget (legacy route)'
-    warned += 1
-  }
-  rows.push([route, String(urls.length), formatKiB(total), status])
+  const verdict = judgeRoute(route, loaded)
+  failures.push(...verdict.failures)
+  if (verdict.warned) warned += 1
+  rows.push([route, String(urls.length), formatKiB(verdict.total), verdict.status])
 }
 
 const widths = [Math.max(5, ...rows.map(([route]) => route.length)), 7, 10]
 const line = ([route, count, size, status]) =>
   `  ${route.padEnd(widths[0])}  ${count.padStart(widths[1])}  ${size.padStart(widths[2])}  ${status}`
-console.log(`check:dist: first-load JS per route, gzip (budget ${formatKiB(FIRST_LOAD_BUDGET)}, enforced for ${V2_ROUTES.join(', ')}):`)
+console.log(`check:dist: first-load JS per route, gzip (budget ${formatKiB(FIRST_LOAD_BUDGET)}; a legacy route, one carrying ${LEGACY_LIBRARIES.map(({ label }) => label).join(' or ')}, only warns; rebuilt: ${MUST_BE_V2.join(', ')}):`)
 console.log(line(['route', 'scripts', 'gzip', '']).trimEnd())
 for (const row of rows) console.log(line(row))
-for (const route of V2_ROUTES) {
-  if (!pages.some((page) => page.route === route)) console.log(`check:dist: note: ${route} is in V2_ROUTES but not prerendered yet`)
+for (const route of MUST_BE_V2) {
+  if (!pages.some((page) => page.route === route)) console.log(`check:dist: note: ${route} is in MUST_BE_V2 but not prerendered yet`)
 }
 
 const motionChunks = [...names].filter((name) => MOTION_CHUNK.test(name))
@@ -272,14 +349,25 @@ if (motionChunks.length !== 1) {
   failures.push(`expected one motion chunk (assets/engine-*.js), found ${motionChunks.length}: ${motionChunks.join(', ') || 'none'}`)
 } else {
   const [motion] = motionChunks
-  const bytes = readFileSync(join(DIST, ...motion.split('/')))
-  const size = gzipSync(bytes).length
+  const { gzip: size, motion: libraries } = readScript(motion)
   console.log(`check:dist: motion chunk ${motion}: ${formatKiB(size)} gzip (budget ${formatKiB(MOTION_BUDGET)})`)
   if (size > MOTION_BUDGET) failures.push(`motion chunk ${motion}: ${formatKiB(size)} gzip, over the ${formatKiB(MOTION_BUDGET)} budget`)
-  const content = bytes.toString('utf8')
   for (const { label, pattern } of MOTION_LIBRARIES) {
-    if (!pattern.test(content)) failures.push(`the guard no longer sees ${label} in the motion chunk ${motion}: update its fingerprint (${pattern})`)
+    if (!libraries.includes(label)) failures.push(`the guard no longer sees ${label} in the motion chunk ${motion}: update its fingerprint (${pattern})`)
   }
+}
+
+// Flip: one lazy chunk of its own, wherever a page loads it.
+const flipChunks = scripts.map(nameOf).filter((name) => readScript(name).flip)
+if (flipChunks.length === 0) {
+  console.log(`check:dist: note: no chunk carries Flip (${FLIP.pattern}) yet; no page loads Flip before Task 8`)
+} else if (flipChunks.length > 1) {
+  failures.push(`Flip is in ${flipChunks.length} chunks (${flipChunks.join(', ')}); it must be one lazy chunk of its own`)
+} else {
+  const [flip] = flipChunks
+  const size = readScript(flip).gzip
+  console.log(`check:dist: Flip chunk ${flip}: ${formatKiB(size)} gzip (budget ${formatKiB(FLIP_BUDGET)})`)
+  if (size > FLIP_BUDGET) failures.push(`Flip chunk ${flip}: ${formatKiB(size)} gzip, over the ${formatKiB(FLIP_BUDGET)} budget`)
 }
 
 if (leaks.length > 0) {
@@ -291,10 +379,10 @@ if (devCode.length > 0) {
   for (const hit of devCode) console.error(`  ${hit}`)
 }
 if (failures.length > 0) {
-  console.error('check:dist: FAILED, first-load JS and the motion chunk:')
+  console.error('check:dist: FAILED, first-load JS, the motion chunk and Flip:')
   for (const failure of failures) console.error(`  ${failure}`)
 }
 if (leaks.length > 0 || devCode.length > 0 || failures.length > 0) process.exit(1)
 
 console.log('check:dist: OK, no agency branding and no dev-only code in build/client/')
-console.log(`check:dist: OK, no motion library in first-load JS; v2 routes and the motion chunk within budget${warned > 0 ? ` (${warned} legacy routes over budget, warned above)` : ''}`)
+console.log(`check:dist: OK, no motion library or Flip in first-load JS; v2 routes, the motion chunk and Flip within budget${warned > 0 ? ` (${warned} legacy routes over budget, warned above)` : ''}`)
