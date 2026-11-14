@@ -18,9 +18,12 @@ export default [
   route('projects/:id', 'routes/projects-id-redirect.jsx'),
   route('contact', 'pages/Contact.jsx'),
   route('blog', 'pages/Blog.jsx'),
-  // The polygon tracer for the explorer maps (src/data/maps), under the dev
-  // server only. A production build has no such route; scripts/check-dist.mjs
-  // fails if any of it reaches the build.
-  ...(import.meta.env.DEV ? [route('dev/tracer', 'pages/dev/TracerPage.jsx')] : []),
+  // Under the dev server only: the polygon tracer for the explorer maps
+  // (src/data/maps) and the gallery of the shared primitives
+  // (src/components/ui). A production build has neither route;
+  // scripts/check-dist.mjs fails if any of them reaches the build.
+  ...(import.meta.env.DEV
+    ? [route('dev/tracer', 'pages/dev/TracerPage.jsx'), route('dev/ui', 'pages/dev/UiGallery.jsx')]
+    : []),
   route('*', 'routes/not-found.jsx'),
 ]

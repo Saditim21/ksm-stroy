@@ -66,6 +66,25 @@
   }
 }
 
+@layer components {
+  /* RollingNumber (src/components/ui/RollingNumber.jsx): one digit column
+     shows digit --d through its one-digit window, its 0–9 strip moved up by
+     --d tenths of its height. The strip's digits are drawn here, so the page's
+     text holds only the real number, in the sr-only span. The roll animates
+     the strip from the digit it showed back onto the column's. */
+  .roll-col {
+    display: block;
+    transform: translateY(calc(var(--d) * -10%));
+  }
+  .roll-strip {
+    display: block;
+  }
+  .roll-strip::before {
+    content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
+    white-space: pre;
+  }
+}
+
 /* Custom scrollbar utilities for mobile responsiveness */
 @layer utilities {
   .nums {

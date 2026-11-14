@@ -166,6 +166,10 @@ export default {
         'slide-in-right': 'slide-in-right 0.6s ease-out forwards',
         'scale-in': 'scale-in 0.5s ease-out forwards',
         'float': 'float 6s ease-in-out infinite',
+        // HeroTitle's load moment (src/components/ui/HeroTitle.jsx): each line
+        // rises out of its mask, --i lines times 60 ms late, held below its
+        // mask until its turn. Used only as motion-safe:animate-hero-rise.
+        'hero-rise': 'hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 60ms) backwards',
       },
       
       keyframes: {
@@ -188,6 +192,10 @@ export default {
         'float': {
           '0%, 100%': { transform: 'translateY(-10px)' },
           '50%': { transform: 'translateY(10px)' },
+        },
+        'hero-rise': {
+          from: { transform: 'translateY(105%)' },
+          to: { transform: 'translateY(0)' },
         },
       },
     },

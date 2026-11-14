@@ -7,8 +7,8 @@
 //    this one, and none of its branding may reach ksmstroy.com. Before it
 //    scans build/client/, it checks itself against planted files (PLANTED).
 // 2. Fails when dev-only code reaches build/client/: the /dev/tracer polygon
-//    tracer is routed only under the dev server (import.meta.env.DEV in
-//    src/routes.js).
+//    tracer and the /dev/ui gallery of the shared primitives are routed only
+//    under the dev server (import.meta.env.DEV in src/routes.js).
 // 3. Prints the total gzip size of the JavaScript in build/client/assets, for
 //    information only.
 // 4. Prints, for every prerendered page (each index.html), its first-load JS:
@@ -41,10 +41,13 @@ const FORBIDDEN = [
 
 // The tracer's route path, its lazy chunk's file name and its
 // "Export → clipboard" button (the arrow is one character in a text file, and
-// three in a binary one).
+// three in a binary one); the gallery's route path, its chunk's file name and
+// the folder its sample media come from.
 const DEV_ONLY = [
   { label: '/dev/tracer', pattern: /\/dev\/tracer/ },
   { label: 'TracerPage', pattern: /TracerPage|Export .{1,4}clipboard/ },
+  { label: '/dev/ui', pattern: /\/dev\/ui\b/ },
+  { label: 'UiGallery', pattern: /UiGallery|\/dev-media\// },
 ]
 
 // Text files are read as UTF-8, so a non-breaking space, two bytes there, is
