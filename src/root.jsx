@@ -26,8 +26,11 @@ export const meta = () => [
   robotsMeta(),
 ]
 
+// KSM Text, the shell's face, on every page (spec §3.1). The pages that set
+// KSM Display in their first viewport preload it themselves
+// (src/utils/fontLinks.js).
 export const links = () => [
-  { rel: 'preload', href: '/fonts/ksm-display.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+  { rel: 'preload', href: '/fonts/ksm-text.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
   { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
   { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
   { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },

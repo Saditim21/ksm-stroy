@@ -1,49 +1,55 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-build-fonts.py - KSM Stroy redesign v2: self-hosted Playfair (display) and
-Geologica (text/UI) with Bulgarian letterforms (design spec section 3.2).
+build-fonts.py - KSM Stroy, Diptych (design spec docs/superpowers/specs/
+2026-11-14-ksmstroy-diptych-design.md, section 3.1): self-hosted Cormorant
+Garamond (KSM Display, normal and italic) and Manrope (KSM Text) with the
+Bulgarian letterforms, each face built as ONE file.
 
-Sources (pinned, sha256-checked) are the canonical Google Fonts variable masters,
-the same font versions that @fontsource-variable/playfair@5.3.0 (Playfair 2.203)
-and @fontsource-variable/geologica@5.3.0 (Geologica 1.010) ship, but unsplit.
-Fontsource ships each script as a separate file, so neither file contains the
-kerning between Cyrillic letters and punctuation (for example "У," or "„С").
-Building one file from the full master keeps those pairs.
+Sources (pinned to one google/fonts commit, sha256-checked) are the canonical
+variable masters. Building one file from the whole master keeps the kerning
+between Cyrillic letters and punctuation (for example "„С" or "Г,"), which a
+font split per script cannot hold.
 
-Pipeline, per family:
+Pipeline, per face:
   1. keep only the language systems we use (cyrl default = Russian forms, cyrl/BGR);
-     drop Playfair's calt arrow ligatures (-> etc.; the site draws arrows as SVG);
   2. pre-subset to the coverage below, so instancing is fast;
-  3. fontTools instancer: Playfair opsz pinned (default 72, chosen from a 72/96/120
-     comparison), wdth 100, wght limited to 400-560 and kept variable;
-     Geologica CRSV/SHRP/slnt pinned at 0, wght limited to 300-600;
-  4. Playfair: freeze lnum into the cmap (digits, % + - x = < > ^ ~ +- map to their
-     lining forms), so figures are never old-style; tnum stays a live feature;
-  5. final subset: features ccmp locl rlig/rvrn calt liga kern mark mkmk tnum case,
-     no hinting, no glyph names, name IDs 0-6 + 13/14 (OFL);
-  6. tabular-digit fix (a no-op unless needed): Geologica's tabular six drifts 2-5
-     units wider than the other tabular digits; it gets their advance;
-  7. checks (Bulgarian forms, lining + tabular digits via gvar and HVAR, coverage,
-     cross-script kerning) and fallback metrics; exits 1 if a check fails.
+  3. fontTools instancer: Cormorant normal wght limited to 500-600 and kept
+     variable; Cormorant italic pinned at wght 500 (a static face); Manrope wght
+     limited to 400-600 and kept variable;
+  4. Cormorant (both): freeze lnum into the cmap, so figures are never old-style
+     (Cormorant's default figures are); tnum stays a live feature and gives
+     tabular lining figures;
+  5. final subset: features ccmp locl calt liga kern mark mkmk tnum case, no
+     hinting, no glyph names, name IDs 0-6 + 13/14 (OFL);
+  6. tabular-digit fix (a no-op unless needed): a tabular digit that drifts a few
+     units from the others gets their advance;
+  7. checks (Bulgarian forms, lining + tabular digits, coverage, kept features,
+     the 90 KiB budget) and fallback metrics; exits 1 if a check fails.
+
+Coverage: the Cyrillic, Basic Latin and punctuation sets below, in each file (one file
+per face, so the kerning between scripts survives).
 
 Outputs (in --out, default ./dist):
-  playfair-display.woff2       Playfair, opsz pinned (display), wdth 100,
-                               wght 400-560 variable, lining figures frozen as
-                               the default, Cyrillic + Latin + punctuation in ONE file
-  geologica-text.woff2         Geologica, CRSV/SHRP/slnt pinned at 0,
-                               wght 300-600 variable, same coverage, ONE file
-  split/*.woff2                the same instances split Cyrillic / Latin (comparison only)
-  compare/playfair-opszNN.woff2  opsz candidates for the specimen
-  fonts.css                    @font-face rules for /fonts/ + metric-matched fallbacks
-  fonts.preview.css            the same with relative URLs, for the local specimens
-  font-report.json             sizes, features, checks and fallback numbers
-  OFL-*.txt                    licences that must travel with the fonts
-  work/                        unshipped inspection copies (with glyph names)
+  ksm-display.woff2         Cormorant Garamond, wght 500-600 variable, lining
+                            figures frozen as the default
+  ksm-display-italic.woff2  Cormorant Garamond Italic, static 500, lining figures
+                            frozen as the default
+  ksm-text.woff2            Manrope, wght 400-600 variable
+  fonts.css                 @font-face rules for /fonts/ + metric-matched fallbacks
+  fonts.preview.css         the same with relative URLs, for local specimens
+  font-report.json          sizes, features, checks and fallback numbers
+  OFL-*.txt                 licences that must travel with the fonts
+  work/                     unshipped inspection copies (with glyph names)
+
+The fallback faces are measured against Georgia, Times New Roman and Noto Serif
+(Display) and Segoe UI, Arial and Roboto (Text). Georgia, Times New Roman, Segoe
+UI and Arial are read from --system-fonts; Noto Serif and Roboto, the Android
+faces, from their pinned google/fonts masters, which are never shipped.
 
 Usage (isolated mode; fontTools 4.68 + brotli importable, or via --pylib):
-  python -I -X utf8 build-fonts.py --pylib ../_py --fetch
-  python -I -X utf8 build-fonts.py --pylib ../_py --experiment   # marginal byte costs
+  python -I -X utf8 build-fonts.py --pylib <dir> --fetch --src <dir> --out <dir> [--copy <src dirs>]
+  python -I -X utf8 build-fonts.py --pylib <dir> --experiment   # marginal byte costs
 Output is byte-identical between runs (timestamps are kept from the sources).
 """
 
@@ -64,14 +70,9 @@ ap.add_argument('--pylib', help='extra sys.path entry that holds fontTools + bro
 ap.add_argument('--src', default=os.path.join(HERE, 'src'), help='source folder (default ./src)')
 ap.add_argument('--out', default=os.path.join(HERE, 'dist'), help='output folder (default ./dist)')
 ap.add_argument('--fetch', action='store_true', help='download missing sources from the pinned URLs')
-ap.add_argument('--opsz', type=float, default=72,
-                help='Playfair display optical size to pin (default 72, chosen from the 72/96/120 comparison)')
-ap.add_argument('--compare-opsz', default='72,96,120', help='extra Playfair instances for the opsz specimen')
 ap.add_argument('--url-prefix', default='/fonts/', help='URL prefix used in fonts.css')
 ap.add_argument('--system-fonts', default='C:/Windows/Fonts', help='folder with the local fallback fonts')
-ap.add_argument('--fontsource', help='folder holding unpacked @fontsource-variable packages '
-                '(playfair/package, geologica/package) for the provenance check')
-ap.add_argument('--copy', nargs='*', default=[], help='folders whose text must be covered by the subset')
+ap.add_argument('--copy', nargs='*', default=[], help='folders whose text must be covered by the subset (report only)')
 ap.add_argument('--experiment', action='store_true', help='print marginal byte costs of optional features')
 ARGS = ap.parse_args()
 if ARGS.pylib:
@@ -85,20 +86,30 @@ from fontTools.varLib import instancer  # noqa: E402
 # --------------------------------------------------------------------------------------
 # Sources
 # --------------------------------------------------------------------------------------
-GF = 'https://raw.githubusercontent.com/google/fonts'
-GF_PLAYFAIR = GF + '/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/playfair/'
-GF_GEOLOGICA = GF + '/a60a77e14f28abd4ef243a1b5dfc48df0cec5205/ofl/geologica/'
+GF_COMMIT = 'cc39c4c2c304bc368c9b7c311ea2bcc6013299fe'
+GF = f'https://raw.githubusercontent.com/google/fonts/{GF_COMMIT}/ofl/'
 SOURCES = {
-    'playfair': dict(path='gf-playfair/Playfair[opsz,wdth,wght].ttf',
-                     url=GF_PLAYFAIR + 'Playfair%5Bopsz%2Cwdth%2Cwght%5D.ttf',
-                     sha256='33cfecbc9948cf9eafe54dc9f36d19a03b393cf12221b20be235926d1ca1db61'),
-    'playfair-ofl': dict(path='gf-playfair/OFL.txt', url=GF_PLAYFAIR + 'OFL.txt',
-                         sha256='7d16bbb17375beefaa4d1d25c41f860cb161c9e614b44af790983a9fd7102627'),
-    'geologica': dict(path='gf-geologica/Geologica[CRSV,SHRP,slnt,wght].ttf',
-                      url=GF_GEOLOGICA + 'Geologica%5BCRSV%2CSHRP%2Cslnt%2Cwght%5D.ttf',
-                      sha256='9124d9e88ac6c11d761f35241713a51d68e2c4ebedce0edaca834717a00959ec'),
-    'geologica-ofl': dict(path='gf-geologica/OFL.txt', url=GF_GEOLOGICA + 'OFL.txt',
-                          sha256='778186245840aea0e60bec6a46e7fb1442e0cd78e41afeadffcd3e8824b379e0'),
+    'cormorant': dict(path='gf-cormorantgaramond/CormorantGaramond[wght].ttf',
+                      url=GF + 'cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf',
+                      sha256='b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0'),
+    'cormorant-italic': dict(path='gf-cormorantgaramond/CormorantGaramond-Italic[wght].ttf',
+                             url=GF + 'cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf',
+                             sha256='0f48ea6abb2084537854f7174c470991a463b13036309e3b50a81511611c530d'),
+    'cormorant-ofl': dict(path='gf-cormorantgaramond/OFL.txt', url=GF + 'cormorantgaramond/OFL.txt',
+                          sha256='60700d351cac4650c51f3f9db318d2a420f8b45052dba2715eb5fec41f0f6956'),
+    'manrope': dict(path='gf-manrope/Manrope[wght].ttf', url=GF + 'manrope/Manrope%5Bwght%5D.ttf',
+                    sha256='3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6'),
+    'manrope-ofl': dict(path='gf-manrope/OFL.txt', url=GF + 'manrope/OFL.txt',
+                        sha256='58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b'),
+    # Measured for the Android fallback faces only; never shipped.
+    'noto-serif': dict(path='gf-notoserif/NotoSerif[wdth,wght].ttf',
+                       url=GF + 'notoserif/NotoSerif%5Bwdth%2Cwght%5D.ttf',
+                       sha256='4d8e6761424656867019081a1a01336f3cb086982682698714054fc33f782713'),
+    'noto-serif-italic': dict(path='gf-notoserif/NotoSerif-Italic[wdth,wght].ttf',
+                              url=GF + 'notoserif/NotoSerif-Italic%5Bwdth%2Cwght%5D.ttf',
+                              sha256='e87acbc6c0efd0d9a20d6a8cbbda2b266c14be3a3a6f5af8ec9d7b2460570ad1'),
+    'roboto': dict(path='gf-roboto/Roboto[wdth,wght].ttf', url=GF + 'roboto/Roboto%5Bwdth%2Cwght%5D.ttf',
+                   sha256='d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134'),
 }
 
 # --------------------------------------------------------------------------------------
@@ -132,32 +143,39 @@ PUNCT = [
 COMBINING = [0x0300, 0x0301]  # grave and acute (stress marks); what mark/mkmk position
 
 FULL_SET = sorted(set(CYRILLIC + LATIN + PUNCT + COMBINING))
-SPLIT_CYRILLIC = sorted(set(CYRILLIC + COMBINING))
-SPLIT_LATIN = sorted(set(FULL_SET) - set(SPLIT_CYRILLIC))
+
+# The text files --copy reads, and the folders it skips.
+COPY_EXTS = {'.js', '.jsx', '.ts', '.tsx', '.mjs', '.html', '.json', '.md', '.csv', '.txt', '.css'}
+COPY_SKIP = {'node_modules', '.git', 'dist', 'build', '.vercel', 'coverage'}
 
 KEEP_SCRIPTS = ['DFLT', 'cyrl', 'latn']
 KEEP_LANGSYS = {'cyrl': {'BGR '}, 'latn': set(), 'DFLT': set()}  # Russian etc. = cyrl default
+FEATURES = ['ccmp', 'locl', 'calt', 'liga', 'kern', 'mark', 'mkmk', 'tnum', 'case']
 
+# One entry per shipped file. `limits` go to the instancer: a range keeps the axis
+# variable, a number pins it. `bg_letters` are the letters each face must draw in a
+# Bulgarian form of its own under cyrl/BGR, as the 2026-11-14 masters do. A few more
+# BGR substitutions lead to a glyph drawn exactly like the default one (Cormorant's
+# Д И Й Л ф л, and Д И Й Ѝ in its italic; Manrope's К): the default is already the
+# Bulgarian shape. The report lists them; they are not a failure. The italic draws
+# fewer Bulgarian forms because italic Cyrillic is already close to them.
 FAMILIES = {
-    # rlig (Playfair) and rvrn (Geologica) carry the fonts' FeatureVariations glyph swaps.
-    'playfair': dict(
-        source='playfair', ofl='playfair-ofl', ofl_out='OFL-Playfair.txt', out='playfair-display',
-        css_family='Playfair', weights=(400, 560), freeze='lnum',
-        features=['ccmp', 'locl', 'rlig', 'calt', 'liga', 'kern', 'mark', 'mkmk', 'tnum', 'case'],
-        check_weights=[400, 420, 480, 500, 560]),   # counts 400, h1 420, h2 480, h3 500
-    'geologica': dict(
-        source='geologica', ofl='geologica-ofl', ofl_out='OFL-Geologica.txt', out='geologica-text',
-        css_family='Geologica', weights=(300, 600), freeze=None,
-        features=['ccmp', 'locl', 'rvrn', 'calt', 'liga', 'kern', 'mark', 'mkmk', 'tnum', 'case'],
-        check_weights=[300, 400, 500, 600]),        # body 400, labels 500
+    'display': dict(
+        source='cormorant', ofl='cormorant-ofl', ofl_out='OFL-Cormorant.txt', out='ksm-display',
+        css_family='KSM Display', style='normal', limits={'wght': (500, 600)}, freeze='lnum',
+        check_weights=[500, 550, 600], bg_letters='ЍФвгджзийкмнпртцчшщъьюѝ'),  # titles 500, counts 600
+    'display-italic': dict(
+        source='cormorant-italic', ofl=None, out='ksm-display-italic',
+        css_family='KSM Display', style='italic', limits={'wght': 500}, freeze='lnum',
+        check_weights=[500], bg_letters='ЛФвджзкю'),     # the em word, 500
+    'text': dict(
+        source='manrope', ofl='manrope-ofl', ofl_out='OFL-Manrope.txt', out='ksm-text',
+        css_family='KSM Text', style='normal', limits={'wght': (400, 600)}, freeze=None,
+        check_weights=[400, 500, 600], bg_letters='ДЖЛвгджзийклнптцчшщьюѝ',  # body 400, labels 500, ids 600
+        # Manrope draws none of these and the site's copy uses none (checked
+        # 2026-11-14); a browser draws such a character from the next font.
+        allowed_missing={'U+0300', 'U+0301', 'U+04B0', 'U+04B1', 'U+2010', 'U+2032', 'U+2033'}),
 }
-
-
-def playfair_limits(opsz):
-    return {'opsz': float(opsz), 'wdth': 100.0, 'wght': (400, 560)}
-
-
-GEOLOGICA_LIMITS = {'CRSV': 0.0, 'SHRP': 0.0, 'slnt': 0.0, 'wght': (300, 600)}
 
 # Bulgarian letter + space sample for the fallback metrics. Counts of every Cyrillic
 # letter (case kept) and the space in the deduplicated Cyrillic prose runs of the site
@@ -174,17 +192,30 @@ BG_COUNTS = {
     'ш': 64, 'щ': 128, 'ъ': 279, 'ь': 6, 'ю': 24, 'я': 297,
 }
 
-# Fallback faces. Weight bands: each band gets its own metric-matched @font-face, tuned at
-# the weight of the role that uses it most.
+# Fallback faces. A face is read from --system-fonts (`file`) or from a pinned source
+# (`source`). Each weight band gets its own metric-matched @font-face, tuned at the
+# weight of the role that uses it most.
 FALLBACKS = {
-    'playfair': [
-        dict(name='Georgia', css='Playfair Fallback Georgia', file='georgia.ttf', local=['Georgia']),
-        dict(name='Times New Roman', css='Playfair Fallback Times', file='times.ttf',
+    'display': [
+        dict(name='Georgia', css='KSM Display Fallback Georgia', file='georgia.ttf', local=['Georgia']),
+        dict(name='Times New Roman', css='KSM Display Fallback Times', file='times.ttf',
              local=['Times New Roman', 'TimesNewRomanPSMT']),
+        dict(name='Noto Serif', css='KSM Display Fallback Noto', source='noto-serif',
+             local=['Noto Serif', 'NotoSerif', 'NotoSerif-Regular', 'Noto Serif Regular']),
     ],
-    'geologica': [
-        dict(name='Segoe UI', css='Geologica Fallback Segoe', file='segoeui.ttf', local=['Segoe UI', 'SegoeUI']),
-        dict(name='Arial', css='Geologica Fallback Arial', file='arial.ttf', local=['Arial', 'ArialMT']),
+    'display-italic': [
+        dict(name='Georgia Italic', css='KSM Display Fallback Georgia', file='georgiai.ttf',
+             local=['Georgia Italic', 'Georgia-Italic']),
+        dict(name='Times New Roman Italic', css='KSM Display Fallback Times', file='timesi.ttf',
+             local=['Times New Roman Italic', 'TimesNewRomanPS-ItalicMT']),
+        dict(name='Noto Serif Italic', css='KSM Display Fallback Noto', source='noto-serif-italic',
+             local=['Noto Serif Italic', 'NotoSerif-Italic']),
+    ],
+    'text': [
+        dict(name='Segoe UI', css='KSM Text Fallback Segoe', file='segoeui.ttf', local=['Segoe UI', 'SegoeUI']),
+        dict(name='Arial', css='KSM Text Fallback Arial', file='arial.ttf', local=['Arial', 'ArialMT']),
+        dict(name='Roboto', css='KSM Text Fallback Roboto', source='roboto',
+             local=['Roboto', 'Roboto-Regular', 'Roboto Regular']),
         dict(name='Helvetica Neue', css=None, file=None, local=['Helvetica Neue'],
              skip='macOS/iOS only: no Cyrillic advance data available here and none is published '
                   '(capsize metrics are Latin-weighted). Arial ships on macOS and iOS, so the Arial '
@@ -192,11 +223,14 @@ FALLBACKS = {
     ],
 }
 BANDS = {
-    'playfair': [dict(range=(400, 449), tune=420, roles='h1 (420), counts (400)'),
-                 dict(range=(450, 560), tune=490, roles='h2 (480), h3 (500)')],
-    'geologica': [dict(range=(300, 449), tune=400, roles='body, small (400)'),
-                  dict(range=(450, 600), tune=500, roles='labels, buttons (500)')],
+    'display': [dict(range=(500, 549), tune=500, roles='h1, h2, h3, titles (500)'),
+                dict(range=(550, 600), tune=600, roles='counts (600)')],
+    'display-italic': [dict(range=(500, 500), tune=500, roles='the em word (500)')],
+    'text': [dict(range=(400, 449), tune=400, roles='body, small (400)'),
+             dict(range=(450, 600), tune=500, roles='labels, buttons (500), ids (600)')],
 }
+
+BUDGET_BYTES = 90 * 1024  # spec section 3.1: the three files together, 90 KiB
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -244,6 +278,10 @@ def load(data):
     return TTFont(io.BytesIO(data), recalcTimestamp=False)
 
 
+def is_variable(font):
+    return 'fvar' in font
+
+
 def prune_langsys(font):
     """Keep only the language systems we use (cyrl/BGR); Russian is the cyrl default."""
     for tag in ('GSUB', 'GPOS'):
@@ -256,28 +294,6 @@ def prune_langsys(font):
             recs = [r for r in sr.Script.LangSysRecord if r.LangSysTag in keep]
             sr.Script.LangSysRecord = recs
             sr.Script.LangSysCount = len(recs)
-
-
-def drop_calt_ligatures(font):
-    """Playfair's calt has a ligature lookup that turns -> <- ^- into arrows. The site draws
-    its arrows as SVG and the subset has no arrows, so remove that lookup from calt
-    (the contextual case-punctuation lookups in calt stay)."""
-    gsub = font['GSUB'].table
-    removed = []
-    for fr in gsub.FeatureList.FeatureRecord:
-        if fr.FeatureTag != 'calt':
-            continue
-        keep = []
-        for li in fr.Feature.LookupListIndex:
-            lk = gsub.LookupList.Lookup[li]
-            t = lk.LookupType if lk.LookupType != 7 else lk.SubTable[0].ExtSubTable.LookupType
-            if t == 4:
-                removed.append(li)
-            else:
-                keep.append(li)
-        fr.Feature.LookupListIndex = keep
-        fr.Feature.LookupCount = len(keep)
-    return sorted(set(removed))
 
 
 def run_subset(font, unicodes, features, glyph_names=True):
@@ -381,16 +397,25 @@ def advance_signature(font, glyph):
 
 
 def equalize_tabular_digits(font):
-    """Geologica's tabular six is 2 units wider than the other tabular digits at wght 300 and
-    drifts to +5 units (of 2000) at 600; the others stay at 1296. Give every tabular digit the
-    default advance and the advance variation of the majority, so tnum digits are equal at
-    every weight, then rebuild HVAR from gvar. A no-op when they already agree (Playfair).
-    Refuses anything bigger than a drift of 1% of the em."""
-    from fontTools.varLib.hvar import add_HVAR
+    """Give every tabular digit the default advance and the advance variation of the
+    majority, so tnum digits are equal at every weight, then rebuild HVAR from gvar.
+    A no-op when they already agree. Refuses anything bigger than a drift of 1% of the em.
+    A static face only has its default advances to compare."""
     glyphs = tabular_digit_glyphs(font)
     hm = font['hmtx']
     upm = font['head'].unitsPerEm
     adv = collections.Counter(hm[g][0] for g in glyphs).most_common(1)[0][0]
+    if not is_variable(font):
+        fixed = {}
+        for g in glyphs:
+            if hm[g][0] == adv:
+                continue
+            if abs(hm[g][0] - adv) > 0.01 * upm:
+                raise SystemExit(f'{g}: tabular advance differs by more than a small drift; refusing to patch')
+            fixed[g] = dict(before=dict(default=hm[g][0]), after=dict(default=adv))
+            hm[g] = (adv, hm[g][1])
+        return fixed
+    from fontTools.varLib.hvar import add_HVAR
     sigs = {g: advance_signature(font, g) for g in glyphs}
     majority = dict(collections.Counter(tuple(sorted(s.items())) for s in sigs.values()).most_common(1)[0][0])
     fixed = {}
@@ -403,7 +428,7 @@ def equalize_tabular_digits(font):
         if set(majority) - regions:
             raise SystemExit(f'{g}: majority has variation regions the glyph lacks')
         before = dict(default=hm[g][0], deltas={str(k): v for k, v in sigs[g].items()})
-        hm[g] = (adv, hm[g][1])  # outline untouched; the right side bearing absorbs the 2 units
+        hm[g] = (adv, hm[g][1])  # outline untouched; the right side bearing absorbs the drift
         for tv in font['gvar'].variations.get(g, []):
             key = tuple(sorted(tv.axes.items()))
             c = tv.coordinates
@@ -421,7 +446,7 @@ def build_font(src_path, limits, unicodes, features, freeze=None):
     Returns (TTFont with glyph names, info)."""
     f = TTFont(src_path, recalcTimestamp=False)
     prune_langsys(f)
-    info = {'calt_ligature_lookups_removed': drop_calt_ligatures(f)}
+    info = {}
     pre_features = list(features) + ([freeze] if freeze else [])
     run_subset(f, unicodes, pre_features)
     f = load(to_bytes(f))
@@ -460,15 +485,37 @@ def ranges_str(cps):
     return ','.join(f'U+{a:04X}' if a == b else f'U+{a:04X}-{b:04X}' for a, b in out)
 
 
+def text_characters(dirs):
+    """Every character (code point) in the text files under `dirs`, with its count."""
+    cnt = collections.Counter()
+    for root in dirs:
+        for dp, dns, fns in os.walk(root):
+            dns[:] = [d for d in dns if d not in COPY_SKIP]
+            for fn in fns:
+                if os.path.splitext(fn)[1].lower() in COPY_EXTS:
+                    try:
+                        with open(os.path.join(dp, fn), encoding='utf-8') as fh:
+                            cnt.update(fh.read())
+                    except (UnicodeDecodeError, OSError):
+                        pass
+    return cnt
+
+
 # --------------------------------------------------------------------------------------
 # Checks
 # --------------------------------------------------------------------------------------
 
 
 def glyph_signature(font, name):
+    """Outline, advance and, in a variable face, the variation deltas: two glyphs drawn
+    alike at the default weight may still part at another one."""
     glyf = font['glyf']
     coords, ends, _ = glyf[name].getCoordinates(glyf)
-    return tuple(coords), tuple(ends), font['hmtx'][name][0]
+    deltas = ()
+    if 'gvar' in font:
+        deltas = tuple((tuple(sorted(tv.axes.items())), tuple(tv.coordinates))
+                       for tv in font['gvar'].variations.get(name, []))
+    return tuple(coords), tuple(ends), font['hmtx'][name][0], deltas
 
 
 def features_by_script(font):
@@ -523,22 +570,33 @@ def hvar_advances(font, glyphs, wght):
     return out
 
 
+def at_weight(font_bytes, w):
+    """The face at `w`: an instance of a variable face, a static face as it is."""
+    f = load(font_bytes)
+    return instancer.instantiateVariableFont(f, {'wght': w}, inplace=False) if is_variable(f) else f
+
+
 def check_digits(font_bytes, weights):
     rows = []
     vf = load(font_bytes)
+    variable = is_variable(vf)
     vf_tab = tabular_digit_glyphs(vf)
     vf_cmap = vf.getBestCmap()
     vf_default = [vf_cmap[0x30 + i] for i in range(10)]
-    sigs = {tuple(sorted(advance_signature(vf, g).items())) for g in vf_tab}
+    sigs = {tuple(sorted(advance_signature(vf, g).items())) for g in vf_tab} if variable else {()}
     for w in weights:
-        hv_tab = hvar_advances(vf, vf_tab, w)
-        hv_def = hvar_advances(vf, vf_default, w)
-        s = instancer.instantiateVariableFont(load(font_bytes), {'wght': w}, inplace=False)
+        s = at_weight(font_bytes, w)
         cmap, hm, glyf = s.getBestCmap(), s['hmtx'], s['glyf']
         upm = s['head'].unitsPerEm
         dflt = [cmap[0x30 + i] for i in range(10)]
         tnum = single_subst(s, feature_lookups(s, 'GSUB', 'tnum'))
         tab = [tnum.get(g, g) for g in dflt]
+        if variable:
+            hv_tab = hvar_advances(vf, vf_tab, w)
+            hv_def = hvar_advances(vf, vf_default, w)
+        else:
+            hv_tab = [hm[g][0] for g in tab]
+            hv_def = [hm[g][0] for g in dflt]
 
         def bounds(names):
             out = []
@@ -563,7 +621,7 @@ def check_digits(font_bytes, weights):
             hvar_matches_gvar=all(abs(a - hm[g][0]) <= 0.5 for a, g in zip(hv_tab + hv_def, tab + dflt)),
             tnum_is_lining=min(b[0] for b in bt) > -0.03 * upm,
         ))
-    return dict(tnum_variation_identical_for_all_digits=len(sigs) == 1, by_weight=rows)
+    return dict(variable=variable, tnum_variation_identical_for_all_digits=len(sigs) == 1, by_weight=rows)
 
 
 def pair_kern(font, left, right):
@@ -603,85 +661,11 @@ def check_cross_kerning(font):
     return out
 
 
-def feature_variations(font):
-    gsub = font['GSUB'].table
-    fv = getattr(gsub, 'FeatureVariations', None)
-    if not fv:
-        return []
-    axes = [a.axisTag for a in font['fvar'].axes]
-    out = []
-    for r in fv.FeatureVariationRecord:
-        conds = []
-        if r.ConditionSet:
-            for c in r.ConditionSet.ConditionTable:
-                conds.append(f'{axes[c.AxisIndex]} {c.FilterRangeMinValue:.3f}..{c.FilterRangeMaxValue:.3f}')
-        subs = {}
-        for sr in r.FeatureTableSubstitution.SubstitutionRecord:
-            lks = sr.Feature.LookupListIndex
-            m = {}
-            for li in lks:
-                lk = gsub.LookupList.Lookup[li]
-                for st in lk.SubTable:
-                    if hasattr(st, 'mapping'):
-                        m.update(st.mapping)
-            subs[gsub.FeatureList.FeatureRecord[sr.FeatureIndex].FeatureTag] = m
-        out.append(dict(conditions=conds or ['always'], substitutions=subs))
-    return out
-
-
 def copy_coverage(dirs, cmap_cps):
     """Characters used in the site copy that the subset does not cover."""
-    exts = {'.js', '.jsx', '.ts', '.tsx', '.html', '.json', '.md', '.csv', '.mjs'}
-    skip = {'node_modules', '.git', 'dist', 'build', '.vercel', 'docs', 'coverage'}
-    cnt = collections.Counter()
-    for root in dirs:
-        for dp, dns, fns in os.walk(root):
-            dns[:] = [d for d in dns if d not in skip]
-            for fn in fns:
-                if os.path.splitext(fn)[1].lower() in exts:
-                    try:
-                        with open(os.path.join(dp, fn), encoding='utf-8') as fh:
-                            cnt.update(fh.read())
-                    except (UnicodeDecodeError, OSError):
-                        pass
-    missing = {f'U+{ord(c):04X}': n for c, n in sorted(cnt.items()) if ord(c) >= 0x20 and ord(c) not in cmap_cps
-               and ord(c) not in (0x2028, 0x2029)}
-    return missing
-
-
-def provenance_check(fs_dir, family, src_path):
-    """Compare the canonical master with the fontsource 5.3.0 'standard' (all-axes) files."""
-    names = {'playfair': ['playfair/package/files/playfair-cyrillic-standard-normal.woff2',
-                          'playfair/package/files/playfair-latin-standard-normal.woff2'],
-             'geologica': ['geologica/package/files/geologica-cyrillic-full-normal.woff2',
-                           'geologica/package/files/geologica-latin-full-normal.woff2']}[family]
-    master = TTFont(src_path)
-    mg, mh, mv = master['glyf'], master['hmtx'], master['gvar'].variations
-    out = []
-    for rel in names:
-        p = os.path.join(fs_dir, rel)
-        if not os.path.exists(p):
-            out.append(dict(file=rel, error='missing'))
-            continue
-        fs = TTFont(p)  # woff2 is decompressed by fontTools (brotli)
-        fg, fh, fv = fs['glyf'], fs['hmtx'], fs['gvar'].variations
-        same = diff = 0
-        diffs = []
-        for g in fs.getGlyphOrder():
-            if g == '.notdef' or g not in mh.metrics:
-                continue
-            a = (fg[g].getCoordinates(fg)[0], fh[g][0])
-            b = (mg[g].getCoordinates(mg)[0], mh[g][0])
-            va = [(tuple(sorted(t.axes.items())), tuple(t.coordinates)) for t in fv.get(g, [])]
-            vb = [(tuple(sorted(t.axes.items())), tuple(t.coordinates)) for t in mv.get(g, [])]
-            if a == b and va == vb:
-                same += 1
-            else:
-                diff += 1
-                diffs.append(g)
-        out.append(dict(file=rel, version=fs['name'].getDebugName(5), glyphs_identical=same,
-                        glyphs_different=diff, examples=diffs[:8]))
-    return dict(master_version=master['name'].getDebugName(5), files=out)
+    cnt = text_characters(dirs)
+    return {f'U+{ord(c):04X}': n for c, n in sorted(cnt.items()) if ord(c) >= 0x20 and ord(c) not in cmap_cps
+            and ord(c) not in (0x2028, 0x2029)}
 
 
 # --------------------------------------------------------------------------------------
@@ -729,12 +713,12 @@ def vertical_metrics(font):
                 win=[os2.usWinAscent, os2.usWinDescent])
 
 
-def fallback_metrics(family, font_bytes, system_dir):
+def fallback_metrics(family, font_bytes, system_dir, paths):
     cfg = FAMILIES[family]
     weights = sorted({*cfg['check_weights'], *(b['tune'] for b in BANDS[family])})
     web = {}
     for w in weights:
-        s = instancer.instantiateVariableFont(load(font_bytes), {'wght': w}, inplace=False)
+        s = at_weight(font_bytes, w)
         avg, missing, nbgr = sample_avg_advance(s)
         web[w] = dict(avg_em=avg, missing=missing, bgr_forms_used=nbgr, vm=vertical_metrics(s))
     result = dict(web={str(w): dict(avg_advance_em=round(v['avg_em'], 5), bgr_forms_used=v['bgr_forms_used'],
@@ -745,12 +729,12 @@ def fallback_metrics(family, font_bytes, system_dir):
             entry['skipped'] = fb['skip']
             result['fallbacks'].append(entry)
             continue
-        path = os.path.join(system_dir, fb['file'])
+        path = paths[fb['source']] if fb.get('source') else os.path.join(system_dir, fb['file'])
         if not os.path.exists(path):
             entry['skipped'] = f'{path} not found'
             result['fallbacks'].append(entry)
             continue
-        ff = TTFont(path, lazy=True)
+        ff = TTFont(path, lazy=True)  # a variable source is measured at its default (Regular)
         favg, fmissing, fbgr = sample_avg_advance(ff)
         entry.update(file=path, version=ff['name'].getDebugName(5), avg_advance_em=round(favg, 5),
                      missing=fmissing, bgr_forms_in_fallback=fbgr)
@@ -778,49 +762,47 @@ def fallback_metrics(family, font_bytes, system_dir):
 # --------------------------------------------------------------------------------------
 
 
+def css_weight(lo, hi):
+    return f'{lo}' if lo == hi else f'{lo} {hi}'
+
+
+def web_weights(cfg):
+    w = cfg['limits']['wght']
+    return w if isinstance(w, tuple) else (w, w)
+
+
 def css_text(prefix, files, fallbacks, comment):
-    pf, geo = FAMILIES['playfair'], FAMILIES['geologica']
     lines = [f'/* {comment} */', '']
-    for fam, cfg in (('playfair', pf), ('geologica', geo)):
-        lo, hi = cfg['weights']
+    for fam, cfg in FAMILIES.items():
         lines += ['@font-face {',
                   f'  font-family: "{cfg["css_family"]}";',
                   f'  src: url("{prefix}{files[fam]}") format("woff2");',
-                  f'  font-weight: {lo} {hi};',
-                  '  font-style: normal;',
+                  f'  font-weight: {css_weight(*web_weights(cfg))};',
+                  f'  font-style: {cfg["style"]};',
                   '  font-display: swap;',
                   '}', '']
     lines += ['/* Metric-matched fallbacks: size-adjust from the average advance of a Bulgarian',
               '   letter-frequency sample (Bulgarian locl forms), overrides from the web font\'s',
-              '   vertical metrics. One face per weight band. Faces whose local() font is not',
-              '   installed fail to load and the browser moves on to the next family. */', '']
-    stacks = {}
-    for fam in ('playfair', 'geologica'):
-        names = []
+              '   vertical metrics. One face per weight band, and an italic one for Display.',
+              '   Faces whose local() font is not installed fail to load and the browser moves',
+              '   on to the next family. The stacks are in src/index.css and tailwind.config.js. */', '']
+    for fam, cfg in FAMILIES.items():
         for fb in fallbacks[fam]['fallbacks']:
             if 'bands' not in fb:
                 continue
-            names.append(fb['css_family'])
             src = ', '.join(f'local("{n}")' for n in fb['local'])
             for b in fb['bands']:
                 lines += ['@font-face {',
                           f'  font-family: "{fb["css_family"]}";',
                           f'  src: {src};',
-                          f'  font-weight: {b["weight"][0]} {b["weight"][1]};',
-                          '  font-style: normal;',
+                          f'  font-weight: {css_weight(*b["weight"])};',
+                          f'  font-style: {cfg["style"]};',
                           f'  size-adjust: {b["size_adjust"]:.2f}%;',
                           f'  ascent-override: {b["ascent_override"]:.2f}%;',
                           f'  descent-override: {b["descent_override"]:.2f}%;',
                           f'  line-gap-override: {b["line_gap_override"]:.2f}%;',
                           '}', '']
-        stacks[fam] = names
-    pf_stack = ', '.join([f'"{pf["css_family"]}"'] + [f'"{n}"' for n in stacks['playfair']] + ['serif'])
-    geo_stack = ', '.join([f'"{geo["css_family"]}"'] + [f'"{n}"' for n in stacks['geologica']] + ['sans-serif'])
-    lines += [':root {',
-              f'  --font-display: {pf_stack};',
-              f'  --font-text: {geo_stack};',
-              '}', '']
-    return '\n'.join(lines)
+    return '\n'.join(lines).rstrip('\n') + '\n'
 
 
 # --------------------------------------------------------------------------------------
@@ -829,7 +811,7 @@ def css_text(prefix, files, fallbacks, comment):
 
 
 def kb(n):
-    """kB = 1000 bytes (the budget unit); KiB is reported alongside where it matters."""
+    """kB = 1000 bytes; KiB = 1024 bytes, the budget's unit (spec section 3.1)."""
     return round(n / 1000, 1)
 
 
@@ -838,32 +820,16 @@ def kib(n):
 
 
 def experiment(paths):
-    """Marginal woff2 cost of optional features and coverage, at the chosen opsz."""
+    """Marginal woff2 cost of the optional features."""
     rows = []
-    base_pf = FAMILIES['playfair']['features']
-    base_geo = FAMILIES['geologica']['features']
-    variants = [
-        ('playfair', 'as configured', base_pf, FULL_SET),
-        ('playfair', 'without liga', [x for x in base_pf if x != 'liga'], FULL_SET),
-        ('playfair', 'without calt', [x for x in base_pf if x != 'calt'], FULL_SET),
-        ('playfair', 'without case', [x for x in base_pf if x != 'case'], FULL_SET),
-        ('playfair', 'without kern', [x for x in base_pf if x != 'kern'], FULL_SET),
-        ('playfair', 'without combining marks', base_pf, sorted(set(FULL_SET) - set(COMBINING))),
-        ('playfair', 'only the task list (no ccmp/calt/liga/rlig)',
-         ['locl', 'kern', 'mark', 'mkmk', 'tnum', 'case'], FULL_SET),
-        ('geologica', 'as configured', base_geo, FULL_SET),
-        ('geologica', 'without liga', [x for x in base_geo if x != 'liga'], FULL_SET),
-        ('geologica', 'without calt', [x for x in base_geo if x != 'calt'], FULL_SET),
-        ('geologica', 'without case', [x for x in base_geo if x != 'case'], FULL_SET),
-        ('geologica', 'without combining marks', base_geo, sorted(set(FULL_SET) - set(COMBINING))),
-    ]
-    for fam, label, feats, uni in variants:
-        cfg = FAMILIES[fam]
-        limits = playfair_limits(ARGS.opsz) if fam == 'playfair' else GEOLOGICA_LIMITS
-        f, _ = build_font(paths[cfg['source']], limits, uni, feats, cfg['freeze'])
-        size = len(ship_bytes(f))
-        rows.append((fam, label, size))
-        log(f'{fam:10s} {label:45s} {size:7d} B  {kb(size):5.1f} kB')
+    for fam, cfg in FAMILIES.items():
+        variants = [('as configured', FEATURES)] + [
+            (f'without {x}', [y for y in FEATURES if y != x]) for x in ('kern', 'liga', 'calt', 'case')]
+        for label, feats in variants:
+            f, _ = build_font(paths[cfg['source']], cfg['limits'], FULL_SET, feats, cfg['freeze'])
+            size = len(ship_bytes(f))
+            rows.append((fam, label, size))
+            log(f'{fam:15s} {label:20s} {size:7d} B  {kib(size):5.1f} KiB')
     return rows
 
 
@@ -876,26 +842,21 @@ def main():
         experiment(paths)
         return
 
-    report = dict(generated_by='build-fonts.py', fonttools=FONTTOOLS_VERSION,
+    report = dict(generated_by='build-fonts.py', fonttools=FONTTOOLS_VERSION, google_fonts_commit=GF_COMMIT,
                   sources={k: dict(path=SOURCES[k]['path'], url=SOURCES[k]['url'], sha256=SOURCES[k]['sha256'])
                            for k in SOURCES},
-                  coverage=dict(single_file=ranges_str(FULL_SET), split_cyrillic=ranges_str(SPLIT_CYRILLIC),
-                                split_latin=ranges_str(SPLIT_LATIN)),
+                  coverage=ranges_str(FULL_SET),
                   families={})
     for cfg in FAMILIES.values():
-        with open(paths[cfg['ofl']], 'rb') as fh, open(os.path.join(ARGS.out, cfg['ofl_out']), 'wb') as out:
-            out.write(fh.read())
-
-    os.makedirs(os.path.join(ARGS.out, 'split'), exist_ok=True)
-    os.makedirs(os.path.join(ARGS.out, 'compare'), exist_ok=True)
+        if cfg['ofl']:
+            with open(paths[cfg['ofl']], 'rb') as fh, open(os.path.join(ARGS.out, cfg['ofl_out']), 'wb') as out:
+                out.write(fh.read())
     os.makedirs(os.path.join(ARGS.out, 'work'), exist_ok=True)
 
-    files = {}
-    shipped = {}
+    files, shipped, versions = {}, {}, {}
     for fam, cfg in FAMILIES.items():
-        limits = playfair_limits(ARGS.opsz) if fam == 'playfair' else GEOLOGICA_LIMITS
-        log(f'[{fam}] building single file, limits {limits}')
-        font, info = build_font(paths[cfg['source']], limits, FULL_SET, cfg['features'], cfg['freeze'])
+        log(f'[{fam}] building, limits {cfg["limits"]}')
+        font, info = build_font(paths[cfg['source']], cfg['limits'], FULL_SET, FEATURES, cfg['freeze'])
         data = ship_bytes(font)
         name = cfg['out'] + '.woff2'
         with open(os.path.join(ARGS.out, name), 'wb') as fh:
@@ -905,58 +866,32 @@ def main():
         files[fam] = name
         shipped[fam] = data
         sf = load(data)
+        versions[fam] = sf['name'].getDebugName(5)
         cmap_cps = set(sf.getBestCmap())
         fam_report = dict(
             file=name, bytes=len(data), kB=kb(len(data)), KiB=kib(len(data)), sha256=hashlib.sha256(data).hexdigest(),
-            axes={a.axisTag: [a.minValue, a.defaultValue, a.maxValue] for a in sf['fvar'].axes},
-            pinned={k: v for k, v in limits.items() if not isinstance(v, tuple)},
+            version=versions[fam],
+            axes={a.axisTag: [a.minValue, a.defaultValue, a.maxValue] for a in sf['fvar'].axes} if is_variable(sf) else {},
+            pinned={k: v for k, v in cfg['limits'].items() if not isinstance(v, tuple)},
             glyphs=sf['maxp'].numGlyphs,
             missing_from_requested=[f'U+{c:04X}' for c in FULL_SET if c not in cmap_cps],
-            features_kept=cfg['features'],
+            features_kept=FEATURES,
             features_by_script=features_by_script(sf),
             bgr=check_bgr(font),
             digits=check_digits(data, cfg['check_weights']),
             cross_script_kerning=check_cross_kerning(sf),
-            feature_variations=feature_variations(sf),
             build=info,
         )
-        # two-file split, same instance, for comparison
-        split = {}
-        for part, uni in (('cyrillic', SPLIT_CYRILLIC), ('latin', SPLIT_LATIN)):
-            pfont, _ = build_font(paths[cfg['source']], limits, uni, cfg['features'], cfg['freeze'])
-            pdata = ship_bytes(pfont)
-            pname = f'{cfg["out"]}-{part}.woff2'
-            with open(os.path.join(ARGS.out, 'split', pname), 'wb') as fh:
-                fh.write(pdata)
-            split[part] = dict(file='split/' + pname, bytes=len(pdata), kB=kb(len(pdata)),
-                               unicode_range=ranges_str(uni))
-        split['total_bytes'] = split['cyrillic']['bytes'] + split['latin']['bytes']
-        split['total_kB'] = kb(split['total_bytes'])
-        fam_report['split'] = split
-        if ARGS.fontsource:
-            fam_report['provenance_vs_fontsource'] = provenance_check(ARGS.fontsource, fam, paths[cfg['source']])
         if ARGS.copy:
             fam_report['site_copy_not_covered'] = copy_coverage(ARGS.copy, cmap_cps)
         report['families'][fam] = fam_report
-        log(f'[{fam}] {name}: {len(data)} B ({kb(len(data))} kB); split {split["cyrillic"]["bytes"]} + '
-            f'{split["latin"]["bytes"]} = {split["total_bytes"]} B')
+        log(f'[{fam}] {name}: {len(data)} B ({kib(len(data))} KiB)')
 
-    # Playfair opsz candidates (same pipeline, single file)
-    cands = {}
-    for o in [float(x) for x in ARGS.compare_opsz.split(',') if x.strip()]:
-        f, _ = build_font(paths['playfair'], playfair_limits(o), FULL_SET, FAMILIES['playfair']['features'], 'lnum')
-        d = ship_bytes(f)
-        nm = f'playfair-opsz{int(o)}.woff2'
-        with open(os.path.join(ARGS.out, 'compare', nm), 'wb') as fh:
-            fh.write(d)
-        cands[nm] = dict(opsz=o, bytes=len(d), kB=kb(len(d)))
-    report['playfair_opsz_candidates'] = cands
-
-    # fallbacks + CSS
-    fb = {fam: fallback_metrics(fam, shipped[fam], ARGS.system_fonts) for fam in FAMILIES}
+    fb = {fam: fallback_metrics(fam, shipped[fam], ARGS.system_fonts, paths) for fam in FAMILIES}
     report['fallbacks'] = fb
-    stamp = (f'Generated by build-fonts.py (fontTools {FONTTOOLS_VERSION}). Playfair 2.203 opsz {ARGS.opsz:g} '
-             f'wdth 100 wght 400-560; Geologica 1.010 wght 300-600. Do not edit by hand.')
+    stamp = (f'Generated by build-fonts.py (fontTools {FONTTOOLS_VERSION}). Cormorant Garamond '
+             f'{versions["display"].replace("Version ", "")} wght 500-600, italic wght 500; Manrope '
+             f'{versions["text"].replace("Version ", "")} wght 400-600. Do not edit by hand.')
     with open(os.path.join(ARGS.out, 'fonts.css'), 'w', encoding='utf-8', newline='\n') as fh:
         fh.write(css_text(ARGS.url_prefix, files, fb, stamp))
     with open(os.path.join(ARGS.out, 'fonts.preview.css'), 'w', encoding='utf-8', newline='\n') as fh:
@@ -964,38 +899,40 @@ def main():
 
     total = sum(len(v) for v in shipped.values())
     report['first_load'] = dict(
-        files=[files['playfair'], files['geologica']], bytes=total, kB=kb(total), KiB=kib(total),
-        budget_kB=90, within_budget=total <= 90 * 1000, headroom_bytes=90 * 1000 - total)
+        files=[files[f] for f in FAMILIES], bytes=total, kB=kb(total), KiB=kib(total),
+        budget_bytes=BUDGET_BYTES, within_budget=total <= BUDGET_BYTES, headroom_bytes=BUDGET_BYTES - total)
     problems = run_checks(report)
     report['checks'] = dict(passed=not problems, problems=problems)
     report['build_seconds'] = round(time.time() - t0, 1)
     with open(os.path.join(ARGS.out, 'font-report.json'), 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(report, fh, ensure_ascii=False, indent=2)
-    log(f'first load: {total} B = {kb(total)} kB = {kib(total)} KiB (budget 90 kB); built in {report["build_seconds"]} s')
+    log(f'three faces: {total} B = {kib(total)} KiB (budget 90 KiB = {BUDGET_BYTES} B); built in {report["build_seconds"]} s')
     if problems:
         log('CHECKS FAILED:')
         for p in problems:
             log('  -', p)
         sys.exit(1)
-    log('checks passed: Bulgarian forms, lining + tabular digits (gvar and HVAR), coverage, features, budget')
+    log('checks passed: Bulgarian forms, lining + tabular digits, coverage, features, budget')
 
 
-# Requested code points the fonts do not have (fine: the browser falls back per character).
-ALLOWED_MISSING = {'U+00AD',   # soft hyphen: Playfair has none (Chrome hyphenates with the hyphen glyph)
-                   'U+201B'}   # reversed-9 quote: in neither font, unused in Bulgarian
+# Requested code points a font may lack (fine: the browser falls back per character).
+ALLOWED_MISSING = {'U+00AD',   # soft hyphen (Chrome hyphenates with the hyphen glyph)
+                   'U+201B'}   # reversed-9 quote: unused in Bulgarian
 
 
 def run_checks(report):
-    """The spec's CI checks (section 3.2): equal digit advances and the BGR forms present,
-    plus coverage, the kept features and the first-load budget."""
+    """The spec's checks (section 3.1): the Bulgarian forms present and reached only
+    through cyrl/BGR, lining figures by default and equal tabular ones, the kept
+    features, the coverage and the 90 KiB budget."""
     problems = []
     for fam, d in report['families'].items():
-        miss = set(d['missing_from_requested']) - ALLOWED_MISSING
+        miss = set(d['missing_from_requested']) - ALLOWED_MISSING - FAMILIES[fam].get('allowed_missing', set())
         if miss:
             problems.append(f'{fam}: requested code points missing: {sorted(miss)}')
         bgr = d['bgr']
-        if bgr['bgr_substitutions'] < 15 or bgr['identical_outlines']:
-            problems.append(f'{fam}: Bulgarian forms missing or identical ({bgr})')
+        lost = sorted(set(FAMILIES[fam]['bg_letters']) - set(bgr['letters_with_bg_forms']))
+        if lost:
+            problems.append(f'{fam}: Bulgarian forms missing for {"".join(lost)} ({bgr})')
         gsub, gpos = d['features_by_script']['GSUB'], d['features_by_script']['GPOS']
         if 'locl' not in gsub.get('cyrl/BGR', []) or 'locl' in gsub.get('cyrl/dflt', []):
             problems.append(f'{fam}: locl must be reachable through cyrl/BGR only')
@@ -1010,7 +947,7 @@ def run_checks(report):
                 if not row[key]:
                     problems.append(f'{fam}: digits {key} false at wght {row["wght"]}')
     if not report['first_load']['within_budget']:
-        problems.append(f'first-load fonts {report["first_load"]["bytes"]} B exceed 90 kB')
+        problems.append(f'the three faces, {report["first_load"]["bytes"]} B, exceed 90 KiB')
     return problems
 
 

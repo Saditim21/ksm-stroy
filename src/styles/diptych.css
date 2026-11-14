@@ -96,11 +96,13 @@
   }
 
   /* The ground of a page M2 has not rebuilt yet (src/root.jsx, the route
-     handle's `legacy`): production's light page, its text colour and its
-     fonts, as production shows them. */
+     handle's `legacy`): production's light page, with the text colour, face
+     and leading it had before the site turned dark (the legacy sans stack,
+     Preflight's 1.5), so its layout stays as it was. */
   .legacy-ground {
     background: #fafafa;
     color: #1a1a1a;
     font-family: theme(fontFamily.sans);
+    line-height: 1.5;
   }
 }
