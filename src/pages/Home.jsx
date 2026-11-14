@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 import HeroCarousel from '../components/ui/HeroCarousel'
-import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import EuPosterSection from '../components/EuPosterSection'
-import { seoData, generateStructuredData } from '../utils/seo'
+import { pageMeta } from '../seo/meta'
+import { seoData } from '../utils/seo'
 import img001 from '../assets/home/optimized/001.webp'
 import img003 from '../assets/images/003.webp'
 import imgPhoto4 from '../assets/home/optimized/photo-4.webp'
@@ -35,23 +35,13 @@ const Home = () => {
     { number: "100%", label: "Качество и гаранция" }
   ]
 
-  // Generate structured data for homepage
-  const organizationStructuredData = generateStructuredData('organization')
-
   return (
     <>
-      <SEO 
-        title={seoData.home.title}
-        description={seoData.home.description}
-        keywords={seoData.home.keywords}
-        ogTitle={seoData.home.ogTitle}
-        ogImage={seoData.home.ogImage}
-        structuredData={organizationStructuredData}
-      />
-      
-      <motion.main 
+      {/* initial={false}: the prerendered HTML shows the page in its final
+          state, not hidden until the JS runs. */}
+      <motion.main
         className="min-h-screen"
-        initial="initial"
+        initial={false}
         animate="in"
         exit="out"
         variants={pageVariants}
@@ -180,3 +170,11 @@ const Home = () => {
 }
 
 export default Home
+
+// The page's head (root.jsx <Meta/>).
+export const meta = () => pageMeta({
+  title: seoData.home.title,
+  description: seoData.home.description,
+  path: '/',
+  image: seoData.home.ogImage,
+})

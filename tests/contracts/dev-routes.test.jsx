@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from './site'
 
 // /dev/tracer is the polygon tracer for the explorer maps (src/data/maps), a
-// tool for whoever edits the maps. src/App.jsx routes it only when
+// tool for whoever edits the maps. src/routes.js routes it only when
 // import.meta.env.DEV is true, so the dev server has it and ksmstroy.com does
-// not. scripts/check-dist.mjs fails the build check if it reaches dist/.
+// not. scripts/check-dist.mjs fails the build check if it reaches the build.
 
 // vi.unstubAllEnvs() would also undo the blank sheet URLs of src/test/setup.js,
 // so DEV is put back by hand.
@@ -30,17 +30,13 @@ it('/dev/tracer opens the map tracer under the dev server', async () => {
 }, 30000)
 
 it('a production build has no /dev/tracer route', async () => {
-  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
   vi.stubEnv('DEV', false)
   vi.resetModules()
-  const { default: App } = await import('../../src/App')
+  const site = await import('./site')
 
-  window.history.replaceState(null, '', '/dev/tracer')
-  render(<App />)
+  site.renderSiteAt('/dev/tracer')
 
-  // React Router reports a URL that matches no route.
-  await waitFor(() => {
-    expect(warn.mock.calls.flat().join(' ')).toMatch(/No routes matched location "\/dev\/tracer"/)
-  }, { timeout: 15000 })
+  // The URL matches no page, so it shows the 404 page.
+  expect(await screen.findByRole('heading', { name: 'Тази страница я няма в чертежа.' }, { timeout: 15000 })).toBeInTheDocument()
   expect(screen.queryByText(/Изберете изображение/)).not.toBeInTheDocument()
 }, 30000)

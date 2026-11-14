@@ -17,10 +17,19 @@ const OptimizedImage = ({
   onError,
   ...props
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false)
+  // A priority image is the page's opening picture: the prerendered HTML shows
+  // it at once instead of fading it in after the JS runs.
+  const [isLoaded, setIsLoaded] = useState(priority)
   const [isError, setIsError] = useState(false)
   const [imageSrc, setImageSrc] = useState(priority ? src : null)
   const imgRef = useRef()
+
+  // A prerendered <img> can finish loading before hydration attaches onLoad,
+  // and React then never sees its load event: check once it is in the DOM.
+  useEffect(() => {
+    const img = imgRef.current?.querySelector('img')
+    if (img?.complete && img.naturalWidth > 0) setIsLoaded(true)
+  }, [imageSrc])
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -141,7 +150,7 @@ const OptimizedImage = ({
           width={width}
           height={height}
           loading={priority ? 'eager' : loading}
-          fetchpriority={fetchPriority || (priority ? 'high' : undefined)}
+          fetchPriority={fetchPriority || (priority ? 'high' : undefined)}
           className={`transition-opacity duration-300 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           } ${className}`}

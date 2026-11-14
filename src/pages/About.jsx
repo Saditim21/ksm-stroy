@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, EffectFade } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-fade'
+import { pageMeta } from '../seo/meta'
 import { seoData } from '../utils/seo'
 import slider01 from '../assets/images/slider01.webp'
 import slider02 from '../assets/images/slider02.webp'
@@ -15,7 +15,9 @@ import traditions from '../assets/images/traditions.webp'
 import hotelParadise from '../assets/projects/Хотел Парадайс - с.Огняново/45263613_104668413873023_2147464397956579328_n.webp'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
-// Move AnimatedCounter outside the component to prevent re-renders
+// Move AnimatedCounter outside the component to prevent re-renders.
+// Until it first counts up it shows its real value, so the prerendered HTML
+// reads "15+", not "0+".
 const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }) => {
   const [count, setCount] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
@@ -42,7 +44,7 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={false}
       whileInView={{ opacity: 1 }}
       viewport={{ once: false, amount: 0.3 }}
       onViewportEnter={() => setIsVisible(true)}
@@ -50,7 +52,7 @@ const AnimatedCounter = React.memo(({ end, duration = 2000, suffix = "", label }
       className="text-center"
     >
       <div className="text-5xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent">
-        {hasAnimated ? count : 0}{suffix}
+        {hasAnimated ? count : end}{suffix}
       </div>
       <p className="text-gray-300 text-sm mt-2 font-medium">{label}</p>
     </motion.div>
@@ -114,27 +116,22 @@ const About = () => {
 
 
   return (
+    // initial={false} here and throughout the hero: the prerendered HTML shows
+    // the page in its final state, not hidden until the JS runs. (A parent's
+    // initial={false} does not reach a child with an `initial` of its own.)
     <motion.div
-      initial="initial"
+      initial={false}
       animate="in"
       exit="out"
       variants={pageVariants}
       transition={pageTransition}
     >
-      <SEO 
-        title={seoData.about.title}
-        description={seoData.about.description}
-        keywords={seoData.about.keywords}
-        ogTitle={seoData.about.ogTitle}
-        ogImage={seoData.about.ogImage}
-      />
-      
       <main className="min-h-screen">
 
       {/* Hero Section - Eye-catching & Smooth */}
       <motion.section
         className="relative min-h-[calc(100svh-var(--header-h))] md:h-screen flex items-center justify-center overflow-hidden"
-        initial={{ opacity: 0 }}
+        initial={false}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
       >
@@ -204,7 +201,7 @@ const About = () => {
         <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white safe-x safe-b">
           <motion.div
             variants={staggerContainer}
-            initial="initial"
+            initial={false}
             animate="animate"
           >
             {/* Enhanced Title with Text Shadow */}
@@ -216,7 +213,7 @@ const About = () => {
               }}
             >
               <motion.span
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="block"
@@ -225,7 +222,7 @@ const About = () => {
               </motion.span>
               <motion.span
                 className="block mt-2 relative"
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
@@ -235,7 +232,7 @@ const About = () => {
                 {/* Animated underline */}
                 <motion.div
                   className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent rounded-full"
-                  initial={{ width: 0, opacity: 0 }}
+                  initial={false}
                   animate={{ width: '80%', opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.8 }}
                 />
@@ -244,7 +241,7 @@ const About = () => {
 
             {/* Enhanced Description with Better Contrast */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
               className="relative"
@@ -273,7 +270,7 @@ const About = () => {
               {stats.map((stat, index) => (
                 <motion.div
                   key={`stat-${stat.label}-${stat.number}`}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={false}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
                   whileHover={{
@@ -310,7 +307,7 @@ const About = () => {
         {/* Enhanced Scroll Indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
         >
@@ -341,7 +338,7 @@ const About = () => {
         {/* Enhanced Progress Indicators */}
         <motion.div
           className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 flex gap-4"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
         >
@@ -883,3 +880,11 @@ const About = () => {
 }
 
 export default About
+
+// The page's head (root.jsx <Meta/>).
+export const meta = () => pageMeta({
+  title: seoData.about.title,
+  description: seoData.about.description,
+  path: '/about',
+  image: seoData.about.ogImage,
+})

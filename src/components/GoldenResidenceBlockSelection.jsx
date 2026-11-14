@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { pageMeta } from '../seo/meta';
 
 // Gallery Images
 import galleryImage1 from '../assets/продажби/project 2/photos/golden-residence-1.webp';
@@ -377,3 +378,10 @@ const GoldenResidenceBlockSelection = () => {
 };
 
 export default GoldenResidenceBlockSelection;
+
+// The page's head (root.jsx <Meta/>).
+export const meta = () => pageMeta({
+  title: 'Golden Residence - KSM Stroy',
+  description: 'Golden Residence в жк Левски Г, ул. Ген. Климент Бояджиев, гр. София: блок А и блок Б, по 96 апартамента на 8 етажа.',
+  path: '/projects/golden-residence',
+});

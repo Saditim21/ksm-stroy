@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
-import SEO from '../components/common/SEO'
 import OptimizedImage from '../components/ui/OptimizedImage'
-import { seoData } from '../utils/seo'
+import { pageMeta } from '../seo/meta'
 import { pageVariants, pageTransition, fadeInUp, staggerContainer, staggerItem, hoverLift, viewportOptions } from '../utils/animations'
 
 // Import project images
@@ -272,14 +271,6 @@ const Projects = () => {
 
   return (
     <>
-      <SEO 
-        title="Обекти - KSM Stroy"
-        description="Разгледайте нашите успешно реализирани строителни проекти - жилищни комплекси, хотелски комплекси и санирания."
-        keywords="проекти, обекти, строителство, жилищни комплекси, хотелски комплекси"
-        ogTitle="Обекти - KSM Stroy"
-        ogImage={projects[0]?.images[0]}
-      />
-      
       <main className="min-h-screen bg-primary-50 pt-20">
 
       {/* Project Filter - Compact Segmented Control */}
@@ -779,3 +770,12 @@ const ProjectCard = ({ project, index, onClick }) => {
 }
 
 export default Projects
+
+// The page's head (root.jsx <Meta/>): production's strings for this page, and
+// its first project's photo, as before.
+export const meta = () => pageMeta({
+  title: 'Обекти - KSM Stroy',
+  description: 'Разгледайте нашите успешно реализирани строителни проекти - жилищни комплекси, хотелски комплекси и санирания.',
+  path: '/blog',
+  image: greenLife1,
+})

@@ -9,8 +9,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Smooth scrolling */
-    scroll-behavior: smooth;
+    /* No `scroll-behavior: smooth`: it turns <ScrollRestoration/>'s
+       window.scrollTo on a route change into an animation, so the new page
+       lands mid-way down (React Router spike, gotcha 10). */
     /* Prevent overscroll bounce/refresh effect */
     overscroll-behavior: none;
     overscroll-behavior-y: none;
@@ -145,5 +146,22 @@ html, body, #root {
   }
   to {
     transform: scale(1.12);
+  }
+}
+
+/* Route change: a 260 ms crossfade of the outlet (spec §5.3). root.jsx keys a
+   React <ViewTransition enter="page-in" exit="page-out"> on the pathname, so
+   the old page leaves and the new one arrives in one view transition; the
+   browser's own fade-out and fade-in run at this duration. */
+::view-transition-old(.page-out),
+::view-transition-new(.page-in) {
+  animation-duration: 260ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

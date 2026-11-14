@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
-import SEO from '../components/common/SEO'
+import { pageMeta } from '../seo/meta'
 import { seoData } from '../utils/seo'
 import { pageVariants, pageTransition, fadeInUp, buttonExpand, viewportOptions } from '../utils/animations'
 
@@ -187,17 +187,11 @@ const Contact = () => {
 
   return (
     <>
-      <SEO 
-        title={seoData.contact.title}
-        description={seoData.contact.description}
-        keywords={seoData.contact.keywords}
-        ogTitle={seoData.contact.ogTitle}
-        ogImage={seoData.contact.ogImage}
-      />
-      
-      <motion.main 
+      {/* initial={false}: the prerendered HTML shows the page in its final
+          state, not hidden until the JS runs. */}
+      <motion.main
         className="min-h-screen pt-6"
-        initial="initial"
+        initial={false}
         animate="in"
         exit="out"
         variants={pageVariants}
@@ -531,3 +525,11 @@ const Contact = () => {
 }
 
 export default Contact
+
+// The page's head (root.jsx <Meta/>).
+export const meta = () => pageMeta({
+  title: seoData.contact.title,
+  description: seoData.contact.description,
+  path: '/contact',
+  image: seoData.contact.ogImage,
+})

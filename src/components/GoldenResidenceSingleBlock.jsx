@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
+import { pageMeta } from '../seo/meta';
 import { buildingImages, getGoldenResidenceImage } from '../constants/buildingImages';
 import { useApartments } from '../context/ApartmentContext';
 import { normalizeStatus } from '../utils/propertyStatus';
@@ -1636,3 +1637,14 @@ const GoldenResidenceSingleBlock = () => {
 };
 
 export default GoldenResidenceSingleBlock;
+
+// The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
+// the page itself does.
+export const meta = ({ params }) => {
+  const letter = params.block === 'block-a' ? 'А' : 'Б';
+  return pageMeta({
+    title: `Golden Residence, блок ${letter} - KSM Stroy`,
+    description: `Етажите и апартаментите на Golden Residence, блок ${letter}: 96 апартамента на 8 етажа в жк Левски Г, гр. София.`,
+    path: `/projects/golden-residence/${params.block}`,
+  });
+};

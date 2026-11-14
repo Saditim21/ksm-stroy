@@ -1,10 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import OptimizedImage from './OptimizedImage'
 import { useApartments } from '../../context/ApartmentContext'
 import goldenResidence from '../../assets/home/optimized/001.webp'
 import mnogoamilna from '../../assets/home/optimized/photo-4.webp'
+
+// Golden Residence's live counts until the sheets arrive: the prerendered HTML
+// and the first client render show this, never a stale built-in count.
+const PENDING = { total: '—', available: '—', reserved: '—', sold: '—' }
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -43,10 +47,10 @@ const HeroCarousel = () => {
     {
       name: "Golden Residence",
       location: "жк ЛЕВСКИ Г | ул. Ген. Климент Бояджиев",
-      apartments: goldenResidenceStats.apartments,
-      garages: goldenResidenceStats.garages
+      apartments: loading ? PENDING : goldenResidenceStats.apartments,
+      garages: loading ? PENDING : goldenResidenceStats.garages
     }
-  ], [goldenResidenceStats])
+  ], [goldenResidenceStats, loading])
 
   // Get current building data
   const currentBuilding = buildingData[currentSlide]
@@ -82,9 +86,11 @@ const HeroCarousel = () => {
 
   return (
     <section className="relative h-screen overflow-hidden">
-      {/* Carousel Images */}
+      {/* Carousel Images. initial={false} on the three AnimatePresence: the
+          first slide is in the prerendered HTML in its final state, and only
+          later slides animate in. */}
       <div className="absolute inset-0">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentSlide}
             className="absolute inset-0 overflow-hidden"
@@ -119,7 +125,7 @@ const HeroCarousel = () => {
             
             {/* Left Content - Text */}
             <div className="lg:col-span-7 text-center lg:text-left px-2 sm:px-0">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={currentSlide}
                   initial={{ opacity: 0, x: -50 }}
@@ -179,7 +185,7 @@ const HeroCarousel = () => {
 
             {/* Right Content - Apartment Availability Box */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end mt-4 sm:mt-6 lg:mt-0">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={currentSlide}
                   className="bg-white/95 backdrop-blur-md rounded-xl sm:rounded-luxury-lg p-3 sm:p-5 lg:p-6 shadow-luxury-lg border border-silver-200 max-w-[calc(100%-1rem)] sm:max-w-sm lg:max-w-md w-full mx-2 sm:mx-0"

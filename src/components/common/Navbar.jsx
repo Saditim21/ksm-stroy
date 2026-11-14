@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router'
 import logo from '../../assets/images/logo.webp'
+import { normalizePathname } from '../../utils/pathname'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const location = useLocation()
+  // The prerendered HTML is rendered at /about/, the browser hydrates /about.
+  const pathname = normalizePathname(useLocation().pathname)
 
   const navItems = [
     { path: '/', label: 'Начало' },
@@ -41,14 +43,14 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   className={`px-3 py-2 text-sm font-medium transition-all duration-200 relative group ${
-                    location.pathname === item.path
+                    pathname === item.path
                       ? 'text-gold-400'
                       : 'text-platinum-300 hover:text-gold-400'
                   }`}
                 >
                   {item.label}
                   {/* Active indicator */}
-                  {location.pathname === item.path && (
+                  {pathname === item.path && (
                     <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-gold-400 to-gold-600 rounded-full"></span>
                   )}
                   {/* Hover indicator */}
@@ -129,7 +131,7 @@ const Navbar = () => {
                 to={item.path}
                 onClick={() => setIsOpen(false)}
                 className={`block mx-2 px-4 py-3.5 text-base font-medium rounded-xl transition-all duration-200 ${
-                  location.pathname === item.path
+                  pathname === item.path
                     ? 'bg-gradient-to-r from-gold-100 to-gold-50 text-gold-700 border-l-4 border-gold-500 pl-5'
                     : 'text-gray-800 hover:bg-gray-100 active:bg-gray-200'
                 }`}
@@ -139,7 +141,7 @@ const Navbar = () => {
               >
                 <span className="flex items-center justify-between">
                   {item.label}
-                  {location.pathname === item.path && (
+                  {pathname === item.path && (
                     <svg className="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>

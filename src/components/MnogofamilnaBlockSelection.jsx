@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { pageMeta } from '../seo/meta';
 import blockAImage from '../assets/продажби/project 1/block-A/blockA.webp';
 import blockBImage from '../assets/продажби/project 1/block-B/blockB.webp';
 
@@ -444,3 +445,10 @@ const MnogofamilnaBlockSelection = () => {
 };
 
 export default MnogofamilnaBlockSelection;
+
+// The page's head (root.jsx <Meta/>).
+export const meta = () => pageMeta({
+  title: 'Многофамилна жилищна сграда - KSM Stroy',
+  description: 'Многофамилна жилищна сграда в ж.к. Връбница-1, гр. София: блок А и блок Б, по 72 апартамента на 9 етажа.',
+  path: '/projects/mnogofamilna-sgrada',
+});

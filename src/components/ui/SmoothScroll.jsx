@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import Lenis from 'lenis'
 import useMotionAllowed from '../../hooks/useMotionAllowed'
 import { gsap, ScrollTrigger } from '../../utils/gsap'

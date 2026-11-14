@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react'
 import { act, render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router'
 import { vi } from 'vitest'
 import useScrollLock from '../../hooks/useScrollLock'
 import { LENIS_OPTIONS } from '../../utils/smoothScroll'

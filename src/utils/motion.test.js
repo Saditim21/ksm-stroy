@@ -21,7 +21,7 @@ test('MD_UP is the 768px md breakpoint', () => {
 test('no source file but motion.js spells the md query out', () => {
   const sources = import.meta.glob(['../**/*.{js,jsx}', '!../**/*.test.{js,jsx}', '!../test/**'], { query: '?raw', import: 'default', eager: true })
   // The glob reaches the whole of src/, not just this folder.
-  expect(Object.keys(sources)).toEqual(expect.arrayContaining(['./motion.js', '../App.jsx', '../main.jsx']))
+  expect(Object.keys(sources)).toEqual(expect.arrayContaining(['./motion.js', '../root.jsx', '../routes.js']))
   const spelled = Object.keys(sources).filter((path) => path !== './motion.js' && sources[path].includes('(min-width: 768px)'))
   expect(spelled).toEqual([])
 })

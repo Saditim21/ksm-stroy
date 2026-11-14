@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import SEO from '../components/common/SEO'
+import { useNavigate, Link } from 'react-router'
 import OptimizedImage from '../components/ui/OptimizedImage'
 import PropertyCard from '../components/ui/PropertyCard'
 import FourTowersFloorMap, { FLOOR_DATA } from '../components/FourTowersFloorMap'
 import ApartmentDetailsModal from '../components/ApartmentDetailsModal'
-import { seoData } from '../utils/seo'
+import { pageMeta } from '../seo/meta'
 import { properties, filters } from '../constants/properties'
 import { buildingImages, getBuildingImage, getGoldenResidenceImage } from '../constants/buildingImages'
 import GoldenResidenceFloorMap from '../components/GoldenResidenceFloorMap'
@@ -208,14 +207,6 @@ const Sales = () => {
 
   return (
     <>
-      <SEO 
-        title="Продажби - KSM Stroy"
-        description="Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София."
-        keywords="продажби, апартаменти, имоти, новостроящи се, София"
-        ogTitle="Продажби - KSM Stroy"
-        ogImage={properties[0]?.images[0]}
-      />
-      
       <main className="min-h-screen bg-primary-50">
 
 
@@ -1179,6 +1170,17 @@ const BuildingView = ({ buildingData, hoveredFloor, setHoveredFloor, selectedFlo
   )
 }
 
+// The particle effect's twenty sparkles, scattered by fixed low-discrepancy
+// sequences rather than Math.random() in render: render must be pure, and a
+// prerendered page must hydrate to the same markup it was built with.
+const fraction = (x) => x - Math.floor(x)
+const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+  left: `${(fraction(0.5 + i * 0.7548776662) * 100).toFixed(1)}%`,
+  top: `${(fraction(0.5 + i * 0.5698402910) * 100).toFixed(1)}%`,
+  animationDelay: `${(fraction(i * 0.6180339887) * 3).toFixed(2)}s`,
+  animationDuration: `${(2 + fraction(i * 0.4142135624) * 2).toFixed(2)}s`,
+}))
+
 // Creative Mobile Project View - Interactive Building Explorer
 const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentSelect, hoveredFloor, setHoveredFloor }) => {
   const [viewMode, setViewMode] = useState('explore') // 'explore', 'floors', 'apartments'
@@ -1451,16 +1453,11 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
       
       {/* Subtle Particle Effect */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {PARTICLES.map((style, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-gold-400/30 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
+            style={style}
           />
         ))}
       </div>
@@ -1469,3 +1466,12 @@ const MobileProjectView = ({ project, buildingImage, onFloorSelect, onApartmentS
 }
 
 export default Sales
+
+// The page's head (root.jsx <Meta/>): production's strings for this page, and
+// its first property's photo, as before.
+export const meta = () => pageMeta({
+  title: 'Продажби - KSM Stroy',
+  description: 'Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София.',
+  path: '/projects',
+  image: properties[0].images[0],
+})

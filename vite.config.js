@@ -1,48 +1,41 @@
+import { reactRouter } from '@react-router/dev/vite'
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
+// The React Router plugin builds the site from src/routes.js and
+// react-router.config.js, and brings its own JSX transform and React Refresh
+// in place of @vitejs/plugin-react. Tailwind runs through postcss.config.js,
+// which Vite picks up on its own.
+//
+// Vitest loads this file too. The React Router plugin must not run there (the
+// tests fail with "React Router Vite plugin can't detect preamble"), so tests
+// get plain Vite with the automatic JSX runtime instead.
+const isVitest = process.env.VITEST === 'true'
+
 export default defineConfig({
-  plugins: [
-    react(),
-  ],
-  define: {
-    __DEV__: process.env.NODE_ENV === 'development'
+  plugins: [!isVitest && reactRouter()],
+  esbuild: {
+    // No license comments in the bundles.
+    legalComments: 'none',
+    ...(isVitest && { jsx: 'automatic' }),
   },
+  // Dev server only. Vite would otherwise discover these on the first visit to
+  // a page that imports them, re-optimize and reload; a page hydrating during
+  // that reload mixes two copies of React ("Invalid hook call").
   optimizeDeps: {
     include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'framer-motion',
-      '@emailjs/browser',
-      'react-hook-form'
-    ]
+      'framer-motion', 'swiper/react', 'swiper/modules', 'react-hook-form', '@emailjs/browser',
+      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', '@gsap/react', 'lenis', '@vercel/analytics/react',
+    ],
   },
+  // No manualChunks: React Router splits the build per route.
   build: {
     target: 'es2020',
     assetsInlineLimit: 4096,
     reportCompressedSize: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'framer': ['framer-motion'],
-          'swiper': ['swiper'],
-        }
-      }
-    }
   },
   server: {
     host: true,
-    port: 3000
-  },
-  esbuild: {
-    // Tree-shake unused imports in dev mode  
-    treeShaking: true,
-    // Remove unused code in development for faster builds
-    legalComments: 'none'
+    port: 3000,
   },
   // Vitest. tests/ holds the production contract tests; api/ must never hold
   // a test, because Vercel deploys every file in api/ as a serverless function.
@@ -52,5 +45,5 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.js'],
     include: ['src/**/*.test.{js,jsx}', 'tests/**/*.test.{js,jsx}'],
     css: false,
-  }
+  },
 })

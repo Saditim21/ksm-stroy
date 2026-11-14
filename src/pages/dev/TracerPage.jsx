@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { polygonToPoints, polygonCentroid } from '../../utils/buildingMaps'
 import useZoomPan from '../../components/explorer/useZoomPan'
+import { pageMeta } from '../../seo/meta'
 
 // Dev-only tracing editor (spec §5). Draw/edit polygon shapes over any image,
 // tag them as floors or apartments, import/export map JSON.
@@ -178,3 +179,10 @@ export default function TracerPage() {
     </div>
   )
 }
+
+// The head under the dev server: a production build has no such page.
+export const meta = () => pageMeta({
+  title: 'Tracer (dev) - KSM Stroy',
+  description: 'Dev-only polygon tracer for the explorer maps (src/data/maps).',
+  path: '/dev/tracer',
+})

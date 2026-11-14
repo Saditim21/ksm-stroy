@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
+import { pageMeta } from '../seo/meta';
 import { FLOOR_DATA } from './FourTowersFloorMap';
 import buildingAllFloorsArchitectureImage from '../assets/продажби/project 1/building-all-floors-architecture.webp';
 
@@ -933,3 +934,14 @@ const MnogofamilnaSingleBlock = () => {
 };
 
 export default MnogofamilnaSingleBlock;
+
+// The page's head (root.jsx <Meta/>). Any block but block-a shows блок Б, as
+// the page itself does.
+export const meta = ({ params }) => {
+  const letter = params.block === 'block-a' ? 'А' : 'Б';
+  return pageMeta({
+    title: `Многофамилна жилищна сграда, блок ${letter} - KSM Stroy`,
+    description: `Етажите и апартаментите на многофамилната жилищна сграда в ж.к. Връбница-1, гр. София, блок ${letter}: 72 апартамента на 9 етажа.`,
+    path: `/projects/mnogofamilna-sgrada/${params.block}`,
+  });
+};

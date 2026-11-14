@@ -1,14 +1,15 @@
 #!/usr/bin/env node
-// Checks the production build in dist/ (run `npm run build` first).
+// Checks the production build in build/client/ (run `npm run build` first).
 //
-// 1. Fails when any file in dist/ carries the branding of the agency that
-//    built the Golden Residence landing (golden-residence @944bb03): its name,
-//    its domain or its phone number. Parts of that site are ported into this
-//    one, and none of its branding may reach ksmstroy.com. Before it scans
-//    dist/, it checks itself against planted files (PLANTED).
-// 2. Fails when dev-only code reaches dist/: the /dev/tracer polygon tracer is
-//    routed only under the dev server (import.meta.env.DEV in src/App.jsx).
-// 3. Prints the total gzip size of the JavaScript in dist/assets, for
+// 1. Fails when any file in build/client/ carries the branding of the agency
+//    that built the Golden Residence landing (golden-residence @944bb03): its
+//    name, its domain or its phone number. Parts of that site are ported into
+//    this one, and none of its branding may reach ksmstroy.com. Before it
+//    scans build/client/, it checks itself against planted files (PLANTED).
+// 2. Fails when dev-only code reaches build/client/: the /dev/tracer polygon
+//    tracer is routed only under the dev server (import.meta.env.DEV in
+//    src/routes.js).
+// 3. Prints the total gzip size of the JavaScript in build/client/assets, for
 //    information only.
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
@@ -17,7 +18,8 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
-const DIST = join(ROOT, 'dist')
+// React Router's build output: what the host serves.
+const DIST = join(ROOT, 'build', 'client')
 
 // "dianahomes", "Diana Homes", "893 951 010", "893951010" and their close
 // spellings (any case; a space, dot, dash or non-breaking space inside, which
@@ -43,7 +45,7 @@ const TEXT_FILE = /\.(html|js|css|json|txt|xml|svg)$/i
 // Files the branding scan must catch: the agency's name and phone with
 // non-breaking spaces (U+00A0, and the narrow U+202F) in UTF-8 text, and its
 // domain inside a binary. A change to the patterns or to the decoding that
-// would miss one of them fails the check before dist/ is scanned.
+// would miss one of them fails the check before build/client/ is scanned.
 const PLANTED = [
   { name: 'planted.html', bytes: Buffer.from('<p>Diana\u00a0Homes</p>', 'utf8') },
   { name: 'planted.js', bytes: Buffer.from('const phone = "+359\u00a0893\u00a0951\u00a0010"', 'utf8') },
@@ -90,7 +92,7 @@ try {
   if (!statSync(DIST).isDirectory()) throw new Error('not a directory')
   files = filesUnder(DIST)
 } catch {
-  console.error('check:dist: dist/ not found. Run `npm run build` first.')
+  console.error('check:dist: build/client/ not found. Run `npm run build` first.')
   process.exit(1)
 }
 
@@ -103,7 +105,7 @@ for (const file of files) {
   scan(DEV_ONLY, name, content, devCode)
 }
 
-// dist/assets/*.js: the bundles directly in dist/assets.
+// build/client/assets/*.js: the bundles directly in build/client/assets.
 const scripts = files.filter((file) => {
   const parts = relative(DIST, file).split(sep)
   return parts.length === 2 && parts[0] === 'assets' && parts[1].endsWith('.js')
@@ -111,8 +113,8 @@ const scripts = files.filter((file) => {
 const raw = scripts.reduce((sum, file) => sum + statSync(file).size, 0)
 const gzip = scripts.reduce((sum, file) => sum + gzipSync(readFileSync(file)).length, 0)
 
-console.log(`check:dist: ${files.length} files in dist/`)
-console.log(`check:dist: dist/assets/*.js: ${scripts.length} files, ${formatKiB(raw)} raw, ${formatKiB(gzip)} gzip`)
+console.log(`check:dist: ${files.length} files in build/client/`)
+console.log(`check:dist: build/client/assets/*.js: ${scripts.length} files, ${formatKiB(raw)} raw, ${formatKiB(gzip)} gzip`)
 
 if (leaks.length > 0) {
   console.error('check:dist: FAILED, agency branding found in the build:')
@@ -124,4 +126,4 @@ if (devCode.length > 0) {
 }
 if (leaks.length > 0 || devCode.length > 0) process.exit(1)
 
-console.log('check:dist: OK, no agency branding and no dev-only code in dist/')
+console.log('check:dist: OK, no agency branding and no dev-only code in build/client/')

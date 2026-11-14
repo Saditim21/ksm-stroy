@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# React Router framework mode: the build output and generated route types
+/build
+/.react-router/
+
 # Map previews from scripts/render-floor-overlay.mjs (regenerable, not source)
 scripts/.preview/
 
