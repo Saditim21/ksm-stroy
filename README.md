@@ -81,7 +81,9 @@ pages still animate with framer-motion; Lenis runs on every page, and
   `<ScrollRestoration/>` sets the position (the top, a saved position on Back,
   a `#hash` target), and `src/motion/LenisScrollSync.jsx` hands it to Lenis at
   once (`immediate`, so a fling still gliding cannot carry the new page down),
-  then has ScrollTrigger re-measure after the view transition. Lenis
+  after Lenis has measured the new page (it clamps every jump to the last page
+  height it measured), then has ScrollTrigger re-measure after the view
+  transition. Lenis
   overwrites a native scroll mid-fling, so anything else that scrolls the
   page goes through it while it runs: `getLenis()` (`src/utils/lenis.js`),
   `scrollToId()` (`src/utils/scroll.js`), `useScrollLock()`.

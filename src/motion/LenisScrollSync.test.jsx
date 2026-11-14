@@ -1,5 +1,5 @@
 import { act, render } from '@testing-library/react'
-import { MemoryRouter, useNavigate } from 'react-router'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router'
 import { vi } from 'vitest'
 
 // LenisScrollSync gives a route change's scroll position to Lenis, and has
@@ -69,7 +69,7 @@ describe('the scroll position', () => {
   // scroll lock has stopped, since the page holding the lock releases it only
   // in a passive effect, after this one.
   test('each navigation hands Lenis the position the router scrolled to, at once', () => {
-    const lenis = { scrollTo: vi.fn() }
+    const lenis = { dimensions: { resize: vi.fn() }, scrollTo: vi.fn() }
     lenisHandle.setLenis(lenis)
     renderSync('/')
     lenis.scrollTo.mockClear()
@@ -93,6 +93,7 @@ describe('the scroll position', () => {
       targetScroll,
       isScrolling: 'smooth',
       isStopped: false,
+      dimensions: { resize: vi.fn() },
       scrollTo: vi.fn((target, { force = false } = {}) => {
         if (lenis.isStopped && !force) return
         if (target === lenis.targetScroll) return
@@ -135,6 +136,112 @@ describe('the scroll position', () => {
   test('without Lenis, the router\'s scroll stands alone', () => {
     renderSync('/')
     expect(() => go('/contact')).not.toThrow()
+  })
+})
+
+// Lenis 1.3 clamps every jump to how far the page could scroll when it last
+// measured (lenis.mjs: `clamp(0, target, this.limit)`, ahead of the immediate
+// branch), and an immediate jump writes the clamped value to the window. Lenis'
+// own observers re-measure 250 ms after the page changes, SmoothScroll's a frame
+// after; in the commit that swaps the page, Lenis still has the height of the
+// page being left. The router's position on a longer page (Back to a point deep
+// in it, a #hash target) can lie past that.
+describe('a position past where the page being left could scroll', () => {
+  // jsdom lays nothing out: the document is as tall as the rendered page says.
+  // With jsdom's 768 px window, Home scrolls 4832 px, /about 3332 px and
+  // /contact 1532 px.
+  const PAGE_HEIGHTS = { '/': 5600, '/about': 4100, '/contact': 2300 }
+  function Page() {
+    const { pathname } = useLocation()
+    return <main data-height={PAGE_HEIGHTS[pathname]} />
+  }
+  beforeEach(() => {
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      configurable: true,
+      get: () => Number(document.querySelector('main')?.dataset.height ?? 0),
+    })
+  })
+  afterEach(() => {
+    delete document.documentElement.scrollHeight
+  })
+
+  function renderPages(path) {
+    return render(
+      <MemoryRouter initialEntries={[path]}>
+        <Navigator />
+        <Page />
+        <LenisScrollSync />
+      </MemoryRouter>,
+    )
+  }
+
+  // Lenis 1.3 as far as a jump goes. It measures when it is created.
+  // `dimensions.resize()` measures and does nothing else (SmoothScroll's
+  // observer calls it); `resize()` measures and also takes the window's position
+  // as its own.
+  function measuringLenis({ publicDimensions = true } = {}) {
+    let limit = 0
+    const measure = () => { limit = document.documentElement.scrollHeight - window.innerHeight }
+    const lenis = {
+      targetScroll: window.scrollY,
+      isScrolling: false,
+      isStopped: false,
+      dimensions: publicDimensions ? { resize: measure } : undefined,
+      resize: () => {
+        measure()
+        lenis.targetScroll = window.scrollY
+      },
+      scrollTo: (target, { immediate = false, force = false } = {}) => {
+        if (lenis.isStopped && !force) return
+        const clamped = Math.min(Math.max(target, 0), limit)
+        if (clamped === lenis.targetScroll) return
+        lenis.targetScroll = clamped
+        if (immediate) scrolledTo(clamped)
+      },
+    }
+    measure()
+    return lenis
+  }
+
+  test('Back to a point deep in a longer page lands there', () => {
+    renderPages('/')
+    const lenis = measuringLenis()
+    lenisHandle.setLenis(lenis)
+    lenis.scrollTo(4000, { immediate: true })
+
+    scrolledTo(0)
+    go('/contact')
+    // A frame later, SmoothScroll's observer has measured /contact.
+    lenis.dimensions.resize()
+
+    // ScrollRestoration puts Home back 4000 px down.
+    scrolledTo(4000)
+    go(-1)
+    expect(window.scrollY).toBe(4000)
+    expect(lenis.targetScroll).toBe(4000)
+  })
+
+  test('a #hash target deep in a longer page stays in view', () => {
+    renderPages('/contact')
+    const lenis = measuringLenis()
+    lenisHandle.setLenis(lenis)
+
+    // ScrollRestoration has brought #team, 2600 px down /about, into view.
+    scrolledTo(2600)
+    go('/about#team')
+    expect(window.scrollY).toBe(2600)
+    expect(lenis.targetScroll).toBe(2600)
+  })
+
+  test('a Lenis without public dimensions measures through resize()', () => {
+    renderPages('/contact')
+    const lenis = measuringLenis({ publicDimensions: false })
+    lenisHandle.setLenis(lenis)
+
+    scrolledTo(2600)
+    go('/about#team')
+    expect(window.scrollY).toBe(2600)
+    expect(lenis.targetScroll).toBe(2600)
   })
 })
 
