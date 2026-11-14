@@ -141,6 +141,17 @@ test.each([
   await expect(svc.fetchGarageData('garages')).resolves.toBeNull()
 })
 
+// The same rule for an apartment tab (sheetsCore.js): without Статус every unit
+// would read as free; without Етаж or Апартамент no row names a unit.
+test.each([
+  ['Статус', 'Етаж,Апартамент,Вид,Застроена,Идеални,Обща,Изложение\n1,А 101,2-стаен,57.46,8.22,65.68,Юг'],
+  ['Апартамент', 'Етаж,Вид,Застроена,Идеални,Обща,Изложение,Статус\n1,2-стаен,57.46,8.22,65.68,Юг,Продаден'],
+  ['Етаж', 'Апартамент,Вид,Застроена,Идеални,Обща,Изложение,Статус\nА 101,2-стаен,57.46,8.22,65.68,Юг,Продаден'],
+])('fetchApartmentData falls back when the tab has no %s column', async (_column, body) => {
+  const svc = await loadServiceWithSheet('VITE_GOOGLE_SHEET_BLOCK_A', body)
+  await expect(svc.fetchApartmentData('blockA')).resolves.toBeNull()
+})
+
 // The Многофамилна sheets are optional: skipping them must not log twice a
 // page load (finding 5 of the M0 review).
 test('an unconfigured sheet is skipped silently, without a request', async () => {

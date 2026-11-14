@@ -12,9 +12,22 @@
  * The "Статус" column accepts four values (case and plural forms are tolerated):
  *   Свободен · Резервиран · Продаден · Блокиран
  * See src/utils/propertyStatus.js for how they are normalized and counted.
+ *
+ * The CSV parsing, the column guards and the column names are sheetsCore.js's,
+ * shared with the Vercel Function api/availability.js. This file adds the
+ * browser fetch, its cache and the shapes the legacy pages read.
  */
 
 import { normalizeStatus, summarizeStatuses } from '../utils/propertyStatus';
+import {
+  APARTMENT_COLUMNS,
+  SPOT_COLUMNS,
+  normalizeApartmentRow,
+  normalizeSpotRow,
+  parseCsv,
+  readTab,
+  toRows,
+} from './sheetsCore';
 
 // Replace this with your published Google Sheet CSV URL
 // Format: https://docs.google.com/spreadsheets/d/e/SPREADSHEET_ID/pub?gid=SHEET_ID&single=true&output=csv
@@ -41,78 +54,36 @@ const cache = {
 };
 
 /**
- * Parse CSV string into array of objects
+ * Parse CSV string into array of objects, keyed by the header row
  */
 export function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  if (lines.length < 2) return [];
-
-  // Parse header row
-  const headers = parseCSVLine(lines[0]);
-
-  // Parse data rows
-  const data = [];
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-    if (values.length === headers.length) {
-      const row = {};
-      headers.forEach((header, index) => {
-        row[header.trim()] = values[index].trim();
-      });
-      data.push(row);
-    }
-  }
-
-  return data;
+  return toRows(parseCsv(csvText));
 }
 
 /**
- * Parse a single CSV line, handling quoted values
- */
-function parseCSVLine(line) {
-  const values = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      values.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  values.push(current);
-
-  return values;
-}
-
-/**
- * Transform raw sheet data to apartment format
+ * Transform raw sheet data to apartment format: the rows parseCSV() gives, as
+ * the floor map the legacy pages read. The columns are read by
+ * normalizeApartmentRow(), so both readers of a tab agree on them.
  */
 export function transformToApartmentData(rawData) {
   const floorData = {};
 
-  rawData.forEach(row => {
-    const floor = parseInt(row['Етаж'] || row['Floor'] || '0', 10);
+  rawData.map(normalizeApartmentRow).forEach(row => {
+    const floor = parseInt(row.floor || '0', 10);
 
     if (!floorData[floor]) {
       floorData[floor] = [];
     }
 
     floorData[floor].push({
-      apartment: row['Апартамент'] || row['Apartment'] || '',
-      built: row['Застроена'] || row['Built'] || '',
-      ideal: row['Идеални'] || row['Ideal'] || '',
-      вид: row['Вид'] || row['Type'] || '',
-      total: row['Обща'] || row['Total'] || '',
-      изложение: row['Изложение'] || row['Exposure'] || '',
-      status: row['Статус'] || row['Status'],
-      цена: row['Цена'] || row['Price'] || '',
+      apartment: row.unit,
+      built: row.area.built,
+      ideal: row.area.ideal,
+      вид: row.type,
+      total: row.area.total,
+      изложение: row.exposure,
+      status: row.status,
+      цена: row.price,
     });
   });
 
@@ -176,8 +147,9 @@ export async function fetchApartmentData(block = 'blockA') {
 
   try {
     const csvText = await fetchSheetCSV(sheetUrl);
-    const rawData = parseCSV(csvText);
-    const apartmentData = transformToApartmentData(rawData);
+    // A body without the Етаж, Апартамент and Статус columns is not the tab:
+    // readTab() throws, and the caller falls back.
+    const apartmentData = transformToApartmentData(readTab(csvText, APARTMENT_COLUMNS));
 
     // A 200 that parses to nothing (Google serving an HTML error/login page,
     // an emptied tab) must behave like a failure — an empty {} is truthy and
@@ -224,20 +196,15 @@ export function calculateStats(floorData) {
  * Номер names no place (a blank line), so it is left out.
  */
 function transformToGarageData(rawData) {
-  return rawData.map(row => ({
-    number: row['Номер'] || row['Number'] || '',
-    built: row['Застроена'] || row['Built'] || '',
-    ideal: row['Идеални'] || row['Ideal'] || '',
-    total: row['Обща'] || row['Total'] || '',
-    type: row['Тип'] || row['Type'] || 'Гараж',
-    status: normalizeStatus(row['Статус'] || row['Status']),
-  })).filter(item => item.number !== '');
+  return rawData.map(normalizeSpotRow).filter(spot => spot.number !== '').map(spot => ({
+    number: spot.number,
+    built: spot.area.built,
+    ideal: spot.area.ideal,
+    total: spot.area.total,
+    type: spot.type || 'Гараж',
+    status: spot.status,
+  }));
 }
-
-// The columns a garage or parking tab must have. Sheet columns are never
-// renamed, so a body without them is not the tab: Google's HTML error page has
-// neither, and without Статус every place would read as free.
-const GARAGE_COLUMNS = ['Номер', 'Статус'];
 
 /**
  * Fetch garage or parking data from Google Sheets
@@ -256,13 +223,10 @@ export async function fetchGarageData(type = 'garages') {
 
   try {
     const csvText = await fetchSheetCSV(sheetUrl);
-    const header = parseCSVLine(csvText.trim().split('\n')[0]).map((name) => name.trim());
-    const missing = GARAGE_COLUMNS.filter((column) => !header.includes(column));
-    if (missing.length > 0) {
-      throw new Error(`Sheet response has no ${missing.join(' or ')} column`);
-    }
-
-    const garageData = transformToGarageData(parseCSV(csvText));
+    // Sheet columns are never renamed, so a body without Номер and Статус is
+    // not the tab: Google's HTML error page has neither, and without Статус
+    // every place would read as free. readTab() throws on it.
+    const garageData = transformToGarageData(readTab(csvText, SPOT_COLUMNS));
 
     // Same trap as above: [] is truthy, so an unparsable 200 would silently
     // replace the fallback list with nothing.

@@ -33,8 +33,8 @@ export default defineConfig([
     },
   },
   {
-    // The build config files run in Node.
-    files: ['*.config.js'],
+    // The build config files, and the Vercel Functions in api/, run in Node.
+    files: ['*.config.js', 'api/**/*.js'],
     languageOptions: { globals: globals.node },
   },
   {
