@@ -7,6 +7,7 @@ import Home from './Home'
 import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
+import Contact from './Contact'
 import GoldenResidenceBlockSelection from '../components/GoldenResidenceBlockSelection'
 import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 
@@ -43,6 +44,20 @@ test.each([
   const html = prerender(Page)
   expect(html).toContain(text)
   expect(hiddenElements(html)).toEqual([])
+})
+
+// Every page has its H1 in the HTML a visitor without JS gets (spec §6.7; the
+// smoke run checks it in the browser). These three had none on main either:
+// until M2 to M4 rebuild them, each names itself in a visually hidden H1, as
+// Home does, with its name in the menu.
+test.each([
+  { path: '/projects', Page: Projects, name: 'Продажби' },
+  { path: '/blog', Page: Blog, name: 'Обекти' },
+  { path: '/contact', Page: Contact, name: 'Контакти' },
+])('$path pre-renders one H1, $name', ({ Page, name }) => {
+  const headings = [...prerender(Page).matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)]
+    .map(([, inner]) => inner.replace(/<[^>]+>/g, '').trim())
+  expect(headings).toEqual([name])
 })
 
 // A lazy photo renders no <img> before the JS runs; its <noscript> fallback is

@@ -208,7 +208,9 @@ const Sales = () => {
   return (
     <>
       <main className="min-h-screen bg-primary-50">
-
+      {/* The page's H1 (spec §6.7), visually hidden as on Home: the page
+          shows no title of its own. */}
+      <h1 className="sr-only">Продажби</h1>
 
       {/* Property Filter */}
       <section

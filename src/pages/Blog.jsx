@@ -272,6 +272,9 @@ const Projects = () => {
   return (
     <>
       <main className="min-h-screen bg-primary-50 pt-20">
+      {/* The page's H1 (spec §6.7), visually hidden as on Home: the page
+          shows no title of its own. */}
+      <h1 className="sr-only">Обекти</h1>
 
       {/* Project Filter - Compact Segmented Control */}
       <section className="py-3 sm:py-6 lg:py-8 bg-gradient-to-br from-ivory-50 to-primary-50">
