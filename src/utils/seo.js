@@ -44,7 +44,7 @@ export const seoData = {
 
 export const defaultSEO = {
   siteName: "KSM Stroy",
-  siteUrl: "https://ksmstroy.bg",
+  siteUrl: "https://www.ksmstroy.com",
   locale: "bg_BG",
   type: "website",
   twitterHandle: "@ksmstroy"

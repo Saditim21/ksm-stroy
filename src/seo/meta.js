@@ -4,6 +4,14 @@ import { SITE } from '../config/site'
 // (Production's head pointed at ksmstroy.bg, which does not resolve.)
 export const SITE_URL = SITE.origin
 
+// Replaced at build time (vite.config.js, src/seo/stage.js).
+/* global IS_PRODUCTION_BUILD */
+
+// The robots tag of every page: only the production site is indexed.
+export function robotsMeta(production = IS_PRODUCTION_BUILD) {
+  return { name: 'robots', content: production ? 'index, follow' : 'noindex, nofollow' }
+}
+
 // Production's fallback share image (src/components/common/SEO.jsx on main).
 const DEFAULT_IMAGE = '/assets/images/slider01.jpg'
 
@@ -19,6 +27,7 @@ export function pageMeta({ title, description, path, image = DEFAULT_IMAGE }) {
   const url = SITE_URL + path
   return [
     { title },
+    robotsMeta(),
     { name: 'description', content: description },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },

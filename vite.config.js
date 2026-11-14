@@ -1,5 +1,6 @@
 import { reactRouter } from '@react-router/dev/vite'
 import { defineConfig } from 'vite'
+import { isProductionStage } from './src/seo/stage.js'
 
 // The React Router plugin builds the site from src/routes.js and
 // react-router.config.js, and brings its own JSX transform and React Refresh
@@ -13,6 +14,8 @@ const isVitest = process.env.VITEST === 'true'
 
 export default defineConfig({
   plugins: [!isVitest && reactRouter()],
+  // Build-time: only the production site is indexed (src/seo/stage.js).
+  define: { IS_PRODUCTION_BUILD: JSON.stringify(isProductionStage(process.env)) },
   esbuild: {
     // No license comments in the bundles.
     legalComments: 'none',
@@ -24,7 +27,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'framer-motion', 'swiper/react', 'swiper/modules', 'react-hook-form', '@emailjs/browser',
-      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', '@gsap/react', 'lenis', '@vercel/analytics/react',
+      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', '@gsap/react', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
     ],
   },
   // No manualChunks: React Router splits the build per route.
