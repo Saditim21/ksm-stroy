@@ -2,11 +2,26 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
+        // v2 tokens
+        paper: '#F1F2EF',
+        ink: '#14202F',
+        dusk: '#1F3A63',
+        light: '#F5D88F',
+        'gold-ink': '#7A6336',
+        graphite: '#465060',
+        rule: '#CBD0D4',
+        'bronze-ink': '#7A6549',
+        'status-free': '#3F8F55',
+        'status-free-deep': '#2F6E41',
+        'status-reserved': '#C9962E',
+        'status-sold': '#B23A30',
+        'status-blocked': '#7A828C',
+
         // Primary Brand Colors - Luxury Enterprise
         primary: {
           900: '#1a1a1a', // Deep Charcoal
@@ -102,10 +117,18 @@ export default {
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
         'serif': ['Playfair Display', 'Georgia', 'serif'],
-        'display': ['Inter', 'system-ui', 'sans-serif'],
+        'display': ['"KSM Display"', '"KSM Display Fallback Georgia"', '"KSM Display Fallback Times"', 'serif'],
+        'text': ['"KSM Text"', '"KSM Text Fallback Segoe"', '"KSM Text Fallback Arial"', 'sans-serif'],
       },
       
       fontSize: {
+        'body': ['17px', { lineHeight: '1.6' }],
+        'small': ['14.5px', { lineHeight: '1.45' }],
+        'label': ['12.5px', { lineHeight: '1.4' }],
+        'h3': ['24px', { lineHeight: '1.25' }],
+        'h2': ['clamp(34px, 4.2vw, 58px)', { lineHeight: '1.06' }],
+        'display': ['clamp(44px, 7.6vw, 120px)', { lineHeight: '0.98' }],
+        'count': ['clamp(56px, 9vw, 140px)', { lineHeight: '0.9' }],
         'hero': ['3.5rem', { lineHeight: '1.1', fontWeight: '700' }],
         'display-1': ['2.5rem', { lineHeight: '1.2', fontWeight: '700' }],
         'display-2': ['2rem', { lineHeight: '1.3', fontWeight: '600' }],
@@ -127,10 +150,16 @@ export default {
       },
       
       borderRadius: {
+        'ui': '2px',
         'luxury': '12px',
         'luxury-lg': '16px',
       },
       
+      transitionTimingFunction: {
+        'expo-out': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'power3-out': 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+      },
+
       animation: {
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
         'slide-in-left': 'slide-in-left 0.6s ease-out forwards',

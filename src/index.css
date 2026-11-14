@@ -24,8 +24,25 @@
     overflow-x: hidden;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    /* Consistent background color to prevent flash - matches primary-50 */
-    background-color: #fafafa;
+    /* Paper background from first paint, no flash */
+    background: theme(colors.paper);
+    color: theme(colors.ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  .on-dusk :focus-visible {
+    outline-color: theme(colors.paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
   }
 
   /* Better touch behavior for interactive elements */
@@ -49,6 +66,10 @@
 
 /* Custom scrollbar utilities for mobile responsiveness */
 @layer utilities {
+  .nums {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none;  /* Firefox */
