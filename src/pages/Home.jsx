@@ -53,11 +53,14 @@ const Home = () => {
       {/* Hero Section */}
       <HeroCarousel />
 
-      {/* Services Section */}
+      {/* Services Section. initial={false} on the scroll-in sections below as
+          well, and on their grids: their children inherit it, so the
+          prerendered HTML shows them in their final state. (A child with an
+          `initial` of its own does not inherit it.) */}
       <motion.section 
         id="services-section" 
         className="py-6 sm:py-8 lg:py-12 bg-primary-50"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={fadeInUp}
@@ -73,7 +76,7 @@ const Home = () => {
           <motion.div 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
             variants={staggerContainer}
-            initial="initial"
+            initial={false}
             whileInView="animate"
             viewport={viewportOptions}
           >
@@ -107,7 +110,7 @@ const Home = () => {
       {/* Statistics Section */}
       <motion.section 
         className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={fadeInUp}
@@ -127,7 +130,7 @@ const Home = () => {
           <motion.div 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
             variants={staggerContainer}
-            initial="initial"
+            initial={false}
             whileInView="animate"
             viewport={viewportOptions}
             role="list"
@@ -143,7 +146,7 @@ const Home = () => {
               >
                 <motion.div 
                   className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent mb-2 sm:mb-3"
-                  initial={{ scale: 0 }}
+                  initial={false}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ 

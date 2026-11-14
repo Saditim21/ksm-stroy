@@ -40,12 +40,17 @@ const GoldenResidenceBlockSelection = () => {
     };
   }, []);
 
+  // initial={false} on every animated element of the first screen: the
+  // prerendered HTML shows the page in its final state, not hidden until the JS
+  // runs. (A parent's initial={false} does not reach a child with an `initial`
+  // of its own.) The gallery and the full-screen viewer open on a click, so
+  // they keep their entrance animations.
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 py-2 sm:py-6 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="mb-4 sm:mb-8 lg:mb-12"
-          initial={{ opacity: 0, y: -20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
@@ -66,7 +71,7 @@ const GoldenResidenceBlockSelection = () => {
               <div className="flex justify-center">
                 <motion.h1
                   className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 bg-clip-text text-transparent leading-tight text-center"
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={false}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.7 }}
                 >
@@ -82,7 +87,7 @@ const GoldenResidenceBlockSelection = () => {
                     setFullscreenImage(null);
                   }}
                   className="bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 lg:px-6 lg:py-3 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group text-sm sm:text-base"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={false}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
                   whileHover={{ scale: 1.05 }}
@@ -101,7 +106,7 @@ const GoldenResidenceBlockSelection = () => {
             <div className="flex justify-center">
               <motion.div 
                 className="w-16 sm:w-20 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"
-                initial={{ width: 0 }}
+                initial={false}
                 animate={{ width: "4rem" }}
                 transition={{ delay: 0.5, duration: 0.8 }}
               />
@@ -109,7 +114,7 @@ const GoldenResidenceBlockSelection = () => {
           </div>
           <motion.p
             className="text-base sm:text-lg lg:text-xl text-gray-700 text-center px-6 sm:px-8 font-medium"
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
@@ -122,7 +127,7 @@ const GoldenResidenceBlockSelection = () => {
           <motion.div
             className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-l-2xl lg:rounded-r-none touch-manipulation active:shadow-3xl"
             onClick={() => handleBlockSelect('block-a')}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             whileHover={{ scale: 1.02, y: -2 }}
@@ -144,7 +149,7 @@ const GoldenResidenceBlockSelection = () => {
               <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
                 <div className="text-center text-white max-w-sm">
                   <motion.div
-                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
                   >
@@ -157,7 +162,7 @@ const GoldenResidenceBlockSelection = () => {
                     </motion.h2>
                     <motion.p 
                       className="text-lg sm:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 lg:mb-10 drop-shadow-lg font-semibold tracking-wide"
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.6, duration: 0.6 }}
                     >
@@ -180,7 +185,7 @@ const GoldenResidenceBlockSelection = () => {
           <motion.div
             className="w-full lg:w-1/2 relative group cursor-pointer overflow-hidden min-h-[45vh] sm:min-h-[50vh] lg:min-h-full shadow-2xl rounded-2xl lg:rounded-r-2xl lg:rounded-l-none touch-manipulation active:shadow-3xl"
             onClick={() => handleBlockSelect('block-b')}
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             whileHover={{ scale: 1.02, y: -2 }}
@@ -202,7 +207,7 @@ const GoldenResidenceBlockSelection = () => {
               <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
                 <div className="text-center text-white max-w-sm">
                   <motion.div
-                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
                   >
@@ -215,7 +220,7 @@ const GoldenResidenceBlockSelection = () => {
                     </motion.h2>
                     <motion.p 
                       className="text-lg sm:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 lg:mb-10 drop-shadow-lg font-semibold tracking-wide"
-                      initial={{ opacity: 0 }}
+                      initial={false}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.8, duration: 0.6 }}
                     >

@@ -641,12 +641,13 @@ const ProjectCard = ({ project, index, onClick }) => {
                 </svg>
               </div>
             )}
+            {/* OptimizedImage fades the photo in itself once it loads. A load
+                fade in this className would also reach its <noscript>
+                fallback, where no script ever lifts it. */}
             <OptimizedImage
               src={project.images[0]}
               alt={`${project.title} - KSM Stroy проект`}
-              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
               onLoad={handleImageLoad}
               onError={handleImageError}
               loading="lazy"

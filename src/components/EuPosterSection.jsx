@@ -12,10 +12,12 @@ const facts = [
   { label: 'Продължителност', value: '27.01.2026 г. – 27.01.2027 г.' },
 ]
 
+// initial={false}: the prerendered HTML shows the poster in its final state, not
+// hidden until the JS runs and the section scrolls into view.
 const EuPosterSection = () => (
   <motion.section
     className="py-10 sm:py-14 lg:py-20 bg-white"
-    initial="initial"
+    initial={false}
     whileInView="animate"
     viewport={viewportOptions}
     variants={fadeInUp}

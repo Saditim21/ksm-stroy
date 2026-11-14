@@ -377,10 +377,13 @@ const About = () => {
         </motion.div>
       </motion.section>
 
-      {/* Company Story with Parallax Effect */}
+      {/* Company Story with Parallax Effect. initial={false} on this and every
+          scroll-in section below, so the prerendered HTML shows them in their
+          final state: their children inherit it, and the two below with an
+          `initial` of their own carry initial={false} themselves. */}
       <motion.section 
         className="py-20 bg-gradient-to-br from-white via-ivory-50 to-primary-50 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
@@ -481,7 +484,7 @@ const About = () => {
                   style={{
                     clipPath: 'polygon(10% 0, 100% 0, 100% 100%, 0 90%)'
                   }}
-                  initial={{ x: 50, opacity: 0 }}
+                  initial={false}
                   whileInView={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
                 >
@@ -498,7 +501,7 @@ const About = () => {
                   style={{
                     clipPath: 'polygon(5% 0, 100% 0, 100% 95%, 0 100%)'
                   }}
-                  initial={{ y: 30, opacity: 0 }}
+                  initial={false}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
                   whileHover={{ y: -10, rotate: 2 }}
@@ -559,7 +562,7 @@ const About = () => {
       {/* Values Section with Advanced Animations */}
       <motion.section 
         className="py-20 bg-gradient-to-br from-primary-50 to-ivory-50 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
@@ -623,7 +626,7 @@ const About = () => {
       {/* Who We Are Section */}
       <motion.section
         className="py-20 bg-white relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
@@ -645,7 +648,7 @@ const About = () => {
       {/* Services Section */}
       <motion.section
         className="py-20 bg-gradient-to-br from-primary-50 to-ivory-50 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
@@ -760,7 +763,7 @@ const About = () => {
       {/* Mission & Vision with Split Animation */}
       <motion.section 
         className="py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
@@ -827,7 +830,7 @@ const About = () => {
       {/* Call to Action with Impressive Animation */}
       <motion.section 
         className="py-24 bg-gradient-to-br from-gold-500 via-gold-600 to-gold-700 relative overflow-hidden"
-        initial="initial"
+        initial={false}
         whileInView="animate"
         viewport={viewportOptions}
         variants={staggerContainer}
