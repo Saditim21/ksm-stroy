@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:dist": "node scripts/check-dist.mjs"
+    "check:dist": "node scripts/check-dist.mjs",
+    "images": "node scripts/images/build-images.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

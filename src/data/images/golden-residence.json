@@ -1,0 +1,96 @@
+{
+  "gr-balconiesFromBelow": {
+    "path": "/img/gr-balconiesFromBelow",
+    "w": 1304,
+    "h": 1736,
+    "widths": [
+      481,
+      769,
+      1202,
+      1304
+    ],
+    "color": "#6C6863"
+  },
+  "gr-balconiesSide": {
+    "path": "/img/gr-balconiesSide",
+    "w": 864,
+    "h": 1736,
+    "widths": [
+      319,
+      510,
+      796,
+      864
+    ],
+    "color": "#605A45"
+  },
+  "gr-cornerView": {
+    "path": "/img/gr-cornerView",
+    "w": 2222,
+    "h": 1728,
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2222
+    ],
+    "color": "#72756F"
+  },
+  "gr-endTowers": {
+    "path": "/img/gr-endTowers",
+    "w": 2452,
+    "h": 1220,
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ],
+    "color": "#848985"
+  },
+  "gr-frontElevation": {
+    "path": "/img/gr-frontElevation",
+    "w": 2452,
+    "h": 1222,
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ],
+    "color": "#7A7D77"
+  },
+  "gr-hero-desktop": {
+    "path": "/img/gr-hero-desktop",
+    "w": 1920,
+    "h": 760,
+    "widths": [
+      1920
+    ],
+    "color": "#52504E"
+  },
+  "gr-hero-mobile": {
+    "path": "/img/gr-hero-mobile",
+    "w": 608,
+    "h": 760,
+    "widths": [
+      608
+    ],
+    "color": "#52504E"
+  },
+  "gr-longFacade": {
+    "path": "/img/gr-longFacade",
+    "w": 2452,
+    "h": 1372,
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ],
+    "color": "#878A82"
+  }
+}

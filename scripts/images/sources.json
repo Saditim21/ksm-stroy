@@ -1,0 +1,130 @@
+[
+  {
+    "id": "gr-hero-desktop",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/film/hero-desktop",
+    "widths": []
+  },
+  {
+    "id": "gr-hero-mobile",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/film/hero-mobile",
+    "widths": []
+  },
+  {
+    "id": "gr-frontElevation",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/frontElevation-{w}",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ]
+  },
+  {
+    "id": "gr-longFacade",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/longFacade-{w}",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ]
+  },
+  {
+    "id": "gr-cornerView",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/cornerView-{w}",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2222
+    ]
+  },
+  {
+    "id": "gr-endTowers",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/endTowers-{w}",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2048,
+      2452
+    ]
+  },
+  {
+    "id": "gr-balconiesSide",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/balconiesSide-{w}",
+    "widths": [
+      319,
+      510,
+      796,
+      864
+    ]
+  },
+  {
+    "id": "gr-balconiesFromBelow",
+    "group": "golden-residence",
+    "kind": "copy",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/balconiesFromBelow-{w}",
+    "widths": [
+      481,
+      769,
+      1202,
+      1304
+    ]
+  },
+  {
+    "id": "mnogofamilna-sgrada1",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/sgrada1.jpg",
+    "crop": {
+      "left": 0,
+      "top": 155,
+      "width": 3308,
+      "height": 2020
+    },
+    "widths": [
+      768,
+      1024,
+      1440,
+      1920,
+      2560
+    ]
+  },
+  {
+    "id": "eu-cofunded-bg",
+    "group": "shell",
+    "src": "git:origin/vidimost-es:public/eu/eu-cofunded-bg.png",
+    "widths": [
+      300,
+      600,
+      900
+    ]
+  },
+  {
+    "id": "eu-pkip",
+    "group": "shell",
+    "src": "git:origin/vidimost-es:public/eu/pkip.png",
+    "widths": [
+      300,
+      600,
+      900
+    ]
+  }
+]

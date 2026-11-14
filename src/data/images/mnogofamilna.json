@@ -1,0 +1,15 @@
+{
+  "mnogofamilna-sgrada1": {
+    "path": "/img/mnogofamilna-sgrada1",
+    "w": 3308,
+    "h": 2020,
+    "widths": [
+      768,
+      1024,
+      1440,
+      1920,
+      2560
+    ],
+    "color": "#546476"
+  }
+}

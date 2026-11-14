@@ -1,0 +1,24 @@
+{
+  "eu-cofunded-bg": {
+    "path": "/img/eu-cofunded-bg",
+    "w": 900,
+    "h": 198,
+    "widths": [
+      300,
+      600,
+      900
+    ],
+    "color": "#CFD7E3"
+  },
+  "eu-pkip": {
+    "path": "/img/eu-pkip",
+    "w": 1283,
+    "h": 355,
+    "widths": [
+      300,
+      600,
+      900
+    ],
+    "color": "#E1E1DF"
+  }
+}
