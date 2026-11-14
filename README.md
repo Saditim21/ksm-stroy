@@ -73,7 +73,8 @@ pages still animate with framer-motion; Lenis runs on every page, and
   0.07, 80% per notch), and touch scrolling left to the browser
   (`syncTouch: false`). A panel that scrolls on its own keeps the wheel while
   it can scroll (`allowNestedScroll`). A pinch, and any gesture while the page
-  is zoomed in, stays the browser's.
+  is zoomed in or held still with `body { overflow: hidden }` (the legacy
+  modals), stays the browser's.
 - `src/motion/SmoothScroll.jsx` runs Lenis around the site shell
   (`src/root.jsx`) once the engine has loaded; content that grows re-measures
   Lenis and ScrollTrigger. On a route change React Router's

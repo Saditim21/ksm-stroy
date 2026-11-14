@@ -35,6 +35,12 @@ export const LENIS_OPTIONS = {
 // second finger until the last one lifts, a pinch is the browser's. And while
 // the page is zoomed in, a finger or the wheel pans the zoomed view, as the
 // browser does.
+//
+// A page can also hold itself still with `body { overflow: hidden }`, as the
+// legacy /blog and /projects modals do. That stops the wheel and the finger,
+// not a script, and Lenis scrolls the page by script: while it holds, every
+// gesture is the browser's, which keeps the page still. (useScrollLock stops
+// Lenis instead.)
 export function createGestureFilter(scale = () => window.visualViewport?.scale ?? 1) {
   let pinching = false
   return ({ event }) => {
@@ -45,6 +51,7 @@ export function createGestureFilter(scale = () => window.visualViewport?.scale ?
         return false
       }
     }
+    if (document.body.style.overflow === 'hidden') return false
     return scale() <= 1.01
   }
 }
