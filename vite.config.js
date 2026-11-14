@@ -1,5 +1,6 @@
 import { reactRouter } from '@react-router/dev/vite'
 import { defineConfig, loadEnv } from 'vite'
+import { clientRoutesCaseSensitive } from './scripts/client-routes-case.mjs'
 import { isProductionStage } from './src/seo/stage.js'
 
 // The React Router plugin builds the site from src/routes.js and
@@ -93,7 +94,9 @@ async function toFetchRequest(req, url) {
 }
 
 export default defineConfig({
-  plugins: [!isVitest && reactRouter(), !isVitest && devApi()],
+  // clientRoutesCaseSensitive(): the browser's routes keep src/routes.js's
+  // caseSensitive, which React Router 8.5.1 drops (scripts/client-routes-case.mjs).
+  plugins: [!isVitest && reactRouter(), !isVitest && devApi(), !isVitest && clientRoutesCaseSensitive()],
   // Build-time: only the production site is indexed (src/seo/stage.js).
   define: { IS_PRODUCTION_BUILD: JSON.stringify(isProductionStage(process.env)) },
   esbuild: {
