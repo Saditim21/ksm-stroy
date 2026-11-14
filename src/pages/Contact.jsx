@@ -188,9 +188,11 @@ const Contact = () => {
   return (
     <>
       {/* initial={false}: the prerendered HTML shows the page in its final
-          state, not hidden until the JS runs. */}
+          state, not hidden until the JS runs. bg-primary-50: the band of
+          pt-6 above the first section shows production's ground (main's App
+          wrapper painted it), not the shell's paper. */}
       <motion.main
-        className="min-h-screen pt-6"
+        className="min-h-screen pt-6 bg-primary-50"
         initial={false}
         animate="in"
         exit="out"
