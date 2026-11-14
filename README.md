@@ -47,14 +47,20 @@ animate with framer-motion, `SmoothScroll` is not mounted and
   (`scrubDrift`) runs from `md` up only, through `gsap.matchMedia()` and
   `MD_UP`; `src/utils/motion.js` holds those and the shared eases and
   staggers.
+- Hooks that ask the browser (`useMotionAllowed`, `useMediaQuery`,
+  `useCoarsePointer`, `useFinePointer`) answer `false` on the server and while
+  the page hydrates, then the browser's answer. A view that shows something
+  only the browser knows, such as a deep link's query string, waits for
+  `useHydrated()`. Layout chosen by media stays in CSS media queries.
 - Only `transform`, `opacity` and `clip-path` animate: none of them makes the
   browser lay the page out again.
 - A height that sets the page's length uses `var(--screen-h)`, never `vh` or
   `svh`. Messenger's and Instagram's in-app browsers resize the page as their
   toolbars slide, so a `vh` height moves everything below it under the
-  reader's finger. `trackScreenHeight()` (`src/utils/screenHeight.js`) sets
-  `--screen-h` on `<html>` at load and changes it only when ScrollTrigger
-  re-measures too.
+  reader's finger. An inline script in `<head>` (`SCREEN_HEIGHT_SCRIPT`,
+  `src/utils/screenHeight.js`) writes `--screen-h` into
+  `<style id="screen-h">` before first paint. `trackScreenHeight()` keeps that
+  element up to date, changing it only when ScrollTrigger re-measures too.
 - Lenis' settings live in `src/utils/smoothScroll.js`: a slower wheel (lerp
   0.07, 80% per notch) and, with `syncTouch`, Lenis' own glide after a flick
   on touch screens. A pinch, and any gesture while the page is zoomed in,

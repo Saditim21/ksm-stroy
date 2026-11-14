@@ -4,6 +4,7 @@ import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import { ApartmentProvider } from './context/ApartmentContext'
 import { SITE_URL } from './seo/meta'
+import { SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { getLenis } from './utils/lenis'
 import { normalizePathname } from './utils/pathname'
 import { seoData } from './utils/seo'
@@ -81,6 +82,9 @@ export function Layout({ children }) {
         <meta name="geo.placename" content="София" />
         <meta name="theme-color" content="#2563eb" />
         <meta name="format-detection" content="telephone=no" />
+        {/* Pre-paint (src/utils/headScripts.js): after the viewport meta, and
+            before the stylesheet, which would hold it back until it loaded. */}
+        <script dangerouslySetInnerHTML={{ __html: SCREEN_HEIGHT_SCRIPT }} />
         <Links />
         <style dangerouslySetInnerHTML={{ __html: CRITICAL_CSS }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS) }} />
