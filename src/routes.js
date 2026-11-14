@@ -19,7 +19,9 @@ import { blockPaths } from './config/blocks.js'
 //   match /projects/golden-residence/block-c too.
 const page = (path, file, options) => route(path, file, { ...options, caseSensitive: true })
 
-// One file renders every block of a project, so each route has an id of its own.
+// One file renders every block of a project, so each route has an id of its
+// own: its path, by which the file knows its block (matchedBlock in
+// src/config/blocks.js).
 const blockPages = (project, file) => blockPaths(project).map((path) => page(path, file, { id: path }))
 
 export default [

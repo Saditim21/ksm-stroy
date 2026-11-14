@@ -14,16 +14,21 @@ export const PROJECT_BLOCKS = {
   ],
 }
 
-// The path of each block's page in `project`, without the leading slash, as
-// src/routes.js writes paths: projects/<project>/<block>.
-export const blockPaths = (project) => PROJECT_BLOCKS[project].map(({ id }) => `projects/${project}/${id}`)
+// The path of a block's page, without the leading slash, as src/routes.js
+// writes paths: projects/<project>/<block>.
+const blockPath = (project, id) => `projects/${project}/${id}`
 
-// The block whose page `pathname` is, by its last segment (a trailing slash
-// aside: the prerender asks for /projects/golden-residence/block-a/).
-// src/routes.js routes only these paths to a block page.
-export function blockAt(project, pathname) {
-  const id = pathname.replace(/\/+$/, '').split('/').pop()
-  const block = PROJECT_BLOCKS[project].find((candidate) => candidate.id === id)
-  if (!block) throw new Error(`${pathname} is not a block of ${project}`)
-  return block
+// The path of each block's page in `project`.
+export const blockPaths = (project) => PROJECT_BLOCKS[project].map(({ id }) => blockPath(project, id))
+
+// The block of `project` whose page the matched routes are, by route id:
+// src/routes.js gives each block's route the id of its path, and React Router
+// hands the matched routes, ids included, to a page's `meta` and to
+// useMatches(). Never by the address, which the dev server's router matches
+// without regard to case (/projects/golden-residence/Block-A is block A's
+// route there). Undefined, never an error, when no matched route is a block
+// page of `project`.
+export function matchedBlock(project, matches) {
+  const ids = new Set(matches.map(({ id }) => id))
+  return PROJECT_BLOCKS[project]?.find(({ id }) => ids.has(blockPath(project, id)))
 }

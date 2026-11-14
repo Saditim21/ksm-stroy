@@ -37,10 +37,15 @@ function toRoute({ id, path, index, caseSensitive, file, children }) {
 //
 // The address bar follows the router, as a browser's does: a navigation adds a
 // history entry, a redirect that replaces the entry (/projects/1) does not.
-export function renderSiteAt(path) {
+//
+// { caseSensitive: false } matches every route without regard to case, as the
+// dev server's router does (src/routes.js); the production build's matches by
+// case, as by default here.
+export function renderSiteAt(path, { caseSensitive } = {}) {
   window.history.replaceState(null, '', path)
+  const toSiteRoute = (entry) => toRoute(caseSensitive === undefined ? entry : { ...entry, caseSensitive })
   const router = createMemoryRouter(
-    [{ path: '/', Component: App, HydrateFallback, ErrorBoundary, children: routes.map(toRoute) }],
+    [{ path: '/', Component: App, HydrateFallback, ErrorBoundary, children: routes.map(toSiteRoute) }],
     { initialEntries: [path] },
   )
   let shown = path
