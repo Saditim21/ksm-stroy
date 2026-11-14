@@ -13,7 +13,7 @@ export default {
         dusk: '#1F3A63',
         light: '#F5D88F',
         'gold-ink': '#7A6336',
-        graphite: '#465060',
+        graphite: '#4A5462',
         rule: '#CBD0D4',
         'bronze-ink': '#7A6549',
         'status-free': '#3F8F55',
