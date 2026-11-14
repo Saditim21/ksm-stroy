@@ -39,3 +39,10 @@ it('is Highlight under forced colours, on any ground', () => {
   ])
   expect(block[2]).toMatch(/outline-color:\s*Highlight;/)
 })
+
+// Spec §2.2: the ring's 1 px radius, the one corner Diptych rounds, which the
+// offset widens. Never on the legacy pages, whose controls keep their radii.
+it('has a 1 px radius, except on the legacy ground', () => {
+  expect(rule(':focus-visible:not(.on-light *)')).toMatch(/^\s*border-radius:\s*1px;\s*$/)
+  expect(rule(':focus-visible')).not.toMatch(/border-radius/)
+})

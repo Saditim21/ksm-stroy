@@ -13,9 +13,9 @@ import { MD_UP } from '../../utils/motion'
 import { pageMeta } from '../../seo/meta'
 
 // Dev-only gallery of the shared primitives (src/components/ui), each on
-// Diptych's two grounds, onyx and umber, for review (plan Task 7). src/routes.js routes /dev/ui only
-// under the dev server; scripts/check-dist.mjs fails if any of it reaches the
-// build.
+// Diptych's two grounds, onyx and umber, for review (plan Task 7).
+// src/routes.js routes /dev/ui only under the dev server;
+// scripts/check-dist.mjs fails if any of it reaches the build.
 //
 // Sample media: the site has no AVIF/WebP ladders or film clips yet (the image
 // pipeline, plan Task 8, and the film copy come later), so the picture and the

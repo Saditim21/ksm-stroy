@@ -17,8 +17,9 @@ import Projects from './Projects'
 // .on-dusk. The legacy pages' near-black grounds (#1a1a1a, #2c2c2c, black
 // overlays) are dark grounds, where an onyx ring cannot be seen (WCAG 2.4.7).
 // So each marks itself .on-dusk, or a tighter wrapper does, and never a light
-// card inside it: the card's controls keep the onyx ring. jsdom applies no CSS: src/styles/focus-ring.test.js pins the
-// rules, and the smoke run measures the ring in Chrome.
+// card inside it: the card's controls keep the onyx ring. jsdom applies no
+// CSS: src/styles/focus-ring.test.js pins the rules, and the smoke run
+// measures the ring in Chrome.
 
 const onDusk = (element) => element.closest('.on-dusk') !== null
 
