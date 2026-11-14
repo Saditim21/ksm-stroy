@@ -11,6 +11,16 @@
 //    src/routes.js).
 // 3. Prints the total gzip size of the JavaScript in build/client/assets, for
 //    information only.
+// 4. Prints, for every prerendered page (each index.html), its first-load JS:
+//    every module script and modulepreload the page names, gzipped (spec §10,
+//    at most 160 KiB). Over that, a route in V2_ROUTES fails; any other route
+//    is a legacy page that M2 to M4 replace, and gets a WARN line (Ruling R2).
+// 5. Fails when the first-load JS of any route carries GSAP, ScrollTrigger,
+//    SplitText or Lenis. They are the motion chunk's alone (spec §5.1).
+// 6. Prints the motion chunk's gzip size, failing above 60 KiB (spec §10).
+//
+// 160 kB and 60 kB in the spec are read as KiB, as the plan reads its font
+// budget (90 kB = 92,160 B).
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
@@ -53,6 +63,46 @@ const PLANTED = [
   { name: 'planted.png', bytes: Buffer.from('\x89PNG\r\n\x1a\n\x00tEXtdianahomes.bg\x00', 'latin1') },
 ]
 
+const KIB = 1024
+const FIRST_LOAD_BUDGET = 160 * KIB
+const MOTION_BUDGET = 60 * KIB
+
+// The routes rebuilt for v2: their first-load JS fails the check above the
+// budget. M2 to M4 add each route they rebuild. A route listed here before it
+// is prerendered gets a note.
+const V2_ROUTES = ['/eu-proekt', '/404']
+
+// The motion chunk: src/motion/engine.js, which only an import() reaches
+// (src/motion/runtime.js), with the libraries only it imports.
+const MOTION_CHUNK = /^assets\/engine-[\w-]+\.js$/
+
+// What each motion library leaves in minified code: a message or an internal
+// name of its own, which no code of ours writes. The bare names cannot serve:
+// our first-load code names `ScrollTrigger` as a property of the loaded engine
+// (motion.ScrollTrigger.refresh()), and minified SplitText carries no
+// "SplitText" at all. Each fingerprint must be found in the motion chunk, or
+// the check fails: it could no longer see that library anywhere.
+const MOTION_LIBRARIES = [
+  // Its warning "Please gsap.registerPlugin(ScrollTrigger)".
+  { label: 'ScrollTrigger', pattern: /registerPlugin\(ScrollTrigger\)/ },
+  // It splits again when a web font finishes loading.
+  { label: 'SplitText', pattern: /"loadingdone",\s*this\._split\b/ },
+  { label: 'GSAP', pattern: /GreenSockGlobals/ },
+  // The version its constructor writes on window.
+  { label: 'Lenis', pattern: /lenisVersion/ },
+]
+
+// A page the first-load parser must read in full: a modulepreload, a module
+// script with a src, an inline module script's static and dynamic imports.
+// It must skip a classic script and a stylesheet.
+const PLANTED_PAGE = {
+  html: '<link rel="modulepreload" href="/assets/a.js"/><script type="module" src="/assets/b.js"></script>'
+    + '<script type="module" async="">import "/assets/c.js";\nimport * as route0 from "/assets/d.js";\n'
+    + 'import("/assets/e.js");</script><script>import("/assets/classic.js")</script>'
+    + '<link rel="stylesheet" href="/assets/f.css"/>',
+  scripts: ['/assets/a.js', '/assets/b.js', '/assets/c.js', '/assets/d.js', '/assets/e.js'],
+}
+
 function filesUnder(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name)
@@ -61,7 +111,7 @@ function filesUnder(dir) {
 }
 
 function formatKiB(bytes) {
-  return `${(bytes / 1024).toFixed(1)} KiB`
+  return `${(bytes / KIB).toFixed(1)} KiB`
 }
 
 function decode(name, bytes) {
@@ -76,6 +126,30 @@ function scan(patterns, name, content, found) {
   }
 }
 
+const attribute = (tag, name) => new RegExp(`\\b${name}=["']([^"']+)["']`, 'i').exec(tag)?.[1]
+
+// The JS a page loads first: every <link rel="modulepreload">, every
+// <script type="module" src>, and what an inline module script imports.
+function firstLoadScripts(html) {
+  const urls = new Set()
+  for (const [tag] of html.matchAll(/<link\b[^>]*>/gi)) {
+    if (/\brel=["']?modulepreload\b/i.test(tag)) urls.add(attribute(tag, 'href'))
+  }
+  for (const [, attrs, body] of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (!/\btype=["']?module\b/i.test(attrs)) continue
+    const src = attribute(attrs, 'src')
+    if (src) {
+      urls.add(src)
+      continue
+    }
+    for (const [, from, dynamic] of body.matchAll(/\bimport\s*(?:[\w$*{}\s,]+?\s*from\s*)?["']([^"']+)["']|\bimport\(\s*["']([^"']+)["']\s*\)/g)) {
+      urls.add(from ?? dynamic)
+    }
+  }
+  urls.delete(undefined)
+  return [...urls]
+}
+
 const missed = PLANTED.filter(({ name, bytes }) => {
   const found = []
   scan(FORBIDDEN, name, decode(name, bytes), found)
@@ -84,6 +158,14 @@ const missed = PLANTED.filter(({ name, bytes }) => {
 if (missed.length > 0) {
   console.error('check:dist: FAILED, the self-check missed the agency branding in planted files:')
   for (const { name } of missed) console.error(`  ${name}`)
+  process.exit(1)
+}
+
+const plantedScripts = firstLoadScripts(PLANTED_PAGE.html)
+if (plantedScripts.join(' ') !== PLANTED_PAGE.scripts.join(' ')) {
+  console.error('check:dist: FAILED, the self-check misread the scripts of a planted page:')
+  console.error(`  expected ${PLANTED_PAGE.scripts.join(' ')}`)
+  console.error(`  read     ${plantedScripts.join(' ')}`)
   process.exit(1)
 }
 
@@ -96,10 +178,13 @@ try {
   process.exit(1)
 }
 
+const nameOf = (file) => relative(DIST, file).split(sep).join('/')
+const names = new Set(files.map(nameOf))
+
 const leaks = []
 const devCode = []
 for (const file of files) {
-  const name = relative(DIST, file).split(sep).join('/')
+  const name = nameOf(file)
   const content = decode(name, readFileSync(file))
   scan(FORBIDDEN, name, content, leaks)
   scan(DEV_ONLY, name, content, devCode)
@@ -116,6 +201,84 @@ const gzip = scripts.reduce((sum, file) => sum + gzipSync(readFileSync(file)).le
 console.log(`check:dist: ${files.length} files in build/client/`)
 console.log(`check:dist: build/client/assets/*.js: ${scripts.length} files, ${formatKiB(raw)} raw, ${formatKiB(gzip)} gzip`)
 
+const failures = []
+
+// Each script's gzip size and the motion libraries in it, read once: most
+// routes share most of their scripts.
+const scriptInfo = new Map()
+function readScript(name) {
+  if (!scriptInfo.has(name)) {
+    const bytes = readFileSync(join(DIST, ...name.split('/')))
+    const content = bytes.toString('utf8')
+    scriptInfo.set(name, {
+      gzip: gzipSync(bytes).length,
+      libraries: MOTION_LIBRARIES.filter(({ pattern }) => pattern.test(content)).map(({ label }) => label),
+    })
+  }
+  return scriptInfo.get(name)
+}
+
+// Every prerendered page: build/client/about/index.html is /about.
+const pages = [...names]
+  .filter((name) => name === 'index.html' || name.endsWith('/index.html'))
+  .map((name) => ({ name, route: `/${name.slice(0, -'index.html'.length).replace(/\/$/, '')}` }))
+  .sort((a, b) => a.route.localeCompare(b.route))
+
+const rows = []
+let warned = 0
+for (const { name, route } of pages) {
+  // Script URLs are site paths, resolved as the browser would from the page.
+  const base = new URL(route === '/' ? '/' : `${route}/`, 'https://site.invalid')
+  const urls = firstLoadScripts(readFileSync(join(DIST, ...name.split('/')), 'utf8'))
+  if (urls.length === 0) failures.push(`${route}: no first-load JS found in ${name}; the page parser no longer reads it`)
+  let total = 0
+  for (const url of urls) {
+    const script = decodeURIComponent(new URL(url, base).pathname).slice(1)
+    if (!names.has(script)) {
+      failures.push(`${route}: ${name} loads ${url}, which is not in build/client/`)
+      continue
+    }
+    const { gzip: size, libraries } = readScript(script)
+    total += size
+    for (const label of libraries) failures.push(`${route}: first-load ${script} carries ${label}`)
+  }
+  const v2 = V2_ROUTES.includes(route)
+  let status = 'OK'
+  if (total > FIRST_LOAD_BUDGET && v2) {
+    status = 'FAIL, over budget'
+    failures.push(`${route}: first-load JS ${formatKiB(total)} gzip, over the ${formatKiB(FIRST_LOAD_BUDGET)} budget`)
+  } else if (total > FIRST_LOAD_BUDGET) {
+    status = 'WARN, over budget (legacy route)'
+    warned += 1
+  }
+  rows.push([route, String(urls.length), formatKiB(total), status])
+}
+
+const widths = [Math.max(5, ...rows.map(([route]) => route.length)), 7, 10]
+const line = ([route, count, size, status]) =>
+  `  ${route.padEnd(widths[0])}  ${count.padStart(widths[1])}  ${size.padStart(widths[2])}  ${status}`
+console.log(`check:dist: first-load JS per route, gzip (budget ${formatKiB(FIRST_LOAD_BUDGET)}, enforced for ${V2_ROUTES.join(', ')}):`)
+console.log(line(['route', 'scripts', 'gzip', '']).trimEnd())
+for (const row of rows) console.log(line(row))
+for (const route of V2_ROUTES) {
+  if (!pages.some((page) => page.route === route)) console.log(`check:dist: note: ${route} is in V2_ROUTES but not prerendered yet`)
+}
+
+const motionChunks = [...names].filter((name) => MOTION_CHUNK.test(name))
+if (motionChunks.length !== 1) {
+  failures.push(`expected one motion chunk (assets/engine-*.js), found ${motionChunks.length}: ${motionChunks.join(', ') || 'none'}`)
+} else {
+  const [motion] = motionChunks
+  const bytes = readFileSync(join(DIST, ...motion.split('/')))
+  const size = gzipSync(bytes).length
+  console.log(`check:dist: motion chunk ${motion}: ${formatKiB(size)} gzip (budget ${formatKiB(MOTION_BUDGET)})`)
+  if (size > MOTION_BUDGET) failures.push(`motion chunk ${motion}: ${formatKiB(size)} gzip, over the ${formatKiB(MOTION_BUDGET)} budget`)
+  const content = bytes.toString('utf8')
+  for (const { label, pattern } of MOTION_LIBRARIES) {
+    if (!pattern.test(content)) failures.push(`the guard no longer sees ${label} in the motion chunk ${motion}: update its fingerprint (${pattern})`)
+  }
+}
+
 if (leaks.length > 0) {
   console.error('check:dist: FAILED, agency branding found in the build:')
   for (const leak of leaks) console.error(`  ${leak}`)
@@ -124,6 +287,11 @@ if (devCode.length > 0) {
   console.error('check:dist: FAILED, dev-only code found in the build:')
   for (const hit of devCode) console.error(`  ${hit}`)
 }
-if (leaks.length > 0 || devCode.length > 0) process.exit(1)
+if (failures.length > 0) {
+  console.error('check:dist: FAILED, first-load JS and the motion chunk:')
+  for (const failure of failures) console.error(`  ${failure}`)
+}
+if (leaks.length > 0 || devCode.length > 0 || failures.length > 0) process.exit(1)
 
 console.log('check:dist: OK, no agency branding and no dev-only code in build/client/')
+console.log(`check:dist: OK, no motion library in first-load JS; v2 routes and the motion chunk within budget${warned > 0 ? ` (${warned} legacy routes over budget, warned above)` : ''}`)

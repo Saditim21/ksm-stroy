@@ -3,7 +3,7 @@
 // (golden-residence src/utils/lenis.js @944bb03).
 //
 // Why this lives in its own file rather than next to the component that
-// creates it (src/components/ui/SmoothScroll.jsx): adding a named non-component
+// creates it (src/motion/SmoothScroll.jsx): adding a named non-component
 // export to a component module is exactly what
 // `react-refresh/only-export-components` flags ("Use a new file to share
 // constants or functions between components"). SmoothScroll registers the
@@ -17,8 +17,9 @@
 // `getLenis()?.scrollTo(0, { immediate: true })` cancels the in-flight
 // animation instead of racing it.
 //
-// Null whenever Lenis is not running: reduced motion, the test environment,
-// SSR/prerender, or between unmount and the next mount. Every caller must
+// Null whenever Lenis is not running: until the motion engine has loaded,
+// after the page (src/motion/runtime.js), under reduced motion, in tests,
+// on the server, or between unmount and the next mount. Every caller must
 // therefore keep `window.scrollTo` as its fallback.
 let instance = null
 

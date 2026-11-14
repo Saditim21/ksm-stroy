@@ -37,7 +37,7 @@ function screenHeightStyle(doc) {
 }
 
 // Call once, in the browser. On a phone the height follows only what
-// ScrollTrigger's ignoreMobileResize re-measures for (src/utils/gsap.js): a new
+// ScrollTrigger's ignoreMobileResize re-measures for (src/motion/engine.js): a new
 // width (the phone turned) or a height change over a quarter. So the sections
 // and ScrollTrigger's measurements change together. With a mouse, every resize
 // counts. clientWidth and clientHeight, not innerWidth and innerHeight:

@@ -1,5 +1,3 @@
-import { gsap, ScrollTrigger } from '../utils/gsap'
-
 // Copied from the Golden Residence landing (src/test/media.js @944bb03).
 //
 // jsdom has no window.matchMedia, so by default every component sees motion as
@@ -25,9 +23,6 @@ export function mockMatchMedia({ reduce = false, fine = false, coarse = false } 
     if (!lists.has(query)) lists.set(query, mediaList(query, answer(query)))
     return lists.get(query)
   }
-  // src/utils/gsap.js skips ScrollTrigger in a window without matchMedia; this
-  // window has one now. A second registration is a no-op.
-  gsap.registerPlugin(ScrollTrigger)
   return function restore() {
     if (had) window.matchMedia = previous
     else delete window.matchMedia

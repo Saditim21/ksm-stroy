@@ -19,34 +19,42 @@ HTML at build time (`react-router.config.js`); the routes are in
 - `npm run dev`: development server on port 3000
 - `npm run build`: production build in `build/client/`
 - `npm test`: unit tests and production contract tests (Vitest)
-- `npm run check:dist`: checks the build in `build/client/`; run `npm run build` first
+- `npm run check:dist`: checks the build in `build/client/` (agency branding,
+  dev-only code, first-load JS per route, the motion chunk); run
+  `npm run build` first
 - `npm run lint`: ESLint
 
 ## Motion
 
 Motion is GSAP 3 (ScrollTrigger and SplitText, under GSAP's standard no-charge
-licence) through `@gsap/react`'s `useGSAP`, with Lenis for smooth scrolling,
-driven by GSAP's ticker. It comes from the Golden Residence landing
-(golden-residence @944bb03). Nothing uses it yet: the current pages still
-animate with framer-motion, `SmoothScroll` is not mounted and
-`trackScreenHeight()` is not called.
+licence), with Lenis for smooth scrolling, driven by GSAP's ticker. It comes
+from the Golden Residence landing (golden-residence @944bb03). The current
+pages still animate with framer-motion; Lenis runs on every page, and
+`trackScreenHeight()` is not called yet.
 
-- GSAP's plugins are registered once, in `src/utils/gsap.js`: import `gsap`,
-  `ScrollTrigger`, `SplitText` and `useGSAP` from there, never from `gsap`
-  directly. Without a `window` it registers nothing, so it is safe to import
-  while pre-rendering.
+- GSAP and Lenis are one deferred chunk. `src/motion/engine.js` is the only
+  module that imports `gsap`, `gsap/*` or `lenis`, and only
+  `src/motion/runtime.js` loads it, with `import()`, once the page has loaded.
+  They are never part of a route's first-load JS: `npm run check:dist` fails
+  if they are, or if the motion chunk grows over 60 KiB gzip.
+- A component declares its motion with `useMotion(ref, setup, deps)`
+  (`src/motion/useMotion.js`). Once the engine has loaded, the setup gets
+  `{ gsap, ScrollTrigger, SplitText, Lenis, lenis }` (`lenis` is the running
+  instance, or null). Setups run from an idle queue, one per idle period,
+  with one `ScrollTrigger.refresh()` when the queue drains. Each runs inside a
+  `gsap.context` scoped to the ref's element, so selector text stays inside
+  it, and is reverted on unmount, after the function it returned is called.
+- Nothing runs where `useMotionAllowed()` is false: on the server and while
+  hydrating, under reduced motion or data saver, and wherever `matchMedia` is
+  missing (jsdom, so in every test that does not install `src/test/media.js`).
+  A test that allows motion mocks `src/motion/engine.js`.
 - An element's CSS is its final, visible state, and GSAP animates *from*
   hidden or offset values. With reduced motion, in tests and without
   JavaScript the page renders complete and static, so markup never ships
   `opacity: 0`.
-- Every animation runs inside `useGSAP`, with a scope wherever it selects
-  elements by selector text, behind `useMotionAllowed()`: false under reduced
-  motion or data saver, and wherever `matchMedia` is missing (jsdom, so in
-  every test that does not install `src/test/media.js`). Effects that follow
-  the pointer (`useMagnetic`) also need `useFinePointer()`. Scroll drift
-  (`scrubDrift`) runs from `md` up only, through `gsap.matchMedia()` and
-  `MD_UP`; `src/utils/motion.js` holds those and the shared eases and
-  staggers.
+- Scroll drift (`scrubDrift`, called with the setup's `gsap`) runs from `md`
+  up only, through `gsap.matchMedia()` and `MD_UP`; `src/utils/motion.js`
+  holds those and the shared eases and staggers.
 - Hooks that ask the browser (`useMotionAllowed`, `useMediaQuery`,
   `useCoarsePointer`, `useFinePointer`) answer `false` on the server and while
   the page hydrates, then the browser's answer. A view that shows something
@@ -62,14 +70,16 @@ animate with framer-motion, `SmoothScroll` is not mounted and
   `<style id="screen-h">` before first paint. `trackScreenHeight()` keeps that
   element up to date, changing it only when ScrollTrigger re-measures too.
 - Lenis' settings live in `src/utils/smoothScroll.js`: a slower wheel (lerp
-  0.07, 80% per notch) and, with `syncTouch`, Lenis' own glide after a flick
-  on touch screens. A pinch, and any gesture while the page is zoomed in,
+  0.07, 80% per notch), and touch scrolling left to the browser
+  (`syncTouch: false`). A pinch, and any gesture while the page is zoomed in,
   stays the browser's.
-- `src/components/ui/SmoothScroll.jsx` runs Lenis, inside the router. A route
-  change starts the new page at its top, through Lenis (`immediate`, so a
-  fling still gliding cannot carry the new page down) or, where Lenis is not
-  running, `window.scrollTo`; then ScrollTrigger re-measures. Content that
-  grows re-measures Lenis and ScrollTrigger too. Lenis overwrites a native
-  scroll mid-fling, so anything else that scrolls the page goes through it
-  while it runs: `getLenis()` (`src/utils/lenis.js`), `scrollToId()`
-  (`src/utils/scroll.js`), `useScrollLock()`.
+- `src/motion/SmoothScroll.jsx` runs Lenis around the site shell
+  (`src/root.jsx`) once the engine has loaded; content that grows re-measures
+  Lenis and ScrollTrigger. On a route change React Router's
+  `<ScrollRestoration/>` sets the position (the top, a saved position on Back,
+  a `#hash` target), and `src/motion/LenisScrollSync.jsx` hands it to Lenis at
+  once (`immediate`, so a fling still gliding cannot carry the new page down),
+  then has ScrollTrigger re-measure after the view transition. Lenis
+  overwrites a native scroll mid-fling, so anything else that scrolls the
+  page goes through it while it runs: `getLenis()` (`src/utils/lenis.js`),
+  `scrollToId()` (`src/utils/scroll.js`), `useScrollLock()`.

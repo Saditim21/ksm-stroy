@@ -1,7 +1,9 @@
 import { EASE_OUT, EASE_IN_OUT, EASE_FOLLOW, LINE_STAGGER, CHAR_STAGGER, MD_UP, CLIP_HIDDEN, CLIP_SHOWN, scrubDrift } from './motion'
-import { gsap } from './gsap'
 
 // From golden-residence src/utils/motion.test.js @944bb03.
+
+// The gsap a useMotion setup is handed, as far as scrubDrift uses it.
+const fakeGsap = (tween = {}) => ({ fromTo: vi.fn(() => tween) })
 
 test('the GSAP eases and staggers are the landing\'s', () => {
   expect(EASE_OUT).toBe('expo.out')
@@ -34,33 +36,25 @@ test('the clip constants are a bottom-up inset uncover', () => {
 
 test('scrubDrift scrubs a held-scale drift and merges the caller trigger', () => {
   const tween = {}
-  const fromTo = vi.spyOn(gsap, 'fromTo').mockReturnValue(tween)
-  try {
-    const el = document.createElement('div')
-    const frame = document.createElement('div')
-    expect(scrubDrift(el, { trigger: frame, start: 'top bottom', end: 'bottom top' })).toBe(tween)
-    expect(fromTo).toHaveBeenCalledTimes(1)
-    expect(fromTo).toHaveBeenCalledWith(
-      el,
-      { yPercent: -6, scale: 1.14 },
-      {
-        yPercent: 6,
-        scale: 1.14,
-        ease: 'none',
-        scrollTrigger: { scrub: true, trigger: frame, start: 'top bottom', end: 'bottom top' },
-      },
-    )
-  } finally {
-    fromTo.mockRestore()
-  }
+  const gsap = fakeGsap(tween)
+  const el = document.createElement('div')
+  const frame = document.createElement('div')
+  expect(scrubDrift(gsap, el, { trigger: frame, start: 'top bottom', end: 'bottom top' })).toBe(tween)
+  expect(gsap.fromTo).toHaveBeenCalledTimes(1)
+  expect(gsap.fromTo).toHaveBeenCalledWith(
+    el,
+    { yPercent: -6, scale: 1.14 },
+    {
+      yPercent: 6,
+      scale: 1.14,
+      ease: 'none',
+      scrollTrigger: { scrub: true, trigger: frame, start: 'top bottom', end: 'bottom top' },
+    },
+  )
 })
 
 test('scrubDrift lets the caller turn scrub off or soften it', () => {
-  const fromTo = vi.spyOn(gsap, 'fromTo').mockReturnValue({})
-  try {
-    scrubDrift(document.createElement('div'), { scrub: 0.5 })
-    expect(fromTo.mock.calls[0][2].scrollTrigger).toEqual({ scrub: 0.5 })
-  } finally {
-    fromTo.mockRestore()
-  }
+  const gsap = fakeGsap()
+  scrubDrift(gsap, document.createElement('div'), { scrub: 0.5 })
+  expect(gsap.fromTo.mock.calls[0][2].scrollTrigger).toEqual({ scrub: 0.5 })
 })

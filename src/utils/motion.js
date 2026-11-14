@@ -1,7 +1,6 @@
-import { gsap } from './gsap'
-
 // The motion vocabulary shared by every animation, from the Golden Residence
-// landing (golden-residence src/utils/motion.js @944bb03).
+// landing (golden-residence src/utils/motion.js @944bb03). It imports no GSAP:
+// GSAP loads after first paint, and only src/motion/ imports it.
 
 // GSAP ease names and staggers.
 export const EASE_OUT = 'expo.out' // reveals
@@ -25,8 +24,9 @@ export const CLIP_SHOWN = 'inset(0% 0% 0% 0%)'
 // while the trigger scrubs. Held at scale 1.14 throughout, so there are 7% spare
 // on each side against a 6% drift and the frame's edge never shows. `scrollTrigger`
 // carries the caller's trigger, start and end; scrub is on unless it says otherwise.
-// Call it inside useGSAP, from md up (MD_UP).
-export function scrubDrift(el, scrollTrigger) {
+// Call it inside a useMotion setup, with the gsap that setup is handed, from md
+// up (MD_UP).
+export function scrubDrift(gsap, el, scrollTrigger) {
   return gsap.fromTo(el, { yPercent: -6, scale: 1.14 }, {
     yPercent: 6,
     scale: 1.14,

@@ -1,11 +1,12 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useState, ViewTransition } from 'react'
+import { lazy, Suspense, useEffect, useState, ViewTransition } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation } from 'react-router'
 import Navbar from './components/common/Navbar'
 import Footer from './components/common/Footer'
 import { ApartmentProvider } from './context/ApartmentContext'
+import LenisScrollSync from './motion/LenisScrollSync'
+import SmoothScroll from './motion/SmoothScroll'
 import { SITE_URL } from './seo/meta'
 import { SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
-import { getLenis } from './utils/lenis'
 import { normalizePathname } from './utils/pathname'
 import { seoData } from './utils/seo'
 import './index.css'
@@ -91,27 +92,15 @@ export function Layout({ children }) {
       </head>
       <body>
         {children}
+        {/* Scroll on a route change has one owner (spec §5.3):
+            ScrollRestoration sets the position, then LenisScrollSync, which
+            must render after it, hands it to Lenis. */}
         <ScrollRestoration />
         <LenisScrollSync />
         <Scripts />
       </body>
     </html>
   )
-}
-
-// <ScrollRestoration/> picks the position on every navigation (the top for a
-// new entry, the saved position on back and forward, the #hash target) and
-// applies it with window.scrollTo in a layout effect. A Lenis fling still in
-// flight would overwrite that on its next frame, so right after it (this
-// renders later, so its layout effect runs later) Lenis adopts the position at
-// once and its animation stops. Without Lenis (reduced motion, the prerender)
-// this does nothing.
-function LenisScrollSync() {
-  const location = useLocation()
-  useLayoutEffect(() => {
-    getLenis()?.scrollTo(window.scrollY, { immediate: true, force: true })
-  }, [location.key])
-  return null
 }
 
 const Analytics = lazy(() => import('@vercel/analytics/react').then((m) => ({ default: m.Analytics })))
@@ -144,16 +133,21 @@ function RouteTransition() {
   )
 }
 
+// SmoothScroll runs Lenis once the motion engine has loaded, after the page
+// has (src/motion/runtime.js); until then, and without motion, the page
+// scrolls natively and SmoothScroll is a plain wrapper.
 export default function App() {
   return (
     <ApartmentProvider>
-      <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
-        <Navbar />
-        <main className="flex-1 overscroll-none">
-          <RouteTransition />
-        </main>
-        <Footer />
-      </div>
+      <SmoothScroll>
+        <div className="min-h-screen flex flex-col bg-primary-50 overscroll-none">
+          <Navbar />
+          <main className="flex-1 overscroll-none">
+            <RouteTransition />
+          </main>
+          <Footer />
+        </div>
+      </SmoothScroll>
       <ConditionalAnalytics />
     </ApartmentProvider>
   )
