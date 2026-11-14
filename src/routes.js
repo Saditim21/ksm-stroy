@@ -11,7 +11,9 @@ import { blockPaths } from './config/blocks.js'
 // live one beside it. The host serves a prerendered file only at its exact
 // path, case included, and the 404 page for anything else (vercel.json). So:
 // - every route is case-sensitive: /About is the 404 page, as the host
-//   serves it, never /about's page;
+//   serves it, never /about's page (in the browser too: React Router 8.5.1
+//   drops the flag there, and scripts/client-routes-case.mjs puts it back in
+//   the production build);
 // - a block page has one route per block in src/config/blocks.js, the blocks
 //   react-router.config.js prerenders, never a `:block` param, which would
 //   match /projects/golden-residence/block-c too.
