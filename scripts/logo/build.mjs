@@ -14,6 +14,9 @@ import { traceWordmark, transformPath, WORD_REGION } from './trace-wordmark.mjs'
 import { cleanOutline } from './outline-fit.mjs';
 import { centrelineResiduals } from './residuals.mjs';
 
+// The functions handed to page.evaluate() run in the page, with its globals.
+/* global document */
+
 const args = process.argv.slice(2);
 const OUT = path.resolve(HERE, args.includes('--out') ? args[args.indexOf('--out') + 1] : '.');
 const CHECK = path.join(OUT, 'check');

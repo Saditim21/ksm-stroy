@@ -36,7 +36,7 @@ export function transformPath(d, fn, digits = 2) {
     return s === '-0' ? '0' : s;
   };
   const tokens = d.match(/[MLCZmlcz]|-?\d*\.?\d+(?:e-?\d+)?/g);
-  let out = '', nums = [], cmd = '';
+  let out = '', nums = [];
   const flush = () => {
     for (let i = 0; i + 1 < nums.length; i += 2) {
       const [x, y] = fn(nums[i], nums[i + 1]);
@@ -48,7 +48,7 @@ export function transformPath(d, fn, digits = 2) {
     if (/^[MLCZmlcz]$/.test(t)) {
       flush();
       if (t !== t.toUpperCase()) throw new Error('relative command in potrace output: ' + t);
-      cmd = t; out += t;
+      out += t;
     } else nums.push(parseFloat(t));
   }
   flush();

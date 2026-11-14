@@ -1,4 +1,5 @@
-import { EmblemPaths, STROKE_PROPS } from './Emblem.jsx'
+import { EmblemPaths } from './Emblem.jsx'
+import { STROKE_PROPS } from './strokeProps.js'
 import { WORDMARK_D } from './wordmark-path.js'
 
 // Placement of the emblem and wordmark inside each lockup, from the masters

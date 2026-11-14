@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { cwd } from 'node:process'
 import { links } from '../root.jsx'
 
-const fontsDir = join(process.cwd(), 'public/fonts')
+const fontsDir = join(cwd(), 'public/fonts')
 const fontFile = (f) => join(fontsDir, f)
-const css = () => readFileSync(join(process.cwd(), 'src/styles/fonts.css'), 'utf8')
+const css = () => readFileSync(join(cwd(), 'src/styles/fonts.css'), 'utf8')
 
 describe('self-hosted fonts', () => {
   it('ships both woff2 files within the 90 kB budget', () => {

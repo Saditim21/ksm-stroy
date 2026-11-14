@@ -8,7 +8,7 @@
 // With no --from it refines params.json.
 import fs from 'fs';
 import path from 'path';
-import { HERE, sharp, sourceAlpha, crop, rasterAlpha, l2, binarize, dilate, iou, softIoU, overlayPNG, writeJSON } from './lib.mjs';
+import { HERE, sourceAlpha, crop, rasterAlpha, l2, binarize, dilate, iou, softIoU, overlayPNG, writeJSON } from './lib.mjs';
 import { emblemPaths } from './geom.mjs';
 import { centrelineResiduals } from './residuals.mjs';
 

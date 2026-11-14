@@ -10,7 +10,7 @@ export const HERE = path.dirname(fileURLToPath(import.meta.url));
 const candidates = [process.env.KSM_NODE_MODULES_FROM, path.join(HERE, 'package.json'), 'C:/ksm-stroy/ksm-stroy/package.json'].filter(Boolean);
 export function req(name) {
   for (const c of candidates) {
-    try { return createRequire(c)(name); } catch {}
+    try { return createRequire(c)(name); } catch { /* not there: the next candidate */ }
   }
   throw new Error(`cannot resolve ${name}`);
 }
