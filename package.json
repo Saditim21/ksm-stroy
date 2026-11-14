@@ -13,7 +13,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:dist": "node scripts/check-dist.mjs",
-    "images": "node scripts/images/build-images.mjs"
+    "images": "node scripts/images/build-images.mjs",
+    "smoke": "node scripts/smoke/smoke.mjs",
+    "perf": "node scripts/perf/lighthouse.mjs",
+    "verify": "npm test && npm run build && npm run check:dist && npm run smoke"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -47,6 +50,7 @@
     "globals": "^16.3.0",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.6",
+    "puppeteer-core": "^25.17.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.17",
     "vite": "^7.1.0",
