@@ -43,16 +43,11 @@ const MnogofamilnaBlockSelection = () => {
   // runs. (A parent's initial={false} does not reach a child with an `initial`
   // of its own.) The gallery and the full-screen viewer open on a click, so
   // they keep their entrance animations.
-  //
-  // The page opens on dusk, under the see-through header (the handle below):
-  // the header's paper text needs a dark ground, and the dusk runs on well
-  // past the 80 px after which the header turns paper. The opening starts
-  // with the bar's height, so the bar covers nothing of the page.
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 pb-2 sm:pb-6 lg:pb-16">
-      <div className="on-dusk bg-dusk pt-[var(--bar-h)] text-paper">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 py-2 sm:py-6 lg:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="container mx-auto px-4 pb-6 pt-2 sm:px-6 sm:pb-8 sm:pt-6 lg:px-8 lg:pb-12 lg:pt-16"
+          className="mb-4 sm:mb-8 lg:mb-12"
           initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -64,7 +59,7 @@ const MnogofamilnaBlockSelection = () => {
               <div className="flex justify-start">
                 <button
                   onClick={() => navigate('/projects')}
-                  className="text-paper hover:text-paper/80 active:text-paper transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-paper/10 sm:justify-start sm:min-w-auto sm:px-2"
+                  className="text-gray-800 hover:text-gray-600 active:text-gray-900 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-gray-200/50 sm:justify-start sm:min-w-auto sm:px-2"
                 >
                   <span className="text-2xl sm:text-xl font-bold">←</span>
                   <span className="hidden sm:inline sm:ml-2 sm:mr-1 text-base font-medium">Назад към проекти</span>
@@ -116,7 +111,7 @@ const MnogofamilnaBlockSelection = () => {
             </div>
           </div>
           <motion.p
-            className="text-base sm:text-lg lg:text-xl text-paper/80 text-center px-6 sm:px-8 font-medium"
+            className="text-base sm:text-lg lg:text-xl text-gray-700 text-center px-6 sm:px-8 font-medium"
             initial={false}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -124,9 +119,7 @@ const MnogofamilnaBlockSelection = () => {
             Изберете блок за преглед
           </motion.p>
         </motion.div>
-      </div>
 
-      <div className="container mx-auto px-4 pt-4 sm:px-6 sm:pt-8 lg:px-8 lg:pt-12">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-2 min-h-[75vh] sm:min-h-[80vh] lg:h-[75vh]">
           {/* Block A - Enhanced Mobile Experience */}
           <motion.div
@@ -458,9 +451,10 @@ const MnogofamilnaBlockSelection = () => {
 
 export default MnogofamilnaBlockSelection;
 
-// How the site's shell frames this page (src/shell/handle.js): the header is
-// see-through over its dusk opening (above) until the page scrolls.
-export const handle = { header: 'overlay', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
+// How the site's shell frames this page (src/shell/handle.js): the solid
+// header, as on every legacy page; the page opens below it, on production's
+// light ground.
+export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({

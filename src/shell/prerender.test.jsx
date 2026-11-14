@@ -19,7 +19,7 @@ function prerender(path) {
       children: [
         { index: true, ...page({ header: 'overlay' }) },
         { path: 'about', ...page() },
-        { path: 'projects/golden-residence', ...page({ header: 'overlay', project: 'golden-residence', object: 'Golden Residence' }) },
+        { path: 'projects/golden-residence', ...page({ header: 'solid', project: 'golden-residence', object: 'Golden Residence' }) },
       ],
     }],
     { initialEntries: [path] },

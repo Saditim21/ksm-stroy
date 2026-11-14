@@ -132,8 +132,8 @@ describe('the header as the page scrolls', () => {
     Object.defineProperty(window, 'scrollY', { configurable: true, writable: true, value: 0 })
   })
 
-  it.each(['/', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is see-through over %s until 80 px down, then paper', async (path) => {
-    renderSiteAt(path)
+  it('is see-through over the home page’s hero until 80 px down, then paper', async () => {
+    renderSiteAt('/')
     const header = await siteHeader()
     expect(header).toHaveAttribute('data-look', 'overlay')
 
@@ -143,8 +143,10 @@ describe('the header as the page scrolls', () => {
     await waitFor(() => expect(header).toHaveAttribute('data-look', 'overlay'))
   })
 
-  it('is paper from the top of a page with no hero under it', async () => {
-    renderSiteAt('/about')
+  // The project pages open on production's light ground, so the bar is paper
+  // over them from the top, as on every page with no hero under it.
+  it.each(['/about', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is paper from the top of %s', async (path) => {
+    renderSiteAt(path)
 
     expect(await siteHeader()).toHaveAttribute('data-look', 'solid')
   })
@@ -190,19 +192,19 @@ describe('the header as the page scrolls', () => {
 
 // How each page of src/routes.js frames the shell: its module's `handle`
 // (src/shell/handle.js), read from the real modules (plan Task 9, Step 2).
-// Home and the two project pages run under the see-through header: Home's
-// hero and the project pages' dusk openings carry its paper text. The
-// explorers and every other page are solid.
+// Home runs under the see-through header: its hero carries the header's paper
+// text. The two project pages open on production's light ground, so they are
+// solid, as are the explorers and every other page.
 const GOLDEN_RESIDENCE = { project: 'golden-residence', object: 'Golden Residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
 const HANDLES = {
   '/': { header: 'overlay' },
   '/about': { header: 'solid' },
   '/projects': { header: 'solid' },
-  '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE },
+  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE },
   '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE },
   '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE },
-  '/projects/mnogofamilna-sgrada': { header: 'overlay', ...MNOGOFAMILNA },
+  '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA },
   '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA },
   '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA },
   // A redirect to /projects, which shows nothing of its own.
