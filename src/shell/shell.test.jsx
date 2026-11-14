@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../tests/contracts/site'
+import routes from '../routes'
 
 // The site's shell (plan Task 9, spec §8.1) around every page: the header with
 // the EU line, the mobile menu, the footer with its title block, and the 404
@@ -76,6 +77,24 @@ describe('the header', () => {
     expect(header.getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', href)
   })
 
+  // The EU line rides in the header on every page (spec §8.1, §14.1), not
+  // only in the footer. Both versions of its text stay in the page; CSS shows
+  // the one whose project number fits the room (src/index.css), which no
+  // test here can see.
+  it('carries the EU line: the lockup, the programme, the project number and „За проекта“', async () => {
+    renderSiteAt('/about')
+    const banner = await siteHeader()
+    const header = within(banner)
+
+    expect(header.getByRole('img', { name: 'Съфинансирано от Европейския съюз' })).toBeInTheDocument()
+    expect(header.getByRole('img', { name: 'Програма „Конкурентоспособност и иновации в предприятията“' })).toBeInTheDocument()
+    expect(header.getByRole('link', { name: 'За проекта' })).toHaveAttribute('href', '/eu-proekt')
+    expect(textOf(banner)).toContain(
+      'Проект „Дигитализация на предприятията“, № BG16RFPR001-1.012-1485-C01, по Програма „Конкурентоспособност и иновации в предприятията“ 2021-2027.',
+    )
+    expect(textOf(banner)).toContain('Проект № BG16RFPR001-1.012-1485-C01, съфинансиран от ЕС.')
+  })
+
   it('lets a keyboard skip straight to the page', async () => {
     renderSiteAt('/about')
 
@@ -124,6 +143,49 @@ describe('the header as the page scrolls', () => {
 
     scrollTo(window.innerHeight + 200)
     await waitFor(() => expect(header).not.toHaveAttribute('data-hidden'))
+  })
+})
+
+// How each page of src/routes.js frames the shell: its module's `handle`
+// (src/shell/handle.js), read from the real modules.
+//
+// The Golden Residence and Многофамилна pages are solid in M1, where the plan
+// asks for overlay. Their legacy pages open on a light ground with no hero:
+// the see-through bar's paper text would not read there, and with the page
+// starting under the bar, the bar would cover their back button and title.
+// When M2 rebuilds both pages around their heroes, they switch to overlay
+// (spec §8.1), and this table with them.
+const GOLDEN_RESIDENCE = { project: 'golden-residence', object: 'Golden Residence' }
+const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда' }
+const HANDLES = {
+  '/': { header: 'overlay' },
+  '/about': { header: 'solid' },
+  '/projects': { header: 'solid' },
+  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE },
+  '/projects/golden-residence/:block': { header: 'solid', ...GOLDEN_RESIDENCE },
+  '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA },
+  '/projects/mnogofamilna-sgrada/:block': { header: 'solid', ...MNOGOFAMILNA },
+  // A redirect to /projects, which shows nothing of its own.
+  '/projects/:id': undefined,
+  '/contact': { header: 'solid' },
+  '/blog': { header: 'solid' },
+  '/eu-proekt': { header: 'solid' },
+  '/*': { header: 'solid' },
+}
+
+describe('each page’s handle', () => {
+  const modules = import.meta.glob(['/src/**/*.jsx', '!/src/**/*.test.jsx'], { eager: true })
+  // The dev server's own pages (dev/*) are not part of the site.
+  const pages = routes
+    .filter(({ path }) => !path?.startsWith('dev/'))
+    .map(({ index, path, file }) => [index ? '/' : `/${path}`, file])
+
+  it('is decided for every page', () => {
+    expect(pages.map(([path]) => path).sort()).toEqual(Object.keys(HANDLES).sort())
+  })
+
+  it.each(pages)('%s (%s)', (path, file) => {
+    expect(modules[`/src/${file}`].handle).toEqual(HANDLES[path])
   })
 })
 

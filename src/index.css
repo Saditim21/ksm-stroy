@@ -175,6 +175,34 @@
   --header-h: calc(var(--eu-h) + var(--bar-h));
 }
 
+/* The text of the header's EU line (src/shell/EuLine.jsx). Its box is the
+   room the logos and „За проекта“ leave in the 36 px row, and it shows the
+   longest version whose project number fits there whole; an ellipsis ends
+   the rest. Where not even the short version's number fits (a phone), it
+   shows neither, so the number is never cut. Each width is the 12 px text
+   through „…C01, “ plus the ellipsis: short 255 px and full 490 px in KSM
+   Text, rounded up to cover the widest fallback face that paints the text
+   until the font arrives (Arial: 278 and 505 px). */
+.eu-line-text {
+  container-type: inline-size;
+}
+.eu-line-text > span {
+  display: none;
+}
+@container (min-width: 280px) {
+  .eu-line-text > .eu-line-short {
+    display: inline;
+  }
+}
+@container (min-width: 510px) {
+  .eu-line-text > .eu-line-short {
+    display: none;
+  }
+  .eu-line-text > .eu-line-full {
+    display: inline;
+  }
+}
+
 /* Safe-area aware horizontal + bottom padding helpers */
 .safe-x {
   padding-left: max(1rem, env(safe-area-inset-left));

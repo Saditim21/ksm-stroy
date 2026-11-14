@@ -9,15 +9,18 @@ import images from '../data/images/shell.json'
 // seen on landing without scrolling; the mobile menu and the footer carry it
 // on dusk.
 //
-// tone 'paper' is the header's strip, 36 px on paper. Its text keeps to one
-// line and ends in an ellipsis where the room runs out; under 640 px it is
-// the short version. On a phone narrower than 480 px not even the short line's
-// first words fit beside the two logos, so the text gives way and the logos
-// and „За проекта“ stay.
+// tone 'paper' is the header's strip: one row, 36 px, on paper. Its text box
+// is the room the logos and „За проекта“ leave, and it shows the longest
+// version of the text whose project number fits there whole, with an
+// ellipsis for the rest (src/index.css, .eu-line-text): the full text on a
+// desktop, the short one on a tablet. On a phone not even the short text's
+// number fits beside the two logos, so the box stays empty, and the lockup
+// and „За проекта“ remain. The number never shows cut. The menu and the
+// footer give the whole text at every width.
 //
 // tone 'dusk' sets both logos on a paper plate, because their lettering is
 // dark on a transparent ground and would vanish on dusk, and lets the text
-// wrap beside or under it.
+// wrap beside or under it, the short version under 640 px.
 //
 // Spec §3.2: a non-breaking space after „№“ and after the one-letter words.
 const TEXT = 'Проект „Дигитализация на предприятията“, №\u00a0BG16RFPR001-1.012-1485-C01, по Програма „Конкурентоспособност и\u00a0иновации в\u00a0предприятията“ 2021-2027.'
@@ -51,8 +54,8 @@ function Logos({ tone }) {
   )
 }
 
-// The text, short under 640 px. The other version is display: none, so a
-// screen reader reads one.
+// The text on dusk, short under 640 px. The other version is display: none,
+// so a screen reader reads one.
 function Text() {
   return (
     <>
@@ -88,8 +91,11 @@ export default function EuLine({ tone = 'paper' }) {
         <span className="flex shrink-0 items-center gap-2.5">
           <Logos tone="paper" />
         </span>
-        <p className="hidden min-w-0 flex-1 truncate text-[12px] leading-tight min-[480px]:block">
-          <Text />
+        {/* Both versions stay in the page; the box's width picks the one
+            shown (src/index.css), and a screen reader reads that one. */}
+        <p className="eu-line-text min-w-0 flex-1 truncate text-[12px] leading-tight">
+          <span className="eu-line-short">{SHORT_TEXT}</span>
+          <span className="eu-line-full">{TEXT}</span>
         </p>
         <Link
           to="/eu-proekt"
