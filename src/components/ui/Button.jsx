@@ -28,6 +28,17 @@ const VARIANTS = {
   },
 }
 
+// The focus ring src/index.css draws, in the colour of the ground `tone`
+// names (decision of 2026-11-14): ink on paper, paper on dusk, never the
+// label's colour, which a filled primary button sets to the ground's own.
+// Set here too, so a button over a dark picture with no .on-dusk around it
+// still shows its ring. Under forced colours, the system's Highlight.
+const RING = {
+  paper: 'focus-visible:outline-ink',
+  dusk: 'focus-visible:outline-paper',
+}
+const FORCED_RING = 'forced-colors:focus-visible:outline-[color:Highlight]'
+
 function Arrow() {
   return (
     <svg
@@ -60,7 +71,8 @@ export default function Button({
   ...rest
 }) {
   const look = VARIANTS[variant]?.[tone] ?? VARIANTS.primary.paper
-  const classes = `${BASE} ${look} ${className}`.trim()
+  const ring = `${RING[tone] ?? RING.paper} ${FORCED_RING}`
+  const classes = `${BASE} ${look} ${ring} ${className}`.trim()
   const content = (
     <>
       {children}

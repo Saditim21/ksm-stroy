@@ -44,6 +44,24 @@ test.each([
   expect(screen.getByRole('button')).toHaveClass(...classes)
 })
 
+// The focus ring is the ground's text colour (decision of 2026-11-14): ink on
+// paper and paper on dusk. A filled primary button's own label is the
+// opposite colour, so a ring in currentColor vanished into the ground around
+// it. Under forced colours the ring is the system's Highlight.
+test.each([
+  ['primary', 'paper', 'focus-visible:outline-ink'],
+  ['primary', 'dusk', 'focus-visible:outline-paper'],
+  ['secondary', 'paper', 'focus-visible:outline-ink'],
+  ['secondary', 'dusk', 'focus-visible:outline-paper'],
+  ['quiet', 'paper', 'focus-visible:outline-ink'],
+  ['quiet', 'dusk', 'focus-visible:outline-paper'],
+])('%s on %s takes its focus ring from the ground: %s', (variant, tone, ring) => {
+  render(<Button variant={variant} tone={tone}>Запитване</Button>)
+  const button = screen.getByRole('button')
+  expect(button).toHaveClass(ring, 'forced-colors:focus-visible:outline-[color:Highlight]')
+  expect(button.className).not.toMatch(tone === 'paper' ? /outline-paper/ : /outline-ink/)
+})
+
 test('primary on paper is the default', () => {
   render(<Button>Запитване</Button>)
   expect(screen.getByRole('button')).toHaveClass('bg-ink', 'text-paper')

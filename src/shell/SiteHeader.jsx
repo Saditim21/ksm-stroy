@@ -106,7 +106,9 @@ export default function SiteHeader() {
         }`}
       >
         <EuLine />
-        <div className={overlay ? 'text-paper' : 'bg-paper text-ink shadow-[0_1px_0_theme(colors.rule)]'}>
+        {/* See-through over a dark hero, the bar is a dusk ground (.on-dusk),
+            so its focus rings are paper (src/index.css). */}
+        <div className={overlay ? 'on-dusk text-paper' : 'bg-paper text-ink shadow-[0_1px_0_theme(colors.rule)]'}>
           <div className="site-wrap flex h-[var(--bar-h)] items-center gap-1 lg:gap-5 xl:gap-7">
             <Link to="/" aria-label="КСМ Строй, начална страница" className={`shrink-0 ${overlay ? '' : 'text-gold-ink'}`}>
               <Logo className="h-[46px] w-auto stroke-[3.45]" />

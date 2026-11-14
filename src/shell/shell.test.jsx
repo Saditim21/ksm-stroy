@@ -135,6 +135,29 @@ describe('the header as the page scrolls', () => {
     expect(await siteHeader()).toHaveAttribute('data-look', 'solid')
   })
 
+  // A focus ring is the ground's text colour (src/index.css): over the hero
+  // the see-through bar is a dusk ground, so its rings are paper, „Запитване“
+  // included; once solid it is paper again. The EU line above it is always on
+  // paper.
+  it('is a dusk ground for focus rings while see-through, and paper once solid', async () => {
+    renderSiteAt('/')
+    const header = await siteHeader()
+    const inHeader = within(header)
+    const bar = inHeader.getByRole('link', { name: 'КСМ Строй, начална страница' }).closest('.site-wrap').parentElement
+    const inquiry = inHeader.getByRole('link', { name: 'Запитване' })
+    const euLink = inHeader.getByRole('link', { name: 'За проекта' })
+
+    expect(bar).toHaveClass('on-dusk')
+    expect(inquiry).toHaveClass('focus-visible:outline-paper')
+    expect(euLink.closest('.on-dusk')).toBeNull()
+
+    scrollTo(81)
+    await waitFor(() => expect(header).toHaveAttribute('data-look', 'solid'))
+    expect(bar).not.toHaveClass('on-dusk')
+    expect(inquiry).toHaveClass('focus-visible:outline-ink')
+    expect(euLink.closest('.on-dusk')).toBeNull()
+  })
+
   it('after the first screen, hides going down and comes back going up', async () => {
     renderSiteAt('/about')
     const header = await siteHeader()
