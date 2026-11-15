@@ -1,8 +1,8 @@
-import { VT_CUT, clearTransitionCut, cutNextTransition, cutOnPop, keepRootSnapshot } from './viewTransition'
+import { VT_CUT, clearTransitionCut, cutNextTransition, cutOnPop, keepRootSnapshot, liftCutWhenDone } from './viewTransition'
 
 // The doors' off switch (spec §5.6): `vt-cut` on <html> turns the next route
 // change's doors off (src/styles/motion.css), for the hero move and for Back
-// and Forward. LenisScrollSync takes it off once that change is over.
+// and Forward. It comes off once that change is over.
 
 const html = document.documentElement
 afterEach(() => {
@@ -23,6 +23,29 @@ it('leaves the other classes on <html> alone', () => {
   cutNextTransition()
   clearTransitionCut()
   expect(html.className).toBe('js intro')
+})
+
+// The cut holds until the change it cuts is done. The browser keeps a view
+// transition up until the frame after its animations have finished, and styles
+// its pseudo-elements from the stylesheet until then: lifted as the animations
+// end, the cut would start the doors on them, from the page left. React calls
+// liftCutWhenDone as a route change's view transition starts to animate, and
+// what it returns once that transition has finished (src/root.jsx). A later
+// change's cut is its own: the end of an earlier change, such as the doors
+// Back cuts short, leaves it on.
+it('lifts the cut when its change is done, never a later change’s', () => {
+  cutNextTransition()
+  const backDone = liftCutWhenDone()
+  backDone()
+  expect(html.classList.contains('vt-cut')).toBe(false)
+
+  const doorsDone = liftCutWhenDone()
+  cutNextTransition()
+  const forwardDone = liftCutWhenDone()
+  doorsDone()
+  expect(html.classList.contains('vt-cut')).toBe(true)
+  forwardDone()
+  expect(html.classList.contains('vt-cut')).toBe(false)
 })
 
 it('a popstate cuts the doors', () => {

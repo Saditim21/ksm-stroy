@@ -2,10 +2,12 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { useState } from 'react'
 import { renderToStaticMarkup, renderToString } from 'react-dom/server'
 import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../tests/contracts/site'
+import LenisScrollSync from './motion/LenisScrollSync'
 import App, { Layout } from './root'
 import { mockMatchMedia } from './test/media'
 import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
@@ -89,15 +91,31 @@ it('keeps --screen-h following the screen once the app is up', async () => {
 // through the doors. On every page but the first, focus moves to <main>.
 //
 // renderSiteAt's memory router never reads window.history, so these cases
-// build the router themselves, with a page for each path, and keep it.
+// build the router themselves, with a page for each path, and keep it. The
+// app renders as Layout has it in the document, with LenisScrollSync after it.
 describe('arrival and focus', () => {
   const page = (text, handle = { header: 'solid' }) => ({ Component: () => <p>{text}</p>, handle })
+  // The site keeps rendering while a route change's view transition is up (the
+  // header, the data), and React runs that change's passive effects,
+  // LenisScrollSync's among them, before it renders again. renderAgain()
+  // stands in for that.
+  let renderAgain
+  function Site() {
+    const [, setRenders] = useState(0)
+    renderAgain = () => act(() => setRenders((renders) => renders + 1))
+    return (
+      <>
+        <App />
+        <LenisScrollSync />
+      </>
+    )
+  }
   function renderApp(path) {
     goOffline()
     const router = createMemoryRouter(
       [{
         path: '/',
-        Component: App,
+        Component: Site,
         children: [
           { index: true, ...page('Начало', { header: 'overlay' }) },
           { path: 'eu-proekt', ...page('Проект на ЕС') },
@@ -228,8 +246,8 @@ describe('arrival and focus', () => {
       expect(html.classList.contains('vt-cut')).toBe(false)
     })
 
-    // The hero move's cut and Back's are theirs to keep, until LenisScrollSync
-    // clears them once their change is over.
+    // The hero move's cut and Back's are theirs to keep, until their change is
+    // over (below).
     it('keeps the cut of a page the hero move or Back brings', async () => {
       const { router } = renderApp('/')
       html.classList.add('vt-cut')
@@ -241,6 +259,168 @@ describe('arrival and focus', () => {
       await shows('Начало')
       expect(frame()).toHaveAttribute('data-arrive', 'pop')
       expect(html.classList.contains('vt-cut')).toBe(true)
+    })
+
+    // A browser's same-document view transitions, as far as the doors need
+    // them (CSS View Transitions, as Chrome runs them):
+    // - startViewTransition() captures the view being left, then runs the
+    //   update, in which React applies the new page;
+    // - it then sets up the pseudo-elements, styled by the stylesheet with
+    //   <html>'s classes as they are, and `ready` resolves: React calls the
+    //   route boundary's onEnter and onExit;
+    // - the stylesheet styles them as long as the transition is up: a class
+    //   change on <html> restyles them at once, so lifting `vt-cut` starts the
+    //   doors on them (src/styles/motion.css), from the page left;
+    // - the transition is up until the frame after its animations have all
+    //   finished, and then `finished` resolves.
+    // Each transition records the cut it was started with, the cut its
+    // pseudo-elements were styled with, and the cut every class change on
+    // <html> left while it was up.
+    function browserViewTransitions() {
+      const transitions = []
+      const listed = []
+      let up = null
+      const watch = new MutationObserver(() => {
+        if (up) up.cuts.push(html.classList.contains('vt-cut'))
+      })
+      watch.observe(html, { attributes: true, attributeFilter: ['class'] })
+      document.startViewTransition = ({ update }) => {
+        let resolveReady
+        let resolveAnimations
+        let resolveFinished
+        const ready = new Promise((resolve) => { resolveReady = resolve })
+        const finished = new Promise((resolve) => { resolveFinished = resolve })
+        const animation = {
+          effect: { pseudoElement: '::view-transition-group(root)', target: html, getKeyframes: () => [], setKeyframes() {} },
+          finished: new Promise((resolve) => { resolveAnimations = resolve }),
+          cancel() {},
+        }
+        const over = async () => {
+          up = null
+          listed.splice(listed.indexOf(animation), 1)
+          resolveFinished()
+          await act(async () => {})
+        }
+        const transition = {
+          cutAtStart: html.classList.contains('vt-cut'),
+          cuts: [],
+          ready,
+          // Its animations finish; it stays up until the next frame.
+          endAnimations: () => act(async () => resolveAnimations()),
+          // The next frame: it is over.
+          over,
+        }
+        transitions.push(transition)
+        listed.push(animation)
+        queueMicrotask(async () => {
+          await update()
+          transition.cut = html.classList.contains('vt-cut')
+          up = transition
+          resolveReady()
+        })
+        return { ready, finished, updateCallbackDone: ready, skipTransition: over, types: new Set() }
+      }
+      document.getAnimations = () => [...listed]
+      html.getAnimations = () => [...listed]
+      Object.defineProperty(document, 'fonts', { configurable: true, value: { status: 'loaded', ready: Promise.resolve() } })
+      vi.stubGlobal('CSS', { escape: (name) => name })
+      // Every page in view, as React measures it before naming it.
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 1024, 768))
+      return {
+        transitions,
+        restore() {
+          watch.disconnect()
+          delete document.startViewTransition
+          delete document.getAnimations
+          delete html.getAnimations
+          delete document.fonts
+        },
+      }
+    }
+
+    // The text of every page main shows, in order, each once as it comes.
+    function pagesShown() {
+      const shown = [frame().textContent]
+      new MutationObserver(() => {
+        const text = frame()?.textContent
+        if (text !== shown.at(-1)) shown.push(text)
+      }).observe(document.getElementById('main'), { childList: true, subtree: true })
+      return shown
+    }
+
+    // Back and Forward are instant (spec §5.6): one view transition each,
+    // which the cut keeps from its start until it is over, so its doors never
+    // start, and the page left never shows again. Its animations end a frame
+    // before it does: the cut lifted then would start the doors there, from
+    // the page left.
+    it('switches at once on Back and Forward: one view transition each, cut until it is over', async () => {
+      const browser = browserViewTransitions()
+      try {
+        const { router } = renderApp('/eu-proekt')
+        const shown = pagesShown()
+
+        fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('link', { name: 'За нас' }))
+        await shows('Страницата за нас')
+        await waitFor(() => expect(browser.transitions).toHaveLength(1))
+        const [doors] = browser.transitions
+        await act(() => doors.ready)
+        expect(doors).toMatchObject({ cutAtStart: false, cut: false })
+        await renderAgain()
+        await doors.endAnimations()
+        await doors.over()
+
+        const steps = [
+          { address: '/eu-proekt', delta: -1, page: 'Проект на ЕС' },
+          { address: '/about', delta: 1, page: 'Страницата за нас' },
+        ]
+        for (const [i, { address, delta, page }] of steps.entries()) {
+          pop(address)
+          await act(() => router.navigate(delta))
+          await shows(page)
+          await waitFor(() => expect(browser.transitions).toHaveLength(2 + i))
+          const transition = browser.transitions[1 + i]
+          await act(() => transition.ready)
+          expect(transition).toMatchObject({ cutAtStart: true, cut: true })
+          expect(frame()).toHaveAttribute('data-arrive', 'pop')
+
+          await renderAgain()
+          await transition.endAnimations()
+          expect(html.classList.contains('vt-cut')).toBe(true)
+          await transition.over()
+          expect(html.classList.contains('vt-cut')).toBe(false)
+          expect(transition.cuts).not.toContain(false)
+        }
+
+        expect(browser.transitions).toHaveLength(3)
+        expect(shown).toEqual(['Проект на ЕС', 'Страницата за нас', 'Проект на ЕС', 'Страницата за нас'])
+      } finally {
+        browser.restore()
+      }
+    })
+
+    // A link, the open menu's among them, runs the doors once: one view
+    // transition, never cut.
+    it('runs the doors once for a page link in the open menu', async () => {
+      const browser = browserViewTransitions()
+      try {
+        renderApp('/eu-proekt')
+        fireEvent.click(screen.getByRole('button', { name: /Меню/ }))
+        fireEvent.click(within(screen.getByRole('dialog', { name: 'Меню' })).getByRole('link', { name: 'За нас' }))
+        await shows('Страницата за нас')
+        await waitFor(() => expect(browser.transitions).toHaveLength(1))
+        const [doors] = browser.transitions
+        await act(() => doors.ready)
+        expect(doors).toMatchObject({ cutAtStart: false, cut: false })
+        await renderAgain()
+        await doors.endAnimations()
+        await doors.over()
+
+        expect(doors.cuts).not.toContain(true)
+        expect(browser.transitions).toHaveLength(1)
+        expect(screen.queryByRole('dialog', { name: 'Меню' })).toBeNull()
+      } finally {
+        browser.restore()
+      }
     })
   })
 })

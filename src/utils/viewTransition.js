@@ -4,19 +4,47 @@
 // - the hero move (Home → Golden Residence), which lands on an identical frame
 //   and must not close doors over it;
 // - Back and Forward, which are instant.
-// LenisScrollSync clears the cut once that change's transition is over, or
-// after TRANSITION_MAX_MS where none settles, so it never sticks. A cut left
-// over from a change that never came (Back to a page still loading when a link
-// was followed, a hero move given up) is lifted by the next page the doors
-// bring, before its doors are set up (root.jsx).
+// The cut comes off once that change's view transition is over (liftCutWhenDone,
+// below), or after TRANSITION_MAX_MS where no transition ends it
+// (LenisScrollSync), so it never sticks. A cut left over from a change that
+// never came (Back to a page still loading when a link was followed, a hero
+// move given up) is lifted by the next page the doors bring, before its doors
+// are set up (root.jsx).
 export const VT_CUT = 'vt-cut'
 
+// How many cuts have been made: the number of the latest. Each cut is one
+// change's, and only that change's end lifts it.
+let cuts = 0
+
 export function cutNextTransition() {
+  cuts += 1
   document.documentElement.classList.add(VT_CUT)
 }
 
 export function clearTransitionCut() {
   document.documentElement.classList.remove(VT_CUT)
+}
+
+// Returns the function that lifts the cut now on once its change is done. It
+// lifts nothing if a later change has made a cut of its own by then: Back
+// pressed during the doors cuts its own change, and the end of the doors it
+// cut short must leave that cut on.
+//
+// RouteTransition (root.jsx) hands this to React as its <ViewTransition>'s
+// onEnter and onExit: React calls it as the route change's view transition
+// starts to animate, and calls what it returns once that transition has
+// finished (ViewTransition.finished), its pseudo-elements gone. Not before:
+// the browser keeps a transition up until the frame after its animations have
+// all finished, and styles its pseudo-elements from the stylesheet until then.
+// Lifted as the animations end (a cut change's are only the 250 ms the
+// browser gives its groups), the cut would start the doors on them
+// (src/styles/motion.css): the page left would show again and close, after
+// Back had switched at once.
+export function liftCutWhenDone() {
+  const cut = cuts
+  return () => {
+    if (cut === cuts) clearTransitionCut()
+  }
 }
 
 // The doors close the whole view (spec §5.6, decision 10): the root snapshot

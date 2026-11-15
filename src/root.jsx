@@ -11,7 +11,7 @@ import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { trackScreenHeight } from './utils/screenHeight'
 import { seoData } from './utils/seo'
-import { clearTransitionCut, cutOnPop, keepRootSnapshot } from './utils/viewTransition'
+import { clearTransitionCut, cutOnPop, keepRootSnapshot, liftCutWhenDone } from './utils/viewTransition'
 import './index.css'
 
 // The root route: the document around every page (Layout), the site shell
@@ -125,8 +125,11 @@ function ConditionalAnalytics() {
 // a commit a frame after making it, so a popstate whose listener runs after
 // React Router's, and after React's commit (Chrome's order), still finds the
 // page being left there, while a fragment the browser follows finds the page
-// it keeps. And the root snapshot takes part in every route change, so the
-// doors close it with the page (src/utils/viewTransition.js).
+// it keeps. The cut holds until the change's view transition has finished:
+// React calls the boundary's onEnter and onExit as the transition starts to
+// animate, and liftCutWhenDone's lifter once it has finished. And the root
+// snapshot takes part in every route change, so the doors close it with the
+// page (src/utils/viewTransition.js).
 function RouteTransition() {
   const location = useLocation()
   const navigationType = useNavigationType()
@@ -148,7 +151,7 @@ function RouteTransition() {
     else arrive = location.state?.arrive === 'hero' ? 'hero' : 'doors'
   }
   return (
-    <ViewTransition key={page} enter="page-in" exit="page-out" default="none">
+    <ViewTransition key={page} enter="page-in" exit="page-out" default="none" onEnter={liftCutWhenDone} onExit={liftCutWhenDone}>
       <PageFrame arrive={arrive} />
     </ViewTransition>
   )

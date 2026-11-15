@@ -12,15 +12,17 @@ const motion = vi.hoisted(() => ({ ScrollTrigger: { refresh: vi.fn() } }))
 vi.mock('./engine.js', () => ({ default: motion }))
 
 // Fresh modules for every test: whether the engine has loaded is runtime
-// state, and the Lenis handle is module state.
+// state, and the Lenis handle and the doors' cuts are module state.
 let LenisScrollSync
 let runtime
 let lenisHandle
+let viewTransition
 beforeEach(async () => {
   vi.resetModules()
   LenisScrollSync = (await import('./LenisScrollSync')).default
   runtime = await import('./runtime')
   lenisHandle = await import('../utils/lenis')
+  viewTransition = await import('../utils/viewTransition')
   motion.ScrollTrigger.refresh.mockReset()
 })
 
@@ -357,24 +359,44 @@ describe('ScrollTrigger', () => {
 
 // `vt-cut` (src/utils/viewTransition.js) turns the doors off for one route
 // change: the hero move's, or Back's and Forward's. Once that change is over,
-// the next one has its doors again.
+// the next one has its doors again. The end of its view transition lifts it
+// (RouteTransition, src/root.jsx); this lifts it where no transition does, so
+// it never sticks.
 describe('the doors\' cut', () => {
   const html = document.documentElement
   afterEach(() => html.classList.remove('vt-cut'))
 
-  test('is cleared once the transition has finished', async () => {
-    const transition = deferred()
-    runningAnimations(transitionAnimation(transition.promise))
+  // The browser keeps a view transition up until the frame after its
+  // animations have finished, and styles its pseudo-elements from the
+  // stylesheet until then. Lifted as the animations end, the cut would start
+  // the doors on them, from the page left, after Back had switched at once.
+  test('stays on when the transition’s animations have finished', async () => {
+    vi.useFakeTimers()
+    const animations = deferred()
+    runningAnimations(transitionAnimation(animations.promise))
     renderSync('/')
 
     html.classList.add('vt-cut')
     go('/about')
-    await settle()
+    animations.resolve()
+    await act(() => vi.advanceTimersByTimeAsync(1399))
     expect(html.classList.contains('vt-cut')).toBe(true)
-
-    transition.resolve()
-    await settle()
+    await act(() => vi.advanceTimersByTimeAsync(1))
     expect(html.classList.contains('vt-cut')).toBe(false)
+  })
+
+  // Back again before the 1400 ms are up, to a page still loading: its cut
+  // is on before its change comes, and stays on for it.
+  test('leaves a later change’s cut on', async () => {
+    vi.useFakeTimers()
+    renderSync('/')
+
+    viewTransition.cutNextTransition()
+    go('/about')
+    await act(() => vi.advanceTimersByTimeAsync(1000))
+    viewTransition.cutNextTransition()
+    await act(() => vi.advanceTimersByTimeAsync(400))
+    expect(html.classList.contains('vt-cut')).toBe(true)
   })
 
   // Back and Forward: React may start no view transition at all, and a

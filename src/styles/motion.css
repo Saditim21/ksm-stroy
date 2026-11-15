@@ -53,7 +53,10 @@
   }
   /* The hero move and Back/Forward: the new page and the root at once, as a
      browser's own Back from its page cache would show them; an open menu
-     fades as the browser does. */
+     fades as the browser does. The browser styles the pseudo-elements from
+     these rules for as long as the transition is up, so the cut stays on
+     until it is over (src/utils/viewTransition.js): lifted earlier, the door
+     rules above would start on them. */
   :root.vt-cut::view-transition-old(.page-out),
   :root.vt-cut::view-transition-new(.page-in),
   :root.vt-cut::view-transition-image-pair(.page-in),

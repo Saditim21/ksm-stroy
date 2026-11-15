@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import { getLenis } from '../utils/lenis'
-import { clearTransitionCut } from '../utils/viewTransition'
+import { liftCutWhenDone } from '../utils/viewTransition'
 import { getMotion } from './runtime'
 
 // The longest a route change's view transition runs (the doors' 1120 ms in
@@ -33,14 +33,20 @@ function viewTransitionDone() {
 // stopped Lenis ignores scrollTo, and a scroll lock (useScrollLock) held by the
 // page being left is released only in a passive effect, after this one.
 //
-// Then, once the view transition is over, ScrollTrigger re-measures: every
-// trigger caches its start and end in pixels, and the new page has moved
-// those that outlive the route change, such as one in the footer. And the
-// doors' cut (`vt-cut`, src/utils/viewTransition.js), set for this change by
-// the hero move or a popstate, comes off, so the next change has its doors.
-// Only then: taken off mid-transition, it would start the doors there. A
-// newer change waits for its own transition, and its own cut stays on until
-// that is over.
+// Then, once the view transition's animations have finished, ScrollTrigger
+// re-measures: every trigger caches its start and end in pixels, and the new
+// page has moved those that outlive the route change, such as one in the
+// footer.
+//
+// The doors' cut (`vt-cut`, src/utils/viewTransition.js), set for this change
+// by the hero move or a popstate, comes off when the change's view transition
+// has finished (RouteTransition, src/root.jsx), not when its animations have:
+// the browser keeps the transition up until the next frame, and the cut taken
+// off in between would start the doors on it. Where no transition ends it (no
+// view transitions in the browser, none that started, or one that never
+// settles), this takes it off after TRANSITION_MAX_MS, so the next change has
+// its doors. A newer change's cut is its own, and stays on: Back pressed again
+// before then, to a page still loading, cuts its change before it comes.
 //
 // Without Lenis (no motion, or the engine not loaded yet) the router's scroll
 // stands alone, and there is no ScrollTrigger to re-measure.
@@ -85,13 +91,13 @@ export default function LenisScrollSync() {
     if (shownLocation.current === location) return undefined
     shownLocation.current = location
     let live = true
+    const liftCut = setTimeout(liftCutWhenDone(), TRANSITION_MAX_MS)
     viewTransitionDone().then(() => {
-      if (!live) return
-      clearTransitionCut()
-      getMotion()?.ScrollTrigger.refresh()
+      if (live) getMotion()?.ScrollTrigger.refresh()
     })
     return () => {
       live = false
+      clearTimeout(liftCut)
     }
   }, [location])
 
