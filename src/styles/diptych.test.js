@@ -1,4 +1,4 @@
-import { rulesFor, rulesOf, valueOf } from '../test/css'
+import { NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../test/css'
 
 // src/styles/diptych.css: Diptych's type roles, actions, grounds and the
 // seam's layout primitives (spec §3, §4, §6.1, §11), in Tailwind's components
@@ -56,18 +56,48 @@ it('lets the legacy ground synthesise faces again', () => {
   expect(valueOf(only('.legacy-ground'), 'font-synthesis')).toBe('initial')
 })
 
-// The legacy ground's light belongs to the page (src/root.jsx): the page's
-// frame paints it, and fills <main> below the header. <main> paints none. The
-// doors (src/styles/motion.css) carry <main> in the root snapshot, which spans
-// the scrollbar's gutter too and so opens on another centre than the page,
-// half a gutter to the right: a light ground there showed past the page's
-// door as a band, on a desktop with a classic scrollbar. With the page, the
-// light opens and closes on the page's own centre, the seam's.
-it('paints the legacy ground with the page, never with <main>', () => {
-  const ground = declared(only('.legacy-ground'))
-  expect(Object.keys(ground).filter((prop) => prop.startsWith('background'))).toEqual([])
-  expect(ground).toMatchObject({ display: 'flex', 'flex-direction': 'column' })
-  expect(declared(only('.legacy-ground > .page-frame'))).toEqual({ 'flex-grow': '1', background: '#fafafa' })
+// The legacy ground's light (src/root.jsx: <main> is .legacy-ground, its one
+// child the page's frame).
+describe('the legacy ground', () => {
+  // The page's frame paints it and fills <main> below the header, so the
+  // doors (src/styles/motion.css) carry it with the page and open and close
+  // it on the page's own centre, the seam's.
+  it('is painted by the page’s frame', () => {
+    expect(declared(only('.legacy-ground'))).toMatchObject({ display: 'flex', 'flex-direction': 'column' })
+    expect(declared(only('.legacy-ground > .page-frame'))).toEqual({ 'flex-grow': '1', background: '#fafafa' })
+  })
+
+  // <main>, which the root snapshot holds, paints it too, below the header and
+  // under the frame, except where the doors run. Their root snapshot spans the
+  // scrollbar's gutter as well and opens half a gutter right of the page, so a
+  // light ground there showed past the page's door as a band. Without the
+  // doors the change is a crossfade: the root's two snapshots blend as one
+  // pair, so a light ground in both stays light, while the leaving and the
+  // arriving page fade apart, each over the root, and over onyx a quarter of
+  // it showed through at the midpoint, a grey veil over the whole page.
+  it('is painted by <main> as well, below the header, wherever the doors never run', () => {
+    const ground = declared(only('.legacy-ground'))
+    expect(ground['background-color']).toBe('#fafafa')
+    expect(ground['background-clip']).toBe('content-box')
+    expect(declared(only(':root.js .legacy-ground', [LAYER, NO_PREFERENCE]))).toEqual({ 'background-color': 'transparent' })
+    const painting = rules.filter((rule) => rule.selectors.some((selector) => /\.legacy-ground$/.test(selector))
+      && rule.declarations.some(({ prop }) => prop.startsWith('background')))
+    expect(painting.map((rule) => rule.selector)).toEqual(['.legacy-ground', ':root.js .legacy-ground'])
+  })
+
+  // Where the doors run is motion.css's condition: the gate's :root.js, with
+  // no reduced-motion preference. Reduced motion switched on after the page
+  // loaded leaves `js` on <html> but stops the doors, so the gate's class
+  // alone would not do.
+  it('leaves <main> bare under the condition the doors run under', () => {
+    const bare = only(':root.js .legacy-ground', [LAYER, NO_PREFERENCE])
+    const motion = rulesOf('src/styles/motion.css')
+    for (const selector of [':root.js:not(.vt-cut)::view-transition-old(root)', ':root.js:not(.vt-cut)::view-transition-new(root)']) {
+      const found = rulesFor(motion, selector)
+      expect(found, selector).toHaveLength(1)
+      expect([LAYER, ...found[0].atRules], selector).toEqual(bare.atRules)
+    }
+  })
 })
 
 describe('the seam and the halves (spec §4)', () => {

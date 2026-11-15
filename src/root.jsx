@@ -199,10 +199,11 @@ function PageFrame({ arrive: arrival }) {
 // `legacy`) keeps production's light ground inside the dark shell, with no
 // grain: its <main> is .legacy-ground, and .on-light turns its focus rings
 // onyx (src/styles/diptych.css, src/index.css). The page's frame paints that
-// ground, never <main>, so the doors carry it with the page and the root
-// snapshot holds none (src/styles/diptych.css). The frame fills <main> below
-// the header: the room under the header keeps the site's onyx, so the solid
-// header, onyx at 86 %, reads onyx there too.
+// ground, so the doors carry it with the page. <main> paints it too, under the
+// frame, except where the doors run: then the root snapshot holds none, and
+// without the doors it keeps the crossfade light (src/styles/diptych.css).
+// Both start below the header: the room under the header keeps the site's
+// onyx, so the solid header, onyx at 86 %, reads onyx there too.
 //
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page

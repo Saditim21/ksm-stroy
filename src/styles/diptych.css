@@ -112,16 +112,28 @@
      body's `font-synthesis: none` (src/index.css) is for Diptych's faces.
 
      <main> carries the class, and its one child, the page's frame, paints
-     the light, filling <main> below the header. Never <main> itself: the
-     doors (src/styles/motion.css) carry <main> in the root snapshot, which
-     spans the scrollbar's gutter as well and so opens half a gutter off the
-     page's centre, and a light ground there showed past the page's door as a
-     band. In the frame, the page's snapshot, the light opens and closes with
-     the page, on the seam. As a flex item the frame holds its content's
-     margins, so its light covers them, as <main>'s did. */
+     the light, filling <main> below the header. In the frame, the page's
+     snapshot in the doors (src/styles/motion.css), the light opens and
+     closes with the page, on the seam. As a flex item the frame holds its
+     content's margins, so its light covers them.
+
+     <main> paints the same light under the frame, from below the header
+     (its content box), except where the doors run, which carry <main> in
+     the root snapshot. That snapshot spans the scrollbar's gutter as well,
+     so its doors open half a gutter off the page's centre, and a light
+     ground there showed past the page's door as a band. Without the doors
+     the change is a crossfade, and <main>'s light keeps it light: the
+     root's two snapshots blend as one pair, light into light, while the
+     leaving and the arriving page fade apart, each over the root, and over
+     onyx alone a quarter of it would show through midway, a grey veil.
+     Where the doors run is motion.css's condition, `:root.js` with no
+     reduced-motion preference: reduced motion switched on after the page
+     loaded keeps `js` but stops the doors. */
   .legacy-ground {
     display: flex;
     flex-direction: column;
+    background-color: #fafafa;
+    background-clip: content-box;
     color: #1a1a1a;
     font-family: theme(fontFamily.sans);
     line-height: 1.5;
@@ -130,6 +142,9 @@
   .legacy-ground > .page-frame {
     flex-grow: 1;
     background: #fafafa;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :root.js .legacy-ground { background-color: transparent; }
   }
 
   /* ---------- the seam (spec §4) ---------- */

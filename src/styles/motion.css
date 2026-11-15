@@ -15,15 +15,19 @@
 
    The root snapshot spans the scrollbar's gutter as well, so with a classic
    scrollbar its doors run half a gutter right of the page's, which close on
-   the page's centre, the seam's. So it holds no light ground: a legacy page's
-   is the page's own, painted by its frame (src/styles/diptych.css), and opens
-   and closes with it. In the root it showed past the page's door as a band.
+   the page's centre, the seam's. So under the doors it holds no light ground:
+   a legacy page's is the page's own, painted by its frame
+   (src/styles/diptych.css), and opens and closes with it. In the root it
+   showed past the page's door as a band.
 
    Without motion (reduced motion, Save-Data, no matchMedia), a 200 ms
-   crossfade. `vt-cut` on <html> (src/utils/viewTransition.js) turns the doors
-   off for one change: the hero move, and Back and Forward. Without a
-   reduced-motion preference that change is instant; with one, it keeps the
-   crossfade.
+   crossfade. There <main> paints a legacy page's ground under its frame, so
+   the root holds it as well, and its two snapshots, which blend as one pair,
+   keep it light while the two pages fade apart over it (diptych.css: over
+   the root's onyx alone they let a grey veil through midway). `vt-cut` on
+   <html> (src/utils/viewTransition.js) turns the doors off for one change:
+   the hero move, and Back and Forward. Without a reduced-motion preference
+   that change is instant; with one, it keeps the crossfade.
 
    Not in a Tailwind layer: these rules are never purged, and nothing else
    styles the view transition (src/index.css). */
@@ -71,7 +75,8 @@
      through the new one wherever the new one lies on the root's onyx, as a
      rebuilt page does, for the whole transition (React runs one on Back and
      Forward too). And the old root, fading out, would show the old view's
-     footer and grain through the new page for a moment. */
+     footer and grain through the new page for a moment, and without the
+     gate (Save-Data) a legacy page's ground. */
   :root.vt-cut::view-transition-old(.page-out),
   :root.vt-cut::view-transition-old(root) { display: none; }
 }

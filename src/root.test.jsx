@@ -428,11 +428,14 @@ describe('arrival and focus', () => {
 // A legacy page's light ground travels with the page through the doors: the
 // page's frame, the snapshot the doors open and close on the seam, paints it
 // (.legacy-ground > .page-frame, src/styles/diptych.css). <main>, which the
-// root snapshot holds, paints no ground of its own: that snapshot spans the
-// scrollbar's gutter too, so its doors run half a gutter off the page's, and
-// a ground there showed past the page's door as a light band.
+// root snapshot holds, paints it only through .legacy-ground, which leaves it
+// bare where the doors run: that snapshot spans the scrollbar's gutter too, so
+// its doors run half a gutter off the page's, and a ground there showed past
+// the page's door as a light band. Without the doors <main> paints it too, so
+// the crossfade keeps the ground light. Never a utility of <main>'s own, which
+// would paint under the doors as well.
 describe('the legacy ground', () => {
-  it('is painted by the page’s frame, never by <main>', async () => {
+  it('is painted by the page’s frame, and by <main> only through .legacy-ground', async () => {
     goOffline()
     renderSiteAt('/about')
     await screen.findByText(/основана през месец септември 2008/)
