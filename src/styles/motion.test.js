@@ -101,9 +101,9 @@ describe('vt-cut, the hero move and Back/Forward', () => {
     }
   })
 
-  // The new page at once: a page has no ground of its own, so an old page's
-  // snapshot left in place would show through it for the whole transition
-  // (React runs one on Back and Forward too). It goes at once.
+  // The new page at once: a rebuilt page lies on the root's onyx, so an old
+  // page's snapshot left in place would show through it for the whole
+  // transition (React runs one on Back and Forward too). It goes at once.
   it('takes the old page’s snapshot away at once', () => {
     const rule = rulesFor(rules, ':root.vt-cut::view-transition-old(.page-out)').find((found) => valueOf(found, 'display'))
     expect(valueOf(rule, 'display')).toBe('none')
@@ -112,10 +112,9 @@ describe('vt-cut, the hero move and Back/Forward', () => {
   })
 
   // Back and Forward are instant (spec §5.6), as a browser's own Back from its
-  // page cache is: the root (the ground, the footer) switches with the page. A
-  // root that faded would hold the old ground under the new page's text for a
-  // moment: ivory on a legacy page's light ground, or a legacy page's dark text
-  // on onyx. The hero move's two roots are both onyx.
+  // page cache is: the root (the footer, the grain) switches with the page. A
+  // root that faded would show the old view's footer through the new page for
+  // a moment. The hero move's two roots are both onyx.
   it('switches the root at once', () => {
     expect(declared(':root.vt-cut::view-transition-old(root)').display).toBe('none')
     expect(declared(':root.vt-cut::view-transition-new(root)').animation).toBe('none')

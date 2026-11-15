@@ -109,13 +109,27 @@
      and leading it had before the site turned dark (the legacy sans stack,
      Preflight's 1.5), so its layout stays as it was. A system face with no
      italic or bold of its own is slanted and emboldened again, as it was:
-     body's `font-synthesis: none` (src/index.css) is for Diptych's faces. */
+     body's `font-synthesis: none` (src/index.css) is for Diptych's faces.
+
+     <main> carries the class, and its one child, the page's frame, paints
+     the light, filling <main> below the header. Never <main> itself: the
+     doors (src/styles/motion.css) carry <main> in the root snapshot, which
+     spans the scrollbar's gutter as well and so opens half a gutter off the
+     page's centre, and a light ground there showed past the page's door as a
+     band. In the frame, the page's snapshot, the light opens and closes with
+     the page, on the seam. As a flex item the frame holds its content's
+     margins, so its light covers them, as <main>'s did. */
   .legacy-ground {
-    background: #fafafa;
+    display: flex;
+    flex-direction: column;
     color: #1a1a1a;
     font-family: theme(fontFamily.sans);
     line-height: 1.5;
     font-synthesis: initial;
+  }
+  .legacy-ground > .page-frame {
+    flex-grow: 1;
+    background: #fafafa;
   }
 
   /* ---------- the seam (spec §4) ---------- */

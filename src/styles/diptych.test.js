@@ -56,6 +56,20 @@ it('lets the legacy ground synthesise faces again', () => {
   expect(valueOf(only('.legacy-ground'), 'font-synthesis')).toBe('initial')
 })
 
+// The legacy ground's light belongs to the page (src/root.jsx): the page's
+// frame paints it, and fills <main> below the header. <main> paints none. The
+// doors (src/styles/motion.css) carry <main> in the root snapshot, which spans
+// the scrollbar's gutter too and so opens on another centre than the page,
+// half a gutter to the right: a light ground there showed past the page's
+// door as a band, on a desktop with a classic scrollbar. With the page, the
+// light opens and closes on the page's own centre, the seam's.
+it('paints the legacy ground with the page, never with <main>', () => {
+  const ground = declared(only('.legacy-ground'))
+  expect(Object.keys(ground).filter((prop) => prop.startsWith('background'))).toEqual([])
+  expect(ground).toMatchObject({ display: 'flex', 'flex-direction': 'column' })
+  expect(declared(only('.legacy-ground > .page-frame'))).toEqual({ 'flex-grow': '1', background: '#fafafa' })
+})
+
 describe('the seam and the halves (spec §4)', () => {
   it('.seam is 1 px of brass down the middle, drawn from the top, never in the way', () => {
     expect(declared(only('.seam'))).toEqual({

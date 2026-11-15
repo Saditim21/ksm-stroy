@@ -170,6 +170,9 @@ function RouteTransition() {
 // followed, a hero move given up), so the frame lifts it as React applies the
 // page: in a view transition, before the browser sets up the doors. The hero
 // move's target and a page Back or Forward brings keep theirs.
+//
+// The frame is the page's snapshot in the doors. On a legacy page it paints
+// the light ground (.page-frame, src/styles/diptych.css).
 function PageFrame({ arrive: arrival }) {
   const [arrive] = useState(arrival)
   useLayoutEffect(() => {
@@ -179,7 +182,7 @@ function PageFrame({ arrive: arrival }) {
     if (arrive !== undefined) document.getElementById('main')?.focus({ preventScroll: true })
   }, [arrive])
   return (
-    <div data-arrive={arrive}>
+    <div className="page-frame" data-arrive={arrive}>
       <Outlet />
     </div>
   )
@@ -195,9 +198,11 @@ function PageFrame({ arrive: arrival }) {
 // (.grain, src/styles/shell.css). A page M2 has not rebuilt yet (its handle's
 // `legacy`) keeps production's light ground inside the dark shell, with no
 // grain: its <main> is .legacy-ground, and .on-light turns its focus rings
-// onyx (src/styles/diptych.css, src/index.css). That ground starts below the
-// header (bg-clip-content): the room under the header keeps the site's onyx,
-// so the solid header, onyx at 86 %, reads onyx there too.
+// onyx (src/styles/diptych.css, src/index.css). The page's frame paints that
+// ground, never <main>, so the doors carry it with the page and the root
+// snapshot holds none (src/styles/diptych.css). The frame fills <main> below
+// the header: the room under the header keeps the site's onyx, so the solid
+// header, onyx at 86 %, reads onyx there too.
 //
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
@@ -223,7 +228,7 @@ export default function App() {
           <main
             id="main"
             tabIndex={-1}
-            className={`flex-1 overscroll-none focus:outline-none${legacy ? ' on-light legacy-ground bg-clip-content' : ''}${header === 'overlay' ? '' : ' pt-[var(--header-h)]'}`}
+            className={`flex-1 overscroll-none focus:outline-none${legacy ? ' on-light legacy-ground' : ''}${header === 'overlay' ? '' : ' pt-[var(--header-h)]'}`}
           >
             <RouteTransition />
           </main>

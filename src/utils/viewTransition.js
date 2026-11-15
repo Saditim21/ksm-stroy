@@ -48,12 +48,12 @@ export function liftCutWhenDone() {
 }
 
 // The doors close the whole view (spec §5.6, decision 10): the root snapshot
-// (the footer, the grain, the ground) closes with the page, and what they
+// (the footer, the grain, the site's onyx) closes with the page, and what they
 // uncover is ::view-transition's onyx. But React leaves the root out of a view
 // transition whose changes all sit inside the boundaries it animates, as a
 // route change's do: it sets <html>'s inline view-transition-name to none,
 // hides the root's group and shrinks ::view-transition to nothing. The doors
-// would then uncover the live page, a legacy page's light ground among it.
+// would then uncover the live document, not onyx.
 // React leaves alone a name it finds set inline, so this sets the root's own
 // name, `root`, there while the app is up. After hydration, so the server's
 // <html> stays as React rendered it. Every view transition then closes the

@@ -424,3 +424,33 @@ describe('arrival and focus', () => {
     })
   })
 })
+
+// A legacy page's light ground travels with the page through the doors: the
+// page's frame, the snapshot the doors open and close on the seam, paints it
+// (.legacy-ground > .page-frame, src/styles/diptych.css). <main>, which the
+// root snapshot holds, paints no ground of its own: that snapshot spans the
+// scrollbar's gutter too, so its doors run half a gutter off the page's, and
+// a ground there showed past the page's door as a light band.
+describe('the legacy ground', () => {
+  it('is painted by the page’s frame, never by <main>', async () => {
+    goOffline()
+    renderSiteAt('/about')
+    await screen.findByText(/основана през месец септември 2008/)
+
+    const main = document.getElementById('main')
+    expect(main).toHaveClass('on-light', 'legacy-ground')
+    expect(main.className).not.toMatch(/(^|\s)bg-/)
+    expect(main.children).toHaveLength(1)
+    expect(main.firstElementChild).toHaveClass('page-frame')
+  })
+
+  it('is not on a rebuilt page, whose frame is the same', async () => {
+    goOffline()
+    renderSiteAt('/eu-proekt')
+    await screen.findByRole('heading', { level: 1, name: 'Дигитализация на предприятията' })
+
+    const main = document.getElementById('main')
+    expect(main).not.toHaveClass('legacy-ground')
+    expect(main.firstElementChild).toHaveClass('page-frame')
+  })
+})

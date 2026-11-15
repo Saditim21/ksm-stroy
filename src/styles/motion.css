@@ -8,10 +8,16 @@
    (0–400 ms), a 1 px brass seam appears (0–120 ms) and glints (400–520 ms),
    and the new view opens from it (520–1120 ms) as the seam fades. The doors
    close the whole view: the page, the root snapshot (the footer, the grain,
-   the ground) and an open menu (its group, `site-menu`), and uncover onyx.
-   The header is a group of its own and switches at once, over the page and
-   the root; an open menu lies over it, as it does live, and the doors
+   the site's onyx) and an open menu (its group, `site-menu`), and uncover
+   onyx. The header is a group of its own and switches at once, over the page
+   and the root; an open menu lies over it, as it does live, and the doors
    uncover it as they close the menu.
+
+   The root snapshot spans the scrollbar's gutter as well, so with a classic
+   scrollbar its doors run half a gutter right of the page's, which close on
+   the page's centre, the seam's. So it holds no light ground: a legacy page's
+   is the page's own, painted by its frame (src/styles/diptych.css), and opens
+   and closes with it. In the root it showed past the page's door as a band.
 
    Without motion (reduced motion, Save-Data, no matchMedia), a 200 ms
    crossfade. `vt-cut` on <html> (src/utils/viewTransition.js) turns the doors
@@ -41,7 +47,7 @@
 @media (prefers-reduced-motion: no-preference) {
   /* What the doors uncover. */
   :root.js::view-transition { background: var(--onyx); }
-  /* The page, the root snapshot (footer, grain, ground) and an open menu close together. */
+  /* The page, the root snapshot (footer, grain, onyx) and an open menu close together. */
   :root.js::view-transition-old(.page-out),
   :root.js:not(.vt-cut)::view-transition-old(site-menu),
   :root.js:not(.vt-cut)::view-transition-old(root) { animation: door-close 400ms var(--e-io) both; }
@@ -61,12 +67,11 @@
   :root.vt-cut::view-transition-new(.page-in),
   :root.vt-cut::view-transition-image-pair(.page-in),
   :root.vt-cut::view-transition-new(root) { animation: none; }
-  /* The old snapshots go at once. A page has no ground of its own: the old
-     page, left in place, would show through the new one for the whole
-     transition (React runs one on Back and Forward too). And the old root
-     holds the old ground: fading out, it would keep the new page's text on it
-     for a moment, ivory on a legacy page's light ground, or a legacy page's
-     dark text on onyx. */
+  /* The old snapshots go at once. The old page, left in place, would show
+     through the new one wherever the new one lies on the root's onyx, as a
+     rebuilt page does, for the whole transition (React runs one on Back and
+     Forward too). And the old root, fading out, would show the old view's
+     footer and grain through the new page for a moment. */
   :root.vt-cut::view-transition-old(.page-out),
   :root.vt-cut::view-transition-old(root) { display: none; }
 }
