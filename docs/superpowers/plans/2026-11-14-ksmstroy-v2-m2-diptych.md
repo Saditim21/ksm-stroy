@@ -1044,7 +1044,7 @@ it('fills the EmailJS template', () => expect(buildLead(fields, { production: tr
 
 - [ ] **Step 6: Commit.** `feat(golden-residence): the Diptych page with the hero, story, gallery, parking and inquiry`.
 
-**Preview:** "Golden Residence: the new page with the hero, the story, the blocks, the gallery, parking and the inquiry, and the move from Home's half into it. The explorer comes next; the block pages are still legacy."
+**Preview:** "Golden Residence: the new page with the hero, the story, the blocks, the gallery, parking and the inquiry, and the move from Home's half into it. For now each block shows its facts, its free count and a link to its page; the apartment squares that the line under „Два блока, по 96 апартамента“ describes are the block grids, which come with the explorer's last step. The explorer comes next; the block pages are still legacy."
 
 ### Task 6: Explorer I: model, status vocabulary, facade, edge panel and phone sheet
 
