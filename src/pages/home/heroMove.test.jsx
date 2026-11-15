@@ -163,3 +163,37 @@ it('the hero move is cancelled by unmount', async () => {
   expect(html()).not.toHaveClass('vt-cut')
   expect(arrival()).toBe('doors')
 })
+
+// Review Focus 4, ruling C9.7: Back during the move, on a Home that is the
+// first entry of the tab's history, takes the browser to another document.
+// Chrome may then keep Home in its back/forward cache with the timer still
+// pending, and a later Forward would bring the page back with the half grown
+// and fire the navigation late. pagehide, which comes before the page is
+// frozen, gives the move up: no navigation, no cut, and the half as it was.
+it('gives the hero move up on pagehide', async () => {
+  restore = mockMatchMedia({ fine: true })
+  renderSiteAt('/')
+  const link = await half()
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+  fireEvent.click(link)
+  await act(async () => { vi.advanceTimersByTime(400) })
+  const hero = document.querySelector('section.hero')
+  expect(hero).toHaveAttribute('data-moving')
+
+  await act(async () => { window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })) })
+  expect(hero).not.toHaveAttribute('data-moving')
+  expect(hero.style.getPropertyValue('--s')).toBe('')
+
+  await act(async () => { vi.advanceTimersByTime(2000) })
+  expect(window.location.pathname).toBe('/')
+  expect(html()).not.toHaveClass('vt-cut')
+
+  // The page shown again (Forward, from the cache): the half moves anew on
+  // the next click.
+  await act(async () => { window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })) })
+  expect(fireEvent.click(link)).toBe(false)
+  expect(hero).toHaveAttribute('data-moving')
+  await act(async () => { vi.advanceTimersByTime(800) })
+  expect(window.location.pathname).toBe(GR)
+})

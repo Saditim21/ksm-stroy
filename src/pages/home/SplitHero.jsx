@@ -107,8 +107,22 @@ export default function SplitHero() {
   const move = useRef(0)
 
   // A move given up (another page taken, or Back, before it lands) leaves no
-  // navigation behind it.
-  useEffect(() => () => clearTimeout(move.current), [])
+  // navigation behind it. Back to another document (Home the tab's first
+  // entry) may keep the page in the back/forward cache with the timer
+  // pending, so pagehide, before the page is frozen, gives the move up too:
+  // Forward then shows the halves as they were, and nothing fires late
+  // (Review Focus 4, ruling C9.7).
+  useEffect(() => {
+    const giveUp = () => {
+      clearTimeout(move.current)
+      setMoving(false)
+    }
+    window.addEventListener('pagehide', giveUp)
+    return () => {
+      window.removeEventListener('pagehide', giveUp)
+      clearTimeout(move.current)
+    }
+  }, [])
 
   // The click takes the link from the browser and the router while the half
   // grows (a second click starts nothing more), then changes the page itself:
