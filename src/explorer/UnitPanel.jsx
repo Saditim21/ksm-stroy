@@ -11,10 +11,11 @@ import { formatDecimal } from '../utils/format'
 import { STATUS_LABEL } from '../utils/propertyStatus'
 import { trapTab } from '../utils/trapTab'
 import { cropFor, planShapes } from './geometry'
-import { findUnit, floorKey, stepUnit } from './model'
+import { findUnit, floorKey } from './model'
 import { PLANS } from './plans'
 import PlanSvg from './PlanSvg'
 import { afterimage } from './planMotion'
+import { stepUnit } from './surfaceModel'
 
 // The unit panel (spec §7.7; extract §4.24; the concept's explorer.js:696-809,
 // golden-residence.html:303-310): one apartment, a modal dialog over the

@@ -1,4 +1,4 @@
-import { statusLook, statusWord } from './status'
+import { statusWord } from './status'
 import StatusSwatch from './StatusSwatch'
 
 // A count of one status (spec §7.9): the swatch, then „**n** word“, singular
@@ -12,7 +12,7 @@ import StatusSwatch from './StatusSwatch'
 export default function StatusCount({ status, count }) {
   const known = typeof count === 'number'
   return (
-    <span className={`st st--${statusLook(status)}`}>
+    <span className="st">
       <StatusSwatch status={status} />
       <b>{known ? count : '—'}</b> {statusWord(status, known ? count : null)}
     </span>

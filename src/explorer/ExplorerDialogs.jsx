@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef } from 'react'
 import { presetInquiry } from '../components/inquiry/inquiryStore'
 import { getLenis } from '../utils/lenis'
-import { findUnit, floorKey, stepUnit } from './model'
+import { findUnit, floorKey } from './model'
 import PlanStage from './PlanStage'
+import { stepUnit } from './surfaceModel'
 import UnitPanel from './UnitPanel'
 
 // The explorer's two dialogs, the plan stage and the unit panel, as the

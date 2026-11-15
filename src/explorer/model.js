@@ -3,7 +3,9 @@
 // each floor's counts by status, its colour and the range of its free areas,
 // each block's counts, types and exposures, and the totals. Statuses follow
 // src/utils/propertyStatus.js: text the rules do not know counts in the
-// total only.
+// total only. What only an opened floor's surfaces read from it, the range
+// line and the unit panel's previous and next, is surfaceModel.js's, so it
+// stays out of the first load.
 import { PROJECT_BLOCKS } from '../config/blocks'
 import { apartmentUnits } from '../data/availability/select'
 import { summarizeFloor } from '../utils/availability'
@@ -77,24 +79,6 @@ export function buildModel(data) {
 }
 
 /**
- * What the range line of a floor's panel says (spec §7.3):
- * - { kind: 'range', min, max }: free units of different areas;
- * - { kind: 'single', area, one }: every free unit has one area (`one` when
- *   only one is free);
- * - { kind: 'reserved' }: none free, some reserved;
- * - { kind: 'soldout' }: otherwise.
- * Null for free units without a known area: nothing to say.
- */
-export function rangeLine({ counts, minFree, maxFree }) {
-  if (counts.available > 0) {
-    if (minFree == null) return null
-    if (minFree === maxFree) return { kind: 'single', area: minFree, one: counts.available === 1 }
-    return { kind: 'range', min: minFree, max: maxFree }
-  }
-  return counts.reserved > 0 ? { kind: 'reserved' } : { kind: 'soldout' }
-}
-
-/**
  * The unit `id` names, or null: `id` is a unit's label („А 501“), as the
  * address, the callbacks and the inquiry carry it (spec §7.1), matched through
  * normalizeUnitId, so „a501“ and „А-501“ find it too. Null without data, for
@@ -104,12 +88,4 @@ export function findUnit(model, id) {
   if (!model || !id) return null
   const wanted = normalizeUnitId(id)
   return model.units.find((unit) => unit.id === wanted) ?? null
-}
-
-/** The unit `delta` places from `unit` on its floor, going round from either
- * end (spec §7.7): the unit panel's previous and next. */
-export function stepUnit(model, unit, delta) {
-  const units = model.floors.get(floorKey(unit.block, unit.floor))?.units ?? [unit]
-  const at = Math.max(0, units.indexOf(unit))
-  return units[(((at + delta) % units.length) + units.length) % units.length]
 }

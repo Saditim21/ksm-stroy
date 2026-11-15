@@ -5,9 +5,10 @@ import { STATUS_ORDER } from '../components/ui/status'
 import { GR_FACTS } from '../config/facts'
 import useMotionNow from '../motion/useMotionNow'
 import { formatArea, formatDecimal, plural } from '../utils/format'
-import { floorKey, rangeLine } from './model'
+import { floorKey } from './model'
 import PlanSvg from './PlanSvg'
 import { crossfadePlan, drawPlan } from './planMotion'
+import { rangeLine } from './surfaceModel'
 
 // The edge panel of a block (spec §7.3; extract §4.21; the concept's
 // explorer.js:284-301, :403-440): a floor the pointer or the keyboard is on,

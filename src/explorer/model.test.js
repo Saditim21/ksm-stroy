@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildModel, findUnit, floorKey, rangeLine, stepUnit } from './model'
+import { buildModel, findUnit, floorKey } from './model'
 import { snapshotData } from './testing'
 
 // The explorer's numbers (spec §7.1, §9), from the sheets snapshot the concept
@@ -65,25 +65,6 @@ describe('buildModel', () => {
   })
 })
 
-describe('rangeLine (spec §7.3)', () => {
-  const m = buildModel(snapshotData())
-  const stats = (available, reserved, minFree, maxFree) => ({ counts: { available, reserved, sold: 0, blocked: 0, total: 12 }, minFree, maxFree })
-
-  it('describes the free range', () => {
-    expect(rangeLine(m.floors.get('А-5'))).toEqual({ kind: 'range', min: 63.51, max: 108.56 })
-    expect(rangeLine(m.floors.get('Б-6'))).toEqual({ kind: 'soldout' })
-  })
-
-  it('gives one area when every free unit has it, and says whether one unit is free', () => {
-    expect(rangeLine(stats(1, 0, 62.18, 62.18))).toEqual({ kind: 'single', area: 62.18, one: true })
-    expect(rangeLine(stats(3, 2, 62.18, 62.18))).toEqual({ kind: 'single', area: 62.18, one: false })
-  })
-
-  it('says a floor with none free but some reserved has reserved ones', () => {
-    expect(rangeLine(stats(0, 2, null, null))).toEqual({ kind: 'reserved' })
-  })
-})
-
 it('keys a floor by its block’s letter and its number', () => {
   expect(floorKey('А', 5)).toBe('А-5')
   expect(floorKey('Б', 1)).toBe('Б-1')
@@ -105,18 +86,5 @@ describe('findUnit', () => {
     expect(findUnit(m, '')).toBeNull()
     expect(findUnit(m, null)).toBeNull()
     expect(findUnit(null, 'А 501')).toBeNull()
-  })
-})
-
-// Spec §7.7: the unit panel's previous and next go round the floor.
-describe('stepUnit', () => {
-  const m = buildModel(snapshotData())
-  const unit = (label) => findUnit(m, label)
-
-  it('steps to the next and the previous unit on the floor, round from either end', () => {
-    expect(stepUnit(m, unit('А 501'), 1).label).toBe('А 502')
-    expect(stepUnit(m, unit('А 501'), -1).label).toBe('А 512')
-    expect(stepUnit(m, unit('А 512'), 1).label).toBe('А 501')
-    expect(stepUnit(m, unit('Б 307'), -1).label).toBe('Б 306')
   })
 })
