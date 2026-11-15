@@ -9,10 +9,18 @@ export function freeApartmentsLine(n) {
   return `${n} свободни апартамента`
 }
 
+// A figure with two decimals and the Bulgarian comma, alone: „54,36“, „3,06“.
+// Where „м²“ follows it, formatArea writes both (ruling C7.4); this is for a
+// figure set apart from its unit (the unit panel's areas) or with none (a
+// кота).
+export function formatDecimal(n) {
+  return n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
 // A non-breaking space before „м²“ (spec §3.2), so the unit never starts a line.
 export function formatArea(n) {
   if (n == null) return '—'
-  return `${n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\u00a0м²`
+  return `${formatDecimal(n)}\u00a0м²`
 }
 
 // Bulgarian counts take the singular for exactly one and the plural otherwise.

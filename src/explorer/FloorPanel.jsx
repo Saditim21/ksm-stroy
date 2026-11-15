@@ -4,7 +4,7 @@ import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
 import { GR_FACTS } from '../config/facts'
 import useMotionNow from '../motion/useMotionNow'
-import { plural } from '../utils/format'
+import { formatArea, formatDecimal, plural } from '../utils/format'
 import { floorKey, rangeLine } from './model'
 import PlanSvg from './PlanSvg'
 import { crossfadePlan, drawPlan } from './planMotion'
@@ -20,8 +20,6 @@ import { crossfadePlan, drawPlan } from './planMotion'
 // panel: it keeps the last floor on show while it slides out. With motion
 // (useMotionNow) it slides in over 0.45 s expo.out, its plan drawing, and out
 // over 0.35 s expo.in; a new floor crossfades. Without, it is there at once.
-
-const m2 = (n) => n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 /** „Блок А · *Етаж 5*“, the panel's and the sheet's title. */
 export function FloorTitle({ floor, className }) {
@@ -49,9 +47,9 @@ export function FloorRange({ floor, className }) {
   if (!line) return null
   let words
   if (line.kind === 'range') {
-    words = <>свободни от <b>{m2(line.min)}</b> до <b>{m2(line.max)}&nbsp;м²</b></>
+    words = <>свободни от <b>{formatDecimal(line.min)}</b> до <b>{formatArea(line.max)}</b></>
   } else if (line.kind === 'single') {
-    words = <>{line.one ? 'свободен' : 'свободни'}: <b>{m2(line.area)}&nbsp;м²</b></>
+    words = <>{line.one ? 'свободен' : 'свободни'}: <b>{formatArea(line.area)}</b></>
   } else if (line.kind === 'reserved') {
     words = 'Няма свободни, има резервирани.'
   } else {
@@ -60,13 +58,20 @@ export function FloorRange({ floor, className }) {
   return <p className={className}>{words}</p>
 }
 
-// „кота +3,06 · 12 апартамента“ where the drawings give the floor's level
-// (spec §9: only А1), else „12 апартамента“.
-function metaOf(floor) {
+/** The floor's meta line: „кота +3,06 · 12 апартамента“ where the drawings
+ * give the floor's level (spec §9: only А1), else „12 апартамента“; with
+ * `free`, the plan stage's, its free apartments after it („· 4 свободни“, `—`
+ * until the data arrives). */
+export function FloorMeta({ floor, free = false, className }) {
   const count = floor.units.length || GR_FACTS.perFloor
-  const apartments = `${count} ${plural(count, 'апартамент', 'апартамента')}`
+  const parts = [`${count} ${plural(count, 'апартамент', 'апартамента')}`]
   const level = GR_FACTS.elevations[floorKey(floor.block, floor.floor)]
-  return level == null ? apartments : `кота +${m2(level)} · ${apartments}`
+  if (level != null) parts.unshift(`кота +${formatDecimal(level)}`)
+  if (free) {
+    const n = floor.counts ? floor.counts.available : null
+    parts.push(`${n ?? '—'} ${plural(n, 'свободен', 'свободни')}`)
+  }
+  return <p className={className}>{parts.join(' · ')}</p>
 }
 
 export default function FloorPanel({ side, floor, plan, onOpenFloor, onUnit, onPointerEnter, onPointerLeave }) {
@@ -117,7 +122,7 @@ export default function FloorPanel({ side, floor, plan, onOpenFloor, onUnit, onP
       {shown ? (
         <>
           <FloorTitle floor={shown} className="fxp__title" />
-          <p className="fxp__meta">{metaOf(shown)}</p>
+          <FloorMeta floor={shown} className="fxp__meta" />
           <div className="fxp__plan">
             <PlanSvg plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
           </div>

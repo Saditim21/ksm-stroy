@@ -79,6 +79,23 @@ export function scrollToId(id, { reveal } = {}) {
   }
 }
 
+// Jumps the page to a section by id, at once, with no glide: where a glide to
+// it would come to rest (restingTop). A deep link that opens the plan stage
+// on arrival lands at #explorer this way first (spec §7.10), so closing the
+// stage leaves the reader at the facade. Natively, and through Lenis when it
+// runs, measured afresh and forced: a dialog's scroll lock may have stopped
+// it, and a stopped Lenis ignores any other jump.
+export function jumpToId(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  const top = restingTop(el)
+  window.scrollTo(0, top)
+  const lenis = getLenis()
+  if (!lenis) return
+  lenis.dimensions?.resize()
+  lenis.scrollTo(top, { immediate: true, force: true })
+}
+
 // The one handler for a link to a section of the same page (spec §5.3).
 // Button attaches it to every href that starts with "#"; a plain anchor to a
 // section of its page calls it from its own onClick.

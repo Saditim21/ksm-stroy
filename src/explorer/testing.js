@@ -44,3 +44,9 @@ export function snapshotAvailability(origin = {}) {
 // The store before its data: the prerendered placeholder, or the read under
 // way.
 export const LOADING = Object.freeze({ status: 'loading', data: null, origin: null, updatedAt: null })
+
+// A name matcher for getByRole: the accessible name with its white space,
+// no-break spaces included, read as single spaces. The explorer's titles keep
+// the no-break space of „Блок А“ (spec §3.3), which a plain string would have
+// to spell.
+export const named = (expected) => (name) => name.replace(/\s+/g, ' ').trim() === expected

@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../tests/contracts/site'
 import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
-import { ApartmentProvider } from '../context/ApartmentContext'
 import Blog from './Blog'
 import Contact from './Contact'
 import Projects from './Projects'
@@ -17,14 +16,13 @@ import Projects from './Projects'
 // So each marks itself .on-dusk, or a tighter wrapper does, and never a light
 // card inside it: the card's controls keep the onyx ring. jsdom applies no
 // CSS: src/styles/focus-ring.test.js pins the rules, and the smoke run
-// measures the ring in Chrome.
+// measures the ring in Chrome. No page the site serves is wrapped in the
+// legacy ApartmentProvider any more, so neither are these.
 
 const onDusk = (element) => element.closest('.on-dusk') !== null
 
 const renderPage = (Page) => render(
-  <MemoryRouter>
-    <ApartmentProvider>{createElement(Page)}</ApartmentProvider>
-  </MemoryRouter>,
+  <MemoryRouter>{createElement(Page)}</MemoryRouter>,
 )
 
 beforeEach(() => {
@@ -92,11 +90,11 @@ it.each([
   for (const control of viewerControls) expect(onDusk(control)).toBe(true)
 })
 
-// A block page's full-screen floor plan, opened from a free apartment: its
-// bar and zoom controls sit on black; the gold card of the chosen apartment
-// does not, and its „Контакт“ keeps the onyx ring.
+// A Многофамилна block page's full-screen floor plan, opened from a free
+// apartment: its bar and zoom controls sit on black; the gold card of the
+// chosen apartment does not, and its „Контакт“ keeps the onyx ring. (The
+// Golden Residence block pages are the Diptych explorer, dark throughout.)
 it.each([
-  { path: '/projects/golden-residence/block-a', floor: '1 етаж', apartment: 'А 101' },
   { path: '/projects/mnogofamilna-sgrada/block-a', floor: 'Етаж 9', apartment: 'А-802' },
 ])('$path: the full-screen plan’s bar and zoom controls are on dusk; the apartment’s gold card is not', async ({ path, floor, apartment }) => {
   renderSiteAt(path)

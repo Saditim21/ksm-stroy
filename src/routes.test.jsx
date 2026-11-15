@@ -87,7 +87,7 @@ it.each([
   {
     module: goldenResidenceBlock,
     path: '/projects/golden-residence/Block-A',
-    shows: ['Golden Residence', 'БЛОК А'],
+    shows: ['Golden Residence', 'блок А'],
     title: 'Golden Residence, блок А - KSM Stroy',
     canonical: '/projects/golden-residence/block-a',
   },

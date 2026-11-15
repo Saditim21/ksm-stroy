@@ -117,6 +117,69 @@ describe('the edge panel and the sheet (spec §7.3, §7.5)', () => {
   })
 })
 
+// Ruling C7.3, spec §3.3: figures are tabular in the rails and the stepper.
+// The `font` shorthand on the stepper's floor resets them, so they come after.
+it('sets the rails’ counts and the stepper’s floor in tabular figures', () => {
+  expect(declaredFor('.fx__cnt .n')['font-variant-numeric']).toMatch(/tabular-nums/)
+  const [floor] = rulesFor(rules, '.step output b')
+  const props = floor.declarations.map(({ prop }) => prop)
+  expect(props.lastIndexOf('font-variant-numeric')).toBeGreaterThan(props.lastIndexOf('font'))
+  expect(valueOf(floor, 'font-variant-numeric')).toMatch(/tabular-nums/)
+})
+
+describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', () => {
+  // Spec §2.2's layers, over the header (40) and the sheet (45), under the
+  // menu (60).
+  it('stacks the stage at 50, the morph’s plan at 51 and the unit panel at 52, fixed over the screen', () => {
+    expect(declaredFor('.ps')).toMatchObject({ position: 'fixed', inset: '0', 'z-index': '50', background: 'var(--umber)' })
+    expect(declaredFor('.ps__ghost')).toMatchObject({ position: 'fixed', 'z-index': '51', 'pointer-events': 'none', 'transform-origin': '0 0' })
+    expect(declaredFor('.up')).toMatchObject({ position: 'fixed', inset: '0', 'z-index': '52', background: 'rgba(8, 7, 6, .72)' })
+  })
+
+  it('splits the stage’s body into the plan and a side column of 320–400 px on umber-2', () => {
+    expect(declaredFor('.ps__body')['grid-template-columns']).toBe('minmax(0, 1fr) minmax(320px, 400px)')
+    expect(declaredFor('.ps__side').background).toBe('var(--umber-2)')
+    expect(declaredFor('.ps__bar')).toMatchObject({ 'grid-template-columns': '1fr auto 1fr', background: 'var(--onyx)' })
+  })
+
+  // Extract §8.3.4: the concept's drawing spills over the bar. The plan's
+  // area clips it.
+  it('clips the plan’s drawing to its area', () => {
+    expect(declaredFor('.ps__plan').overflow).toBe('clip')
+  })
+
+  // Ruling F9: a row takes the ground's ring, 2 px inside itself, so the
+  // scrolling column never clips it.
+  it('rings a focused row inside itself, in the ground’s colour', () => {
+    expect(declaredFor('.utable tr.row:focus-visible')).toEqual({ 'outline-offset': '-2px' })
+  })
+
+  // Spec §7.4: the drawing at .6, .78 in the crop; a hot or focused unit in a
+  // brass-l line, the others' fills dropping back.
+  it('draws the plan’s drawing at .6, and at .78 in the crop', () => {
+    expect(declaredFor('.plan .drawing[data-loaded]').opacity).toBe('.6')
+    expect(declaredFor('.plan--crop .drawing[data-loaded]').opacity).toBe('.78')
+  })
+
+  it('outlines a hot unit in brass-l and dims the others; in the crop, the focus', () => {
+    expect(declaredFor('.plan .u[data-hot] .u-shape')).toMatchObject({ stroke: 'var(--brass-l)', 'stroke-width': 'calc(var(--lw, 1px) * 2.6)' })
+    expect(important('.plan[data-has-hot] .u:not([data-hot]) .u-fill', [], 'opacity', '.4')).toBe(true)
+    expect(declaredFor('.plan .u[data-focus] .u-shape')).toMatchObject({ stroke: 'var(--brass-l)', 'stroke-width': 'calc(var(--lw, 1px) * 2.4)' })
+    expect(important('.plan[data-has-focus] .u:not([data-focus]) .u-fill', [], 'opacity', '.22')).toBe(true)
+  })
+
+  it('sizes the unit panel’s box from its screen, never wider than 1120 or taller than 680 px', () => {
+    expect(declaredFor('.up__box')).toMatchObject({ width: 'min(1120px, calc(100% - 32px))', height: 'min(680px, calc(100% - 48px))', 'grid-template-columns': '1fr 1fr' })
+  })
+
+  it('stacks both on a phone: the stage’s bar on two rows, its plan over the side column; the unit panel in one column', () => {
+    expect(declaredFor('.ps__bar', [PHONE])['grid-template-columns']).toBe('1fr auto')
+    expect(declaredFor('.ps__body', [PHONE])['grid-template-columns']).toBe('1fr')
+    expect(declaredFor('.ps__inspect', [PHONE]).display).toBe('none')
+    expect(declaredFor('.up__box', [PHONE])['grid-template-columns']).toBe('1fr')
+  })
+})
+
 // Spec §2.1: a control's border is hair-ctl.
 it('borders the segmented control and the stepper in hair-ctl', () => {
   expect(declaredFor('.seg').border).toBe('1px solid var(--hair-ctl)')

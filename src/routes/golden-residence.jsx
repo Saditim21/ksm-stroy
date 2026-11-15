@@ -1,5 +1,6 @@
 import InquirySection from '../components/inquiry/InquirySection'
 import { availabilityPreload } from '../data/availability/useAvailability'
+import { ExplorerProvider } from '../explorer/ExplorerContext'
 import ExplorerSection from '../explorer/ExplorerSection'
 import BlocksSection from '../pages/golden-residence/BlocksSection'
 import GallerySection from '../pages/golden-residence/GallerySection'
@@ -15,7 +16,11 @@ import '../pages/golden-residence/gr.css'
 // where Home's half lands; the building's story; the explorer, floor by
 // floor; the two blocks; the gallery; the garages and parking places; and
 // the inquiry, which КСМ Строй takes (decision A1). The page never names the
-// agency that sells through its own landing, nor links to it.
+// agency that sells through its own landing, nor links to it. The explorer's
+// provider wraps every section, from the hero to the inquiry: it reads a deep
+// link to a floor or a unit (?floor=А-5, ?unit=А 501) once the page has
+// hydrated, and renders the plan stage and the unit panel over the page
+// (src/explorer/ExplorerContext.jsx).
 
 // How the site's shell frames this page (src/shell/handle.js): under the
 // see-through header, a page of the project, with the inquiry the header's
@@ -38,7 +43,7 @@ export const meta = () => pageMeta({
 export default function GoldenResidence() {
   preloadWithDocument(PRELOADS)
   return (
-    <>
+    <ExplorerProvider routeBlock={null}>
       <GrHero />
       <StorySection />
       <ExplorerSection />
@@ -46,6 +51,6 @@ export default function GoldenResidence() {
       <GallerySection />
       <ParkingSection />
       <InquirySection page="golden-residence" />
-    </>
+    </ExplorerProvider>
   )
 }

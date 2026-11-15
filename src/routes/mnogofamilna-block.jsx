@@ -1,14 +1,13 @@
-import { useMatches } from 'react-router'
 import MnogofamilnaSingleBlock from '../components/MnogofamilnaSingleBlock'
 import { matchedBlock } from '../config/blocks'
 import { pageMeta } from '../seo/meta'
-import NotFound, { meta as notFoundMeta } from './not-found'
+import BlockRoute from './BlockRoute'
+import { meta as notFoundMeta } from './not-found'
 
 // The page of one block of the Многофамилна жилищна сграда, the legacy page
-// until M2 rebuilds it. src/routes.js routes each block's own path here (no
+// until M3 rebuilds it. src/routes.js routes each block's own path here (no
 // `:block` param), with the path as the route's id, so the matched route names
-// the block. A route that names none (src/routes.js would have to change) is
-// the 404 page.
+// the block; a route that names none is the 404 page (BlockRoute).
 const PROJECT = 'mnogofamilna-sgrada'
 
 // How the site's shell frames this page (src/shell/handle.js).
@@ -27,6 +26,5 @@ export const meta = ({ matches }) => {
 }
 
 export default function MnogofamilnaBlockPage() {
-  const block = matchedBlock(PROJECT, useMatches())
-  return block ? <MnogofamilnaSingleBlock block={block.id} /> : <NotFound />
+  return <BlockRoute project={PROJECT} render={(block) => <MnogofamilnaSingleBlock block={block.id} />} />
 }

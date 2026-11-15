@@ -83,14 +83,14 @@ describe('the header', () => {
     }
   })
 
-  // Home and the Golden Residence page have an inquiry of their own (their
-  // handle's `inquiry`); a block page, still legacy, takes its project to the
-  // contact page.
+  // Home, the Golden Residence page and its block pages have an inquiry of
+  // their own (their handle's `inquiry`); a Многофамилна block page, still
+  // legacy, takes its project to the contact page.
   it.each([
     ['/', '#zapitvane'],
     ['/about', '/contact'],
     ['/projects/golden-residence', '#zapitvane'],
-    ['/projects/golden-residence/block-a', '/contact?project=golden-residence'],
+    ['/projects/golden-residence/block-a', '#zapitvane'],
     ['/projects/mnogofamilna-sgrada/block-a', '/contact?project=mnogofamilna-sgrada'],
   ])('on %s, „Запитване“ opens %s', async (path, href) => {
     renderSiteAt(path)
@@ -195,10 +195,10 @@ describe('the header as the page scrolls', () => {
 // How each page of src/routes.js frames the shell: its module's `handle`
 // (src/shell/handle.js), read from the real modules. Home and the Golden
 // Residence page, rebuilt in Diptych, run under the see-through header, each
-// with an inquiry of its own. Многофамилна's page opens on production's
-// light ground, so it is solid, as are the explorers and every other page.
-// The pages M2 has not yet rebuilt are legacy: they keep production's light
-// look.
+// with an inquiry of its own, as the Golden Residence block pages have too
+// under the solid header. Многофамилна's page opens on production's light
+// ground, so it is solid, as are its block pages and every other page. The
+// pages M2 has not yet rebuilt are legacy: they keep production's light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
@@ -206,8 +206,8 @@ const HANDLES = {
   '/about': { header: 'solid', legacy: true },
   '/projects': { header: 'solid', legacy: true },
   '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE, inquiry: true },
-  '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
-  '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
+  '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
+  '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
   '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
   '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA, legacy: true },

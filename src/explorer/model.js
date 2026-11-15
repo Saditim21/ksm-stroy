@@ -7,7 +7,7 @@
 import { PROJECT_BLOCKS } from '../config/blocks'
 import { apartmentUnits } from '../data/availability/select'
 import { summarizeFloor } from '../utils/availability'
-import { summarize } from '../utils/units'
+import { normalizeUnitId, summarize } from '../utils/units'
 
 /** A floor's key: its block's letter and its number, 'А-5'. */
 export const floorKey = (block, floor) => `${block}-${floor}`
@@ -92,4 +92,24 @@ export function rangeLine({ counts, minFree, maxFree }) {
     return { kind: 'range', min: minFree, max: maxFree }
   }
   return counts.reserved > 0 ? { kind: 'reserved' } : { kind: 'soldout' }
+}
+
+/**
+ * The unit `id` names, or null: `id` is a unit's label („А 501“), as the
+ * address, the callbacks and the inquiry carry it (spec §7.1), matched through
+ * normalizeUnitId, so „a501“ and „А-501“ find it too. Null without data, for
+ * an empty id, and for a unit the sheets do not have.
+ */
+export function findUnit(model, id) {
+  if (!model || !id) return null
+  const wanted = normalizeUnitId(id)
+  return model.units.find((unit) => unit.id === wanted) ?? null
+}
+
+/** The unit `delta` places from `unit` on its floor, going round from either
+ * end (spec §7.7): the unit panel's previous and next. */
+export function stepUnit(model, unit, delta) {
+  const units = model.floors.get(floorKey(unit.block, unit.floor))?.units ?? [unit]
+  const at = Math.max(0, units.indexOf(unit))
+  return units[(((at + delta) % units.length) + units.length) % units.length]
 }

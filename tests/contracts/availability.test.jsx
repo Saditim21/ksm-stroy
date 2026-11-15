@@ -100,8 +100,12 @@ it('shows every unit with its status from the sheet, and Блокиран in the
 
   // The legend names all four statuses.
   expect(pageText()).toMatch(/Свободен\s*Резервиран\s*Продадени?\s*Блокиран/)
-  // One unit on the floor is blocked.
-  expect(pageText()).toMatch(/(?<!\d)1\s*Блокирани|Блокирани:?\s*1(?!\d)/)
+  // One unit on the floor is blocked, counted as M1's „Блокирани: 1“ or as
+  // the explorer's „1 блокиран“, whose word agrees with its number. No
+  // lookahead after „блокиран“: the page's run-together text puts the next
+  // element's letters right after it („1 блокиранСвободен“), and „10“ or
+  // „11 блокирани“ still fails the lookbehind.
+  expect(pageText()).toMatch(/(?<!\d)1\s*блокиран|блокирани:?\s*1(?!\d)/i)
 }, 30000)
 
 it('offers an inquiry for a free unit but none for a blocked one', async () => {

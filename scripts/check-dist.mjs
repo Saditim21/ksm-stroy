@@ -84,7 +84,7 @@ const FLIP_BUDGET = 10 * KIB
 // WARN. M2 adds each route it rebuilds: Task 3 `/`, Task 5
 // `/projects/golden-residence`, Task 7 both Golden Residence block routes. A
 // route listed here before it is prerendered gets a note.
-const MUST_BE_V2 = ['/', '/projects/golden-residence', '/eu-proekt', '/404']
+const MUST_BE_V2 = ['/', '/projects/golden-residence', '/projects/golden-residence/block-a', '/projects/golden-residence/block-b', '/eu-proekt', '/404']
 
 // What each legacy library leaves in minified code (spec §12): framer-motion
 // the data attribute of its optimised appear animations, swiper its slide

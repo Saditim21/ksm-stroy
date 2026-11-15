@@ -215,9 +215,9 @@ function PageFrame({ arrive: arrival }) {
 // the pointer: jsdom, in the tests.
 //
 // Live availability is the platform store's (src/data/availability), which
-// needs no provider. The legacy ApartmentProvider wraps only the legacy page
-// that still reads it, the Golden Residence block page
-// (src/routes/golden-residence-block.jsx).
+// needs no provider. No page the site serves reads the legacy
+// ApartmentProvider any more; /projects still imports a component that would
+// (GoldenResidenceFloorMap, on a branch it never takes) until M4.
 export default function App() {
   const { header, legacy } = useRouteHandle()
   useEffect(() => (typeof window.matchMedia === 'function' ? trackScreenHeight() : undefined), [])

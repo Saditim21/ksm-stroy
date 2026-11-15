@@ -14,10 +14,10 @@ import useReveals from '../../motion/useReveals'
 // spec §9 calls for it (the teaser speaks for Home), then the two ways into
 // the explorer: „Визуално“ and „По критерии“.
 //
-// A floor opens on the Golden Residence page, at the explorer, which reads
-// the floor from the address once the plan stage comes (ruling F11: the hash
-// goes then, for the page's own jump). The headings and the seam reveal as
-// everywhere (useReveals); the markup is the final state.
+// A floor opens on the Golden Residence page by its floor alone
+// (/projects/golden-residence?floor=А-5, ruling F11): the page jumps to its
+// explorer and opens the floor's plan stage (spec §7.10). The headings and
+// the seam reveal as everywhere (useReveals); the markup is the final state.
 
 const GR = '/projects/golden-residence'
 
@@ -27,7 +27,7 @@ export default function TeaserSection() {
   const { data } = useAvailability()
   const model = useMemo(() => buildModel(data), [data])
   const navigate = useNavigate()
-  const openFloor = useCallback((block, floor) => navigate(`${GR}?floor=${block}-${floor}#explorer`), [navigate])
+  const openFloor = useCallback((block, floor) => navigate(`${GR}?floor=${block}-${floor}`), [navigate])
 
   return (
     <section ref={ref} className="sec teaser" id="etazhi" aria-labelledby="teaser-h">

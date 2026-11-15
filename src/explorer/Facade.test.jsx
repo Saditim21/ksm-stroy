@@ -121,6 +121,19 @@ describe('the edge panel (spec §7.3)', () => {
     expect(onOpenFloor.mock.calls[1].slice(0, 3)).toEqual(['А', 5, 'А 502'])
   })
 
+  // Ruling C7.2: the stage gives the focus back to what opened it. The panel's
+  // plan is hidden from assistive technology, so a floor opened from it hands
+  // on the floor's rail, with the plan's place for the stage to grow from.
+  it('hands on the floor’s rail, and the plan’s place, for a floor opened from the plan', () => {
+    const onOpenFloor = renderFacade()
+    fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
+    fireEvent.click(panel('a').querySelector('g[data-suffix="02"] .u-hit'))
+
+    const [, , , meta] = onOpenFloor.mock.calls[0]
+    expect(meta.opener).toBe(rail('А', 5))
+    expect(meta.fromRect).toEqual(panel('a').querySelector('.fxp__plan svg').getBoundingClientRect())
+  })
+
   // Spec §7.2: leaving the facade and its panel clears the hot floor after
   // 320 ms; entering the panel cancels that.
   it('closes 320 ms after the mouse leaves, unless it enters the panel', () => {
@@ -183,6 +196,36 @@ describe('the keys on a rail (spec §7.2)', () => {
     fireEvent.keyUp(document.activeElement, { key: ' ' })
     expect(onOpenFloor).toHaveBeenCalledTimes(1)
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 3])
+  })
+
+  // Ruling C7.1: the floor opens in place, and the stage takes the focus
+  // before Space's keyup comes, which then never reaches the facade. The next
+  // mouse click on a floor is a click of its own.
+  it('take a mouse click after Space opened a floor whose stage took the focus before the keyup', () => {
+    const onOpenFloor = renderFacade()
+    const elsewhere = document.body.appendChild(document.createElement('button'))
+    try {
+      act(() => rail('А', 3).focus())
+      fireEvent.keyDown(document.activeElement, { key: ' ' })
+      act(() => elsewhere.focus())
+      fireEvent.keyUp(elsewhere, { key: ' ' })
+
+      mouseClick(floorPath('Б-2'))
+      expect(onOpenFloor).toHaveBeenCalledTimes(2)
+      expect(onOpenFloor.mock.calls[1].slice(0, 2)).toEqual(['Б', 2])
+    } finally {
+      elsewhere.remove()
+    }
+  })
+
+  // Enter's own click never comes (its keydown is prevented): a click after
+  // it is another click.
+  it('take a click on the rail Enter opened', () => {
+    const onOpenFloor = renderFacade()
+    act(() => rail('А', 3).focus())
+    fireEvent.keyDown(document.activeElement, { key: 'Enter' })
+    mouseClick(rail('А', 3))
+    expect(onOpenFloor).toHaveBeenCalledTimes(2)
   })
 
   it('stop at the top and the bottom floor', () => {
@@ -414,12 +457,20 @@ describe('phones (spec §7.5)', () => {
     expect(document.querySelector('.fx')).not.toHaveClass('is-hot')
   })
 
-  it('opens the floor from the sheet’s „Отворете плана“', () => {
+  // Ruling C7.2: the sheet's own button turns inert as the sheet gives way,
+  // so the floor's rail is the opener the stage gives the focus back to.
+  it('opens the floor from the sheet’s „Отворете плана“ and from its plan, handing on the floor’s rail', () => {
     const onOpenFloor = renderFacade()
     tap(floorPath('Б-2'))
     fireEvent.click(within(sheet()).getByRole('button', { name: 'Отворете плана' }))
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['Б', 2])
-    expect(onOpenFloor.mock.calls[0][3]).toMatchObject({ opener: expect.any(HTMLElement) })
+    expect(onOpenFloor.mock.calls[0][3].opener).toBe(rail('Б', 2))
+    expect(sheet()).toHaveAttribute('inert')
+
+    tap(floorPath('Б-3'))
+    fireEvent.click(sheet().querySelector('g[data-suffix="05"] .u-hit'))
+    expect(onOpenFloor.mock.calls[1].slice(0, 3)).toEqual(['Б', 3, 'Б 305'])
+    expect(onOpenFloor.mock.calls[1][3].opener).toBe(rail('Б', 3))
   })
 
   // The block switch shows the other block, keeping the floor that was hot.
@@ -469,6 +520,34 @@ describe('the panels’ chunk', () => {
     act(() => observers[0].report([{ isIntersecting: true }]))
     await waitFor(() => expect(panel('a')).toHaveAttribute('data-open'))
     expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
+  })
+
+  // Ruling C7.6: a chunk that fails to load (offline, a new deploy, or an
+  // error inside it) leaves the facade working without its panels, and says
+  // so on the console, where the smoke run hears it.
+  it('says on the console when the chunk fails, and still opens floors', async () => {
+    observeByHand()
+    const failure = new Error('the chunk is gone')
+    vi.resetModules()
+    vi.doMock('./surfaces', () => {
+      throw failure
+    })
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const { default: FreshFacade } = await import('./Facade')
+      const onOpenFloor = vi.fn()
+      render(<FreshFacade model={MODEL} mode="full" onOpenFloor={onOpenFloor} />)
+
+      fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
+      await waitFor(() => expect(errors).toHaveBeenCalled())
+      expect(String(errors.mock.calls[0][0])).toMatch(/facade/i)
+      expect(document.querySelector('.fxp')).toBeNull()
+      mouseClick(floorPath('А-4'))
+      expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 4])
+    } finally {
+      vi.doUnmock('./surfaces')
+      errors.mockRestore()
+    }
   })
 
   it('never loads in compact mode', async () => {

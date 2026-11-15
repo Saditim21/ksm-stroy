@@ -1,6 +1,8 @@
-import { useId, useLayoutEffect, useMemo, useRef } from 'react'
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { statusKeyOf } from '../components/ui/status'
+import grImages from '../data/images/golden-residence.json'
 import { PALETTE } from '../styles/palette'
+import { unitButtonLabel } from '../utils/units'
 import { planBox, planShapes } from './geometry'
 import './explorer.css'
 
@@ -16,25 +18,45 @@ import './explorer.css'
 // Each has a brass outline (pathLength 1, so it can draw), its number („501“)
 // at its pole of inaccessibility and a hit path.
 //
-// The viewBox is the union of the block's 12 units, padded (4 in mini).
+// The modes:
+// - mini, the edge panel's and the sheet's: the union of the block's 12
+//   units, padded 4, hidden from assistive technology; a pointer opens a unit
+//   (onUnit);
+// - stage, the plan stage's: padded 14, over the block's dark drawing at 0.6.
+//   Interactive: a group named `label`, its units buttons named as every unit
+//   list names them (unitButtonLabel), which Enter, Space or a click opens
+//   (onUnit). Pointing at a unit, or focusing it, makes it hot (onHot);
+// - crop, the unit panel's: `viewBox` frames one unit (cropFor), over the
+//   drawing at 0.78; hidden from assistive technology.
+// The drawing fades in once it has loaded (explorer.css). Its area is the
+// plan's box's: whatever holds the plan clips it (extract §8.3.4).
+//
+// `hot` (a suffix) is the unit a pointer, the keyboard or the stage's table
+// is on: a brass-l outline, the other fills dropping back. `focus` (a suffix)
+// is the crop's unit: outlined, the others dimmed.
+//
 // fit(), the explorer's only layout work in JS, keeps the label, its halo,
 // the outline and the dash at constant sizes on screen, whatever the plan's
 // size: it writes --fs, --hs, --lw and --dash from a ResizeObserver.
-//
-// `mode` is mini here, the edge panel's and the sheet's: a picture beside
-// the counts, hidden from assistive technology, whose units a pointer can
-// open (onUnit). The stage and the crop come with the plan stage.
 
-// Per mode (spec §7.4): the viewBox's padding, the pattern's size, and the
-// label and line widths on screen.
+// Per mode (spec §7.4): the viewBox's padding, the pattern's size, the label
+// and line widths on screen, and whether the drawing lies under the units.
 const MODES = {
-  mini: { pad: 4, pat: 16, labelPx: 10, lineW: 1 },
-  stage: { pad: 14, pat: 8, labelPx: 12.5, lineW: 1 },
-  crop: { pad: 14, pat: 5, labelPx: 13, lineW: 1.2 },
+  mini: { pad: 4, pat: 16, labelPx: 10, lineW: 1, drawing: false },
+  stage: { pad: 14, pat: 8, labelPx: 12.5, lineW: 1, drawing: true },
+  crop: { pad: 14, pat: 5, labelPx: 13, lineW: 1.2, drawing: true },
 }
 
 const RESERVED = PALETTE['status-reserved']
 const SOLD = PALETTE['status-sold']
+
+// Each block's dark drawing (plan-a, plan-b: 1200 px, the plans' own grid),
+// by the block its plan applies to.
+const DRAWINGS = { 'А': grImages['plan-a'], 'Б': grImages['plan-b'] }
+function drawingOf(plan) {
+  const image = DRAWINGS[plan.appliesTo?.blocks?.[0]]
+  return image ? `${image.path}-${image.widths[image.widths.length - 1]}.webp` : null
+}
 
 // A unit's fill and its opacity, by its status.
 function fillOf(status, id) {
@@ -45,14 +67,18 @@ function fillOf(status, id) {
   return [PALETTE['status-blocked'], 0.1]
 }
 
-export default function PlanSvg({ plan, units, mode = 'mini', onUnit }) {
+export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, onUnit, onHot }) {
   const ref = useRef(null)
   // The patterns' ids, this plan's own: two plans on a page never share one.
   const id = `pl${useId().replace(/[^\w-]/g, '')}`
-  const { pad, pat, labelPx, lineW } = MODES[mode] ?? MODES.mini
-  const box = useMemo(() => planBox(plan, pad), [plan, pad])
+  const { pad, pat, labelPx, lineW, drawing } = MODES[mode] ?? MODES.mini
+  const interactive = mode === 'stage'
+  const box = useMemo(() => viewBox ?? planBox(plan, pad), [viewBox, plan, pad])
   const shapes = planShapes(plan)
   const bySuffix = new Map(units.map((unit) => [unit.suffix, unit]))
+  const href = drawing ? drawingOf(plan) : null
+  // The drawing that has loaded: a new block's waits for its own.
+  const [loaded, setLoaded] = useState(null)
 
   useLayoutEffect(() => {
     const svg = ref.current
@@ -71,10 +97,36 @@ export default function PlanSvg({ plan, units, mode = 'mini', onUnit }) {
     return () => observer.disconnect()
   }, [box, labelPx, lineW])
 
+  const unitOf = (event) => bySuffix.get(event.target.closest?.('.u-hit')?.dataset.suffix)
   const openUnit = (event) => {
-    const unit = bySuffix.get(event.target.closest?.('.u-hit')?.dataset.suffix)
+    const unit = unitOf(event)
     if (unit) onUnit(unit, event)
   }
+  const onKeyDown = (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    const unit = unitOf(event)
+    if (!unit) return
+    event.preventDefault()
+    onUnit?.(unit, event)
+  }
+  // A unit is hot while a hovering pointer is on it (never a finger passing
+  // over), or while it has the focus.
+  const hotFrom = (event) => {
+    const suffix = event.target.closest?.('.u-hit')?.dataset.suffix
+    if (suffix && bySuffix.has(suffix)) onHot(suffix)
+  }
+  const handlers = interactive && onHot
+    ? {
+        onPointerOver: (event) => {
+          if (event.pointerType !== 'touch' && event.pointerType !== 'pen') hotFrom(event)
+        },
+        onPointerLeave: (event) => {
+          if (event.pointerType !== 'touch' && event.pointerType !== 'pen') onHot(null)
+        },
+        onFocus: hotFrom,
+        onBlur: () => onHot(null),
+      }
+    : {}
 
   return (
     <svg
@@ -82,9 +134,15 @@ export default function PlanSvg({ plan, units, mode = 'mini', onUnit }) {
       className={`plan plan--${mode}`}
       viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
       preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
+      role={interactive ? 'group' : undefined}
+      aria-label={interactive ? label : undefined}
+      aria-hidden={interactive ? undefined : 'true'}
       focusable="false"
+      data-has-hot={hot && bySuffix.has(hot) ? '' : undefined}
+      data-has-focus={focus ? '' : undefined}
       onClick={onUnit ? openUnit : undefined}
+      onKeyDown={interactive ? onKeyDown : undefined}
+      {...handlers}
     >
       <defs>
         <pattern id={`${id}r`} width={pat} height={pat} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -96,20 +154,41 @@ export default function PlanSvg({ plan, units, mode = 'mini', onUnit }) {
           <circle cx={pat / 2} cy={pat / 2} r={pat * 0.18} fill={SOLD} />
         </pattern>
       </defs>
+      {href ? (
+        <image
+          className="drawing"
+          href={href}
+          x="0"
+          y="0"
+          width={plan.imageWidth}
+          height={plan.imageHeight}
+          preserveAspectRatio="none"
+          data-loaded={loaded === href ? '' : undefined}
+          onLoad={() => setLoaded(href)}
+        />
+      ) : null}
       <g className="units">
-        {shapes.map(({ suffix, d, label }) => {
+        {shapes.map(({ suffix, d, label: point }) => {
           const unit = bySuffix.get(suffix)
           const status = unit ? statusKeyOf(unit.status) : 'none'
           const [fill, fillOpacity] = fillOf(status, id)
+          const button = interactive && unit ? { tabIndex: 0, role: 'button', 'aria-label': unitButtonLabel(unit) } : {}
           return (
-            <g key={suffix} className="u" data-suffix={suffix} data-status={status}>
+            <g
+              key={suffix}
+              className="u"
+              data-suffix={suffix}
+              data-status={status}
+              data-hot={hot === suffix && unit ? '' : undefined}
+              data-focus={focus === suffix ? '' : undefined}
+            >
               <path className="u-fill" d={d} fill={fill} fillOpacity={fillOpacity} />
               {status === 'blocked' || status === 'unknown' ? <path className="u-blocked" d={d} /> : null}
               <path className="u-shape" d={d} fill="none" pathLength="1" />
-              <text className="u-label" x={label[0]} y={label[1]}>
+              <text className="u-label" x={point[0]} y={point[1]}>
                 {unit ? `${unit.floor}${suffix}` : ''}
               </text>
-              <path className="u-hit" d={d} data-suffix={suffix} />
+              <path className="u-hit" d={d} data-suffix={suffix} {...button} />
             </g>
           )
         })}

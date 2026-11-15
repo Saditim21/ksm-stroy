@@ -1,4 +1,4 @@
-import { bindAddress, bindOneLetterWords, freeApartmentsLine, formatArea, plural } from './format'
+import { bindAddress, bindOneLetterWords, freeApartmentsLine, formatArea, formatDecimal, plural } from './format'
 
 test('freeApartmentsLine handles no data, zero, one and many', () => {
   expect(freeApartmentsLine(null)).toBe('Апартаменти в продажба')
@@ -11,6 +11,16 @@ test('freeApartmentsLine handles no data, zero, one and many', () => {
 test('formatArea uses the Bulgarian decimal comma', () => {
   expect(formatArea(65.68)).toBe('65,68\u00a0м²')
   expect(formatArea(null)).toBe('—')
+})
+
+// Ruling C7.4: the bare figure, two decimals with the Bulgarian comma, for
+// where the м² is set apart (the unit panel's areas) or never follows (a
+// кота); formatArea is it with the м².
+test('formatDecimal gives the figure alone, as formatArea writes it', () => {
+  expect(formatDecimal(54.36)).toBe('54,36')
+  expect(formatDecimal(3.06)).toBe('3,06')
+  expect(formatDecimal(43)).toBe('43,00')
+  expect(formatArea(108.56)).toBe(`${formatDecimal(108.56)}\u00a0м²`)
 })
 
 test('plural picks the singular for exactly one and the plural otherwise', () => {

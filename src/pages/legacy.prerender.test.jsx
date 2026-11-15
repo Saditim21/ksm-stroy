@@ -2,7 +2,6 @@
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
-import { ApartmentProvider } from '../context/ApartmentContext'
 import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
@@ -12,14 +11,14 @@ import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection
 // The build pre-renders the legacy pages in Node, and a visitor sees that HTML
 // until the JS runs. It is their final visual state (plan, global rules): no
 // element starts faded out, collapsed or moved away for an entrance animation
-// to bring it in later. (Home and the Golden Residence page, rebuilt, are
-// src/pages/home/home.prerender.test.jsx's and
-// src/pages/golden-residence/gr.prerender.test.jsx's.)
+// to bring it in later. (Home, the Golden Residence page and its block
+// pages, rebuilt, are src/pages/home/home.prerender.test.jsx's,
+// src/pages/golden-residence/gr.prerender.test.jsx's and
+// src/explorer/BlockPage.prerender.test.jsx's.) No page the site serves is
+// wrapped in the legacy ApartmentProvider any more, so neither are these.
 
 const prerender = (Page) => renderToString(
-  <MemoryRouter>
-    <ApartmentProvider>{createElement(Page)}</ApartmentProvider>
-  </MemoryRouter>,
+  <MemoryRouter>{createElement(Page)}</MemoryRouter>,
 )
 
 // The inline styles that keep an element out of sight: what framer-motion

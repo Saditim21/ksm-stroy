@@ -1,10 +1,12 @@
 /* The explorer (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
-   §7.2–7.5, §8.2 #3; extract §4.19–4.22, §4.25): the section's head and
-   legend, the facade with its rails, the edge panel, the plans and the
-   phone's sheet, ported from the concept's css/diptych.css (:453-543 the
-   section, the facade, the panel and the plans, :553-563 the segmented
-   control and the stepper, :816-828 and :869-889 their phone rules) with
-   the tokens of src/index.css, --screen-h for vh, and the spec's fixes:
+   §7.2–7.7, §7.11, §8.2 #3, §8.3; extract §4.19–4.25): the section's head
+   and legend, the facade with its rails, the edge panel, the plans, the
+   phone's sheet, the plan stage, the unit panel and a block page's head,
+   ported from the concept's css/diptych.css (:453-543 the section, the
+   facade, the panel and the plans, :545-591 the stage, :593-623 the unit
+   panel, :553-563 the segmented control and the stepper, :816-828,
+   :850-863 and :869-889 their phone rules) with the tokens of
+   src/index.css, --screen-h for vh, and the spec's fixes:
    - the layout is CSS only (§7.2): a wrapper is the container, and the
      facade's root inside it evaluates --pw, --sw, --sh and --pitch, because
      container units never resolve against the element that declares the
@@ -15,13 +17,21 @@
    - the rails are buttons, each row min(30px, var(--pitch)) tall, so no two
      overlap, the count at least 24 px, a floor's colour a glyph, never a
      dot; a zero dims to 3.36:1;
-   - the sheet sits at z 45, over the header (spec §2.2);
+   - the sheet sits at z 45, over the header, the stage at 50, the morph's
+     plan at 51 and the unit panel at 52, under the menu (spec §2.2);
+   - the stage's plan area clips its drawing, which the concept lets spill
+     over the bar (extract §8.3.4);
+   - sizes from the screen are the fixed dialogs' own (100 %) or
+     --screen-h's, never svh;
    - a control's border is hair-ctl; hover effects need a fine pointer;
      nothing takes the focus ring away (ruling F9): a floor shows its focus
-     as the dashed highlight and the ring on its rail (spec §11).
+     as the dashed highlight and the ring on its rail, a plan's unit as its
+     hot outline (spec §11's exceptions), and a row of the stage's table
+     takes the ground's ring 2 px inside itself.
 
    The explorer's own stylesheet (Facade.jsx, PlanSvg.jsx): plain CSS, in no
-   Tailwind layer, loaded with the page that shows the explorer. The status
+   Tailwind layer, loaded with the page that shows the explorer, so the
+   dialogs' chunk (surfaces.js) brings no stylesheet of its own. The status
    chips are src/components/ui/status.css's. */
 
 /* ---------- the section (extract §4.19) ---------- */
@@ -225,6 +235,7 @@
   color: var(--ivory);
   font-family: var(--serif);
   font-size: clamp(24px, calc(var(--pitch) * .93), 28px);
+  font-variant-numeric: lining-nums tabular-nums;
   font-weight: 600;
   line-height: 1;
   text-align: center;
@@ -410,6 +421,37 @@
   fill: transparent;
   cursor: pointer;
 }
+/* The block's dark drawing under the units, in the stage and the crop: it
+   fades in once it has loaded (PlanSvg.jsx). Its area is the plan's box;
+   what holds the plan clips it. */
+.plan .drawing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s var(--e-soft);
+}
+.plan .drawing[data-loaded] { opacity: .6; }
+.plan--crop .drawing[data-loaded] { opacity: .78; }
+/* A hot unit (pointed at, focused, or its row in the stage's table): a
+   brass-l outline, its fill brighter, the other fills dropping back over any
+   draw or crossfade under way. A unit's focus is this outline (spec §11's
+   exception for plan units): the ring itself is not drawn, except under
+   forced colours, which give it back its system colour. */
+.plan .u[data-hot] .u-shape,
+.plan .u:focus-within .u-shape {
+  stroke: var(--brass-l);
+  stroke-width: calc(var(--lw, 1px) * 2.6);
+}
+.plan .u[data-hot] .u-fill { filter: brightness(1.25); }
+.plan[data-has-hot] .u:not([data-hot]) .u-fill { opacity: .4 !important; }
+.plan .u-hit:focus-visible { outline-color: transparent; }
+/* The crop's unit, in the unit panel: outlined in brass-l, the others dim. */
+.plan[data-has-focus] .u:not([data-focus]) .u-fill { opacity: .22 !important; }
+.plan[data-has-focus] .u:not([data-focus]) .u-label { opacity: .45 !important; }
+.plan[data-has-focus] .u:not([data-focus]) .u-shape { stroke: rgba(184, 149, 74, .45); }
+.plan .u[data-focus] .u-shape {
+  stroke: var(--brass-l);
+  stroke-width: calc(var(--lw, 1px) * 2.4);
+}
 
 /* ---------- the block switch and the stepper ---------- */
 .fxm { display: none; }
@@ -461,16 +503,406 @@
   line-height: 42px;
   text-align: center;
 }
+/* The shorthand resets the figures, so they come after it (spec §3.3:
+   tabular in the stepper). */
 .step output b {
   margin-left: 4px;
   color: var(--ivory);
   font: 600 22px/1 var(--serif);
+  font-variant-numeric: lining-nums tabular-nums;
   vertical-align: -2px;
 }
+
+/* ---------- the plan stage (spec §7.6; extract §4.23) ---------- */
+/* Over the page and its header (z 50), umber: the bar over the body. Its
+   motion is PlanStage.jsx's. */
+.ps {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--umber);
+  color: var(--ivory);
+}
+.ps__bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 18px var(--gut);
+  border-bottom: 1px solid var(--hair-2);
+  background: var(--onyx);
+}
+.ps__id {
+  display: grid;
+  gap: 4px;
+}
+.ps__title { font: 500 clamp(30px, 2.6vw, 42px)/1 var(--serif); }
+.ps__title em,
+.up__id em { color: var(--brass-l); }
+.ps__meta {
+  color: var(--stone);
+  font-size: 13px;
+}
+.ps__mid {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.ps__close {
+  display: inline-flex;
+  justify-self: end;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .2s;
+}
+/* The close's ×, two hairlines (the stage's and the unit panel's). */
+.ps__close i,
+.up__close i {
+  position: relative;
+  width: 16px;
+  height: 16px;
+}
+.ps__close i::before,
+.ps__close i::after,
+.up__close i::before,
+.up__close i::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -2px;
+  left: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.ps__close i::after,
+.up__close i::after { transform: rotate(-45deg); }
+.ps__body {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+/* The plan, and its drawing to the area's edges, never past them. */
+.ps__plan {
+  position: relative;
+  min-height: 0;
+  padding: 18px 24px 12px;
+  overflow: hidden;
+  overflow: clip;
+}
+.ps__plan > svg {
+  position: absolute;
+  inset: 18px 24px 12px;
+  width: calc(100% - 48px);
+  height: calc(100% - 30px);
+  overflow: visible;
+}
+/* The unit pointed at, top left over the plan. */
+.ps__inspect {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  z-index: 2;
+  min-width: 220px;
+  padding: 14px 16px;
+  border: 1px solid var(--hair);
+  background: rgba(14, 13, 11, .92);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .18s, transform .25s var(--e-out);
+}
+.ps__inspect[data-on] {
+  opacity: 1;
+  transform: none;
+}
+.ps__inspect .serif {
+  font-size: 30px;
+  line-height: 1;
+}
+.ps__inspect dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.ps__inspect dt { color: var(--stone); }
+/* The side column: the counts, the key, the table, the hint. */
+.ps__side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--hair-2);
+  background: var(--umber-2);
+}
+.ps__counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--hair-2);
+}
+.ps__counts .st { color: var(--ivory-2); }
+/* The key to the patterns (spec §7.6): on one line in the 400 px column
+   (about 332 px of it), so the table below keeps its twelve rows on a 900 px
+   screen; a wider face wraps it rather than run past the column. */
+.ps__legend {
+  justify-content: space-between;
+  gap: 8px 6px;
+  padding: 10px 22px;
+  border-bottom: 1px solid var(--hair-2);
+}
+.ps__legend .st {
+  gap: 6px;
+  color: var(--stone);
+  font-size: 12px;
+}
+.ps__list {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.utable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.utable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--umber-2);
+  color: var(--stone);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-align: left;
+}
+.utable td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--hair-2);
+  white-space: nowrap;
+}
+.utable td:first-child,
+.utable th:first-child { padding-left: 22px; }
+.utable td:last-child,
+.utable th:last-child { padding-right: 22px; }
+.utable tr.row {
+  cursor: pointer;
+  transition: background-color .15s;
+}
+/* A row pointed at, or whose unit is (PlanStage.jsx). */
+.utable tr.row.is-hot { background: rgba(184, 149, 74, .08); }
+.utable tr.row:focus-visible { outline-offset: -2px; }
+.utable .uid {
+  color: var(--ivory);
+  font-weight: 600;
+}
+.utable tr.is-sold td:not(.cst) { color: var(--ivory-3); }
+.ps__hint {
+  padding: 12px 22px;
+  border-top: 1px solid var(--hair-2);
+  color: var(--stone);
+  font-size: 12px;
+}
+.ps__hint .tri {
+  display: inline-block;
+  width: .7em;
+  height: .56em;
+  vertical-align: .02em;
+}
+/* The morph's mini plan, over the stage (z 51), without its labels. */
+.ps__ghost {
+  position: fixed;
+  z-index: 51;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+.ps__ghost svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ps__ghost .u-label { display: none; }
+
+/* ---------- the unit panel (spec §7.7; extract §4.24) ---------- */
+/* Over the stage (z 52), on a dark, blurred backdrop: a box of at most
+   1120 × 680 inside the screen, two halves on a seam. Its motion is
+   UnitPanel.jsx's. */
+.up {
+  position: fixed;
+  inset: 0;
+  z-index: 52;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  background: rgba(8, 7, 6, .72);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: var(--ivory);
+}
+.up__box {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(1120px, calc(100% - 32px));
+  height: min(680px, calc(100% - 48px));
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  background: var(--umber);
+}
+.up__box > .seam { z-index: 2; }
+.up__l {
+  position: relative;
+  background: var(--onyx);
+}
+.up__l svg {
+  position: absolute;
+  inset: 28px;
+  width: calc(100% - 56px);
+  height: calc(100% - 56px);
+}
+.up__cap {
+  position: absolute;
+  bottom: 16px;
+  left: 22px;
+  color: var(--stone);
+  font-size: 12px;
+}
+.up__r {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 44px clamp(26px, 3.4vw, 52px) 30px;
+  overflow: auto;
+}
+.up__id { font: 500 clamp(48px, 4.4vw, 72px)/.9 var(--serif); }
+.up__sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  margin-top: -6px;
+  color: var(--ivory-2);
+  font-size: 14px;
+}
+.up__dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--hair-2);
+}
+.up__dl > div {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair-2);
+}
+.up__dl > div:nth-child(odd) { padding-right: 16px; }
+.up__dl dt {
+  color: var(--stone);
+  font-size: 12px;
+  letter-spacing: .02em;
+}
+.up__dl dd {
+  margin-top: 4px;
+  font: 600 26px/1.1 var(--serif);
+  font-variant-numeric: lining-nums;
+}
+.up__dl dd small {
+  color: var(--ivory-3);
+  font: 500 13px var(--sans);
+}
+.up__dl dd.t {
+  margin-top: 6px;
+  font: 500 16px/1.4 var(--sans);
+}
+/* The action, then the floor's units, at the column's foot. */
+.up__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: auto;
+}
+.up__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair-2);
+  font-size: 13px;
+}
+.up__actions + .up__nav { margin-top: 0; }
+.up__nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ivory-2);
+  transition: color .2s;
+}
+.up__nav svg {
+  width: 16px;
+  height: 10px;
+}
+.up__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  transition: color .2s;
+}
+.up__close i {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- a block page's head (spec §7.11, §8.3; BlockPage.jsx) ---------- */
+/* A hinge on the seam: the way back and the H1 against it, the block's facts
+   after it; the explorer follows closer than a section follows another. */
+.bp.hinge {
+  margin-top: clamp(48px, calc(var(--screen-h) * .08), 96px);
+  margin-bottom: 0;
+}
+.bp__id {
+  display: grid;
+  justify-items: end;
+  gap: 20px;
+}
+.bp__back { font-size: 14px; }
+.bp__title {
+  font: 500 clamp(52px, 5.2vw, 88px)/.9 var(--serif);
+  letter-spacing: -.005em;
+}
+.bp__title em { color: var(--brass-l); }
+.bp__facts {
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.bp + .explorer { padding-top: clamp(56px, calc(var(--screen-h) * .09), 104px); }
 
 @media (hover: hover) and (pointer: fine) {
   .seg button:not([aria-pressed="true"]):hover { color: var(--ivory); }
   .step button:hover:not(:disabled) { background: rgba(184, 149, 74, .12); }
+  .ps__close:hover,
+  .up__close:hover,
+  .up__nav button:hover { color: var(--brass-l); }
+  .bp__back:hover .arr { transform: translateX(-4px); }
 }
 
 /* ---------- phones: one block at a time, and the sheet (spec §7.5) ---------- */
@@ -605,4 +1037,82 @@
 }
 @media (min-width: 901px) {
   .sheet { display: none !important; }
+}
+
+/* ---------- phones: the stage, the unit panel, a block page's head ---------- */
+/* The stage's bar on two rows, the close as its × alone (its words kept for
+   assistive technology); the plan over the side column, with no inspector.
+   The unit panel in one column, its plan over its details. */
+@media (max-width: 900px) {
+  .ps__bar {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .ps__mid {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .ps__close {
+    justify-content: center;
+    width: 44px;
+  }
+  .ps__close span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .ps__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(250px, calc(var(--screen-h) * .44)) minmax(0, 1fr);
+  }
+  .ps__plan { padding: 10px 12px; }
+  .ps__plan > svg {
+    inset: 10px 12px;
+    width: calc(100% - 24px);
+    height: calc(100% - 20px);
+  }
+  .ps__inspect { display: none; }
+  /* The side column scrolls as one under the plan, its table's head
+     sticking to its top: the counts, the key and the hint leave a phone
+     too little room for a table that scrolls on its own. */
+  .ps__side {
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid var(--brass);
+    border-left: 0;
+  }
+  .ps__list {
+    flex: none;
+    overflow: visible;
+  }
+  .ps__legend {
+    justify-content: flex-start;
+    gap: 8px 16px;
+  }
+  .up__box {
+    grid-template-columns: 1fr;
+    grid-template-rows: calc(var(--screen-h) * .38) minmax(0, 1fr);
+    width: calc(100% - 16px);
+    height: calc(100% - 24px);
+  }
+  .up__box > .seam { display: none; }
+  .up__l { border-bottom: 1px solid var(--brass); }
+  .up__l svg {
+    inset: 14px;
+    width: calc(100% - 28px);
+    height: calc(100% - 28px);
+  }
+  .up__cap { display: none; }
+  .up__r {
+    gap: 18px;
+    padding: 24px 20px 20px;
+  }
+  .bp.hinge { margin-top: 40px; }
+  .bp__id { justify-items: start; }
 }

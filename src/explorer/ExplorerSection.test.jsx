@@ -1,19 +1,26 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { mockMatchMedia } from '../test/media'
+import { tap } from '../test/pointer'
+import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
-import { LOADING, snapshotAvailability } from './testing'
+import { loadSurfaces } from './loadSurfaces'
+import { LOADING, named, snapshotAvailability } from './testing'
 
 // The explorer's section on the Golden Residence page, #explorer (spec §8.2
-// #3, §9): the heading, the lead with the free count, the legend's counts,
-// the stale-data notice, and the facade. The availability store is stood in
-// for by the sheets snapshot (useAvailability mocked).
+// #3, §9), inside the page's ExplorerProvider: the heading, the lead with the
+// free count, the legend's counts, the stale-data notice, and the facade,
+// whose floors open the plan stage in place. The availability store is stood
+// in for by the sheets snapshot (useAvailability mocked); the stage's chunk
+// is in.
 
 let availability
 vi.mock('../data/availability/useAvailability', () => ({ useAvailability: () => availability }))
 
 const NOTICE = 'Наличността не се зареди. Показваме последните данни, които имаме; за актуална информация: +359 887 886 166.'
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
+const rail = (block, floor) => screen.getByRole('button', { name: new RegExp(`^Блок ${block}, етаж ${floor}[:.]`) })
 
 // Where the router is: the probe a test reads after a floor is opened.
 function Where() {
@@ -25,14 +32,20 @@ function renderSection(props = {}) {
   return render(
     <MemoryRouter initialEntries={['/projects/golden-residence']}>
       <Routes>
-        <Route path="*" element={<><ExplorerSection {...props} /><Where /></>} />
+        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection {...props} /><Where /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
+beforeAll(() => loadSurfaces())
+
 beforeEach(() => {
   availability = snapshotAvailability()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('ExplorerSection', () => {
@@ -83,7 +96,7 @@ describe('ExplorerSection', () => {
     expect(within(legend).getAllByRole('listitem').map(text)).toEqual(['— свободни', '— резервирани', '— продадени', '— блокирани'])
     const rails = screen.getAllByRole('button', { name: /^Блок [АБ], етаж \d\. Enter отваря плана\.$/ })
     expect(rails).toHaveLength(16)
-    for (const rail of rails) expect(rail.querySelector('.n')).toHaveTextContent(/^—$/)
+    for (const each of rails) expect(each.querySelector('.n')).toHaveTextContent(/^—$/)
     expect(screen.queryByText(/Наличността не се зареди/)).toBeNull()
   })
 
@@ -97,11 +110,52 @@ describe('ExplorerSection', () => {
     expect(screen.getByRole('button', { name: /^Блок\sА$/ })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  // For now a floor opens on its block's page (the plan stage comes with the
-  // next step of the explorer).
-  it('opens a floor on its block’s page', () => {
+  // Spec §7.6, §7.10: a floor opens in place, its stage over the page, and
+  // the address says so, the letter always on the Golden Residence page.
+  it('opens a floor in place: the stage, and ?floor in the address', () => {
     renderSection()
-    fireEvent.click(screen.getByRole('button', { name: /^Блок Б, етаж 6:/ }))
-    expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence/block-b?floor=6')
+    fireEvent.click(rail('Б', 6))
+
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=Б-6$/)
+    expect(screen.getByRole('dialog', { name: named('Блок Б · Етаж 6') })).toBeInTheDocument()
+  })
+})
+
+// Spec §7.6: closing gives the focus back to what opened the stage. A
+// floor opened from a panel's plan or from the sheet hands on the floor's
+// rail (ruling C7.2): the plan is hidden from assistive technology, and the
+// sheet's button turns inert as the sheet gives way.
+describe('the focus after the stage', () => {
+  let restore
+  afterEach(() => restore?.())
+
+  it('goes back to the rail of a floor opened from the edge panel’s plan', () => {
+    restore = mockMatchMedia({ fine: true })
+    vi.useFakeTimers()
+    renderSection()
+    fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
+    fireEvent.click(document.querySelector('.fxp--a g[data-suffix="02"] .u-hit'))
+    act(() => vi.advanceTimersByTime(900))
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=А-5&unit=А\+502$/)
+    expect(screen.getByRole('dialog', { name: 'А 502' })).toBeInTheDocument()
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.activeElement).toBe(rail('А', 5))
+  })
+
+  it('goes back to the rail of a floor opened from the phone’s sheet', async () => {
+    restore = mockMatchMedia({ coarse: true })
+    window.matchMedia('(max-width: 900px)').matches = true
+    renderSection()
+    tap(rail('А', 4))
+    fireEvent.click(within(document.querySelector('.sheet')).getByRole('button', { name: 'Отворете плана' }))
+    const stage = screen.getByRole('dialog', { name: named('Блок А · Етаж 4') })
+    expect(document.querySelector('.sheet')).toHaveAttribute('inert')
+
+    fireEvent.click(within(stage).getByRole('button', { name: 'Към сградата' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(rail('А', 4))
   })
 })

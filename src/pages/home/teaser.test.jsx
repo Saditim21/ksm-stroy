@@ -77,12 +77,13 @@ it('shows the notice when a Golden Residence slot is built-in, and not over live
   expect(screen.queryByText(/Наличността не се зареди/)).toBeNull()
 })
 
-// Spec §7.2, ruling F11: a floor opens on the Golden Residence page, at the
-// explorer (Task 7 drops the hash for the page's own jump).
-it('opens a floor on the Golden Residence page, at the explorer', () => {
+// Spec §7.2, ruling F11: a floor opens on the Golden Residence page, whose
+// deep link jumps to the explorer and opens the floor's plan (spec §7.10):
+// no hash.
+it('opens a floor on the Golden Residence page, by the floor alone', () => {
   renderTeaser()
   fireEvent.click(screen.getByRole('button', { name: /^Блок А, етаж 5:/ }))
-  expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence?floor=А-5#explorer')
+  expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=А-5$/)
 })
 
 // Spec §7.2: on Home too, a finger's first tap on a rail names the floor in
@@ -97,5 +98,5 @@ it('names a floor on the first touch tap on its rail, and opens it on the second
   expect(screen.getByTestId('where')).toHaveTextContent(/^\/$/)
 
   tap(a5)
-  expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence?floor=А-5#explorer')
+  expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=А-5$/)
 })

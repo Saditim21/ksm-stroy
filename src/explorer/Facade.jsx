@@ -90,8 +90,11 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   // own (an assistive technology's) opens the floor, as Enter does.
   const stagePress = useRef(null)
   const lastPress = useLastPress()
-  // A rail Enter or Space opened: the click a browser may still send it
-  // (Space's, on its keyup) is not a second opening.
+  // A rail Space opened: the click a browser may still send it on Space's
+  // keyup is not a second opening. Enter's own click never comes (its keydown
+  // is prevented). Any blur ends it: the plan stage takes the focus before the
+  // keyup, which then never reaches the facade, and the next click on a floor
+  // is a click of its own (ruling C7.1).
   const keyed = useRef(false)
   const overPanel = useRef(false)
   // The panels and the sheet, once their chunk is in. Never at the first
@@ -103,9 +106,11 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
     if (compact || surfaces) return
     loadSurfaces().then((module) => {
       if (mounted.current) setSurfaces(module)
-    }, () => {
-      // Offline, or a new deploy replaced the chunk: the facade still opens
-      // its floors, without the panel or the sheet.
+    }, (error) => {
+      // Offline, a new deploy replaced the chunk, or the chunk itself failed:
+      // the facade still opens its floors, without the panel or the sheet,
+      // and the console says why (ruling C7.6).
+      console.error('[explorer] the facade’s panels did not load:', error)
     })
   }, [compact, surfaces])
 
@@ -186,6 +191,11 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
       ?.querySelector('svg.plan')
     open(key, undefined, { fromRect: plan?.getBoundingClientRect() ?? null, opener: railRefs.current.get(key) })
   }
+  // A floor opened from a panel or the sheet (its button, or a unit of its
+  // plan): the plan's place, and the floor's rail as the opener the stage
+  // gives the focus back to. The plan is hidden from assistive technology,
+  // and the sheet's button turns inert as the sheet gives way (ruling C7.2).
+  const openFromSurface = (key, unitLabel, meta) => open(key, unitLabel, { fromRect: meta?.fromRect ?? null, opener: railRefs.current.get(key) })
 
   const keyOf = (event) => event.target.closest?.('[data-k]')?.dataset.k
 
@@ -236,6 +246,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   // without leaving them: a finger has already left the panel when its press
   // moves the focus.
   const onBlur = (event) => {
+    keyed.current = false
     if (rootRef.current?.contains(event.relatedTarget) || overPanel.current || isPhone()) return
     const area = lastPress.current.target?.closest?.('.fx__stage, .fxp')
     if (area && rootRef.current?.contains(area)) return
@@ -248,7 +259,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
     let next = null
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      keyed.current = true
+      keyed.current = event.key === ' '
       openFromFacade(rail.dataset.k)
       return
     }
@@ -379,7 +390,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
                 floor={hot?.on === 'panel' && blockOf(hot.key) === block ? hotFloor : null}
                 plan={surfaces.PLANS[block]}
                 onOpenFloor={(b, f, unit, meta) => open(floorKey(b, f), unit, meta)}
-                onUnit={(unit, meta) => open(floorKey(unit.block, unit.floor), unit.label, meta)}
+                onUnit={(unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)}
                 onPointerEnter={panelEnter}
                 onPointerLeave={panelLeave}
               />
@@ -398,8 +409,8 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
             const { block, floor } = SHAPE.get(hot.key)
             setHot(floorKey(block, Math.min(GR_FACTS.floors, Math.max(1, floor + step))), 'tap')
           }}
-          onOpen={(meta) => hot && open(hot.key, undefined, meta)}
-          onUnit={(unit, meta) => open(floorKey(unit.block, unit.floor), unit.label, meta)}
+          onOpen={(meta) => hot && openFromSurface(hot.key, undefined, meta)}
+          onUnit={(unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)}
         />
       ) : null}
     </div>

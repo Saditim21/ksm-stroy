@@ -22,6 +22,10 @@
 //     without scrolling: a box of its own inside the viewport, opacity 1 up
 //     its ancestors, visibility visible. On / the poster PDF links, scrolled
 //     to, must be visible too. jsdom cannot see CSS hide anything; this can.
+//     A deep link that opens a dialog (its visit's `dialog`: a floor's plan
+//     stage, spec §7.10) jumps to the explorer and covers the page, header
+//     and all: its visit must show that dialog, open and named, instead. The
+//     same page without the query keeps the EU line's check.
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -92,7 +96,7 @@ const VIEWPORTS = [
 // What a visit expects: by default a 200 at the path it asked for.
 const VISITS = [
   ...config.prerender.map((pathname) => ({ path: pathname })),
-  { path: '/projects/golden-residence/block-a?floor=3' },
+  { path: '/projects/golden-residence/block-a?floor=3', dialog: 'Блок А · Етаж 3' },
   { path: '/contact?apartment=%D0%90%20301' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },
@@ -213,6 +217,14 @@ async function inspectLinks({ pathname, text, scroll }) {
   return states
 }
 
+// In the page: the names of the dialogs open on top (none hidden under
+// another), by the text their aria-labelledby names, else their aria-label.
+function openDialogs() {
+  return [...document.querySelectorAll('[role="dialog"]')]
+    .filter((dialog) => dialog.getAttribute('aria-hidden') !== 'true')
+    .map((dialog) => (document.getElementById(dialog.getAttribute('aria-labelledby'))?.textContent ?? dialog.getAttribute('aria-label') ?? '').replace(/\s+/g, ' ').trim())
+}
+
 // In the page: the problems with its trees. One main#main, owned by React (a
 // fiber on the node), and no element at the top of <body> that React does not
 // own, as the prerendered tree is when React has skipped it.
@@ -235,7 +247,7 @@ function appTrees() {
 }
 
 // One visit at one size: every problem found, and the first viewport's shot.
-async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text }, size, shot) {
+async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog }, size, shot) {
   const problems = []
   // Closing the profile aborts what is still loading; that is not the page's doing.
   let closing = false
@@ -337,7 +349,10 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
 
       const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false })
       if (euLinks.length === 0) problems.push('no „За проекта“ link to /eu-proekt')
-      else if (!euLinks.some(({ issues }) => issues.length === 0)) {
+      else if (dialog) {
+        const shown = await page.evaluate(openDialogs)
+        if (!shown.includes(dialog)) problems.push(`the deep link shows no dialog „${dialog}“ (open: ${shown.map((name) => `„${name}“`).join(', ') || 'none'})`)
+      } else if (!euLinks.some(({ issues }) => issues.length === 0)) {
         problems.push(`„За проекта“ is not visible in the first viewport: ${euLinks[0].issues.join(', ')}`)
       }
 

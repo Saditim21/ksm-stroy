@@ -1,4 +1,4 @@
-import { glideToHash, scrollToId } from './scroll'
+import { glideToHash, jumpToId, scrollToId } from './scroll'
 import { setLenis } from './lenis'
 import { EXPO_IN_OUT } from './motion'
 
@@ -242,5 +242,44 @@ describe('a target that moves while Lenis glides', () => {
     const { lenis } = setup(2)
     scrollToId('contact')
     expect(lenis.scrollTo).toHaveBeenCalledTimes(1)
+  })
+})
+
+// Spec §7.10: a deep link that opens the plan stage first jumps the page to
+// #explorer, with no glide, where a glide to it would come to rest: natively,
+// and through Lenis when it runs, which must take the jump even while a
+// dialog's scroll lock has stopped it.
+describe('jumpToId', () => {
+  const setup = (top) => {
+    document.body.innerHTML = '<section id="explorer"></section>'
+    document.getElementById('explorer').getBoundingClientRect = () => ({ top, bottom: top, left: 0, right: 0, width: 0, height: 0, x: 0, y: top })
+    document.documentElement.style.scrollPaddingTop = '76px'
+  }
+
+  afterEach(() => {
+    setLenis(null)
+    document.documentElement.style.scrollPaddingTop = ''
+    vi.restoreAllMocks()
+  })
+
+  test('jumps at once, natively and through a running Lenis, to the section less the scroll padding', () => {
+    setup(2400.4)
+    const native = vi.spyOn(window, 'scrollTo')
+    const lenis = { scrollTo: vi.fn(), dimensions: { resize: vi.fn() } }
+    setLenis(lenis)
+
+    jumpToId('explorer')
+    expect(native).toHaveBeenCalledWith(0, 2324)
+    expect(lenis.dimensions.resize).toHaveBeenCalled()
+    expect(lenis.scrollTo).toHaveBeenCalledWith(2324, { immediate: true, force: true })
+  })
+
+  test('jumps natively without Lenis, and ignores an unknown id', () => {
+    setup(1000)
+    const native = vi.spyOn(window, 'scrollTo')
+    jumpToId('explorer')
+    expect(native).toHaveBeenCalledWith(0, 924)
+    expect(() => jumpToId('missing')).not.toThrow()
+    expect(native).toHaveBeenCalledTimes(1)
   })
 })

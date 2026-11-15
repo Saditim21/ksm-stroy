@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildModel, floorKey, rangeLine } from './model'
+import { buildModel, findUnit, floorKey, rangeLine, stepUnit } from './model'
 import { snapshotData } from './testing'
 
 // The explorer's numbers (spec §7.1, §9), from the sheets snapshot the concept
@@ -87,4 +87,36 @@ describe('rangeLine (spec §7.3)', () => {
 it('keys a floor by its block’s letter and its number', () => {
   expect(floorKey('А', 5)).toBe('А-5')
   expect(floorKey('Б', 1)).toBe('Б-1')
+})
+
+// Spec §7.1: a unit is named by its label everywhere (?unit, the callbacks,
+// the inquiry) and matched through normalizeUnitId, so a hand-written „a501“
+// or „А-501“ finds „А 501“.
+describe('findUnit', () => {
+  const m = buildModel(snapshotData())
+
+  it('finds a unit by its label, however it is written', () => {
+    for (const id of ['А 501', 'А501', 'а 501', 'A-501', ' А  501 ']) expect(findUnit(m, id)).toMatchObject({ label: 'А 501', floor: 5, suffix: '01' })
+    expect(findUnit(m, 'B 212')).toMatchObject({ label: 'Б 212' })
+  })
+
+  it('finds nothing for a unit the sheets do not have, an empty id or no data', () => {
+    expect(findUnit(m, 'А 999')).toBeNull()
+    expect(findUnit(m, '')).toBeNull()
+    expect(findUnit(m, null)).toBeNull()
+    expect(findUnit(null, 'А 501')).toBeNull()
+  })
+})
+
+// Spec §7.7: the unit panel's previous and next go round the floor.
+describe('stepUnit', () => {
+  const m = buildModel(snapshotData())
+  const unit = (label) => findUnit(m, label)
+
+  it('steps to the next and the previous unit on the floor, round from either end', () => {
+    expect(stepUnit(m, unit('А 501'), 1).label).toBe('А 502')
+    expect(stepUnit(m, unit('А 501'), -1).label).toBe('А 512')
+    expect(stepUnit(m, unit('А 512'), 1).label).toBe('А 501')
+    expect(stepUnit(m, unit('Б 307'), -1).label).toBe('Б 306')
+  })
 })
