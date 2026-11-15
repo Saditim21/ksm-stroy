@@ -203,4 +203,5 @@ it('ends with the footnote „Продадените остават в спис�
   // Spec §3.3: a one-letter word and „блок Б“ stay with what follows.
   expect(document.querySelector('.lv__note').textContent).toContain('в\u00a0списъка')
   expect(document.querySelector('.lv__note').textContent).toContain('блок\u00a0Б')
+  expect(document.querySelector('.lv__note').textContent).toContain('така е\u00a0в\u00a0таблицата')
 })

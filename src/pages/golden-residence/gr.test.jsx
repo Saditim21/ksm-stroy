@@ -92,8 +92,17 @@ describe('the story (spec §6.15)', () => {
     const story = within(section('sgradata'))
     expect(story.getByText('500 м')).toBeInTheDocument()
     expect(story.getByText('до метростанция')).toBeInTheDocument()
-    expect(story.getByRole('link', { name: 'Отвори в Google Maps' }))
+    expect(story.getByRole('link', { name: 'Отвори в Google Maps' }))
       .toHaveAttribute('href', mapsUrl('ул. Ген. Климент Бояджиев, жк Левски Г, София'))
+  })
+
+  // Spec §3.3: a one-letter word never ends a line; a no-break space binds
+  // it to the word after it (final review F8).
+  it('binds each one-letter word to the word after it, in the story and the blocks’ lead', () => {
+    const copy = `${section('sgradata').textContent} ${section('blokove').querySelector('.hinge').textContent}`
+    for (const bound of ['е новострояща', 'в Google Maps', 'А и Б', 'входът и градината', 'е апартамент']) {
+      expect(copy).toContain(bound)
+    }
   })
 
   it('gives the building’s figures, 2, 8, 192 and 12, from 43,98 to 114,58 m², and the index 01 / 04', () => {

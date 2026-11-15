@@ -148,7 +148,7 @@ export default function UnitList({ model, block = ALL, onUnit }) {
         </table>
       </div>
       <p className="small lv__note">
-        Продадените остават в&nbsp;списъка. Изложение има само за блок&nbsp;Б, така е в&nbsp;таблицата.
+        Продадените остават в&nbsp;списъка. Изложение има само за блок&nbsp;Б, така е&nbsp;в&nbsp;таблицата.
       </p>
     </div>
   )

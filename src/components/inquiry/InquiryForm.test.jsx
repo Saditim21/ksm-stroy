@@ -83,6 +83,8 @@ describe('checking the fields before anything is sent', () => {
     await fill(user, { email: 'ivan@пример.бг' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.latin)).toBeInTheDocument()
+    // Spec §3.3: the one-letter „с“ bound to the word after it.
+    expect(screen.getByText(ERRORS.latin).textContent).toContain('имейл с латински')
     expect(field('Имейл')).toHaveFocus()
     expect(send).not.toHaveBeenCalled()
   })

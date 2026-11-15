@@ -71,7 +71,7 @@ function BlockStats({ letter, stats }) {
         </p>
       </div>
       {note ? (
-        <p className="blk__note">Изложението на блок&nbsp;{letter} не е попълнено в&nbsp;таблицата.</p>
+        <p className="blk__note">Изложението на блок&nbsp;{letter} не е&nbsp;попълнено в&nbsp;таблицата.</p>
       ) : (
         <ul className="blk__expo">
           {exposures.map(([exposure, count]) => (
@@ -97,7 +97,7 @@ export default function BlocksSection() {
           Два блока, по <em>{PER_BLOCK}</em> апартамента
         </h2>
         <p className="lead" data-fade="">
-          Всеки квадрат е апартамент: етажите отгоре надолу, номерата от 01 до 12. Кликнете квадрат, за да отворите
+          Всеки квадрат е&nbsp;апартамент: етажите отгоре надолу, номерата от 01 до 12. Кликнете квадрат, за да отворите
           апартамента.
         </p>
         <Seam draw />

@@ -51,9 +51,10 @@ const ACTIONS = {
   reserved: 'Попитайте за апартамента',
   unknown: 'Попитайте за апартамента',
 }
+// A no-break space after each one-letter word (spec §3.3).
 const NOTES = {
-  sold: 'Този апартамент е продаден. Свободните на етажа са оцветени в зелено.',
-  blocked: 'Този апартамент не се предлага в момента.',
+  sold: 'Този апартамент е продаден. Свободните на етажа са оцветени в зелено.',
+  blocked: 'Този апартамент не се предлага в момента.',
 }
 
 const ARROW_BACK = (
@@ -235,7 +236,7 @@ function Panel({ model, unit, onClose, onStep, onInquire }) {
         <div ref={leftRef} className="up__l">
           <PlanSvg plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
           <p className="up__cap">
-            План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е очертан.
+            План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е{NBSP}очертан.
           </p>
         </div>
         <div ref={rightRef} className="up__r">
@@ -251,7 +252,7 @@ function Panel({ model, unit, onClose, onStep, onInquire }) {
             <Area term="Идеални части" value={unit.idealParts} />
             <Area term="Обща площ" value={unit.totalArea} />
             <Fact term="Вид">{unit.type || '—'}</Fact>
-            <Fact term="Изложение">{unit.exposure || 'няма данни в таблицата'}</Fact>
+            <Fact term="Изложение">{unit.exposure || `няма данни в${NBSP}таблицата`}</Fact>
             <Fact term="Статус">{status === 'unknown' ? unit.statusText || STATUS_LABEL.unknown : STATUS_LABEL[status]}</Fact>
             {unit.price ? <Fact term="Цена">{unit.price}</Fact> : null}
           </dl>

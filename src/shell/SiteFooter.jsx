@@ -65,7 +65,7 @@ export default function SiteFooter() {
                 <div key={office} className="ftr__office">
                   <p>{bindAddress(office)}</p>
                   <a href={mapsUrl(office)} target="_blank" rel="noopener noreferrer" className="ftr__maps hit">
-                    <span>Отвори в Google Maps</span>
+                    <span>Отвори в&nbsp;Google Maps</span>
                   </a>
                 </div>
               ))}

@@ -46,7 +46,7 @@ function Metro() {
       </div>
       <p data-fade="">
         <Button href={mapsUrl(ADDRESS)} variant="link" target="_blank" rel="noopener noreferrer">
-          Отвори в Google Maps
+          Отвори в&nbsp;Google Maps
         </Button>
       </p>
     </>
@@ -59,7 +59,7 @@ function Figures() {
     <dl className="kv" data-fade="">
       <div>
         <dt>{blocks}</dt>
-        <dd>блока, А и&nbsp;Б</dd>
+        <dd>блока, А&nbsp;и&nbsp;Б</dd>
       </div>
       <div>
         <dt>{floors}</dt>
@@ -97,7 +97,7 @@ const BLOCKS = [
     image: grImages['gr-entrance'],
     photo: 'story__photo--entrance',
     alt: 'Входът на Golden Residence, визуализация',
-    caption: 'Визуализация: входът и градината пред него',
+    caption: 'Визуализация: входът и градината пред него',
     title: (
       <>
         Модерен дом в&nbsp;жк&nbsp;<em>Левски&nbsp;Г</em>
@@ -105,7 +105,7 @@ const BLOCKS = [
     ),
     text: (
       <>
-        Golden Residence е новострояща се жилищна сграда, която съчетава съвременна архитектурна визия, прецизно
+        Golden Residence е&nbsp;новострояща се жилищна сграда, която съчетава съвременна архитектурна визия, прецизно
         функционално разпределение и&nbsp;безупречна локация&nbsp;– в&nbsp;един от най-бързо развиващите се
         и&nbsp;зелени столични райони&nbsp;– жк&nbsp;Левски&nbsp;Г и&nbsp;само на 500&nbsp;метра от метростанция.
       </>
