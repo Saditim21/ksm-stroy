@@ -71,7 +71,9 @@ const lensOf = (key) => {
   const box = SHAPE.get(key)?.bbox
   return box ? { x: box.x, y: box.y, width: box.w, height: box.h } : NO_LENS
 }
-const readLens = (node) => Object.fromEntries(['x', 'y', 'width', 'height'].map((name) => [name, Number(node.getAttribute(name))]))
+// Where the lens is now; nothing once the facade has gone, as a lens still
+// moving then can be (the engine's ticker outlives the page).
+const readLens = (node) => node && Object.fromEntries(['x', 'y', 'width', 'height'].map((name) => [name, Number(node.getAttribute(name))]))
 
 // A floor the data has not reached: its plan without statuses, `—` counts.
 const PLACEHOLDERS = new Map(SHAPES.map(({ key, block, floor }) => [
