@@ -12,7 +12,8 @@ import useExplorer from './useExplorer'
 // unit or closing the stage does.
 //
 // What only matters here is the address: the dialogs' chunk never loads, and
-// motion is a stand-in that takes any call (useMotionNow mocked).
+// motion is a stand-in that takes any call (useMotionNow mocked), or none
+// where a case turns it off.
 
 let availability
 vi.mock('../data/availability/useAvailability', () => ({ useAvailability: () => availability }))
@@ -21,7 +22,8 @@ const anything = new Proxy(function stand() {}, {
   get: (_, key) => (key === 'then' ? undefined : anything),
   apply: () => anything,
 })
-vi.mock('../motion/useMotionNow', () => ({ default: () => () => ({ gsap: anything, ScrollTrigger: anything }) }))
+let motionOn = true
+vi.mock('../motion/useMotionNow', () => ({ default: () => () => (motionOn ? { gsap: anything, ScrollTrigger: anything } : null) }))
 
 function Probe() {
   const explorer = useExplorer()
@@ -54,6 +56,7 @@ beforeEach(() => {
   vi.useFakeTimers()
 })
 afterEach(() => {
+  motionOn = true
   vi.useRealTimers()
 })
 
@@ -62,7 +65,17 @@ describe('the unit a mini plan opens, 820 ms on', () => {
     renderProvider()
     press('plan')
     expect(where()).toBe('?floor=А-5')
-    act(() => vi.advanceTimersByTime(820))
+    act(() => vi.advanceTimersByTime(819))
+    expect(where()).toBe('?floor=А-5')
+    act(() => vi.advanceTimersByTime(1))
+    expect(where()).toBe('?floor=А-5&unit=А+502')
+  })
+
+  // Ruling C9.13: with no plan to grow, nothing waits.
+  it('opens with its floor at once, without motion', () => {
+    motionOn = false
+    renderProvider()
+    press('plan')
     expect(where()).toBe('?floor=А-5&unit=А+502')
   })
 

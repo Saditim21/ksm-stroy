@@ -561,3 +561,31 @@ describe('the panels’ chunk', () => {
     expect((await import('./loadSurfaces')).loadedSurfaces()).toBeNull()
   })
 })
+
+// Ruling C9.14: a rail asked to take the focus back (`focusRail`: a stage
+// that closed with no opener) also turns the facade's phone block to that
+// floor's block, as it renders. A desktop shows and answers both blocks, so
+// there the turn is harmless: the rail takes the focus and its floor turns
+// hot, as any rail's focus makes it; the block switch (hidden from 901 px)
+// and the root's data-block follow, which only a phone reads
+// (explorer.css.test.js); and the other block still answers.
+it('gives a rail of the other block the focus back on a desktop, both blocks still answering', () => {
+  const onRailFocused = vi.fn()
+  const props = { model: MODEL, mode: 'full', initialBlock: 'А', onOpenFloor: vi.fn(), onRailFocused }
+  const { rerender } = render(<Facade {...props} />)
+  const facade = document.querySelector('.fx')
+  expect(facade).toHaveAttribute('data-block', 'А')
+
+  rerender(<Facade {...props} focusRail={{ block: 'Б', floor: 3 }} />)
+  expect(rail('Б', 3)).toHaveFocus()
+  expect(onRailFocused).toHaveBeenCalledTimes(1)
+  expect(panel('b')).toHaveAttribute('data-open')
+  expect(text(panel('b').querySelector('.fxp__title'))).toBe('Блок Б · Етаж 3')
+  expect(facade).toHaveAttribute('data-block', 'Б')
+  expect(screen.getByRole('button', { name: /^Блок\sБ$/ })).toHaveAttribute('aria-pressed', 'true')
+
+  fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
+  expect(panel('a')).toHaveAttribute('data-open')
+  expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
+  expect(panel('b')).not.toHaveAttribute('data-open')
+})

@@ -319,3 +319,12 @@ it('keeps every :hover rule where a fine pointer hovers', () => {
   expect(hovers.length).toBeGreaterThan(0)
   for (const rule of hovers) expect(rule.atRules, rule.selector).toContain(FINE)
 })
+
+// Ruling C9.14: the facade's data-block, the block a phone shows, changes on
+// a desktop too (a rail given the focus back turns it). Only a phone reads
+// it: from 901 px both blocks show and answer whatever it says.
+it('reads the facade’s data-block only on a phone', () => {
+  const reading = rules.filter((rule) => rule.selectors.some((selector) => /\.fx\[data-block/.test(selector)))
+  expect(reading.length).toBeGreaterThan(0)
+  for (const rule of reading) expect(rule.atRules, rule.selector).toEqual([PHONE])
+})

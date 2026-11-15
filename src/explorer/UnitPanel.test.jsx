@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { recordingMotion } from '../test/gsap'
 import { buildModel } from './model'
 import { snapshotData } from './testing'
 import UnitPanel from './UnitPanel'
@@ -254,4 +255,46 @@ it('drops a step still fading out when it closes, and leaves its last frame to f
   expect(afterimage.vars).toMatchObject({ opacity: 0, duration: 0.25, ease: 'power2.in' })
   afterimage.vars.onComplete()
   expect(document.querySelector('.up')).toBeNull()
+})
+
+// The way in with motion (extract §4.24; ruling C9.13), before the first
+// paint: the panel fades in over 0.3 s while its halves open outward from the
+// seam, 0.7 s expo.inOut from 0.05 s, and the seam draws over 0.6 s; once in,
+// it takes off what it set. A step's arrival fades the next unit's details
+// in over 0.25 s.
+it('opens with the halves parting from the seam over 0.7 s, the panel fading in over 0.3 s, the seam drawing over 0.6 s', () => {
+  const recorder = recordingMotion()
+  motion = recorder.motion
+  try {
+    const { rerender, onClose, onStep, onInquire } = renderPanel('А 301')
+    const dialog = panel('А 301')
+    const left = dialog.querySelector('.up__l')
+    const right = dialog.querySelector('.up__r')
+    const seam = dialog.querySelector('.up__box > .seam')
+    expect(seam).not.toBeNull()
+
+    expect(recorder.timelines).toHaveLength(1)
+    const [opening] = recorder.timelines
+    expect(opening.steps.map(({ targets }) => targets)).toEqual([dialog, left, right, seam])
+    expect(opening.steps.map(({ method, from, vars, position }) => ({ method, from, vars, position }))).toEqual([
+      { method: 'fromTo', from: { opacity: 0 }, vars: { opacity: 1, duration: 0.3, ease: 'power2.out' }, position: 0 },
+      { method: 'fromTo', from: { clipPath: 'inset(0% 0% 0% 100%)' }, vars: { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.7, ease: 'expo.inOut' }, position: 0.05 },
+      { method: 'fromTo', from: { clipPath: 'inset(0% 100% 0% 0%)' }, vars: { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.7, ease: 'expo.inOut' }, position: 0.05 },
+      { method: 'fromTo', from: { scaleY: 0 }, vars: { scaleY: 1, duration: 0.6, ease: 'expo.out' }, position: 0 },
+    ])
+    act(() => opening.vars.onComplete())
+    expect(recorder.tweens).toHaveLength(1)
+    expect(recorder.tweens[0].targets).toEqual([dialog, left, right, seam])
+    expect(recorder.tweens[0].vars).toEqual({ clearProps: 'opacity,clipPath,transform' })
+
+    recorder.reset()
+    rerender(<UnitPanel model={MODEL} unitId="А 302" onClose={onClose} onStep={onStep} onInquire={onInquire} />)
+    expect(recorder.timelines).toHaveLength(0)
+    expect(recorder.tweens).toHaveLength(1)
+    expect(recorder.tweens[0].targets).toBe(panel('А 302').querySelector('.up__r'))
+    expect(recorder.tweens[0].from).toEqual({ opacity: 0 })
+    expect(recorder.tweens[0].vars).toEqual({ opacity: 1, duration: 0.25, clearProps: 'opacity' })
+  } finally {
+    motion = null
+  }
 })

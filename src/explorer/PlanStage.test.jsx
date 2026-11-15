@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { recordingMotion } from '../test/gsap'
 import { planBox } from './geometry'
 import { buildModel } from './model'
 import { PLANS } from './plans'
@@ -306,5 +307,115 @@ describe('the morph', () => {
     for (const observer of observers) observer.callback(observer.targets.map((target) => ({ target })))
     expect(sizes()).toEqual(landing)
     expect(observers.flatMap((observer) => observer.targets)).not.toContain(ghost)
+  })
+})
+
+// The way in and the way out with motion (extract §4.23; ruling C9.13), with
+// a recording stand-in for the engine (src/test/gsap.js): the morph's
+// timeline, the 0.35 s fade where no mini plan grows, a new block's or a new
+// floor's change, the focus once the stage is in, and the afterimage of its
+// close.
+describe('the motion', () => {
+  const STAGE = { left: 24, top: 120, width: 1000, height: 700 }
+  const FROM = { left: 1100, top: 400, width: 300, height: 200 }
+  const rect = ({ left, top, width, height }) => ({ left, top, width, height, x: left, y: top, right: left + width, bottom: top + height })
+  const recorder = recordingMotion()
+  const shape = ({ method, from, vars, position }) => (from ? { method, from, vars, position } : { method, vars, position })
+  beforeEach(() => {
+    recorder.reset()
+    motion = recorder.motion
+  })
+
+  it('morphs: the ground comes up over 0.45 s while the mini plan travels 0.8 s expo.inOut, then the stage comes in over it from 0.55 s', () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function measure() {
+      return rect(this.closest('.ps__ghost') ? FROM : STAGE)
+    })
+    renderStage({ fromRect: rect(FROM) })
+    const root = stage()
+    const svg = root.querySelector('.ps__plan svg')
+    const ghost = document.querySelector('.ps__ghost')
+    const drawing = svg.querySelector('.drawing')
+    const rest = [root.querySelector('.ps__bar'), root.querySelector('.ps__side')]
+    expect(drawing).not.toBeNull()
+
+    // Before the first paint the stage's plan, bar, side and drawing wait unseen.
+    const sets = recorder.tweens.filter(({ method }) => method === 'set')
+    expect(sets.find(({ targets }) => targets === svg).vars).toEqual({ opacity: 0, pointerEvents: 'none' })
+    expect(sets.find(({ targets }) => Array.isArray(targets)).targets).toEqual(rest)
+    expect(sets.find(({ targets }) => Array.isArray(targets)).vars).toEqual({ opacity: 0 })
+    expect(sets.find(({ targets }) => targets === drawing).vars).toEqual({ opacity: 0 })
+
+    expect(recorder.timelines).toHaveLength(1)
+    const [morph] = recorder.timelines
+    expect(morph.steps.map(({ targets }) => targets)).toEqual([root, ghost, svg, ghost, rest, svg, drawing])
+    expect(morph.steps.map(shape)).toEqual([
+      { method: 'fromTo', from: { backgroundColor: 'rgba(26, 23, 20, 0)' }, vars: { backgroundColor: 'rgba(26, 23, 20, 1)', duration: 0.45, ease: 'power2.out' }, position: 0 },
+      { method: 'to', vars: { x: 0, y: 0, scale: 1, duration: 0.8, ease: 'expo.inOut' }, position: 0 },
+      { method: 'to', vars: { opacity: 1, duration: 0.25, ease: 'power1.inOut' }, position: 0.55 },
+      { method: 'to', vars: { opacity: 0, duration: 0.25, ease: 'power1.inOut' }, position: 0.55 },
+      { method: 'to', vars: { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.06 }, position: 0.55 },
+      { method: 'set', vars: { pointerEvents: 'auto' }, position: 0.8 },
+      { method: 'to', vars: { opacity: 0.6, duration: 0.4, ease: 'power2.out' }, position: 0.6 },
+    ])
+    expect(recorder.tweens.some(({ method, vars }) => method === 'fromTo' && vars.duration === 0.35)).toBe(false)
+
+    // Once it has landed, it takes off what it set, and the ghost goes.
+    recorder.tweens.length = 0
+    act(() => morph.vars.onComplete())
+    expect(recorder.tweens).toHaveLength(1)
+    expect(recorder.tweens[0].targets).toEqual([root, svg, ...rest, drawing])
+    expect(recorder.tweens[0].vars).toEqual({ clearProps: 'opacity,backgroundColor,pointerEvents' })
+    expect(document.querySelector('.ps__ghost')).toBeNull()
+  })
+
+  it('fades in over 0.35 s power2.out where no mini plan grows into it, as a deep link or a rail opens it', () => {
+    renderStage()
+    expect(recorder.timelines).toHaveLength(0)
+    expect(recorder.tweens).toHaveLength(1)
+    expect(recorder.tweens[0].targets).toBe(stage())
+    expect(shape(recorder.tweens[0])).toEqual({ method: 'fromTo', from: { opacity: 0 }, vars: { opacity: 1, duration: 0.35, ease: 'power2.out', clearProps: 'opacity' }, position: undefined })
+    expect(document.querySelector('.ps__ghost')).toBeNull()
+  })
+
+  it('fades a new block’s plan in over 0.35 s, and crossfades a new floor’s fills', () => {
+    const { rerender, onClose, onFloor, onBlock, onUnit } = renderStage()
+    const props = { model: MODEL, fromRect: null, onClose, onFloor, onBlock, onUnit }
+    recorder.reset()
+
+    rerender(<PlanStage {...props} block="Б" floor={5} />)
+    const svg = stage('Блок Б · Етаж 5').querySelector('.ps__plan svg')
+    expect(recorder.tweens).toHaveLength(1)
+    expect(recorder.tweens[0].targets).toBe(svg)
+    expect(shape(recorder.tweens[0])).toEqual({ method: 'fromTo', from: { opacity: 0 }, vars: { opacity: 1, duration: 0.35, ease: 'power2.out', clearProps: 'opacity' }, position: undefined })
+
+    recorder.reset()
+    rerender(<PlanStage {...props} block="Б" floor={6} />)
+    expect(recorder.tweens.map(shape)).toEqual([
+      { method: 'set', vars: { clearProps: 'strokeDasharray,strokeDashoffset' }, position: undefined },
+      { method: 'fromTo', from: { opacity: 0 }, vars: { opacity: 1, duration: 0.15, ease: 'none', clearProps: 'opacity' }, position: undefined },
+    ])
+  })
+
+  it('moves the focus to „Към сградата“ once it is in, at 700 ms', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    renderStage()
+    const close = within(stage()).getByRole('button', { name: 'Към сградата' })
+    act(() => vi.advanceTimersByTime(699))
+    expect(close).not.toHaveFocus()
+    act(() => vi.advanceTimersByTime(1))
+    expect(close).toHaveFocus()
+  })
+
+  it('leaves its last frame to fade over 0.3 s power2.in as it closes', () => {
+    const { unmount } = renderStage()
+    recorder.reset()
+    unmount()
+    expect(recorder.tweens).toHaveLength(1)
+    const [afterimage] = recorder.tweens
+    expect(afterimage.targets).toHaveClass('ps')
+    expect(afterimage.targets).toHaveAttribute('aria-hidden', 'true')
+    expect(afterimage.vars).toEqual({ opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: expect.any(Function) })
+    afterimage.vars.onComplete()
+    expect(document.querySelector('.ps')).toBeNull()
   })
 })
