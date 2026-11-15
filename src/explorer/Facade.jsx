@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import ResponsivePicture from '../components/ui/ResponsivePicture'
 import StatusCount from '../components/ui/StatusCount'
-import { StatusGlyph } from '../components/ui/StatusSwatch'
-import { STATUS_ORDER, statusWord } from '../components/ui/status'
+import { STATUS_ORDER } from '../components/ui/status'
 import { GR_FACTS } from '../config/facts'
 import grImages from '../data/images/golden-residence.json'
 import building from '../data/maps/golden-residence.building.json'
 import useMotion from '../motion/useMotion'
 import useMotionNow from '../motion/useMotionNow'
+import FacadeRails from './FacadeRails'
 import { FACADE, floorShapes } from './geometry'
 import { loadedSurfaces, loadSurfaces } from './loadSurfaces'
 import { floorKey } from './model'
+import useHotFloor, { isPhone, useLastPress } from './useHotFloor'
 import './explorer.css'
 
 // The facade (spec §7.2; extract §4.20; the concept's explorer.js:215-555):
@@ -32,7 +33,9 @@ import './explorer.css'
 // every count reads `—` then, never a zero, and the facade works all the
 // same. React renders the final state; GSAP (useMotionNow) only moves the
 // lens, and the intro (useMotion) brings the picture, the seam and the
-// counts in once, as the facade comes up from below.
+// counts in once, as the facade comes up from below. The hot floor's state
+// is useHotFloor's, the rails FacadeRails'; the pointer and the keys are
+// handled here, on the stage around them.
 //
 // The edge panels and the sheet are a chunk of their own (surfaces.js),
 // which the full facade loads as it nears the screen, or when it is first
@@ -42,20 +45,16 @@ import './explorer.css'
 
 const SHAPES = floorShapes(building)
 const SHAPE = new Map(SHAPES.map((shape) => [shape.key, shape]))
+const isFloor = (key) => SHAPE.has(key)
 const BLOCKS = ['А', 'Б']
-// Each block's rail, top floor first.
-const RAILS = Object.fromEntries(BLOCKS.map((block) => [block, SHAPES.filter((shape) => shape.block === block).sort((a, b) => b.floor - a.floor)]))
 // The picture is the cut-out facade: its sky is see-through, so it waits on
 // the page's ground, not on a block of its colour.
 const PICTURE = { ...grImages['facade-cut'], color: 'transparent' }
 // The picture's width: the grid's (the stage's) on a desktop, 1200/628 of
 // the stage on a phone, which shows one block.
 const PICTURE_SIZES = '(max-width: 900px) 191vw, (max-width: 1150px) 860px, 76vw'
-const CLOSE_MS = 320
 // How far below the screen the facade starts to load its surfaces.
 const NEAR = '0px 0px 600px 0px'
-const PHONE = '(max-width: 900px)'
-const isPhone = () => window.matchMedia?.(PHONE).matches === true
 const NO_LENS = { x: 0, y: 0, width: 0, height: 0 }
 const lensOf = (key) => {
   const box = SHAPE.get(key)?.bbox
@@ -70,41 +69,8 @@ const PLACEHOLDERS = new Map(SHAPES.map(({ key, block, floor }) => [
 ]))
 const floorOf = (model, key) => model?.floors.get(key) ?? PLACEHOLDERS.get(key)
 
-// A rail's name: „Блок А, етаж 5: 4 свободни, 2 резервирани, 6 продадени,
-// 0 блокирани. Enter отваря плана.“; without the counts until they arrive.
-function railName({ block, floor }, stats) {
-  const counts = stats ? `: ${STATUS_ORDER.map((status) => `${stats.counts[status]} ${statusWord(status, stats.counts[status])}`).join(', ')}` : ''
-  return `Блок ${block}, етаж ${floor}${counts}. Enter отваря плана.`
-}
-
 // A no-break space after the one-letter „и“ (spec §3.3).
 const IDLE_CAPTION = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
-
-// The page's latest press: a key's, or a pointer's and the element it landed
-// on. A key without Ctrl, Alt or ⌘ makes the next focus the keyboard's, and a
-// pointer's press, wherever it lands, a pointer's: the rule :focus-visible
-// follows. It watches the whole page, because Tab reaches a rail from
-// anywhere, and in the capture phase, so it is set before any handler moves
-// the focus. (jsdom matches :focus-visible on every focus, so the tests could
-// not tell the selector's two cases apart.)
-function useLastPress() {
-  const last = useRef({ keyboard: true, target: null })
-  useEffect(() => {
-    const onKey = (event) => {
-      if (!event.ctrlKey && !event.altKey && !event.metaKey) last.current = { keyboard: true, target: null }
-    }
-    const onPointer = (event) => {
-      last.current = { keyboard: false, target: event.target }
-    }
-    document.addEventListener('keydown', onKey, true)
-    document.addEventListener('pointerdown', onPointer, true)
-    return () => {
-      document.removeEventListener('keydown', onKey, true)
-      document.removeEventListener('pointerdown', onPointer, true)
-    }
-  }, [])
-  return last
-}
 
 export default function Facade({ model, mode = 'full', initialBlock = 'А', onOpenFloor }) {
   const compact = mode === 'compact'
@@ -117,11 +83,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   const maskId = `fx${useId().replace(/[^\w-]/g, '')}`
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
-  // The hot floor: { key, source: 'mouse' | 'kbd' | 'tap', on: where it shows }.
-  const [hot, setHotState] = useState(null)
-  // The floor the lens is on: the last hot one, where it stays while it fades.
-  const [lens, setLens] = useState(null)
-  const closeTimer = useRef(0)
+  const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = useHotFloor({ compact, isFloor })
   // The press a click comes from (the stage's pointerdown): its pointer, and
   // the floor that was hot as it began. A touch or pen tap on any other floor
   // only previews it. The click spends it, so a click with no press of its
@@ -147,29 +109,10 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
     })
   }, [compact, surfaces])
 
-  const setHot = useCallback((key, source) => {
-    clearTimeout(closeTimer.current)
-    if (!SHAPE.has(key)) return
-    const on = compact ? 'caption' : isPhone() ? 'sheet' : 'panel'
-    setHotState({ key, source, on })
-    setLens(key)
-  }, [compact])
-
-  const clearHot = useCallback(() => {
-    clearTimeout(closeTimer.current)
-    setHotState(null)
-  }, [])
-
-  const scheduleClose = useCallback(() => {
-    clearTimeout(closeTimer.current)
-    closeTimer.current = setTimeout(clearHot, CLOSE_MS)
-  }, [clearHot])
-
   useEffect(() => {
     mounted.current = true
     return () => {
       mounted.current = false
-      clearTimeout(closeTimer.current)
     }
   }, [])
 
@@ -182,14 +125,6 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
     observer.observe(rootRef.current)
     return () => observer.disconnect()
   }, [compact, surfaces, needSurfaces])
-
-  // Crossing 900 px moves between the panel and the sheet: start again.
-  useEffect(() => {
-    const query = window.matchMedia?.(PHONE)
-    if (!query?.addEventListener) return undefined
-    query.addEventListener('change', clearHot)
-    return () => query.removeEventListener('change', clearHot)
-  }, [clearHot])
 
   // The lens: from floor to floor over 0.25 s power2.out, from where it is,
   // and at once onto the first hot floor; its tint fades over 0.2 s.
@@ -240,7 +175,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   // Opens a floor; the sheet, if it shows it, gives way.
   const open = (key, unitLabel, meta) => {
     const { block, floor } = SHAPE.get(key)
-    setHotState((current) => (current?.on === 'sheet' ? { ...current, on: 'none' } : current))
+    giveWay()
     onOpenFloor?.(block, floor, unitLabel, meta)
   }
 
@@ -351,7 +286,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   // clears it after 320 ms.
   const panelEnter = () => {
     overPanel.current = true
-    clearTimeout(closeTimer.current)
+    cancelClose()
   }
   const panelLeave = (event) => {
     overPanel.current = false
@@ -413,37 +348,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
               </svg>
             </div>
           </div>
-          {BLOCKS.map((block) => (
-            <div key={block} className={`fx__rail fx__rail--${block === 'А' ? 'a' : 'b'}`}>
-              {RAILS[block].map((shape) => {
-                const stats = model?.floors.get(shape.key)
-                const free = stats ? stats.counts.available : null
-                const classes = ['fx__cnt', free === 0 && 'is-zero', hot?.key === shape.key && 'is-hot'].filter(Boolean).join(' ')
-                return (
-                  <button
-                    key={shape.key}
-                    ref={(node) => {
-                      if (node) railRefs.current.set(shape.key, node)
-                      else railRefs.current.delete(shape.key)
-                    }}
-                    type="button"
-                    className={classes}
-                    data-k={shape.key}
-                    data-colour={stats ? stats.colour : 'unknown'}
-                    style={{ '--cy': shape.bbox.y + shape.bbox.h / 2 }}
-                    aria-label={railName(shape, stats)}
-                  >
-                    <span className="f" aria-hidden="true">{shape.floor}</span>
-                    <span className="d" aria-hidden="true">
-                      <StatusGlyph status={stats ? stats.colour : 'unknown'} className="g" />
-                    </span>
-                    <span className="n">{free ?? '—'}</span>
-                    <span className="sr-only">етаж {shape.floor}</span>
-                  </button>
-                )
-              })}
-            </div>
-          ))}
+          <FacadeRails model={model} hotKey={hot?.key ?? null} railRefs={railRefs} />
         </div>
         {compact ? (
           <p className="fx__cap" aria-live="polite">
