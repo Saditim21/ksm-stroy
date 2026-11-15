@@ -168,17 +168,26 @@ describe('arrival and focus', () => {
     expect(frame()).toHaveAttribute('data-arrive', 'hero')
   })
 
-  // The frame is keyed by the path: a hash or query change is the same page.
-  it('keeps the frame and its data-arrive through a hash change', async () => {
+  // The frame is keyed by the path: a hash or query change is the same page,
+  // and the focus stays where it is (spec §5.6, ruling C9.2). The focus is
+  // moved off <main> first, so a hash change that took it back there would
+  // show.
+  it('keeps the frame, its data-arrive and the focus through a hash change', async () => {
     const { router } = renderApp('/eu-proekt')
     await act(() => router.navigate('/about'))
     await shows('Страницата за нас')
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('main#main')))
     const shown = frame()
+    const link = within(screen.getByRole('contentinfo')).getByRole('link', { name: 'За нас' })
+    act(() => link.focus())
+    expect(document.activeElement).toBe(link)
 
     await act(() => router.navigate('/about#ekip'))
     expect(router.state.location.hash).toBe('#ekip')
     expect(frame()).toBe(shown)
     expect(frame()).toHaveAttribute('data-arrive', 'doors')
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+    expect(document.activeElement).toBe(link)
   })
 
   // The doors close the whole view, the root snapshot with the page
