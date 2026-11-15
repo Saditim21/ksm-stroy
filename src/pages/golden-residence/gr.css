@@ -236,9 +236,15 @@
   overflow: hidden;
   background: var(--umber);
 }
-/* „500 м до метростанция“ under a rule. */
+/* „500 м до метростанция“ under a rule. The line goes under the figure only
+   when the two no longer fit side by side: with a reader's text spacing
+   (WCAG 1.4.12, spec §11) „500 м“ and „метростанция“ are 320 px together,
+   past a 320 px phone's line, where they widened the page and the fixed
+   header with it. The line's basis is 0, so it wraps on its longest word,
+   not on its whole length. */
 .metro {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 16px;
   margin-top: 8px;
@@ -251,6 +257,7 @@
   line-height: .9;
 }
 .metro p {
+  flex: 1 1 0;
   color: var(--ivory-2);
   font-size: 15px;
 }
@@ -639,7 +646,11 @@
 /* ---------- phones: the halves stack (spec §4) ---------- */
 @media (max-width: 900px) {
   /* The hero: the render framed to the tall tower, the facts stacked around
-     a 56 px brass tick, the actions in a column. */
+     a 56 px brass tick, the actions in a column. Clipped across: the
+     title's word masks reach .14 em past their words (src/styles/
+     diptych.css: .line-mask), half a pixel past a 320 px screen, which
+     widened the page, and the fixed header with it, to 321 px. */
+  .grhero { overflow-x: clip; }
   .grhero__media img { object-position: 68% 62%; }
   .grhero__title { font-size: clamp(48px, 13.5vw, 80px); }
   .grhero__addr {

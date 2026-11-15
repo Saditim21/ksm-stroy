@@ -89,6 +89,13 @@ describe('the hero (spec §6.14, §6.7)', () => {
     expect(declaredFor('.grhero__facts .seam', [PHONE])).toMatchObject({ width: '56px', height: '1px' })
     expect(declaredFor('.grhero__title', [PHONE])['font-size']).toBe('clamp(48px, 13.5vw, 80px)')
   })
+
+  // The title's word masks reach .14 em past their words (src/styles/
+  // diptych.css: .line-mask): on a 320 px screen, half a pixel past its edge,
+  // which made the page, and the fixed header with it, 321 px wide.
+  it('clips across on a phone, where a word mask’s room may pass the screen’s edge', () => {
+    expect(declaredFor('.grhero', [PHONE])['overflow-x']).toBe('clip')
+  })
 })
 
 describe('the story (spec §6.15, §5.8)', () => {
@@ -109,6 +116,15 @@ describe('the story (spec §6.15, §5.8)', () => {
   it('sets the first block one screen tall and the others .84 of it, beside the picture', () => {
     expect(declaredFor(':root.js .story__block', [NO_PREFERENCE, WIDE])['min-height']).toBe('calc(var(--screen-h) * .84)')
     expect(declaredFor(':root.js .story__block:first-child', [NO_PREFERENCE, WIDE])['min-height']).toBe('var(--screen-h)')
+  })
+
+  // Spec §11, WCAG 1.4.12: with a reader's text spacing, „500 м“ and
+  // „метростанция“ side by side are 320 px, wider than a 320 px phone's line,
+  // and the page widened under the fixed header. The line goes under the
+  // figure then; at the site's spacing the two still fit side by side.
+  it('takes „до метростанция“ under „500 м“ once the two no longer fit side by side', () => {
+    expect(declaredFor('.metro')['flex-wrap']).toBe('wrap')
+    expect(declaredFor('.metro p').flex).toBe('1 1 0')
   })
 })
 

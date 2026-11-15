@@ -57,8 +57,15 @@
 // And the phone opening (spec §6.7): on / at real phone screens under the EU
 // row (PHONE_HERO), once its entrance has settled, the H1 sits on two lines,
 // broken after „пространства“ (spec §3.2: two lines down to 320 px), and it
-// never overlaps the Golden Residence info. jsdom lays out no text; Chrome
-// does.
+// never overlaps the Golden Residence info. Then the same page with a
+// reader's text spacing (WCAG 1.4.12, spec §11: it holds at 320–360 px,
+// TEXT_SPACING): the H1, however many lines it takes, still clear of the
+// Golden Residence info; each half's info whole on its side of the seam; the
+// page no wider than the screen (anything wider, anywhere on the page, would
+// widen the layout viewport, and the fixed header with it, past the screen's
+// edge); the header's „За проекта“ and „Меню“ within the screen; the EU
+// row's logos in their own proportions; and the live count's digits whole in
+// their one-digit window. jsdom lays out no text; Chrome does.
 //
 // And the explorer (spec §7.2–7.6, §7.10), each step failing with its name:
 //   - desktop mouse, /projects/golden-residence at 1440×900: #explorer
@@ -187,6 +194,13 @@ const PHONE_HERO = {
     { width: 320, height: 560 },
   ],
 }
+// WCAG 1.4.12's text spacing as a reader's stylesheet sets it: line height
+// 1.5, letter spacing 0.12 em, word spacing 0.16 em, paragraphs 2 em apart.
+const TEXT_SPACING = '* { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } p { margin-bottom: 2em !important; }'
+// How far a logo may stand from its own proportions (rounding), and how far
+// a part may reach over the seam's half pixel.
+const LOGO_TOLERANCE = 0.02
+const SEAM_TOLERANCE_PX = 1
 
 // The explorer's steps (spec §7): the Golden Residence page's, and a deep
 // link to a floor of block А. A floor's title, in its panel, its sheet and
@@ -664,10 +678,91 @@ async function openingBoxes() {
   return { title: box('h1'), info: box('.half--gr .half__info'), lines }
 }
 
+// In the page, under TEXT_SPACING: the boxes of the H1, the two infos, the
+// seam, the opening and the header's „За проекта“ and „Меню“; the screen's
+// width and the layout viewport's, which grows past the screen when anything
+// on the page is wider; and how far each of the EU row's logos stands from
+// its own proportions.
+function spacedOpening() {
+  const box = (selector) => {
+    const element = document.querySelector(selector)
+    if (!element) return null
+    const { top, right, bottom, left } = element.getBoundingClientRect()
+    return { top, right, bottom, left }
+  }
+  const logos = [...document.querySelectorAll('.hdr .eu__plate img')]
+    .filter((img) => img.complete && img.naturalWidth > 0)
+    .map((img) => {
+      const { width, height } = img.getBoundingClientRect()
+      return { name: img.alt, off: Math.abs(width / height / (img.naturalWidth / img.naturalHeight) - 1) }
+    })
+  // A live count's digits (RollingNumber): each column's strip of ten
+  // digits, and the one-digit window it shows them through.
+  const digits = [...document.querySelectorAll('.hero .roll-strip')].map((strip) => ({
+    line: strip.getBoundingClientRect().height / 10,
+    window: strip.closest('[aria-hidden="true"]')?.getBoundingClientRect().height ?? 0,
+  }))
+  return {
+    title: box('h1'),
+    gr: box('.half--gr .half__info'),
+    seam: box('.hero__seam'),
+    mn: box('.half--mn .half__info'),
+    hero: box('.hero'),
+    more: box('.hdr__eu a.hit'),
+    menu: box('.hdr__menu'),
+    screen: document.documentElement.clientWidth,
+    layout: innerWidth,
+    logos,
+    digits,
+  }
+}
+
+// What a phone opening measured under TEXT_SPACING (spacedOpening) gets
+// wrong: a part over the next, an info across the seam or past the opening's
+// foot, a page wider than the screen, a header control past the screen's
+// edge, a squeezed logo, a live count's digits taller than their window.
+function spacingProblems(size, { title, gr, seam, mn, hero, more, menu, screen, layout, logos, digits }) {
+  const at = `${size} with text spacing`
+  const missing = Object.entries({ H1: title, 'Golden Residence info': gr, seam, 'Многофамилна info': mn, opening: hero, '„За проекта“': more, '„Меню“': menu })
+    .filter(([, found]) => !found)
+    .map(([name]) => name)
+  if (missing.length > 0) return [`${at}: no ${missing.join(', ')} in the page`]
+  const span = ({ top, bottom }) => `${Math.round(top)}–${Math.round(bottom)}`
+  const line = (seam.top + seam.bottom) / 2
+  const problems = []
+  if (title.bottom > gr.top && gr.bottom > title.top) {
+    problems.push(`${at}: the H1 (${span(title)}) overlaps the Golden Residence info (${span(gr)})`)
+  }
+  if (gr.bottom > line + SEAM_TOLERANCE_PX) {
+    problems.push(`${at}: the Golden Residence info (${span(gr)}) runs below the seam at ${Math.round(line)}, into the other half`)
+  }
+  if (mn.top < line - SEAM_TOLERANCE_PX) {
+    problems.push(`${at}: the Многофамилна info (${span(mn)}) starts above the seam at ${Math.round(line)}, where its half is not`)
+  }
+  if (mn.bottom > hero.bottom + SEAM_TOLERANCE_PX) {
+    problems.push(`${at}: the Многофамилна info (${span(mn)}) runs past the opening's foot at ${Math.round(hero.bottom)}`)
+  }
+  if (layout > screen) {
+    problems.push(`${at}: the page is ${layout} px wide on a ${screen} px screen; something on it is wider than the screen, and the fixed header widens with it`)
+  }
+  for (const [name, control] of [['„За проекта“', more], ['„Меню“', menu]]) {
+    if (control.right > screen + 0.5) problems.push(`${at}: the header's ${name} ends at ${Math.round(control.right)}, past the screen's ${screen} px`)
+  }
+  for (const { name, off } of logos) {
+    if (off > LOGO_TOLERANCE) problems.push(`${at}: the EU row's logo „${name}“ is squeezed ${Math.round(off * 100)} % out of its proportions`)
+  }
+  const cut = digits.find(({ line, window }) => Math.abs(line - window) > 0.5)
+  if (cut) {
+    problems.push(`${at}: the Golden Residence count's digits take ${cut.line.toFixed(1)} px each in a ${cut.window.toFixed(1)} px window, which cuts them`)
+  }
+  return problems
+}
+
 // The phone opening (PHONE_HERO): at each real phone screen, in a fresh
 // profile, the slogan's four parts must sit two to a line, „Създаваме
 // пространства“ over „за мечтания живот“, and the H1's box and the Golden
-// Residence info's box must not overlap.
+// Residence info's box must not overlap. Then, with TEXT_SPACING on, the
+// opening and the header must hold (spacingProblems).
 async function phoneHero(browser, userAgents) {
   const problems = []
   for (const { width, height } of PHONE_HERO.sizes) {
@@ -693,6 +788,8 @@ async function phoneHero(browser, userAgents) {
           problems.push(`${size}: the H1 (${Math.round(title.top)}–${Math.round(title.bottom)}) overlaps the Golden Residence info (${Math.round(info.top)}–${Math.round(info.bottom)})`)
         }
       }
+      await page.addStyleTag({ content: TEXT_SPACING })
+      problems.push(...spacingProblems(size, await page.evaluate(spacedOpening)))
     } catch (error) {
       problems.push(`${width}×${height}: the check stopped: ${error.message.split('\n')[0]}`)
     } finally {
@@ -1004,7 +1101,7 @@ async function main() {
     }
 
     if (RUN_PHONE_HERO) {
-      const label = `phone opening: ${PHONE_HERO.path} at ${PHONE_HERO.sizes.map(({ width, height }) => `${width}×${height}`).join(', ')}, the H1 on two lines, clear of the Golden Residence info`
+      const label = `phone opening: ${PHONE_HERO.path} at ${PHONE_HERO.sizes.map(({ width, height }) => `${width}×${height}`).join(', ')}, the H1 on two lines, clear of the Golden Residence info; with text spacing, every part clear and whole, the page and the header within the screen`
       const problems = await phoneHero(browser, userAgents)
       for (const problem of problems) failures.push(`${label}: ${problem}`)
       console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)

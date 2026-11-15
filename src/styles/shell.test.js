@@ -137,6 +137,55 @@ describe('the EU line (spec §6.3)', () => {
   })
 })
 
+// Spec §11: text spacing (WCAG 1.4.12) holds at 320–360 px. With a reader's
+// spacing, a heading's word wider than a phone's line (the EU poster's
+// „предприятията“ at 40 px) ran past the screen and widened the page, and
+// the fixed header widened with it: „За проекта“ and „Меню“ ended past the
+// screen's edge. And where the page kept its width, the header's row
+// narrowed the logos out of their proportions to keep „За проекта“ on one
+// line. The smoke run's phone opening measures both in Chrome.
+describe('text spacing (spec §11, WCAG 1.4.12)', () => {
+  // `anywhere`, not `break-word`, so the word's grid or flex track stays as
+  // wide as the screen too. Phones only: a wider screen's narrowing column
+  // (the services' widening) keeps its words whole. Not on the legacy pages,
+  // whose layout stays as it was.
+  it('breaks a heading’s word too wide for a phone’s line, outside the legacy pages', () => {
+    expect(declaredFor(':where(h1, h2, h3):not(.legacy-ground *)', ['@layer base', PHONE], indexRules)).toEqual({ 'overflow-wrap': 'anywhere' })
+    const wrapping = [...indexRules, ...rules].filter((rule) => valueOf(rule, 'overflow-wrap') || valueOf(rule, 'word-break'))
+    expect(wrapping.map((rule) => [rule.selector, rule.atRules])).toEqual([[':where(h1, h2, h3):not(.legacy-ground *)', ['@layer base', PHONE]]])
+  })
+
+  // The logos keep their proportions (the base layer's img max-width: 100%
+  // let the row's grid squeeze them), and „За проекта“, which may wrap,
+  // takes two lines instead.
+  it('never narrows the EU logos: „За проекта“ wraps instead', () => {
+    expect(declaredFor('.eu__plate img')['max-width']).toBe('none')
+    expect(declaredFor('.eu--row .eu__plate img')['max-width']).toBeUndefined()
+    expect(declaredFor('.eu a')['white-space']).toBeUndefined()
+    expect(rulesFor(rules, '.eu--row a')).toEqual([])
+  })
+
+  // A live count (RollingNumber) shows its digits through a window one em
+  // tall. Their strip took the reader's line height (1.5), its lines grew
+  // half an em taller than the window, and the window cut each digit's foot
+  // off. The strip is a block of its own with its own line height: a
+  // reader's `*` rule reaches no pseudo-element, and the strip's lines keep
+  // to the window.
+  it('keeps a live count’s digits whole in their one-em window', () => {
+    expect(declaredFor('.roll-strip::before', [LAYER], indexRules)).toMatchObject({ display: 'block', 'line-height': '1' })
+  })
+
+  // Its second line reaches 3 px below the 36 px row, so once the header has
+  // moved up, the row is clipped to its box, or the line's underline would
+  // show along the top of the screen. Never while the row is back in view:
+  // for the keyboard (its focus ring) or a deep link's landing.
+  it('clips the EU row to its box only while it is out of view', () => {
+    const selector = ':root:not([data-eu-hold]) .hdr[data-scrolled]:not(:has(.hdr__eu :focus-visible)) .hdr__eu'
+    expect(declaredFor(selector)).toEqual({ 'clip-path': 'inset(0)' })
+    expect(rules.filter((rule) => valueOf(rule, 'clip-path') === 'inset(0)').map((rule) => rule.selector)).toEqual([selector])
+  })
+})
+
 describe('the menu (spec §6.4)', () => {
   // The doors close over an open menu (src/styles/motion.css).
   it('is its own view-transition group, site-menu', () => {

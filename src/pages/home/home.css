@@ -871,42 +871,68 @@
 
 /* ---------- phones: the halves stack (spec §4, §6.7) ---------- */
 @media (max-width: 900px) {
-  /* The seam turns horizontal and drops for the EU row: at --sy, 50 % on a
-     hero 780 px tall or more, never above the header plus 290 px nor within
-     190 px of the bottom. The clips, the pictures, the overlays, the ring,
-     the seam and the Golden Residence info follow it. Nothing widens. */
+  /* The halves stack, the seam turned horizontal between them, as the rows
+     of a grid: under the header the slogan, then at least 10 px of room,
+     the Golden Residence info and 18 px down to the seam; below it the
+     Многофамилна half, its info 22 px off the foot. The opening is one
+     screen, 560 px at least (--hh), and the seam drops for the EU row to
+     --sy: half the opening on a screen 780 px tall or more, never above the
+     header plus 290 px nor within 190 px of the foot. The room between
+     takes up what the parts leave, so the parts sit as they did when the
+     opening was laid out from its height. But the rows hold their content:
+     a slogan or an info a reader spaces wider (WCAG 1.4.12, spec §11) moves
+     what follows it down, the seam too, and the opening grows, where it ran
+     over the info, and the Многофамилна info rose above the seam, its name
+     clipped away. The Golden Residence half spans the first four rows and
+     shares them (subgrid), so its info takes the fourth; a browser without
+     subgrid lays the half out on its own, its info at its foot as before.
+     Each half's picture, overlay and ring fill the half; the overlays keep
+     their stops where they were across the whole opening. Nothing widens. */
   .hero {
     --xg: 0px;
     --xm: 0px;
-    --sy: clamp(50%, calc(var(--header-h) + 290px), calc(100% - 190px));
-    height: max(560px, var(--screen-h));
+    --hh: max(560px, var(--screen-h));
+    --sy: clamp(calc(var(--hh) / 2), calc(var(--header-h) + 290px), calc(var(--hh) - 190px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: calc(var(--header-h) + 14px) auto minmax(10px, 1fr) auto minmax(calc(var(--hh) - var(--sy)), auto);
+    height: auto;
+    min-height: var(--hh);
   }
-  .half--gr { clip-path: inset(0 0 calc(100% - var(--sy)) 0); }
-  .half--mn { clip-path: inset(var(--sy) 0 0 0); }
-  .half--gr .half__media {
-    top: 0;
-    bottom: calc(100% - var(--sy));
+  .half {
+    position: relative;
+    inset: auto;
+    clip-path: none;
   }
-  .half--mn .half__media {
-    top: var(--sy);
-    bottom: 0;
+  .half--gr {
+    grid-area: 1 / 1 / 5;
+    display: grid;
+    grid-template-rows: subgrid;
+    align-content: end;
+    padding: 0 var(--gut) 18px;
+  }
+  .half--mn {
+    grid-area: 5 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 var(--gut) 22px;
   }
   .half--gr .half__media img { object-position: 70% 62%; }
   .half--mn .half__media img { object-position: 72% 60%; }
-  .half--gr::before { background: linear-gradient(180deg, rgba(14, 13, 11, .78) 0%, rgba(14, 13, 11, .42) 16%, rgba(14, 13, 11, .46) 24%, rgba(14, 13, 11, .9) 49%); }
-  .half--mn::before { background: linear-gradient(180deg, rgba(14, 13, 11, .35) 50%, rgba(14, 13, 11, 0) 64%, rgba(14, 13, 11, 0) 70%, rgba(14, 13, 11, .85) 100%); }
+  .half--gr::before { background: linear-gradient(180deg, rgba(14, 13, 11, .78) 0px, rgba(14, 13, 11, .42) calc(var(--hh) * .16), rgba(14, 13, 11, .46) calc(var(--hh) * .24), rgba(14, 13, 11, .9) calc(var(--hh) * .49)); }
+  .half--mn::before { background: linear-gradient(180deg, rgba(14, 13, 11, .35) calc(var(--hh) * .5 - var(--sy)), rgba(14, 13, 11, 0) calc(var(--hh) * .64 - var(--sy)), rgba(14, 13, 11, 0) calc(var(--hh) * .7 - var(--sy)), rgba(14, 13, 11, .85) calc(var(--hh) - var(--sy))); }
   .half::after {
     right: 0;
     width: auto;
   }
-  .half--gr::after { bottom: calc(100% - var(--sy)); }
   .half--mn::after {
-    top: var(--sy);
-    bottom: 0;
+    top: 0;
     left: 0;
   }
   .hero__seam {
-    top: var(--sy);
+    grid-area: 5 / 1;
+    top: 0;
     bottom: auto;
     right: 0;
     width: auto;
@@ -915,16 +941,17 @@
     transform: none;
   }
   .half__info {
+    position: relative;
+    bottom: auto;
     gap: 4px;
     max-width: none;
   }
   .half--gr .half__info {
-    right: var(--gut);
-    bottom: calc(100% - var(--sy) + 18px);
+    grid-row: 4;
+    left: auto;
   }
   .half--mn .half__info {
-    bottom: 22px;
-    left: var(--gut);
+    right: auto;
     justify-items: start;
     text-align: left;
   }
@@ -934,17 +961,19 @@
   /* 32 px (extract §2.2) wherever „Многофамилна сграда“ fits on one line at
      that size, 287 px of text between the gutters: from 328 px. Narrower, it
      scales with the hero (its container, so a scrollbar never counts) and
-     stays on one line, so its info stays below the seam on the shortest
-     screens (320 × 560). */
+     stays on one line, so its info fits the 190 px under the seam on the
+     shortest screens (320 × 560), and the opening stays one screen tall. */
   .half__name { font-size: min(32px, calc((100cqw - 2 * var(--gut)) / 9)); }
   .half__count .num { font-size: 40px; }
   .half__place { font-size: 13px; }
 
   /* Two lines, broken after „пространства“; a part never breaks inside.
-     Below 360 px the title tracks tighter (after the small phones' rules). */
+     Below 360 px the title tracks tighter (after the small phones' rules).
+     In the opening's second row, over the Golden Residence half. */
   .hero__title {
-    top: calc(var(--header-h) + 14px);
-    right: 0;
+    grid-area: 2 / 1;
+    position: relative;
+    inset: auto;
     width: auto;
     padding: 0 var(--gut);
     transform: none;

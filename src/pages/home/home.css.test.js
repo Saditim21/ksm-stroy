@@ -88,25 +88,31 @@ describe('the seam (spec §6.7)', () => {
     ])
   })
 
+  // On a phone the seam drops for the EU row to --sy: half the opening (--hh)
+  // on a screen 780 px tall or more, never above the header plus 290 px, nor
+  // within 190 px of the foot.
   it('centres each building in its half with the spec’s translations, and drops to --sy on a phone', () => {
     const hero = declaredFor('.hero')
     expect(hero['--xg']).toBe('min(0px, max(calc((var(--s) - 1) * 100cqw), calc(var(--s) * 50cqw - 68cqw)))')
     expect(hero['--xm']).toBe('min(calc(var(--s) * 100cqw), max(0px, calc((1 + var(--s)) * 50cqw - 73cqw)))')
     expect(hero['container-type']).toBe('inline-size')
-    expect(declaredFor('.hero', [PHONE])['--sy']).toBe('clamp(50%, calc(var(--header-h) + 290px), calc(100% - 190px))')
+    expect(declaredFor('.hero', [PHONE])).toMatchObject({
+      '--hh': 'max(560px, var(--screen-h))',
+      '--sy': 'clamp(calc(var(--hh) / 2), calc(var(--header-h) + 290px), calc(var(--hh) - 190px))',
+    })
   })
 
-  it('is one screen tall, at least 640 px, or 560 px on a phone', () => {
+  // On a phone its rows hold their content: text a reader spaces wider
+  // (WCAG 1.4.12) makes it taller, never cramped (below).
+  it('is one screen tall, at least 640 px, or 560 px at least on a phone', () => {
     expect(declaredFor('.hero').height).toBe('max(640px, var(--screen-h))')
-    expect(declaredFor('.hero', [PHONE]).height).toBe('max(560px, var(--screen-h))')
+    expect(declaredFor('.hero', [PHONE])).toMatchObject({ height: 'auto', 'min-height': 'var(--hh)' })
   })
 
-  it('clips the halves at the seam: across on a desktop, down at --sy on a phone', () => {
+  it('clips the halves at the seam across on a desktop; on a phone each half is a row of its own', () => {
     expect(declaredFor('.half--gr')['clip-path']).toBe('inset(0 calc((1 - var(--s)) * 100%) 0 0)')
     expect(declaredFor('.half--mn')['clip-path']).toBe('inset(0 0 0 calc(var(--s) * 100%))')
-    expect(declaredFor('.half--gr', [PHONE])['clip-path']).toBe('inset(0 0 calc(100% - var(--sy)) 0)')
-    expect(declaredFor('.half--mn', [PHONE])['clip-path']).toBe('inset(var(--sy) 0 0 0)')
-    expect(declaredFor('.half--gr .half__info', [PHONE]).bottom).toBe('calc(100% - var(--sy) + 18px)')
+    expect(declaredFor('.half', [PHONE])).toMatchObject({ position: 'relative', inset: 'auto', 'clip-path': 'none' })
   })
 
   // Spec §2.2, Review Focus 3: a tap never widens a half, nor does a phone,
@@ -169,6 +175,74 @@ describe('the hero move (spec §6.7)', () => {
       .toMatchObject({ background: heroOverlay, opacity: '1', transition: 'opacity .8s var(--e-io)' })
     expect(declaredFor(':root.js .hero[data-moving] .half--gr::before', [NO_PREFERENCE, FINE_WIDE]))
       .toMatchObject({ opacity: '0', transition: 'opacity .8s var(--e-io)' })
+  })
+})
+
+// Spec §6.7 on a phone, and §11: text spacing (WCAG 1.4.12) holds at
+// 320–360 px. The halves stack as the rows of a grid that hold their
+// content, so a slogan or an info a reader spaces wider moves what follows
+// it down instead of running over it. Placed from the opening's height, the
+// slogan ran over the Golden Residence info, and the Многофамилна info rose
+// above the seam, where its half's clip hid its name. The smoke run's phone
+// opening measures both in Chrome, with the spacing and without.
+describe('the phone opening’s rows (spec §6.7, §11)', () => {
+  it('stacks the slogan under the header, at least 10 px of room, the Golden Residence info and the Многофамилна half', () => {
+    expect(declaredFor('.hero', [PHONE])).toMatchObject({
+      display: 'grid',
+      'grid-template-columns': 'minmax(0, 1fr)',
+      'grid-template-rows': 'calc(var(--header-h) + 14px) auto minmax(10px, 1fr) auto minmax(calc(var(--hh) - var(--sy)), auto)',
+    })
+    expect(declaredFor('.hero__title', [PHONE])).toMatchObject({ 'grid-area': '2 / 1', position: 'relative', inset: 'auto' })
+  })
+
+  // The half shares the opening's rows (subgrid), so its info takes the
+  // fourth. A browser without subgrid lays the half out on its own, its info
+  // at its foot, as the opening was before.
+  it('gives the Golden Residence half the first four rows and its info the fourth, 18 px above the seam', () => {
+    expect(declaredFor('.half--gr', [PHONE])).toMatchObject({
+      'grid-area': '1 / 1 / 5',
+      display: 'grid',
+      'grid-template-rows': 'subgrid',
+      'align-content': 'end',
+      padding: '0 var(--gut) 18px',
+    })
+    expect(declaredFor('.half__info', [PHONE])).toMatchObject({ position: 'relative', bottom: 'auto' })
+    expect(declaredFor('.half--gr .half__info', [PHONE])).toMatchObject({ 'grid-row': '4', left: 'auto' })
+  })
+
+  it('sets the Многофамилна info 22 px off the foot of the last row, the seam and the ring at its top', () => {
+    expect(declaredFor('.half--mn', [PHONE])).toMatchObject({
+      'grid-area': '5 / 1',
+      display: 'flex',
+      'flex-direction': 'column',
+      'justify-content': 'flex-end',
+      padding: '0 var(--gut) 22px',
+    })
+    expect(declaredFor('.half--mn .half__info', [PHONE]).right).toBe('auto')
+    expect(declaredFor('.hero__seam', [PHONE])).toMatchObject({ 'grid-area': '5 / 1', top: '0', height: '1px', margin: '-.5px 0 0' })
+    expect(declaredFor('.half--mn::after', [PHONE])).toMatchObject({ top: '0', left: '0' })
+  })
+
+  // Each overlay looks as it did across the whole opening: its stops where
+  // they were, measured from the opening's top, or from the seam, where the
+  // Многофамилна half now starts.
+  it('keeps each half’s overlay as it was, its stops measured from the opening’s top', () => {
+    expect(declaredFor('.half--gr::before', [PHONE]).background).toBe(
+      'linear-gradient(180deg, rgba(14, 13, 11, .78) 0px, rgba(14, 13, 11, .42) calc(var(--hh) * .16), rgba(14, 13, 11, .46) calc(var(--hh) * .24), rgba(14, 13, 11, .9) calc(var(--hh) * .49))',
+    )
+    expect(declaredFor('.half--mn::before', [PHONE]).background).toBe(
+      'linear-gradient(180deg, rgba(14, 13, 11, .35) calc(var(--hh) * .5 - var(--sy)), rgba(14, 13, 11, 0) calc(var(--hh) * .64 - var(--sy)), rgba(14, 13, 11, 0) calc(var(--hh) * .7 - var(--sy)), rgba(14, 13, 11, .85) calc(var(--hh) - var(--sy)))',
+    )
+  })
+
+  // A part still placed from the opening's percentages would ignore the
+  // rows: the old clips, insets and offsets are gone.
+  it('places nothing on a phone from a percentage of the opening', () => {
+    for (const rule of rules.filter((r) => r.atRules.join(' / ') === PHONE)) {
+      for (const { prop, value } of rule.declarations) {
+        expect(value, `${rule.selector} { ${prop} }`).not.toMatch(/100% - var\(--sy\)|^var\(--sy\)$|inset\(var\(--sy\)/)
+      }
+    }
   })
 })
 

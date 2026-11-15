@@ -125,6 +125,23 @@
     border-radius: 1px;
   }
 
+  /* Text spacing (WCAG 1.4.12, spec §11: it holds at 320–360 px). With a
+     reader's wider letter spacing, a heading's long word can outgrow a
+     phone's line: „предприятията“ at 40 px is 332 px on a 320 px screen's
+     280. It breaks there, rather than run past the screen and widen the
+     page, which a fixed header widens with, past the screen's edge.
+     `anywhere`, unlike `break-word`, also keeps the word's grid or flex
+     track as wide as the screen. At the site's own spacing every heading's
+     words fit their lines, so nothing changes. Phones only: on a wider
+     screen a heading may stand in a narrowing column (the services'
+     widening), where its words hold still. Not on the legacy pages, whose
+     layout stays as it was. */
+  @media (max-width: 900px) {
+    :where(h1, h2, h3):not(.legacy-ground *) {
+      overflow-wrap: anywhere;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
       animation-duration: 1ms !important;
@@ -172,8 +189,16 @@
   .roll-strip {
     display: block;
   }
+  /* Ten lines of one em each, the window's height (RollingNumber's
+     leading-none), whatever line height the page or a reader sets: with a
+     reader's text spacing (WCAG 1.4.12, spec §11) they took 1.5 em, and the
+     window cut each digit's foot off. The strip is a block of its own, so
+     its lines take its own line height, and a reader's `*` rule reaches no
+     pseudo-element. */
   .roll-strip::before {
     content: '0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9';
+    display: block;
+    line-height: 1;
     white-space: pre;
   }
 

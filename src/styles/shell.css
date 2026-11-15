@@ -106,6 +106,14 @@
     height: var(--eu-h);
     padding: 0 var(--gut);
   }
+  /* Moved up out of view, the row keeps to its 36 px. With a reader's text
+     spacing (WCAG 1.4.12) on a 320 px phone, „За проекта“ takes a second
+     line that reaches 3 px below the row, and its underline would show
+     along the top of the screen. Not while the row is back in view, for the
+     keyboard or a deep link's landing (above). */
+  :root:not([data-eu-hold]) .hdr[data-scrolled]:not(:has(.hdr__eu :focus-visible)) .hdr__eu {
+    clip-path: inset(0);
+  }
   .hdr__bar {
     display: flex;
     align-items: center;
@@ -193,8 +201,13 @@
     padding: 9px 14px;
     background: #F7F4EE;
   }
+  /* The logos keep their proportions, never narrowed to make room: the base
+     layer's `max-width: 100%` let the header row's grid squeeze them when a
+     reader's text spacing (WCAG 1.4.12) widened „За проекта“ on a 320 px
+     phone. That link wraps instead (below). */
   .eu__plate img {
     width: auto;
+    max-width: none;
     height: 28px;
   }
   .eu--menu p {
@@ -228,7 +241,9 @@
 
   /* The header's row, 36 px: the plate with 20 px logos, the text, and
      „За проекта“ at the end; the plate and the link fit a 320 px phone
-     (186 + 73 px and the two gaps in its 280 px). The text takes the room
+     (186 + 73 px and the two gaps in its 280 px). With a reader's text
+     spacing the link is 91 px there, and it takes two lines rather than
+     squeeze the plate, which never narrows (above). The text takes the room
      the other two leave, a container that shows the full text when it holds
      it through the project number, else the short text when that fits
      through the number, else nothing; an ellipsis may end the rest of a
