@@ -1,0 +1,190 @@
+/* The closing inquiry (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
+   §6.12, §10; extract §4.14): the contact half and the form, ported from the
+   concept's css/diptych.css (:232-253 the form, :405-412 the contact half,
+   :787-790 their phone rules) with the tokens of src/index.css and the
+   spec's fixes:
+   - a control's border is hair-ctl, which reaches 3:1 on onyx (spec §2.1);
+   - the fields keep the site's focus ring (spec §11, ruling F9), and the
+     concept's brass-l underline stays as a second cue;
+   - an invalid field and its message are status-sold;
+   - hover effects only where a pointer hovers (spec §2.2).
+
+   The component's own stylesheet (InquirySection.jsx): plain CSS, in no
+   Tailwind layer, loaded with the page that has the inquiry. */
+
+/* ---------- the contact half ---------- */
+.contact { background: var(--onyx); }
+/* Against the seam: the heading, the lead, the phones, the hours. */
+.contact__l {
+  display: grid;
+  align-content: start;
+  justify-items: end;
+  gap: 26px;
+  padding: 0 clamp(28px, 4vw, 80px) 0 var(--gut);
+  text-align: right;
+}
+.contact__l .h2 { max-width: 9em; }
+.contact__tel {
+  font-family: var(--serif);
+  font-size: clamp(36px, 3.4vw, 56px);
+  font-weight: 500;
+  line-height: 1;
+  transition: color .25s;
+}
+.contact__l .small { font-size: 14px; }
+.contact__r {
+  max-width: 680px;
+  padding: 0 var(--gut) 0 clamp(28px, 4vw, 80px);
+}
+
+/* ---------- the form ---------- */
+.form {
+  display: grid;
+  gap: 22px;
+}
+/* A sent form gives its place to the thank-you: its own display would
+   otherwise outrank the `hidden` attribute's. */
+.form[hidden] { display: none; }
+.form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.field {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+.field label,
+.field__label {
+  color: var(--stone);
+  font-size: 13px;
+  letter-spacing: .02em;
+}
+/* Underlined, 17 px ivory on the ground. */
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--hair-ctl);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ivory);
+  font-size: 17px;
+  transition: border-color .25s;
+}
+.field textarea {
+  min-height: 92px;
+  line-height: 1.5;
+  resize: vertical;
+}
+/* The select draws its own chevron, in brass. */
+.field select {
+  padding-right: 26px;
+  appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23B8954A'/%3E%3C/svg%3E") no-repeat right 4px center;
+}
+.field select option {
+  background: var(--umber);
+  color: var(--ivory);
+}
+/* A second cue beside the ring: the underline turns brass-l. */
+.field input:focus,
+.field select:focus,
+.field textarea:focus { border-color: var(--brass-l); }
+/* An invalid field keeps its colour while it is fixed. */
+.field [aria-invalid='true'],
+.field [aria-invalid='true']:focus { border-color: var(--status-sold); }
+.field__err {
+  color: var(--status-sold);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* The apartments sent from the explorer, each removable. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 3px 0 12px;
+  border: 1px solid var(--hair-ctl);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.chip button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--stone);
+  font-size: 16px;
+  line-height: 1;
+  transition: color .2s;
+}
+
+.form__consent {
+  display: grid;
+  gap: 8px;
+}
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--stone);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.consent input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  accent-color: var(--brass);
+}
+.form__fail {
+  color: var(--status-sold);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The thank-you, in the form's place. */
+.form__ok {
+  display: grid;
+  gap: 10px;
+  padding: 24px 0;
+}
+.form__ok p:first-child {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .contact__tel:hover { color: var(--brass-l); }
+  .chip button:hover { color: var(--ivory); }
+}
+
+/* ---------- phones: the halves stack, the form under a brass rule ---------- */
+@media (max-width: 900px) {
+  .contact__l {
+    justify-items: start;
+    padding: 0 var(--gut) 40px;
+    text-align: left;
+  }
+  .contact__r {
+    margin: 0 var(--gut);
+    padding: 40px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .form__row { grid-template-columns: 1fr; }
+}

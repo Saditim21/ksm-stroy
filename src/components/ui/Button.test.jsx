@@ -112,11 +112,16 @@ describe('a link to a section of the same page', () => {
     window.history.replaceState(null, '', '/')
   })
 
+  // jsdom lays nothing out, so the section is placed by hand: 1234 px down
+  // the page, which is where the glide must come to rest (no top bar here,
+  // so no scroll padding to leave).
   test('glides to the section through scrollToId, and the click’s default is prevented', () => {
     renderAt()
+    const section = document.getElementById('zapitvane')
+    vi.spyOn(section, 'getBoundingClientRect').mockReturnValue({ top: 1234, bottom: 1634, left: 0, right: 0, width: 0, height: 400, x: 0, y: 1234 })
     expect(fireEvent.click(screen.getByRole('link', { name: 'Запитване' }))).toBe(false)
     expect(lenis.scrollTo).toHaveBeenCalledTimes(1)
-    expect(lenis.scrollTo).toHaveBeenCalledWith(0, expect.objectContaining({ duration: 1.5, easing: EXPO_IN_OUT }))
+    expect(lenis.scrollTo).toHaveBeenCalledWith(1234, expect.objectContaining({ duration: 1.5, easing: EXPO_IN_OUT }))
   })
 
   // jsdom follows a fragment link a task after the click, as a browser does.

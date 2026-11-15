@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import Logo from '../components/brand/Logo'
 import Seam from '../components/ui/Seam'
 import { SITE, mapsUrl } from '../config/site'
-import { bindOneLetterWords } from '../utils/format'
+import { bindAddress } from '../utils/format'
 import EuLine from './EuLine'
 import { NAV } from './nav'
 
@@ -21,8 +21,10 @@ import { NAV } from './nav'
 const BLURB =
   'Водеща строителна компания в България с над 15 години опит. Специализираме се в жилищно и комерсиално строителство, предлагайки иновативни решения и високо качество на изпълнение.'
 
-// The year of this build of the site, as the prerendered HTML shows it.
-const YEAR = 2026
+// The year of this build of the site (ruling C4.9): Vite writes it into the
+// code (vite.config.js), so the prerendered HTML and the browser show the
+// same year, and the next year's build says so.
+/* global BUILD_YEAR */
 
 export default function SiteFooter() {
   const quickLinks = useId()
@@ -61,7 +63,7 @@ export default function SiteFooter() {
               <h2>Адреси</h2>
               {SITE.offices.map((office) => (
                 <div key={office} className="ftr__office">
-                  <p>{bindOneLetterWords(office)}</p>
+                  <p>{bindAddress(office)}</p>
                   <a href={mapsUrl(office)} target="_blank" rel="noopener noreferrer" className="ftr__maps hit">
                     <span>Отвори в Google Maps</span>
                   </a>
@@ -86,7 +88,7 @@ export default function SiteFooter() {
           <EuLine variant="footer" />
           <p className="ftr__copy">
             <span>
-              © {YEAR} {SITE.name} · {SITE.legalName}
+              © {BUILD_YEAR} {SITE.name} · {SITE.legalName}
             </span>
             <a href={SITE.facebook} target="_blank" rel="noopener noreferrer" className="hit">
               <span>Facebook</span>

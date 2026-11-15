@@ -164,6 +164,14 @@
     z-index: 3;
   }
 
+  /* A section of a Diptych page (spec §2.2, extract §1.3): the screen's .16
+     above and below, within 96–180 px, and 88 px on a phone. Here, not in a
+     page's stylesheet, so a page reached first by a link has it too. */
+  .sec {
+    position: relative;
+    padding: clamp(96px, calc(var(--screen-h) * .16), 180px) 0;
+  }
+
   /* A section in two halves, its seam over them. */
   .split {
     position: relative;
@@ -189,6 +197,7 @@
      lead goes under a brass rule; a section's second half takes its own rule
      and inset from its component's stylesheet, as in the concept. */
   @media (max-width: 900px) {
+    .sec { padding: 88px 0; }
     .split,
     .hinge { grid-template-columns: 1fr; }
     .split > .seam,
@@ -207,4 +216,12 @@
     padding: .12em .14em .26em;
     margin: -.12em -.14em -.26em;
   }
+  /* A split heading's masks stack, and the margins of two in a row collapse
+     to the larger, -.26em, not their sum: each line after the first stood
+     .12em lower, the heading .12em a line taller, until the reveal undid the
+     split and everything under it moved up (8 px under the services'
+     heading, 16 px under the inquiry's). So between two masks the room comes
+     back in one margin, the next one's. */
+  .split-line-mask + .split-line-mask { margin-top: -.38em; }
+  .split-line-mask:not(:last-child) { margin-bottom: 0; }
 }

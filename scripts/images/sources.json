@@ -150,5 +150,86 @@
       1920,
       2400
     ]
+  },
+  {
+    "id": "svc-residential",
+    "group": "home",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/res-photo4-1600.webp",
+    "widths": [
+      900,
+      1600
+    ]
+  },
+  {
+    "id": "svc-renovation",
+    "group": "home",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/works-chitalishte-1200.webp",
+    "widths": [
+      700,
+      1200
+    ]
+  },
+  {
+    "id": "svc-commercial",
+    "group": "home",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/works-paradise-960.webp",
+    "widths": [
+      960
+    ]
+  },
+  {
+    "id": "work-green-life",
+    "group": "home",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45306470_104924097180788_3096088000648445952_n.webp",
+    "widths": [
+      700,
+      960
+    ]
+  },
+  {
+    "id": "work-aivazovski",
+    "group": "home",
+    "src": "src/assets/projects/Айвазовски Парк - гр.Поморие/45652633_108252286847969_7426443512180113408_n.webp",
+    "widths": [
+      700,
+      960
+    ]
+  },
+  {
+    "id": "work-panorama",
+    "group": "home",
+    "src": "src/assets/projects/Панорама Резидънс - гр.Созопол/47682915_125662661773598_6339324471370842112_n.webp",
+    "widths": [
+      700,
+      960
+    ]
+  },
+  {
+    "id": "work-sunny-hill",
+    "group": "home",
+    "src": "src/assets/projects/Сънни Хил блок 9 - кв. Меден Рудник гр. Бургас/57077613_162614501411747_1358123651756457984_n.webp",
+    "widths": [
+      700,
+      960
+    ]
+  },
+  {
+    "id": "work-hotel-paradise",
+    "group": "home",
+    "src": "src/assets/projects/Хотел Парадайс - с.Огняново/45222690_104656040540927_7174317773579878400_n (1).webp",
+    "widths": [
+      700,
+      960
+    ]
+  },
+  {
+    "id": "work-chitalishte",
+    "group": "home",
+    "src": "src/assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-36-13-125.jpg",
+    "widths": [
+      700,
+      960,
+      1400
+    ]
   }
 ]

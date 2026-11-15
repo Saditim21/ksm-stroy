@@ -1,3 +1,4 @@
+/* global BUILD_YEAR */
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
@@ -6,6 +7,7 @@ import { goOffline, renderSiteAt } from '../../tests/contracts/site'
 import { SITE, mapsUrl } from '../config/site'
 import App from '../root'
 import routes from '../routes'
+import { bindAddress } from '../utils/format'
 import { inquiryTarget } from './handle'
 import { NAV } from './nav'
 
@@ -81,8 +83,10 @@ describe('the header', () => {
     }
   })
 
+  // Home has an inquiry of its own (its handle's `inquiry`).
   it.each([
-    ['/', '/contact'],
+    ['/', '#zapitvane'],
+    ['/about', '/contact'],
     ['/projects/golden-residence', '/contact?project=golden-residence'],
     ['/projects/mnogofamilna-sgrada/block-a', '/contact?project=mnogofamilna-sgrada'],
   ])('on %s, „Запитване“ opens %s', async (path, href) => {
@@ -182,7 +186,7 @@ describe('the header as the page scrolls', () => {
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
-  '/': { header: 'overlay' },
+  '/': { header: 'overlay', inquiry: true },
   '/about': { header: 'solid', legacy: true },
   '/projects': { header: 'solid', legacy: true },
   '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
@@ -405,6 +409,31 @@ describe('the menu', () => {
 })
 
 describe('the footer', () => {
+  // Ruling C4.7: an office never breaks before its number or its entrance's
+  // letter, nor after a one-letter word, in the footer and in the menu.
+  it('binds each office’s numbers and entrance letter to the words before them', async () => {
+    const user = userEvent.setup()
+    renderSiteAt('/eu-proekt')
+    const footer = await screen.findByRole('contentinfo')
+    const offices = (root) => [...root.querySelectorAll('p')]
+      .map((p) => p.textContent)
+      .filter((text) => SITE.offices.includes(text.replace(/\s/g, ' ')))
+    expect(offices(footer)).toEqual(SITE.offices.map(bindAddress))
+    expect(offices(footer)[1]).toContain('Методий\u00a017, вх.\u00a0Б')
+    await user.click(screen.getByRole('button', { name: 'Меню' }))
+    expect(offices(screen.getByRole('dialog', { name: 'Меню' }))).toEqual(SITE.offices.map(bindAddress))
+  })
+
+  // Ruling C4.9: the © line carries the year of the build, which Vite writes
+  // into the code (vite.config.js: BUILD_YEAR; src/shell/prerender.test.jsx
+  // checks the year it writes), so the prerendered HTML and the browser's
+  // first render agree, and a build made in a new year says so.
+  it('dates the © line by the build’s year', async () => {
+    vi.stubGlobal('BUILD_YEAR', 2031)
+    renderSiteAt('/eu-proekt')
+    expect(textOf(await screen.findByRole('contentinfo'))).toContain('© 2031 КСМ Строй · КСМ СТРОЙ ООД')
+  })
+
   it('the footer: details, both Maps links, „Бързи връзки“, © line and no title block', async () => {
     renderSiteAt('/projects/golden-residence')
     const footer = await screen.findByRole('contentinfo')
@@ -418,7 +447,7 @@ describe('the footer', () => {
       'ksm_str@abv.bg',
       'Пн–Пт 8:00–18:00', 'Сб 9:00–14:00', 'Нд почивен ден',
       FULL_EU_TEXT,
-      '© 2026 КСМ Строй · КСМ СТРОЙ ООД',
+      `© ${BUILD_YEAR} КСМ Строй · КСМ СТРОЙ ООД`,
     ]) {
       expect(text).toContain(fact)
     }

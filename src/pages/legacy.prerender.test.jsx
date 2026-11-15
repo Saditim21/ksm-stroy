@@ -3,7 +3,6 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { ApartmentProvider } from '../context/ApartmentContext'
-import Home from './Home'
 import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
@@ -36,7 +35,6 @@ const hiddenElements = (html) =>
     .map(([, tag, style]) => `<${tag} style="${style}">`)
 
 test.each([
-  { path: '/', Page: Home, text: 'Дигитализация на предприятията' },
   { path: '/about', Page: About, text: 'Мисия и визия' },
   { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection, text: 'Изберете блок за преглед' },
   { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection, text: 'Многофамилна жилищна сграда' },
@@ -48,8 +46,8 @@ test.each([
 
 // Every page has its H1 in the HTML a visitor without JS gets (spec §6.7; the
 // smoke run checks it in the browser). These three had none on main either:
-// until M2 to M4 rebuild them, each names itself in a visually hidden H1, as
-// Home does, with its name in the menu.
+// until M2 to M4 rebuild them, each names itself in a visually hidden H1,
+// with its name in the menu. (Home, rebuilt, is src/pages/home/home.prerender.test.jsx's.)
 test.each([
   { path: '/projects', Page: Projects, name: 'Продажби' },
   { path: '/blog', Page: Blog, name: 'Обекти' },

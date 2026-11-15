@@ -97,8 +97,12 @@ export default defineConfig({
   // clientRoutesCaseSensitive(): the browser's routes keep src/routes.js's
   // caseSensitive, which React Router 8.5.1 drops (scripts/client-routes-case.mjs).
   plugins: [!isVitest && reactRouter(), !isVitest && devApi(), !isVitest && clientRoutesCaseSensitive()],
-  // Build-time: only the production site is indexed (src/seo/stage.js).
-  define: { IS_PRODUCTION_BUILD: JSON.stringify(isProductionStage(process.env)) },
+  // Build-time: only the production site is indexed (src/seo/stage.js); the
+  // footer's © line carries the year of the build (src/shell/SiteFooter.jsx).
+  define: {
+    IS_PRODUCTION_BUILD: JSON.stringify(isProductionStage(process.env)),
+    BUILD_YEAR: JSON.stringify(new Date().getFullYear()),
+  },
   esbuild: {
     // No license comments in the bundles.
     legalComments: 'none',

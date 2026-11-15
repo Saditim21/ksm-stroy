@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from 'react'
 import { getServerSnapshot, getSnapshot, subscribe } from './store'
 
-// A data route preloads the API from its `links` (spec §6.4):
-//   export const links = () => [availabilityPreload]
+// A data route preloads the API with the document it is first loaded as
+// (spec §6.4; ruling C4.10, src/utils/documentPreloads.js):
+//   preloadWithDocument([availabilityPreload])
 export { availabilityPreload } from './store'
 
 /**

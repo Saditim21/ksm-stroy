@@ -8,7 +8,7 @@ import { useAvailability } from '../data/availability/useAvailability'
 import useScrollLock from '../hooks/useScrollLock'
 import useMotionNow from '../motion/useMotionNow'
 import { PALETTE } from '../styles/palette'
-import { bindOneLetterWords } from '../utils/format'
+import { bindAddress, plural } from '../utils/format'
 import { EASE_IN_OUT, EASE_OUT } from '../utils/motion'
 import { normalizePathname } from '../utils/pathname'
 import EuLine from './EuLine'
@@ -174,7 +174,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
                 <Link to={href} prefetch="intent" aria-current={currentFor(href, pathname)}>
                   {label}
                 </Link>
-                {live ? <span className="sub">жк&nbsp;Левски&nbsp;Г · {free ?? '—'} свободни</span> : null}
+                {live ? <span className="sub">жк&nbsp;Левски&nbsp;Г · {free ?? '—'} {plural(free, 'свободен', 'свободни')}</span> : null}
               </li>
             ))}
           </ol>
@@ -197,7 +197,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
           <div>
             <h2>Адреси</h2>
             {SITE.offices.map((office) => (
-              <p key={office}>{bindOneLetterWords(office)}</p>
+              <p key={office}>{bindAddress(office)}</p>
             ))}
           </div>
           <div>

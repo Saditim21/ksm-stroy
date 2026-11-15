@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import { acquireScrollLock, clearLenis, getLenis, releaseScrollLock, setLenis } from './lenis'
+import { acquireScrollLock, clearLenis, getLenis, releaseScrollLock, scrollLocked, setLenis } from './lenis'
 
 // The handle on the live Lenis instance (redesign v1 c141d57; golden-residence
 // @944bb03 tested it only through its callers).
@@ -78,5 +78,18 @@ describe('scroll locks', () => {
       acquireScrollLock()
       releaseScrollLock()
     }).not.toThrow()
+  })
+
+  // What an action that glides after a dialog closes waits for (the inquiry's
+  // presets, src/components/inquiry/inquiryStore.js): whether any lock holds.
+  test('scrollLocked says whether any lock is held', () => {
+    expect(scrollLocked()).toBe(false)
+    acquireScrollLock()
+    acquireScrollLock()
+    expect(scrollLocked()).toBe(true)
+    releaseScrollLock()
+    expect(scrollLocked()).toBe(true)
+    releaseScrollLock()
+    expect(scrollLocked()).toBe(false)
   })
 })

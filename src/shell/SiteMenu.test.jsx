@@ -45,3 +45,21 @@ it('reads „—“ until the availability arrives, then the free apartments of 
   await act(async () => answer({ ok: true, status: 200, json: async () => API_BODY }))
   await waitFor(() => expect(menu).toHaveTextContent('жк Левски Г · 2 свободни'))
 })
+
+// Ruling C4.8: one free apartment is „1 свободен“, the singular. A fresh copy
+// of the menu, so its availability store starts empty again.
+it('says „1 свободен“ when one apartment is free', async () => {
+  vi.resetModules()
+  const { default: FreshMenu } = await import('./SiteMenu')
+  const goldenResidence = { ...API_BODY.projects['golden-residence'], 'block-b': [row('Б 101', 'Продадени')] }
+  const oneFree = { ...API_BODY, projects: { ...API_BODY.projects, 'golden-residence': goldenResidence } }
+  vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => oneFree })))
+  render(
+    <MemoryRouter initialEntries={['/about']}>
+      <FreshMenu id="site-menu" pathname="/about" onClose={() => {}} />
+    </MemoryRouter>,
+  )
+  const menu = screen.getByRole('dialog', { name: 'Меню' })
+  await waitFor(() => expect(menu).toHaveTextContent('жк Левски Г · 1 свободен'))
+  expect(menu).not.toHaveTextContent('1 свободни')
+})

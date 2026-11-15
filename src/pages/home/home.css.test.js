@@ -1,8 +1,10 @@
+import defaultTheme from 'tailwindcss/defaultTheme'
+import tailwindConfig from '../../../tailwind.config.js'
 import { atRulesOf, firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
 
-// src/pages/home/home.css: Home's opening, company section and EU poster
-// (spec §5.5, §6.7, §6.8, §6.13). jsdom applies no CSS, so these read the
-// rules (src/test/css.js).
+// src/pages/home/home.css: Home's opening, company section, services, works
+// and EU poster (spec §5.5, §5.8, §6.7–6.10, §6.13). jsdom applies no CSS, so
+// these read the rules (src/test/css.js).
 
 const HOME = 'src/pages/home/home.css'
 const rules = rulesOf(HOME)
@@ -160,4 +162,164 @@ it('sets the triad at its role size, scoped so the story’s paragraphs never be
   const triad = declaredFor('.bros__story .triad')
   expect(triad).toMatchObject({ 'font-size': 'clamp(28px, 2.4vw, 38px)', 'line-height': '1', 'font-style': 'italic' })
   expect(rulesFor(rules, '.triad')).toEqual([])
+})
+
+// Ruling C4.1: the phone name keeps its binding 32 px (extract §2.2) wherever
+// „Многофамилна сграда“ fits on one line at that size, from about 328 px
+// (287 px of text between two 20 px gutters), and only below that scales
+// with the hero's width (its container, so a scrollbar never counts).
+it('keeps the phone name at 32 px, smaller only where 32 px no longer fits on a line', () => {
+  expect(declaredFor('.half__name', [PHONE])['font-size']).toBe('min(32px, calc((100cqw - 2 * var(--gut)) / 9))')
+})
+
+// Ruling C4.2: a @keyframes name is global, and the stylesheet loaded last
+// wins for every rule that names it, so Home's own never share a name with
+// Tailwind's (HeroTitle's `hero-rise`) or another stylesheet's.
+it('names its keyframes apart from Tailwind’s and the site’s', () => {
+  const keyframesOf = (path) => [...new Set(rulesOf(path).flatMap((rule) => rule.atRules)
+    .filter((atRule) => atRule.startsWith('@keyframes ')).map((atRule) => atRule.slice('@keyframes '.length)))]
+  const own = keyframesOf(HOME)
+  expect(own).toEqual(expect.arrayContaining(['home-rise', 'home-settle', 'home-info', 'home-mask']))
+  const elsewhere = [
+    ...Object.keys(tailwindConfig.theme.extend.keyframes),
+    ...Object.keys(defaultTheme.keyframes),
+    ...['src/index.css', 'src/styles/motion.css', 'src/styles/shell.css', 'src/styles/diptych.css', 'src/components/inquiry/inquiry.css']
+      .flatMap(keyframesOf),
+  ]
+  expect(own.filter((name) => elsewhere.includes(name))).toEqual([])
+})
+
+// Ruling C4.4: a section's padding (spec §2.2) is the site's
+// (src/styles/diptych.css), so a page reached first by a link gets it too.
+it('leaves the section padding to the site’s stylesheet', () => {
+  expect(rulesFor(rules, '.sec')).toEqual([])
+})
+
+// Spec §2.2: anything sized by the screen uses --screen-h, never vh or svh.
+it('sizes nothing by vh or svh', () => {
+  for (const rule of rules) {
+    for (const { prop, value } of rule.declarations) expect(value, `${rule.selector} { ${prop} }`).not.toMatch(/\d(s|d|l)?vh\b/)
+  }
+})
+
+describe('the services (spec §6.9; extract §4.11)', () => {
+  it('sets the three columns in an umber row, the screen’s .6 tall within 470–600 px', () => {
+    expect(declaredFor('.svc__cols')).toMatchObject({
+      display: 'flex',
+      height: 'clamp(470px, calc(var(--screen-h) * .6), 600px)',
+      background: 'var(--umber)',
+    })
+    expect(declaredFor('.svc__col')).toMatchObject({ flex: '1 1 0', transition: 'flex-grow .8s var(--e-out)' })
+    // A fixed measure, so a narrowed column never rewraps its hidden line.
+    expect(declaredFor('.svc__d').width).toBe('23em')
+  })
+
+  // Review Focus 3, spec §2.2: the columns widen only for a pointer that
+  // hovers, with the columns side by side, and only with motion; a tap, a
+  // pen, a phone, reduced motion and Save-Data keep them equal.
+  it('widens a column only on a fine pointer that hovers, side by side, with motion', () => {
+    const widening = rules.filter((rule) => ['.78', '1.7'].includes(valueOf(rule, 'flex-grow')))
+    expect(widening.map((rule) => valueOf(rule, 'flex-grow'))).toEqual(['.78', '1.7'])
+    for (const rule of widening) {
+      expect(rule.atRules, rule.selector).toContain(FINE_WIDE)
+      expect(rule.atRules, rule.selector).toContain(NO_PREFERENCE)
+      for (const selector of rule.selectors) expect(selector).toMatch(/^:root\.js /)
+    }
+    expect(widening[0].selectors).toEqual([':root.js .svc__cols:hover .svc__col', ':root.js .svc__cols:has(.svc__col:focus-visible) .svc__col'])
+    expect(widening[1].selectors).toEqual([':root.js .svc__cols .svc__col:hover', ':root.js .svc__cols:has(.svc__col:focus-visible) .svc__col:focus-visible'])
+  })
+
+  // The reveal itself is feedback, and stays without motion: the photo opens,
+  // the numeral brightens, the line shows, the underline draws, each only for
+  // a pointer that hovers, or for the keyboard's focus.
+  it('reveals the photo, the numeral, the line and the underline only where a fine pointer hovers', () => {
+    const reveal = rules.filter((rule) => rule.selectors.some((selector) => /\.svc__col:(hover|focus-visible)/.test(selector))
+      && rule.selector !== '.svc__col:focus-visible')
+    expect(reveal.length).toBeGreaterThan(4)
+    for (const rule of reveal) expect(rule.atRules, rule.selector).toContain(FINE_WIDE)
+    expect(declaredFor('.svc__col:hover .svc__d', [FINE_WIDE])).toMatchObject({ opacity: '1', transform: 'none', 'transition-delay': '.12s' })
+  })
+
+  // Touch screens wider than a phone have nothing to point with, nor a pen:
+  // every column shows its photo at half strength and its line.
+  it('shows each column’s photo and line on a touch screen wider than a phone', () => {
+    const TOUCH_WIDE = '@media (hover: none) and (min-width: 901px), (pointer: coarse) and (min-width: 901px)'
+    expect(declaredFor('.svc__img', [TOUCH_WIDE])).toMatchObject({ opacity: '.5', 'clip-path': 'none' })
+    expect(declaredFor('.svc__d', [TOUCH_WIDE])).toMatchObject({ opacity: '1', transform: 'none', width: 'auto', 'max-width': '24em' })
+  })
+
+  // Spec §5.8, ruling F13: without motion the columns stay equal and the
+  // photo, the numeral, the line and the underline only fade, over 0.25 s.
+  // Each fade's duration is its own and important, so the reduced-motion
+  // clamp (src/index.css: 1 ms, important, on every element) never cuts it:
+  // these rules are more specific, and Home's stylesheet loads after the
+  // site's.
+  it('only fades the reveal over 0.25 s without motion, past the reduced-motion clamp', () => {
+    const fades = rules.filter((rule) => rule.selectors.every((selector) => selector.startsWith(':root:not(.js) .svc'))
+      && rule.declarations.some(({ prop, value }) => prop === 'transition' && /\.25s/.test(value)))
+    expect(fades.flatMap((rule) => rule.selectors).sort()).toEqual([
+      ':root:not(.js) .svc__col::after',
+      ':root:not(.js) .svc__d',
+      ':root:not(.js) .svc__img',
+      ':root:not(.js) .svc__n',
+    ])
+    for (const rule of fades) {
+      const transition = rule.declarations.find(({ prop }) => prop === 'transition')
+      expect(transition, rule.selector).toMatchObject({ value: 'opacity .25s var(--e-soft)', important: true })
+      expect(rule.atRules, rule.selector).toEqual([])
+    }
+    expect(declaredFor(':root:not(.js) .svc__img')['clip-path']).toBe('none')
+    expect(declaredFor(':root:not(.js) .svc__img img').transform).toBe('none')
+    expect(declaredFor(':root:not(.js) .svc__d').transform).toBe('none')
+  })
+
+  it('stacks the columns on a phone, each with its photo and its line', () => {
+    expect(declaredFor('.svc__cols', [PHONE])).toMatchObject({ 'flex-direction': 'column', height: 'auto' })
+    expect(declaredFor('.svc__col + .svc__col', [PHONE])['border-top']).toBe('1px solid var(--brass)')
+    expect(declaredFor('.svc__d', [PHONE])).toMatchObject({ opacity: '1', transform: 'none' })
+    expect(declaredFor('.svc__img', [PHONE])).toMatchObject({ opacity: '.62', 'clip-path': 'none' })
+  })
+
+  // Spec §11: the column's own ring, drawn inside it: the row runs from edge
+  // to edge of the screen, so a ring outside the first and the last column
+  // would fall off it.
+  it('rings a focused column 4 px inside, otherwise the ground’s ring', () => {
+    expect(declaredFor('.svc__col:focus-visible')).toEqual({ 'outline-offset': '-4px' })
+  })
+})
+
+describe('the works (spec §6.10; extract §4.12)', () => {
+  // Spec §5.8: no sticky works media without motion.
+  it('keeps the media beside the list one screen tall, sticky only with motion and the halves side by side', () => {
+    expect(declaredFor('.works__media')).toMatchObject({ position: 'relative', height: 'var(--screen-h)', background: 'var(--umber)' })
+    const sticky = rules.filter((rule) => valueOf(rule, 'position') === 'sticky')
+    expect(sticky.map((rule) => [rule.selector, rule.atRules])).toEqual([[':root.js .works__media', [NO_PREFERENCE, '@media (min-width: 901px)']]])
+    expect(valueOf(sticky[0], 'top')).toBe('0')
+  })
+
+  // The covers on show stack in the order they were chosen, which the
+  // section sets on each (WorksSection.jsx); the rest are hidden.
+  it('shows only the covers on show', () => {
+    expect(declaredFor('.works__img').visibility).toBe('hidden')
+    expect(declaredFor('.works__img[data-shown]').visibility).toBe('visible')
+  })
+
+  it('marks the chosen work, and a hovered one only for a pointer that hovers', () => {
+    const hovers = rules.filter((rule) => rule.selector.includes('.works__items') && rule.selector.includes(':hover'))
+    expect(hovers.length).toBeGreaterThan(0)
+    for (const rule of hovers) expect(rule.atRules, rule.selector).toContain('@media (hover: hover) and (pointer: fine)')
+    expect(declaredFor(".works__items button[aria-current='true'] .serif")).toMatchObject({ color: 'var(--brass-l)', transform: 'translateX(10px)' })
+  })
+
+  it('sets the media above the list on a phone, .62 of the screen tall', () => {
+    expect(declaredFor('.works__media', [PHONE]).height).toBe('calc(var(--screen-h) * .62)')
+  })
+})
+
+// Spec §2.2: every :hover rule of Home's needs a pointer that hovers, so a
+// tap never leaves one behind.
+it('keeps every :hover rule where a fine pointer hovers', () => {
+  const hovers = rules.filter((rule) => rule.selector.includes(':hover'))
+  expect(hovers.length).toBeGreaterThan(0)
+  for (const rule of hovers) expect(rule.atRules.join(' '), rule.selector).toMatch(/\(hover: hover\) and \(pointer: fine\)/)
 })

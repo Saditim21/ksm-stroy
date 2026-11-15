@@ -121,6 +121,15 @@ describe('the seam and the halves (spec §4)', () => {
     expect(valueOf(only('.split > .seam'), 'z-index')).toBe('4')
   })
 
+  // Spec §2.2: a section's padding, the screen's .16 within 96–180 px, and
+  // 88 px on a phone. The site's, not one page's (ruling C4.4): a page
+  // reached first by a link, such as Golden Residence from the menu, has it
+  // before any visit to Home.
+  it('.sec pads every Diptych section, by the screen’s height', () => {
+    expect(declared(only('.sec'))).toEqual({ position: 'relative', padding: 'clamp(96px, calc(var(--screen-h) * .16), 180px) 0' })
+    expect(declaredFor('.sec', [LAYER, PHONE])).toEqual({ padding: '88px 0' })
+  })
+
   // The heading ends at the seam, the lead starts after it, the seam
   // overshoots both by 18 px.
   it('.hinge sets the heading against the seam and the lead after it', () => {
@@ -156,5 +165,16 @@ describe('the seam and the halves (spec §4)', () => {
     const mask = only('.line-mask')
     expect(mask.selectors).toEqual(['.line-mask', '.split-line-mask'])
     expect(declared(mask)).toEqual({ display: 'block', padding: '.12em .14em .26em', margin: '-.12em -.14em -.26em' })
+  })
+
+  // A split heading's masks stack, and two margins in a row collapse to the
+  // larger rather than add up: between two masks the room they took comes
+  // back in one margin, .12em + .26em, so a heading of several lines is as
+  // tall split as whole, and nothing under it moves when the split goes.
+  // Only SplitText's stacked masks: the opening's parts are positioned.
+  it('gives the room back between two stacked masks in one margin', () => {
+    expect(declared(only('.split-line-mask + .split-line-mask'))).toEqual({ 'margin-top': '-.38em' })
+    expect(declared(only('.split-line-mask:not(:last-child)'))).toEqual({ 'margin-bottom': '0' })
+    expect(rules.filter((rule) => rule.selectors.some((selector) => /\.line-mask\s*\+/.test(selector)))).toEqual([])
   })
 })

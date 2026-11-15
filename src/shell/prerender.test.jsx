@@ -1,4 +1,5 @@
 // @vitest-environment node
+/* global BUILD_YEAR */
 import { renderToString } from 'react-dom/server'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import App from '../root'
@@ -28,13 +29,20 @@ function prerender(path) {
   return renderToString(<RouterProvider router={router} />).replaceAll('<!-- -->', '')
 }
 
+// Ruling C4.9: the footer's © line takes the year from the build, which Vite
+// writes into the code, so the prerender and the browser show the same year.
+test('Vite writes the year of the build into the code', async () => {
+  const { default: config } = await import('../../vite.config.js')
+  expect(config.define.BUILD_YEAR).toBe(JSON.stringify(new Date().getFullYear()))
+})
+
 // „Продажби“ comes from the footer's quick links: the header holds no page
 // links (spec §6.2).
 test.each(['/', '/about', '/projects/golden-residence'])('%s: the shell prerenders complete with no window', (path) => {
   expect(typeof window).toBe('undefined')
   const html = prerender(path)
 
-  for (const text of ['BG16RFPR001-1.012-1485-C01', 'За проекта', 'Продажби', '+359 887 886 166', 'Запитване', 'КСМ СТРОЙ ООД', '© 2026 КСМ Строй']) {
+  for (const text of ['BG16RFPR001-1.012-1485-C01', 'За проекта', 'Продажби', '+359 887 886 166', 'Запитване', 'КСМ СТРОЙ ООД', `© ${BUILD_YEAR} КСМ Строй`]) {
     expect(html).toContain(text)
   }
   expect(html).not.toContain('role="dialog"')

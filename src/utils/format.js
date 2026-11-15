@@ -29,3 +29,26 @@ export function bindOneLetterWords(text) {
   const parts = text.split(/(\s+)/)
   return parts.map((part, j) => (j % 2 === 1 && /^\p{L}$/u.test(parts[j - 1]) ? NBSP : part)).join('')
 }
+
+// An address as the concept sets it (ruling C4.7): besides the one-letter
+// words, a number never starts a line, nor the one letter of an entrance
+// that ends a part of the address, each bound to the word before it:
+// „Връбница 1“, „блок 537А“, „етаж 9“, „Методий 17“, „вх. Б,“. A one-letter
+// word inside the phrase („Кирил и Методий“) leaves the line free to break
+// before it.
+const ENDING_LETTER = /^\p{L}\p{P}$/u
+
+export function bindAddress(text) {
+  const parts = text.split(/(\s+)/)
+  const last = parts.length - 1
+  return parts.map((part, j) => {
+    if (j % 2 === 0) return part
+    const before = parts[j - 1]
+    const after = parts[j + 1]
+    const bound = /^\p{L}$/u.test(before)
+      || /^\d/.test(after)
+      || ENDING_LETTER.test(after)
+      || (j + 1 === last && /^\p{L}$/u.test(after))
+    return bound ? NBSP : part
+  }).join('')
+}

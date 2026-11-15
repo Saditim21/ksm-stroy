@@ -11,5 +11,95 @@
       2400
     ],
     "color": "#3C3729"
+  },
+  "svc-commercial": {
+    "path": "/img/svc-commercial",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      960
+    ],
+    "color": "#8D876A"
+  },
+  "svc-renovation": {
+    "path": "/img/svc-renovation",
+    "w": 1200,
+    "h": 675,
+    "widths": [
+      700,
+      1200
+    ],
+    "color": "#837863"
+  },
+  "svc-residential": {
+    "path": "/img/svc-residential",
+    "w": 1600,
+    "h": 959,
+    "widths": [
+      900,
+      1600
+    ],
+    "color": "#777161"
+  },
+  "work-aivazovski": {
+    "path": "/img/work-aivazovski",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      700,
+      960
+    ],
+    "color": "#737767"
+  },
+  "work-chitalishte": {
+    "path": "/img/work-chitalishte",
+    "w": 1600,
+    "h": 900,
+    "widths": [
+      700,
+      960,
+      1400
+    ],
+    "color": "#9A9CA2"
+  },
+  "work-green-life": {
+    "path": "/img/work-green-life",
+    "w": 960,
+    "h": 641,
+    "widths": [
+      700,
+      960
+    ],
+    "color": "#AFB3A6"
+  },
+  "work-hotel-paradise": {
+    "path": "/img/work-hotel-paradise",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      700,
+      960
+    ],
+    "color": "#ADB5A3"
+  },
+  "work-panorama": {
+    "path": "/img/work-panorama",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      700,
+      960
+    ],
+    "color": "#6C757B"
+  },
+  "work-sunny-hill": {
+    "path": "/img/work-sunny-hill",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      700,
+      960
+    ],
+    "color": "#84868C"
   }
 }

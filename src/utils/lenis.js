@@ -57,3 +57,11 @@ export function releaseScrollLock() {
   locks -= 1
   if (locks === 0) instance?.start()
 }
+
+// Whether any scroll lock is held. Lenis ignores scrollTo while a lock has
+// stopped it, so an action that glides the page after closing a dialog (an
+// inquiry preset, src/components/inquiry/inquiryStore.js) waits until this
+// is false.
+export function scrollLocked() {
+  return locks > 0
+}

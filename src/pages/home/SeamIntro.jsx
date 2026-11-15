@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { EMBLEM_VIEWBOX, EmblemPaths } from '../../components/brand/Emblem'
 
 // The seam intro (spec §5.5; extract §4.7), once per session, on the first
@@ -10,6 +11,13 @@ import { EMBLEM_VIEWBOX, EmblemPaths } from '../../components/brand/Emblem'
 // the session, and never inside a page that arrived (data-arrive, src/root.jsx),
 // so a later return to Home never replays it. Without motion it is never
 // shown. Decoration, hidden from assistive technology.
+//
+// Once it has played it leaves the page (ruling C4.5): the `intro` class
+// stays on <html> for the document's life, so reduced motion switched on and
+// off again would bring its animation back and play it a second time. It
+// leaves on its own animation's end (the doors', the seam's and the mark's
+// end inside it, and bubble up), or at once if that end came before the page
+// hydrated, which its finished animation, held by its fill, still tells.
 
 // One door's half of the mark: the whole emblem, 92 × 105, centred on the
 // seam and cut by its door, so each door carries one half.
@@ -32,8 +40,30 @@ function Mark() {
 }
 
 export default function SeamIntro() {
+  const ref = useRef(null)
+  const [played, setPlayed] = useState(false)
+
+  // A listener of its own: React names the event by what the browser
+  // supports, and would miss a plain `animationend` where AnimationEvent is
+  // unknown.
+  useEffect(() => {
+    const doors = ref.current
+    if (!doors) return undefined
+    const intro = doors.getAnimations?.().find((animation) => animation.animationName === 'intro-doors')
+    if (intro?.playState === 'finished') {
+      setPlayed(true)
+      return undefined
+    }
+    const end = (event) => {
+      if (event.target === doors) setPlayed(true)
+    }
+    doors.addEventListener('animationend', end)
+    return () => doors.removeEventListener('animationend', end)
+  }, [])
+
+  if (played) return null
   return (
-    <div className="intro-doors" aria-hidden="true">
+    <div ref={ref} className="intro-doors" aria-hidden="true">
       <div className="door door--l">
         <Mark />
       </div>

@@ -1,10 +1,16 @@
 /* Home (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
-   §5.5, §6.7, §6.8, §6.13): the seam intro, the split opening, the company
-   and the EU poster, ported from the concept's css/diptych.css (:135-153 the
-   doors, :275-319 and :747-771 the hero, :321-335 and :773-776 the company)
-   with the tokens of src/index.css, --screen-h for vh, and the spec's fixes:
-   the seam is the registered number --s, widening is CSS, the phone seam
-   drops to --sy, the triad is scoped so it renders at its size.
+   §5.5, §6.7–6.10, §6.13): the seam intro, the split opening, the company,
+   the services, the completed works and the EU poster, ported from the
+   concept's css/diptych.css (:135-153 the doors, :275-319 and :747-771 the
+   hero, :321-335 and :773-776 the company, :337-370, :777-786 and :915-922
+   the services, :372-393 and :787-790 the works) with the tokens of
+   src/index.css, --screen-h for vh, and the spec's fixes: the seam is the
+   registered number --s, widening is CSS, the phone seam drops to --sy, the
+   triad is scoped so it renders at its size, hover effects need a fine
+   pointer, and without motion the services only fade and the works' panel
+   stays in place (spec §5.8). The inquiry's styles are its component's
+   (src/components/inquiry/inquiry.css), a section's padding the site's
+   (src/styles/diptych.css: .sec).
 
    Home's own stylesheet (src/pages/Home.jsx), after the site's: plain CSS,
    in no Tailwind layer.
@@ -24,12 +30,6 @@
   syntax: '<number>';
   inherits: true;
   initial-value: .5;
-}
-
-/* A section of the page (extract §1.3). */
-.sec {
-  position: relative;
-  padding: clamp(96px, calc(var(--screen-h) * .16), 180px) 0;
 }
 
 /* ---------- the seam intro (spec §5.5) ---------- */
@@ -401,6 +401,353 @@
   font-size: 13px;
 }
 
+/* ---------- the services (spec §6.9; extract §4.11) ---------- */
+/* After the hinge, three columns on umber, split by brass seams that travel
+   with them as one widens. */
+.svc { padding-bottom: 0; }
+.svc__cols {
+  position: relative;
+  display: flex;
+  height: clamp(470px, calc(var(--screen-h) * .6), 600px);
+  border-top: 1px solid var(--hair-2);
+  border-bottom: 1px solid var(--hair-2);
+  background: var(--umber);
+}
+.svc__col {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-width: 0;
+  padding: clamp(30px, 3.2vw, 48px) clamp(28px, 3.4vw, 56px) clamp(36px, 3.8vw, 58px);
+  overflow: hidden;
+  transition: flex-grow .8s var(--e-out);
+}
+/* The site's ring, inside the column: the row runs from edge to edge of the
+   screen, so a ring outside the first or the last column would fall off it. */
+.svc__col:focus-visible { outline-offset: -4px; }
+.svc__col > .seam {
+  left: 0;
+  margin-left: 0;
+  z-index: 2;
+}
+/* The photo, behind the words, hidden until its column opens. */
+.svc__img {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s var(--e-out), opacity .6s var(--e-out);
+}
+.svc__img picture,
+.svc__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.svc__img img {
+  max-width: none;
+  object-fit: cover;
+  filter: brightness(.66);
+  transform: scale(1.14);
+  transition: transform 1.6s var(--e-out);
+}
+.svc__img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(14, 13, 11, .95) 0%, rgba(14, 13, 11, .42) 50%, rgba(14, 13, 11, .62) 100%);
+}
+.svc__photo--renovation { object-position: 40% 50%; }
+.svc__photo--commercial { object-position: 50% 35%; }
+/* The numeral, outlined in brass. */
+.svc__n {
+  color: transparent;
+  font-family: var(--serif);
+  font-size: clamp(110px, 11vw, 184px);
+  font-weight: 500;
+  line-height: .84;
+  letter-spacing: -.02em;
+  -webkit-text-stroke: 1px var(--brass);
+  opacity: .58;
+  transition: opacity .6s var(--e-out);
+}
+.svc__t {
+  max-width: 8.5em;
+  font-family: var(--serif);
+  font-size: clamp(30px, 2.5vw, 42px);
+  font-weight: 500;
+  line-height: 1.04;
+}
+/* A fixed measure, so a narrowed column never rewraps its hidden line, and
+   its title holds still. */
+.svc__d {
+  width: 23em;
+  margin-top: 14px;
+  color: var(--ivory-2);
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .5s var(--e-out), transform .6s var(--e-out);
+}
+/* The underline that draws as the column opens. */
+.svc__col::after {
+  content: '';
+  position: absolute;
+  right: clamp(28px, 3.4vw, 56px);
+  bottom: 0;
+  left: clamp(28px, 3.4vw, 56px);
+  height: 1px;
+  background: var(--brass-l);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .7s var(--e-out);
+}
+
+/* Where a fine pointer hovers and the columns sit side by side, the column
+   pointed at, or focused, opens: its photo from the bottom, its numeral at
+   full strength, its line after 0.12 s, its underline. */
+@media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+  .svc__col:hover .svc__img,
+  .svc__col:focus-visible .svc__img {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  .svc__col:hover .svc__img img,
+  .svc__col:focus-visible .svc__img img { transform: scale(1); }
+  .svc__col:hover .svc__n,
+  .svc__col:focus-visible .svc__n { opacity: 1; }
+  .svc__col:hover .svc__d,
+  .svc__col:focus-visible .svc__d {
+    opacity: 1;
+    transform: none;
+    transition-delay: .12s;
+  }
+  .svc__col:hover::after,
+  .svc__col:focus-visible::after { transform: scaleX(1); }
+  :root:not(.js) .svc__col:hover::after,
+  :root:not(.js) .svc__col:focus-visible::after { opacity: 1; }
+}
+
+/* With motion it widens too, over 0.8 s, and the seams travel with it
+   (Review Focus 3: a tap, a pen and a phone never widen a column). */
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+    :root.js .svc__cols:hover .svc__col,
+    :root.js .svc__cols:has(.svc__col:focus-visible) .svc__col { flex-grow: .78; }
+    :root.js .svc__cols .svc__col:hover,
+    :root.js .svc__cols:has(.svc__col:focus-visible) .svc__col:focus-visible { flex-grow: 1.7; }
+  }
+}
+
+/* A touch screen wider than a phone, or a pen, has nothing to point with:
+   every column shows its photo at half strength and its line. */
+@media (hover: none) and (min-width: 901px), (pointer: coarse) and (min-width: 901px) {
+  .svc__img {
+    opacity: .5;
+    clip-path: none;
+  }
+  .svc__img img { transform: none; }
+  .svc__d {
+    width: auto;
+    max-width: 24em;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Without motion (no `js`: reduced motion, Save-Data) the columns stay equal,
+   for the widening needs :root.js, and the reveal only fades, over 0.25 s
+   (spec §5.8). Each fade's duration is important, and these rules are more
+   specific than the reduced-motion clamp (src/index.css: 1 ms, important,
+   on every element), which this stylesheet loads after, so the clamp never
+   cuts them (ruling F13). */
+:root:not(.js) .svc__img {
+  clip-path: none;
+  transition: opacity .25s var(--e-soft) !important;
+}
+:root:not(.js) .svc__img img {
+  transform: none;
+  transition: none !important;
+}
+:root:not(.js) .svc__n { transition: opacity .25s var(--e-soft) !important; }
+:root:not(.js) .svc__d {
+  transform: none;
+  transition: opacity .25s var(--e-soft) !important;
+}
+:root:not(.js) .svc__col::after {
+  opacity: 0;
+  transform: none;
+  transition: opacity .25s var(--e-soft) !important;
+}
+
+/* Phones: the columns stack, each with its photo and its line, a brass rule
+   between them. */
+@media (max-width: 900px) {
+  .svc__cols {
+    flex-direction: column;
+    height: auto;
+  }
+  .svc__col {
+    gap: 36px;
+    min-height: 300px;
+    padding: 26px var(--gut) 30px;
+  }
+  .svc__col + .svc__col { border-top: 1px solid var(--brass); }
+  .svc__col > .seam,
+  .svc__col::after { display: none; }
+  .svc__img {
+    opacity: .62;
+    clip-path: none;
+  }
+  .svc__img img { transform: none; }
+  .svc__n {
+    font-size: 92px;
+    opacity: .9;
+  }
+  .svc__t { font-size: 32px; }
+  .svc__d {
+    width: auto;
+    max-width: 24em;
+    margin-top: 10px;
+    font-size: 15px;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- the completed works (spec §6.10; extract §4.12) ---------- */
+/* Beside the list, a panel one screen tall: the chosen work's cover, framed
+   below the bar, and its caption. It stays beside the list as the list
+   scrolls only with motion, and with the halves side by side (spec §5.8). */
+.works { align-items: stretch; }
+.works__media {
+  position: relative;
+  height: var(--screen-h);
+  overflow: hidden;
+  background: var(--umber);
+}
+.works__frame {
+  position: absolute;
+  inset: calc(var(--bar-h) + var(--screen-h) * .03) 0 calc(var(--screen-h) * .06) 0;
+  z-index: 1;
+  overflow: hidden;
+}
+/* Every cover is in the frame, hidden but for those on show: the chosen
+   one, over any it is still wiping in over (WorksSection.jsx stacks them). */
+.works__img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.works__img[data-shown] { visibility: visible; }
+.works__img picture,
+.works__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.works__img img {
+  max-width: none;
+  object-fit: cover;
+}
+.works__cap {
+  position: absolute;
+  bottom: calc(var(--screen-h) * .06 + 22px);
+  left: clamp(28px, 4vw, 64px);
+  z-index: 2;
+  padding: 8px 12px;
+  background: rgba(14, 13, 11, .66);
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.works__list {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  padding: calc(var(--bar-h) + var(--screen-h) * .08) var(--gut) calc(var(--screen-h) * .14) clamp(28px, 5vw, 96px);
+}
+.works__list .lead { margin-bottom: 26px; }
+.works__items { border-top: 1px solid var(--hair-2); }
+.works__items li { border-bottom: 1px solid var(--hair-2); }
+.works__items button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 6px 18px;
+  width: 100%;
+  padding: 22px 0 20px;
+  text-align: left;
+}
+.works__items .serif {
+  font-size: clamp(28px, 2.3vw, 38px);
+  line-height: 1.05;
+  transition: color .25s, transform .45s var(--e-out);
+}
+.works__items .small {
+  grid-column: 1 / -1;
+  font-size: 13px;
+}
+.works__items .tag {
+  padding: 3px 8px;
+  border: 1px solid rgba(216, 189, 122, .4);
+  color: var(--brass-l);
+  font-size: 12px;
+  white-space: nowrap;
+}
+/* The chosen work, and one a pointer is on: a brass underline draws, and
+   the name turns brass-l and steps in. */
+.works__items button::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--brass);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .5s var(--e-out);
+}
+.works__items button[aria-current='true']::before { transform: scaleX(1); }
+.works__items button[aria-current='true'] .serif {
+  color: var(--brass-l);
+  transform: translateX(10px);
+}
+@media (hover: hover) and (pointer: fine) {
+  .works__items button:hover::before { transform: scaleX(1); }
+  .works__items button:hover .serif {
+    color: var(--brass-l);
+    transform: translateX(10px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 901px) {
+    :root.js .works__media {
+      position: sticky;
+      top: 0;
+    }
+  }
+}
+/* Phones: the cover above the list, .62 of the screen tall. */
+@media (max-width: 900px) {
+  .works__media { height: calc(var(--screen-h) * .62); }
+  .works__frame { inset: 0; }
+  .works__cap {
+    bottom: 16px;
+    left: var(--gut);
+    max-width: calc(100% - 2 * var(--gut));
+  }
+  .works__list { padding: 40px var(--gut) 80px; }
+}
+
 /* ---------- the EU poster (spec §6.13) ---------- */
 /* The poster on its white plate, against the seam; beside it the project. */
 .poster__figure {
@@ -466,8 +813,6 @@
 
 /* ---------- phones: the halves stack (spec §4, §6.7) ---------- */
 @media (max-width: 900px) {
-  .sec { padding: 88px 0; }
-
   /* The seam turns horizontal and drops for the EU row: at --sy, 50 % on a
      hero 780 px tall or more, never above the header plus 290 px nor within
      190 px of the bottom. The clips, the pictures, the overlays, the ring,
@@ -528,10 +873,12 @@
   .half--mn .half__count { justify-content: flex-start; }
   .half--mn .half__cta { justify-self: start; }
   .half__cta { margin-top: 6px; }
-  /* 32 px from a 390 px phone up; on a narrower one it scales down to keep
-     „Многофамилна сграда“ on one line, so its info stays below the seam on
-     the shortest screens (320 × 560). */
-  .half__name { font-size: clamp(28px, 8.2vw, 32px); }
+  /* 32 px (extract §2.2) wherever „Многофамилна сграда“ fits on one line at
+     that size, 287 px of text between the gutters: from 328 px. Narrower, it
+     scales with the hero (its container, so a scrollbar never counts) and
+     stays on one line, so its info stays below the seam on the shortest
+     screens (320 × 560). */
+  .half__name { font-size: min(32px, calc((100cqw - 2 * var(--gut)) / 9)); }
   .half__count .num { font-size: 40px; }
   .half__place { font-size: 13px; }
 
@@ -619,19 +966,19 @@
      from --arrive + .45s. A mask clips only while its part rises: then it is
      gone, and nothing cuts a glyph or the title's shadow (spec §3.3). */
   :root.js .half__media img {
-    animation: hero-settle 1.4s var(--e-out) both;
+    animation: home-settle 1.4s var(--e-out) both;
     animation-delay: var(--arrive);
   }
   :root.js .hero__title .line-mask {
-    animation: hero-mask .9s linear backwards;
+    animation: home-mask .9s linear backwards;
     animation-delay: calc(var(--arrive) + .25s + var(--n, 0) * .1s);
   }
   :root.js .hero__title .split-line {
-    animation: hero-rise .9s var(--e-out) both;
+    animation: home-rise .9s var(--e-out) both;
     animation-delay: calc(var(--arrive) + .25s + var(--n, 0) * .1s);
   }
   :root.js .half__info {
-    animation: hero-info 1s var(--e-out) both;
+    animation: home-info 1s var(--e-out) both;
     animation-delay: calc(var(--arrive) + .45s + var(--n, 0) * .1s);
   }
 
@@ -678,13 +1025,13 @@
    never replays it (spec §5.5). */
 :root.js.intro [data-arrive] .intro-doors { display: none; }
 
-@keyframes hero-settle { from { transform: scale(1.12); } }
-@keyframes hero-rise { from { transform: translateY(112%); } }
+@keyframes home-settle { from { transform: scale(1.12); } }
+@keyframes home-rise { from { transform: translateY(112%); } }
 /* The mask's clip while its part rises: 1.2 em below the line's top, under
    the landed line's descenders, and above the ascender tips of Bulgarian
    д, в and б while the line waits 112 % down. */
-@keyframes hero-mask { from, to { clip-path: inset(0 0 .12em 0); } }
-@keyframes hero-info { from { opacity: 0; transform: translateY(22px); } }
+@keyframes home-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes home-info { from { opacity: 0; transform: translateY(22px); } }
 
 @keyframes intro-doors { from { visibility: visible; } to { visibility: hidden; } }
 @keyframes intro-door-l { from { transform: none; } to { transform: translateX(-101%); } }

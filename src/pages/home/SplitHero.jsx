@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { presetInquiry } from '../../components/inquiry/inquiryStore'
 import ResponsivePicture from '../../components/ui/ResponsivePicture'
 import RollingNumber from '../../components/ui/RollingNumber'
 import { GR_FACTS, MNOGO_DATED } from '../../config/facts'
@@ -6,17 +7,17 @@ import { grFree } from '../../data/availability/select'
 import { useAvailability } from '../../data/availability/useAvailability'
 import grImages from '../../data/images/golden-residence.json'
 import homeImages from '../../data/images/home.json'
-import { inquiryHref } from '../../shell/handle'
 import { plural } from '../../utils/format'
 
 // Home's opening (spec §6.7; extract §4.6): the two buildings, one seam.
 // Each half is a link across the whole hero, its picture spanning the hero
 // (sizes 100vw) and clipped at the seam, which is the registered number --s
-// (home.css): Golden Residence to its page, Многофамилна to the inquiry with
-// its project. The slogan (spec §1.2) comes first in the DOM and reads row by
-// row across the seam: each part is a nowrap mask, the left one ending .2 em
-// before the seam, the right one starting .2 em after it; on a phone, two
-// lines broken after „пространства“.
+// (home.css): Golden Residence to its page, Многофамилна to the inquiry on
+// this page with its building chosen (until its page comes in M3). The
+// slogan (spec §1.2) comes first in the DOM and reads row by row across the
+// seam: each part is a nowrap mask, the left one ending .2 em before the
+// seam, the right one starting .2 em after it; on a phone, two lines broken
+// after „пространства“.
 //
 // The Golden Residence count is live: `—` in the prerendered HTML and until
 // the data arrives (RollingNumber), then the free apartments, rolling once;
@@ -28,7 +29,6 @@ import { plural } from '../../utils/format'
 
 const NBSP = ' '
 const LEVSKI = `жк${NBSP}Левски${NBSP}Г`
-const MN_PROJECT = 'mnogofamilna-sgrada'
 
 // Assistive technology hears each half's name in full (spec §6.7); its
 // words are the half's text.
@@ -47,6 +47,17 @@ function Arrow() {
       <path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.2" />
     </svg>
   )
+}
+
+// The Многофамилна half's click (spec §5.3): a plain left click presets the
+// inquiry with the building, which glides the page there
+// (inquiryStore.js), and takes the instant jump from the browser and the
+// router, so the address stays as it was. A click that opens a tab or a
+// window, and the page without its script, follow the link to #zapitvane.
+function toInquiry(event) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  presetInquiry({ option: 'mnogofamilna' })
 }
 
 // One part of the slogan: its mask, and the line that rises inside it.
@@ -97,7 +108,7 @@ export default function SplitHero() {
         </div>
       </Link>
 
-      <Link to={inquiryHref(MN_PROJECT)} prefetch="intent" className="half half--mn" aria-label={MN_NAME}>
+      <a href="#zapitvane" className="half half--mn" aria-label={MN_NAME} onClick={toInquiry}>
         <div className="half__media">
           <ResponsivePicture image={homeImages['mn-dusk']} alt="" sizes="100vw" eager />
         </div>
@@ -115,7 +126,7 @@ export default function SplitHero() {
             Запитване за сградата <Arrow />
           </span>
         </div>
-      </Link>
+      </a>
 
       <div className="hero__seam" aria-hidden="true" />
     </section>
