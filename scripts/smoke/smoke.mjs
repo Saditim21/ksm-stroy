@@ -20,12 +20,16 @@
 //     the live one beside it, with no error in the console;
 //   - the EU line's „За проекта“ link not visible in the first viewport,
 //     without scrolling: a box of its own inside the viewport, opacity 1 up
-//     its ancestors, visibility visible. On / the poster PDF links, scrolled
-//     to, must be visible too. jsdom cannot see CSS hide anything; this can.
+//     its ancestors, visibility visible, and nothing over it (the element at
+//     its centre is the link's own). On / the poster PDF links, scrolled to,
+//     must be visible too. jsdom cannot see CSS hide anything; this can.
 //     A deep link that opens a dialog (its visit's `dialog`: a floor's plan
-//     stage, spec §7.10) jumps to the explorer and covers the page, header
-//     and all: its visit must show that dialog, open and named, instead. The
-//     same page without the query keeps the EU line's check.
+//     stage or a unit's panel, spec §7.10) first jumps to the explorer, and
+//     the dialog lies over the page. Its visit must show that dialog, open
+//     and named, and the EU line all the same (spec §1.9, §14.1: in view on
+//     landing), which the landing keeps above its dialogs
+//     (src/explorer/ExplorerContext.jsx). There the page has scrolled, by
+//     the jump, and must have.
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -97,6 +101,7 @@ const VIEWPORTS = [
 const VISITS = [
   ...config.prerender.map((pathname) => ({ path: pathname })),
   { path: '/projects/golden-residence/block-a?floor=3', dialog: 'Блок А · Етаж 3' },
+  { path: '/projects/golden-residence/block-b?floor=2&unit=%D0%91%20201', dialog: 'Б 201' },
   { path: '/contact?apartment=%D0%90%20301' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },
@@ -182,9 +187,14 @@ const slugOf = (pathname) =>
   decodeURIComponent(pathname).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'home'
 
 // In the page: the links to `pathname` (with `text`, when given), each as
-// whether a visitor sees it now. With `scroll`, each is first scrolled to, one
-// after the other.
-async function inspectLinks({ pathname, text, scroll }) {
+// whether a visitor sees it now: nothing over it either, so a dialog over the
+// page hides it. With `scroll`, each is first scrolled to, one after the
+// other; without it, the page must not have scrolled, unless it `jumped`, as
+// a deep link jumps to the explorer (spec §7.10).
+async function inspectLinks({ pathname, text, scroll, jumped = false }) {
+  const describe = (node) => (node
+    ? `<${node.tagName.toLowerCase()}${node.id ? `#${node.id}` : ''}${[...node.classList].map((name) => `.${name}`).join('')}>`
+    : 'nothing')
   const pathOf = (a) => {
     try {
       return new URL(a.href).pathname
@@ -211,7 +221,11 @@ async function inspectLinks({ pathname, text, scroll }) {
     if (opacity !== 1) issues.push(`opacity ${opacity}`)
     if (visibility !== 'visible') issues.push(`visibility ${visibility}`)
     if (!inViewport) issues.push(`outside the viewport (${Math.round(box.left)},${Math.round(box.top)} ${Math.round(box.width)}×${Math.round(box.height)})`)
-    if (!scroll && scrollY !== 0) issues.push(`the page scrolled to ${scrollY}`)
+    else if (box.width > 0 && box.height > 0) {
+      const over = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+      if (!over || !link.contains(over)) issues.push(`covered by ${describe(over)}`)
+    }
+    if (!scroll && !jumped && scrollY !== 0) issues.push(`the page scrolled to ${scrollY}`)
     states.push({ index: states.length, issues })
   }
   return states
@@ -347,13 +361,15 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         if (!shown.includes(text)) problems.push(`the page does not say „${text}“`)
       }
 
-      const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false })
+      const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: Boolean(dialog) })
       if (euLinks.length === 0) problems.push('no „За проекта“ link to /eu-proekt')
-      else if (dialog) {
+      else if (!euLinks.some(({ issues }) => issues.length === 0)) {
+        problems.push(`„За проекта“ is not visible in the first viewport: ${euLinks[0].issues.join(', ')}`)
+      }
+      if (dialog) {
         const shown = await page.evaluate(openDialogs)
         if (!shown.includes(dialog)) problems.push(`the deep link shows no dialog „${dialog}“ (open: ${shown.map((name) => `„${name}“`).join(', ') || 'none'})`)
-      } else if (!euLinks.some(({ issues }) => issues.length === 0)) {
-        problems.push(`„За проекта“ is not visible in the first viewport: ${euLinks[0].issues.join(', ')}`)
+        if (await page.evaluate(() => scrollY) === 0) problems.push('the deep link did not jump to the explorer')
       }
 
       await page.screenshot({ path: shot })

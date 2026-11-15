@@ -11,6 +11,7 @@ import { trapTab } from '../utils/trapTab'
 import { FloorCounts, FloorMeta } from './FloorPanel'
 import { planBox } from './geometry'
 import { floorKey } from './model'
+import { sizePlan } from './planModes'
 import { PLANS } from './plans'
 import PlanSvg from './PlanSvg'
 import { afterimage, crossfadePlan } from './planMotion'
@@ -85,6 +86,12 @@ function fitted(rect, box) {
 // leaves `fromRect` for the place its units take in the stage's plan, while
 // the stage's ground comes up; then the stage's plan, its bar and its side
 // come in over it, and its drawing after them.
+//
+// The ghost's outline, halo and dash are set for that place, as the concept
+// sets its clone's line for the target (explorer.js:664, extract §4.23 "--lw
+// corrected"): it lands with the stage's 1 px outline, which is thinner
+// while it is small and never thickens as it grows. Its PlanSvg leaves them
+// to this (fit={false}).
 function morph(gsap, { root, svg, ghost, plan, fromRect, onDone }) {
   const mini = planBox(plan, MINI_PAD)
   const full = planBox(plan, STAGE_PAD)
@@ -97,6 +104,8 @@ function morph(gsap, { root, svg, ghost, plan, fromRect, onDone }) {
     height: mini.h * into.scale,
   }
   Object.assign(ghost.style, { left: `${to.left}px`, top: `${to.top}px`, width: `${to.width}px`, height: `${to.height}px` })
+  const ghostPlan = ghost.querySelector('svg')
+  if (ghostPlan) sizePlan(ghostPlan, into.scale, 'mini')
   const drawing = svg.querySelector('.drawing')
   const rest = [root.querySelector('.ps__bar'), root.querySelector('.ps__side')]
   gsap.set(ghost, { x: from.left - to.left, y: from.top - to.top, scale: from.width / to.width })
@@ -371,7 +380,7 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
       </div>
       {ghost ? (
         <div ref={ghostRef} className="ps__ghost" aria-hidden="true">
-          <PlanSvg plan={PLANS[block]} units={data.units} mode="mini" />
+          <PlanSvg plan={PLANS[block]} units={data.units} mode="mini" fit={false} />
         </div>
       ) : null}
     </>,

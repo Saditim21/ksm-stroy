@@ -42,6 +42,13 @@ import './explorer.css'
 // pointed at, focused or touched, if that comes first; a floor that turns
 // hot before then shows as they arrive. They are not in the prerendered
 // HTML: nothing shows them until a floor is hot.
+//
+// `focusRail` ({ block, floor }) is a floor whose rail is to take the focus
+// back: a stage that closed with no opener to give it to (spec §7.6, §7.10;
+// ExplorerDialogs.jsx). A phone shows one block, and the other block's rails
+// are off screen, so the facade turns to that floor's block first. A rail
+// that still takes no focus leaves it on the block switch, never on the
+// page's body. onRailFocused() says it is done.
 
 const SHAPES = floorShapes(building)
 const SHAPE = new Map(SHAPES.map((shape) => [shape.key, shape]))
@@ -72,7 +79,7 @@ const floorOf = (model, key) => model?.floors.get(key) ?? PLACEHOLDERS.get(key)
 // A no-break space after the one-letter „и“ (spec §3.3).
 const IDLE_CAPTION = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
 
-export default function Facade({ model, mode = 'full', initialBlock = 'А', onOpenFloor }) {
+export default function Facade({ model, mode = 'full', initialBlock = 'А', focusRail = null, onOpenFloor, onRailFocused }) {
   const compact = mode === 'compact'
   const rootRef = useRef(null)
   const stageRef = useRef(null)
@@ -84,6 +91,22 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
   const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = useHotFloor({ compact, isFloor })
+
+  // A rail asked to take the focus back: its block on show, in this render,
+  // so the rail is on screen by the time the focus moves.
+  const [railAsked, setRailAsked] = useState(null)
+  if (focusRail !== railAsked) {
+    setRailAsked(focusRail)
+    if (focusRail) setPhoneBlock(focusRail.block)
+  }
+  useLayoutEffect(() => {
+    if (!focusRail) return
+    const rail = railRefs.current.get(floorKey(focusRail.block, focusRail.floor))
+    rail?.focus({ preventScroll: true })
+    if (document.activeElement !== rail) rootRef.current?.querySelector('.fxm [aria-pressed="true"]')?.focus({ preventScroll: true })
+    onRailFocused?.()
+  }, [focusRail, onRailFocused])
+
   // The press a click comes from (the stage's pointerdown): its pointer, and
   // the floor that was hot as it began. A touch or pen tap on any other floor
   // only previews it. The click spends it, so a click with no press of its

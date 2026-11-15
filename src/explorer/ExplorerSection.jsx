@@ -18,12 +18,14 @@ import useExplorer from './useExplorer'
 // section comes into view (useReveals); the markup is the final state.
 //
 // It sits inside the page's ExplorerProvider (ExplorerContext.jsx), whose
-// model it shows and whose openFloor opens a floor's plan stage in place.
+// model it shows and whose openFloor opens a floor's plan stage in place; the
+// facade also takes the floor whose rail the provider asks to focus as a
+// stage closes (railFocus).
 
 export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' }) {
   const ref = useRef(null)
   useReveals(ref)
-  const { model, openFloor } = useExplorer()
+  const { model, openFloor, railFocus, railFocused } = useExplorer()
   const Heading = `h${headingLevel}`
 
   return (
@@ -59,7 +61,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
         </ul>
       </div>
       <StaleNotice className="explorer__notice" />
-      <Facade model={model} mode="full" initialBlock={initialBlock} onOpenFloor={openFloor} />
+      <Facade model={model} mode="full" initialBlock={initialBlock} focusRail={railFocus} onOpenFloor={openFloor} onRailFocused={railFocused} />
     </section>
   )
 }

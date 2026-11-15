@@ -94,6 +94,14 @@
   .hdr[data-scrolled]:has(.hdr__eu :focus-visible) {
     transform: none;
   }
+  /* So does a deep link's landing (spec §1.9, §14.1: the EU line in view on
+     landing): the page has jumped to the explorer, and a dialog lies over it
+     (spec §7.10), leaving the row its 36 px (src/explorer/explorer.css).
+     src/explorer/ExplorerContext.jsx holds data-eu-hold until the landing's
+     dialogs have gone. */
+  :root[data-eu-hold] .hdr[data-scrolled] {
+    transform: none;
+  }
   .hdr__eu {
     height: var(--eu-h);
     padding: 0 var(--gut);

@@ -4,7 +4,7 @@ import useHydrated from '../hooks/useHydrated'
 import useMotionNow from '../motion/useMotionNow'
 import { jumpToId } from '../utils/scroll'
 import { loadedSurfaces, loadSurfaces } from './loadSurfaces'
-import { buildModel } from './model'
+import { buildModel, findUnit } from './model'
 import { ExplorerContext } from './useExplorer'
 import useExplorerState from './useExplorerState'
 
@@ -24,11 +24,20 @@ import useExplorerState from './useExplorerState'
 // - A deep link: when the address opens a dialog as the page arrives, the
 //   page first jumps to #explorer, with no glide (jumpToId), so closing the
 //   stage leaves the reader at the facade; the dialogs mount after the jump.
+// - Its landing keeps the EU line in view (spec §1.9, §14.1): the jump would
+//   slide the header's EU row away (§6.2), and the dialogs cover the page.
+//   From just before the jump until the landing's dialogs have gone, <html>
+//   carries data-eu-hold: the header keeps its EU row where it is, and the
+//   dialogs leave it its 36 px (src/styles/shell.css, explorer.css). The
+//   landing ends once the address asks for no dialog the page can show: a
+//   close, an inquiry, a unit the sheets do not have, or dialogs whose chunk
+//   did not load. A floor opened in place is no landing.
 // - The dialogs are the surfaces' chunk (surfaces.js), loaded when the
 //   address asks for one; the full facade has usually loaded it before, as it
 //   neared the screen. Until it is in, nothing shows.
 
 const UNIT_AFTER_MS = 820
+const holdEuRow = (on) => document.documentElement.toggleAttribute('data-eu-hold', on)
 
 export function ExplorerProvider({ routeBlock = null, children }) {
   const snapshot = useAvailability()
@@ -43,13 +52,30 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     latest.current = state
   })
 
-  // The page's arrival: a deep link's jump comes first, then the dialogs.
+  // The page's arrival: a deep link's jump comes first, then the dialogs. The
+  // EU row is held before the jump's scroll can reach the header.
   const [arrived, setArrived] = useState(false)
+  const [landing, setLanding] = useState(false)
   useEffect(() => {
     if (!hydrated || arrived) return
-    if (stage || unitId) jumpToId('explorer')
+    if (stage || unitId) {
+      holdEuRow(true)
+      setLanding(true)
+      jumpToId('explorer')
+    }
     setArrived(true)
   }, [hydrated, arrived, stage, unitId])
+
+  // The landing lasts while the address asks for a dialog the page can show:
+  // the stage, or a unit the model has (or may have, until the data is in).
+  // The hold follows it at every commit (a link that turns out to open
+  // nothing ends it before it ever commits), and goes with the page.
+  const asksForDialog = Boolean(stage) || (Boolean(unitId) && (!model || Boolean(findUnit(model, unitId))))
+  if (landing && !asksForDialog) setLanding(false)
+  useLayoutEffect(() => {
+    holdEuRow(landing)
+  })
+  useLayoutEffect(() => () => holdEuRow(false), [])
 
   // The dialogs' chunk, once the address asks for a dialog.
   const [surfaces, setSurfaces] = useState(loadedSurfaces)
@@ -61,7 +87,10 @@ export function ExplorerProvider({ routeBlock = null, children }) {
       (module) => {
         if (live) setSurfaces(module)
       },
-      (error) => console.error('[explorer] the plan stage did not load:', error),
+      (error) => {
+        console.error('[explorer] the plan stage did not load:', error)
+        if (live) setLanding(false)
+      },
     )
     return () => {
       live = false
@@ -98,9 +127,17 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     latest.current.closeStage()
   }, [])
 
+  // The floor whose rail is to take the focus back, when a stage has closed
+  // with no opener to give it to and its rail is off screen (a phone's facade
+  // shows one block; ExplorerDialogs.jsx): the facade shows that block, then
+  // focuses the rail, and says so (railFocused).
+  const [railFocus, setRailFocus] = useState(null)
+  const focusRail = useCallback(({ block, floor }) => setRailFocus({ block, floor }), [])
+  const railFocused = useCallback(() => setRailFocus(null), [])
+
   const value = useMemo(
-    () => ({ ...state, model, snapshot, openFloor, openUnit, closeStage }),
-    [state, model, snapshot, openFloor, openUnit, closeStage],
+    () => ({ ...state, model, snapshot, openFloor, openUnit, closeStage, railFocus, railFocused }),
+    [state, model, snapshot, openFloor, openUnit, closeStage, railFocus, railFocused],
   )
 
   return (
@@ -115,6 +152,7 @@ export function ExplorerProvider({ routeBlock = null, children }) {
           unitOpener={unitOpener}
           openUnit={openUnit}
           closeStage={closeStage}
+          focusRail={focusRail}
         />
       ) : null}
     </ExplorerContext.Provider>

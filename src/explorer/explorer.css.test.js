@@ -136,6 +136,14 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
     expect(declaredFor('.up')).toMatchObject({ position: 'fixed', inset: '0', 'z-index': '52', background: 'rgba(8, 7, 6, .72)' })
   })
 
+  // Spec §7.10 with §1.9, §14.1: on a deep link's landing the header keeps
+  // its EU row in view (src/styles/shell.css), and the dialogs leave the row
+  // its 36 px, for as long as ExplorerContext.jsx holds data-eu-hold.
+  it('leaves the EU row its 36 px on a deep link’s landing', () => {
+    expect(declaredFor(':root[data-eu-hold] .ps').top).toBe('var(--eu-h)')
+    expect(declaredFor(':root[data-eu-hold] .up').top).toBe('var(--eu-h)')
+  })
+
   it('splits the stage’s body into the plan and a side column of 320–400 px on umber-2', () => {
     expect(declaredFor('.ps__body')['grid-template-columns']).toBe('minmax(0, 1fr) minmax(320px, 400px)')
     expect(declaredFor('.ps__side').background).toBe('var(--umber-2)')

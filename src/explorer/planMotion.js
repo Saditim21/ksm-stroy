@@ -45,13 +45,18 @@ export function crossfadePlan(gsap, scope) {
  * commit its parameter left the address, and a clone of its last frame fades
  * over the page in its place, `duration` s on power2.in (extract §4.23:
  * 0.3 s; §4.24: 0.25 s). The clone is no dialog, takes no pointer and no
- * focus, and is gone when it has faded. */
+ * focus, and is gone when it has faded. It keeps the dialog's box, whatever
+ * changes around it as it fades: a deep link's landing ends with its
+ * dialogs, and the room they left the EU row goes with it (explorer.css). */
 export function afterimage(gsap, node, duration) {
+  const { top, left, width, height } = node.getBoundingClientRect()
   const clone = node.cloneNode(true)
   for (const name of ['role', 'aria-modal', 'aria-labelledby']) clone.removeAttribute(name)
   clone.setAttribute('aria-hidden', 'true')
   clone.setAttribute('inert', '')
-  clone.style.pointerEvents = 'none'
+  Object.assign(clone.style, {
+    top: `${top}px`, left: `${left}px`, right: 'auto', bottom: 'auto', width: `${width}px`, height: `${height}px`, pointerEvents: 'none',
+  })
   document.body.appendChild(clone)
   gsap.to(clone, { opacity: 0, duration, ease: 'power2.in', onComplete: () => clone.remove() })
 }

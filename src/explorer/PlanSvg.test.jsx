@@ -1,8 +1,9 @@
 import { fireEvent, render } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import floors from '../data/maps/golden-residence.floors.json'
-import { planFor } from './geometry'
+import { planBox, planFor } from './geometry'
 import { buildModel } from './model'
+import { sizePlan } from './planModes'
 import PlanSvg from './PlanSvg'
 import { snapshotData } from './testing'
 
@@ -14,6 +15,56 @@ const PLAN = planFor(floors, 'А')
 const unitsOf = (key) => buildModel(snapshotData()).floors.get(key).units
 const groups = (svg) => [...svg.querySelectorAll('g[data-suffix]')]
 const group = (svg, suffix) => svg.querySelector(`g[data-suffix="${suffix}"]`)
+const sizes = (svg) => ['--fs', '--hs', '--lw', '--dash'].map((name) => svg.style.getPropertyValue(name))
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
+
+// Spec §7.4: the label, its halo, the outline and the dash keep their sizes
+// on screen (mini: 10, 3, 1 and 4/3 px), written in the plan's own units for
+// the scale it is drawn at (fit()).
+describe('PlanSvg, its sizes on screen', () => {
+  const observed = []
+  const Observer = class {
+    observe(target) {
+      observed.push(target)
+    }
+
+    unobserve() {}
+
+    disconnect() {}
+  }
+
+  it('measures itself and keeps measuring: at half scale, everything is twice as long in its units', () => {
+    observed.length = 0
+    vi.stubGlobal('ResizeObserver', Observer)
+    const box = planBox(PLAN, 4)
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ width: box.w / 2, height: box.h / 2, left: 0, top: 0, right: 0, bottom: 0, x: 0, y: 0 })
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
+    const svg = container.querySelector('svg')
+
+    expect(sizes(svg)).toEqual(['20px', '6px', '2px', '8 6'])
+    expect(observed).toContain(svg)
+  })
+
+  // The morph's ghost (PlanStage.jsx): measured while it grows, it would
+  // read its scaled box; its owner sets it for where it lands instead.
+  it('leaves them to its owner with fit={false}, who sets them for a scale with sizePlan()', () => {
+    observed.length = 0
+    vi.stubGlobal('ResizeObserver', Observer)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" fit={false} />)
+    const svg = container.querySelector('svg')
+
+    expect(observed).toEqual([])
+    expect(sizes(svg)).toEqual(['', '', '', ''])
+    sizePlan(svg, 0.5, 'mini')
+    expect(sizes(svg)).toEqual(['20px', '6px', '2px', '8 6'])
+    sizePlan(svg, 2, 'crop')
+    expect(sizes(svg)).toEqual(['6.5px', '1.5px', '0.6px', '2 1.5'])
+  })
+})
 
 describe('PlanSvg, mini', () => {
   it('draws the 12 units, each with its status, its label and its outline', () => {

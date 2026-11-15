@@ -74,6 +74,14 @@ describe('the header (spec §6.2)', () => {
     expect(declaredFor('.hdr[data-scrolled]:has(.hdr__eu :focus-visible)').transform).toBe('none')
   })
 
+  // Spec §1.9, §14.1: the EU line is in view on landing. A deep link lands
+  // scrolled to the explorer with a dialog over the page (spec §7.10), and
+  // the EU row stays while the landing holds (data-eu-hold,
+  // src/explorer/ExplorerContext.jsx; the dialogs leave it room).
+  it('keeps the EU row in view on a deep link’s landing', () => {
+    expect(declaredFor(':root[data-eu-hold] .hdr[data-scrolled]').transform).toBe('none')
+  })
+
   it('carries the EU row and the bar at their heights', () => {
     expect(declaredFor('.hdr__eu').height).toBe('var(--eu-h)')
     expect(declaredFor('.hdr__bar').height).toBe('var(--bar-h)')

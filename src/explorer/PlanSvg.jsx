@@ -4,6 +4,7 @@ import grImages from '../data/images/golden-residence.json'
 import { PALETTE } from '../styles/palette'
 import { unitButtonLabel } from '../utils/units'
 import { planBox, planShapes } from './geometry'
+import { PLAN_MODES, sizePlan } from './planModes'
 import './explorer.css'
 
 // One renderer for every plan of a block (spec §7.4; the concept's
@@ -37,15 +38,14 @@ import './explorer.css'
 //
 // fit(), the explorer's only layout work in JS, keeps the label, its halo,
 // the outline and the dash at constant sizes on screen, whatever the plan's
-// size: it writes --fs, --hs, --lw and --dash from a ResizeObserver.
-
-// Per mode (spec §7.4): the viewBox's padding, the pattern's size, the label
-// and line widths on screen, and whether the drawing lies under the units.
-const MODES = {
-  mini: { pad: 4, pat: 16, labelPx: 10, lineW: 1, drawing: false },
-  stage: { pad: 14, pat: 8, labelPx: 12.5, lineW: 1, drawing: true },
-  crop: { pad: 14, pat: 5, labelPx: 13, lineW: 1.2, drawing: true },
-}
+// size: it measures the plan and writes --fs, --hs, --lw and --dash
+// (sizePlan, planModes.js) from a ResizeObserver. `fit={false}` leaves them
+// to the plan's owner, who writes them with sizePlan() for a scale it knows:
+// the morph's ghost, set for where it lands (PlanStage.jsx). Measured while
+// it grows, it would read its scaled box, the size it starts at.
+//
+// The modes' paddings, patterns, label and line sizes and drawings are
+// planModes.js's (spec §7.4).
 
 const RESERVED = PALETTE['status-reserved']
 const SOLD = PALETTE['status-sold']
@@ -67,11 +67,11 @@ function fillOf(status, id) {
   return [PALETTE['status-blocked'], 0.1]
 }
 
-export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, onUnit, onHot }) {
+export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, fit = true, onUnit, onHot }) {
   const ref = useRef(null)
   // The patterns' ids, this plan's own: two plans on a page never share one.
   const id = `pl${useId().replace(/[^\w-]/g, '')}`
-  const { pad, pat, labelPx, lineW, drawing } = MODES[mode] ?? MODES.mini
+  const { pad, pat, drawing } = PLAN_MODES[mode] ?? PLAN_MODES.mini
   const interactive = mode === 'stage'
   const box = useMemo(() => viewBox ?? planBox(plan, pad), [viewBox, plan, pad])
   const shapes = planShapes(plan)
@@ -80,22 +80,19 @@ export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = nul
   // The drawing that has loaded: a new block's waits for its own.
   const [loaded, setLoaded] = useState(null)
 
+  // fit(): the sizes for the scale the plan is drawn at, as it changes.
   useLayoutEffect(() => {
+    if (!fit) return undefined
     const svg = ref.current
-    const fit = () => {
+    const measure = () => {
       const { width, height } = svg.getBoundingClientRect()
-      if (!width || !height) return
-      const scale = Math.min(width / box.w, height / box.h)
-      svg.style.setProperty('--fs', `${labelPx / scale}px`)
-      svg.style.setProperty('--hs', `${3 / scale}px`)
-      svg.style.setProperty('--lw', `${lineW / scale}px`)
-      svg.style.setProperty('--dash', `${4 / scale} ${3 / scale}`)
+      if (width && height) sizePlan(svg, Math.min(width / box.w, height / box.h), mode)
     }
-    fit()
-    const observer = new ResizeObserver(fit)
+    measure()
+    const observer = new ResizeObserver(measure)
     observer.observe(svg)
     return () => observer.disconnect()
-  }, [box, labelPx, lineW])
+  }, [fit, box, mode])
 
   const unitOf = (event) => bySuffix.get(event.target.closest?.('.u-hit')?.dataset.suffix)
   const openUnit = (event) => {

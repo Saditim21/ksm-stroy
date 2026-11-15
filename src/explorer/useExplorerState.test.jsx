@@ -139,6 +139,52 @@ describe('a deep link', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(document.activeElement).toBe(rail('А', 3))
   }, 30000)
+
+  // Spec §1.9, §14.1: the EU line is in view on landing. The jump slides the
+  // header's EU row away (§6.2), and the dialogs then cover the page, so the
+  // page holds the row in view (data-eu-hold on <html>: the header keeps it,
+  // and the dialogs leave it room) from before the jump until the landing's
+  // dialogs have gone, and no longer than the page.
+  it('holds the EU row in view from before its jump until its dialogs have gone', async () => {
+    const held = () => document.documentElement.hasAttribute('data-eu-hold')
+    const rect = (top) => ({ top, bottom: top + 900, left: 0, right: 1440, width: 1440, height: 900, x: 0, y: top })
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
+      return rect(this.id === 'explorer' ? 2400 : 0)
+    })
+    const atJump = []
+    vi.spyOn(window, 'scrollTo').mockImplementation((x, y) => {
+      if (y === 2400) atJump.push(held())
+    })
+
+    renderSiteAt('/projects/golden-residence/block-a?floor=3&unit=А%20301')
+    await screen.findByRole('dialog', { name: 'А 301' }, { timeout: 15000 })
+    expect(atJump).toEqual([true])
+    expect(held()).toBe(true)
+
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    const stage = await findStage('Блок А · Етаж 3')
+    expect(held()).toBe(true)
+
+    fireEvent.click(within(stage).getByRole('button', { name: 'Към сградата' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(held()).toBe(false)
+  }, 30000)
+
+  it('lets the EU row go with the page, and holds it only while the link opens a dialog', async () => {
+    const held = () => document.documentElement.hasAttribute('data-eu-hold')
+    const { unmount } = renderSiteAt('/projects/golden-residence/block-a?floor=3')
+    await findStage('Блок А · Етаж 3')
+    expect(held()).toBe(true)
+    unmount()
+    expect(held()).toBe(false)
+
+    // A unit the sheets do not have, and no floor: once the data is in, the
+    // link opens nothing, and holds nothing.
+    renderSiteAt('/projects/golden-residence/block-a?unit=А%20999')
+    await waitFor(() => expect(rail('А', 3).querySelector('.n')).toHaveTextContent(/^\d+$/), { timeout: 15000 })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => expect(held()).toBe(false))
+  }, 30000)
 })
 
 // Spec §7.7: an inquiry closes both dialogs in one replace, which returns the

@@ -16,15 +16,18 @@ import UnitPanel from './UnitPanel'
 // - The focus once a dialog has gone: the unit panel's to the element that
 //   opened it, else into the stage under it; the stage's to its opener, else
 //   (a deep link, or an opener gone inert, such as the sheet's button) to its
-//   floor's rail. An inquiry's close gives it to nothing: the inquiry focuses
-//   the form's first field once its glide ends (spec §7.7).
+//   floor's rail. A rail off screen, of the block a phone's facade does not
+//   show, takes no focus: the facade shows that block first, then focuses it
+//   (focusRail, the provider's; Facade.jsx). An inquiry's close gives the
+//   focus to nothing: the inquiry focuses the form's first field once its
+//   glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
 //   and ?unit), then presets the form (presetInquiry), whose glide waits for
 //   the first frame with no scroll lock held: after this close's commit.
 //
 // `state` is useExplorerState()'s; `opening` the stage's { fromRect, opener }
 // (ruling F5), which setOpening(null) spends; `unitOpener` the element that
-// opened the unit panel; openUnit and closeStage the provider's.
+// opened the unit panel; openUnit, closeStage and focusRail the provider's.
 
 // Gives `element` the focus if it can take it: in the page, not inert, and
 // focusable. Whether it did.
@@ -36,7 +39,7 @@ function focusInto(element) {
 
 const railOf = ({ block, floor }) => document.querySelector(`#explorer .fx__cnt[data-k="${floorKey(block, floor)}"]`)
 
-export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage }) {
+export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage, focusRail }) {
   const { stage, unitId } = state
   const unit = findUnit(model, unitId)
   const showStage = Boolean(stage)
@@ -56,10 +59,10 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
       unitOpener.current = null
     }
     if (was.stage && !showStage) {
-      if (!focusInto(opening?.opener) && was.at) focusInto(railOf(was.at))
+      if (!focusInto(opening?.opener) && was.at && !focusInto(railOf(was.at))) focusRail(was.at)
       setOpening(null)
     }
-  }, [showStage, showUnit, stage, opening, setOpening, unitOpener])
+  }, [showStage, showUnit, stage, opening, setOpening, unitOpener, focusRail])
 
   const inquire = (target) => {
     quiet.current = true

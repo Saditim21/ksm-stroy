@@ -872,6 +872,12 @@
   height: 18px;
 }
 
+/* A deep link's landing (spec §7.10 with §1.9, §14.1): the header keeps its
+   EU row in view over the explorer (src/styles/shell.css), and the dialogs
+   leave the row its 36 px, while ExplorerContext.jsx holds data-eu-hold. */
+:root[data-eu-hold] .ps,
+:root[data-eu-hold] .up { top: var(--eu-h); }
+
 /* ---------- a block page's head (spec §7.11, §8.3; BlockPage.jsx) ---------- */
 /* A hinge on the seam: the way back and the H1 against it, the block's facts
    after it; the explorer follows closer than a section follows another. */

@@ -1,13 +1,20 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { planBox } from './geometry'
 import { buildModel } from './model'
+import { PLANS } from './plans'
 import PlanStage from './PlanStage'
 import { named, snapshotData } from './testing'
 
 // The plan stage (spec §7.6; extract §4.23): a floor's full plan, its counts,
 // the key to the patterns and the table of its units, over the page. Block А,
-// floor 5 of the sheets snapshot unless a case says otherwise. No motion here
-// (jsdom has no matchMedia): the stage is there at once.
+// floor 5 of the sheets snapshot unless a case says otherwise. No motion
+// unless a case puts in a recording stand-in for the engine: the stage is
+// there at once.
+
+// The motion engine as useMotionNow() hands it over.
+let motion = null
+vi.mock('../motion/useMotionNow', () => ({ default: () => () => motion }))
 
 const MODEL = buildModel(snapshotData())
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
@@ -21,7 +28,10 @@ function renderStage(props = {}) {
 }
 
 afterEach(() => {
+  motion = null
   vi.useRealTimers()
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 describe('the bar', () => {
@@ -211,5 +221,75 @@ describe('as a dialog', () => {
     expect([...stage().querySelectorAll('.ps__counts .st')].map(text)).toEqual(['— свободни', '— резервирани', '— продадени', '— блокирани'])
     expect(stage().querySelector('tbody').children).toHaveLength(0)
     expect(stage().querySelectorAll('svg.plan g[data-suffix]')).toHaveLength(12)
+  })
+})
+
+// Spec §5.7 → extract §4.23: with motion, the mini plan grows into the
+// stage's (the morph). Its clone, the ghost, lands where the stage's units
+// are, and its sizes are set for that place, as the concept sets its clone's
+// line for the target (explorer.js:664): the stage's 1 px outline as it
+// lands, thinner while it is small, never thickened by its growth. Nothing
+// measures it again while it grows: a ResizeObserver would read its scaled
+// box, the size it starts at.
+describe('the morph', () => {
+  // The stage's plan fills 1000 × 700 px at (24, 120); the mini plan it grows
+  // from was 300 × 200 px at (1100, 400).
+  const STAGE = { left: 24, top: 120, width: 1000, height: 700 }
+  const FROM = { left: 1100, top: 400, width: 300, height: 200 }
+  const rect = ({ left, top, width, height }) => ({ left, top, width, height, x: left, y: top, right: left + width, bottom: top + height })
+
+  it('sets the ghost’s lines for where it lands, and leaves them so as it grows', () => {
+    const observers = []
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback) {
+        this.callback = callback
+        this.targets = []
+        observers.push(this)
+      }
+
+      observe(target) {
+        this.targets.push(target)
+      }
+
+      unobserve() {}
+
+      disconnect() {}
+    })
+    const timeline = { fromTo: () => timeline, to: () => timeline, set: () => timeline, kill() {} }
+    motion = {
+      gsap: {
+        set: vi.fn(),
+        timeline: () => timeline,
+        fromTo: () => ({ kill() {} }),
+        // The close's afterimage fades at once, and goes.
+        to: (target, vars) => {
+          vars.onComplete?.()
+          return { kill() {} }
+        },
+      },
+    }
+    // Inside the ghost, its own scaled box: the mini plan's size and place.
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function measure() {
+      return rect(this.closest('.ps__ghost') ? FROM : STAGE)
+    })
+
+    renderStage({ fromRect: rect(FROM) })
+    const ghost = document.querySelector('.ps__ghost svg')
+    const full = planBox(PLANS['А'], 14)
+    const scale = Math.min(STAGE.width / full.w, STAGE.height / full.h)
+    const sizes = () => ['--fs', '--hs', '--lw', '--dash'].map((name) => ghost.style.getPropertyValue(name))
+    const landing = [`${10 / scale}px`, `${3 / scale}px`, `${1 / scale}px`, `${4 / scale} ${3 / scale}`]
+
+    expect(ghost).toHaveClass('plan--mini')
+    expect(sizes()).toEqual(landing)
+    // It grows from the mini plan's place, scaled down to the mini plan's
+    // width there.
+    const mini = planBox(PLANS['А'], 4)
+    const startWidth = mini.w * Math.min(FROM.width / mini.w, FROM.height / mini.h)
+    expect(motion.gsap.set).toHaveBeenCalledWith(ghost.parentElement, expect.objectContaining({ scale: startWidth / (mini.w * scale) }))
+
+    for (const observer of observers) observer.callback(observer.targets.map((target) => ({ target })))
+    expect(sizes()).toEqual(landing)
+    expect(observers.flatMap((observer) => observer.targets)).not.toContain(ghost)
   })
 })

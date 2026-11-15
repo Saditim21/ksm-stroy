@@ -28,9 +28,9 @@ function Where() {
   return <output data-testid="where">{decodeURIComponent(`${pathname}${search}`)}</output>
 }
 
-function renderSection(props = {}) {
+function renderSection(props = {}, url = '/projects/golden-residence') {
   return render(
-    <MemoryRouter initialEntries={['/projects/golden-residence']}>
+    <MemoryRouter initialEntries={[url]}>
       <Routes>
         <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection {...props} /><Where /></ExplorerProvider>} />
       </Routes>
@@ -118,6 +118,9 @@ describe('ExplorerSection', () => {
 
     expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=Б-6$/)
     expect(screen.getByRole('dialog', { name: named('Блок Б · Етаж 6') })).toBeInTheDocument()
+    // No landing: the page has scrolled to the facade, and the stage covers
+    // it whole (only a deep link's landing holds the EU row in view).
+    expect(document.documentElement).not.toHaveAttribute('data-eu-hold')
   })
 })
 
@@ -157,5 +160,51 @@ describe('the focus after the stage', () => {
     fireEvent.click(within(stage).getByRole('button', { name: 'Към сградата' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(document.activeElement).toBe(rail('А', 4))
+  })
+
+  // Spec §7.6, §7.10 on a phone: a deep link's stage has no opener, so its
+  // floor's rail takes the focus back. A phone shows one block, and the other
+  // block's rails are off screen (explorer.css: display none, so they take no
+  // focus), so the facade turns to the stage's block first. A rail that still
+  // takes no focus leaves it on the block switch, never on the page's body.
+  // jsdom applies no stylesheet: refuseFocus() turns the focus away from the
+  // rails it names, as Chrome does from rails it does not render.
+  describe('on a phone, after a deep link to the block the facade does not show', () => {
+    const HIDDEN_RAILS = '.fx[data-block="А"] .fx__rail--b, .fx[data-block="Б"] .fx__rail--a'
+    const facade = () => document.querySelector('section#explorer .fx')
+    function refuseFocus(selector) {
+      const focus = HTMLElement.prototype.focus
+      vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(function focusIfShown(options) {
+        if (!this.closest(selector)) focus.call(this, options)
+      })
+    }
+    async function closeDeepLinkedStage() {
+      restore = mockMatchMedia({ coarse: true })
+      window.matchMedia('(max-width: 900px)').matches = true
+      renderSection({}, '/projects/golden-residence?floor=Б-5')
+      const stage = await screen.findByRole('dialog', { name: named('Блок Б · Етаж 5') })
+      expect(facade()).toHaveAttribute('data-block', 'А')
+
+      fireEvent.click(within(stage).getByRole('button', { name: 'Към сградата' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    }
+    afterEach(() => vi.restoreAllMocks())
+
+    it('turns the facade to the stage’s block, and gives that floor’s rail the focus', async () => {
+      refuseFocus(HIDDEN_RAILS)
+      await closeDeepLinkedStage()
+
+      expect(facade()).toHaveAttribute('data-block', 'Б')
+      expect(screen.getByRole('button', { name: /^Блок\sБ$/ })).toHaveAttribute('aria-pressed', 'true')
+      expect(document.activeElement).toBe(rail('Б', 5))
+    })
+
+    it('leaves the focus on the block switch when the rail cannot take it', async () => {
+      refuseFocus('.fx__cnt')
+      await closeDeepLinkedStage()
+
+      expect(facade()).toHaveAttribute('data-block', 'Б')
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: /^Блок\sБ$/ }))
+    })
   })
 })
