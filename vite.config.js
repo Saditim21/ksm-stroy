@@ -13,6 +13,14 @@ import { isProductionStage } from './src/seo/stage.js'
 // get plain Vite with the automatic JSX runtime instead. Nor does devApi().
 const isVitest = process.env.VITEST === 'true'
 
+// Vitest only: a suite that imports a stylesheet (root.jsx's index.css) runs
+// it through PostCSS's Autoprefixer, and Browserslist then prints, on every
+// run, that its caniuse-lite data is months old. The notice comes from this
+// process's transforms, before src/test/setup.js runs in a worker, so it is
+// silenced here. The build still hears it, and the dependencies stay as they
+// are, since an update could change the built CSS (ruling C9.1).
+if (isVitest) process.env.BROWSERSLIST_IGNORE_OLD_DATA ??= 'true'
+
 // The Vercel Functions in api/.
 const API_FUNCTIONS = ['/api/availability', '/api/odoo-lead']
 
