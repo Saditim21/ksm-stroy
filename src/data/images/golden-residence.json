@@ -1,4 +1,14 @@
 {
+  "facade-cut": {
+    "path": "/img/facade-cut",
+    "w": 2400,
+    "h": 1198,
+    "widths": [
+      1200,
+      2400
+    ],
+    "color": "#A7A59C"
+  },
   "gr-balconies": {
     "path": "/img/gr-balconies",
     "w": 1300,
@@ -167,5 +177,23 @@
       1600
     ],
     "color": "#645C55"
+  },
+  "plan-a": {
+    "path": "/img/plan-a",
+    "w": 1200,
+    "h": 845,
+    "widths": [
+      1200
+    ],
+    "color": "#F1F2EE"
+  },
+  "plan-b": {
+    "path": "/img/plan-b",
+    "w": 1200,
+    "h": 847,
+    "widths": [
+      1200
+    ],
+    "color": "#F1F2EE"
   }
 }

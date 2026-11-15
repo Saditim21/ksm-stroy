@@ -52,19 +52,25 @@ it('prerenders the slogan, the dated Многофамилна count and the intr
 })
 
 // The Golden Residence count arrives at hydration (spec §9): `—` until then,
-// and a name with no count to read out.
+// and a name with no count to read out. The teaser's floors too.
 it('prerenders the Golden Residence count as —, and names the half without it', () => {
-  const half = parse(prerender()).querySelector('section.hero a.half--gr')
+  const doc = parse(prerender())
+  const half = doc.querySelector('section.hero a.half--gr')
 
   expect(textOf(half.querySelector('.half__count'))).toMatch(/^— /)
   expect(half.getAttribute('aria-label')).toBe('Golden Residence, жк Левски Г. Изберете апартамент.')
+  const rails = [...doc.querySelectorAll('#etazhi .fx__cnt')]
+  expect(rails).toHaveLength(16)
+  expect(rails.map((rail) => textOf(rail.querySelector('.n')))).toEqual(Array(16).fill('—'))
+  expect(rails.find((rail) => rail.getAttribute('aria-label').startsWith('Блок А, етаж 5')).getAttribute('aria-label'))
+    .toBe('Блок А, етаж 5. Enter отваря плана.')
 })
 
 it('prerenders every section, the first work in the panel and the inquiry’s form ready to fill', () => {
   const doc = parse(prerender())
 
   expect([...doc.querySelectorAll('main section[id]')].map((section) => section.id))
-    .toEqual(['proekti', 'za-nas', 'uslugi', 'obekti', 'kontakti', 'es-proekt'])
+    .toEqual(['proekti', 'za-nas', 'uslugi', 'obekti', 'etazhi', 'kontakti', 'es-proekt'])
   expect(textOf(doc.querySelector('#obekti .works__cap'))).toBe('Green Life – Paradise Gardens and Town House, гр. Созопол')
   expect(doc.querySelector('#obekti .works__items button').getAttribute('aria-current')).toBe('true')
   const form = doc.querySelector('#kontakti form')

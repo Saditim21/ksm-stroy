@@ -9,14 +9,15 @@ import EuPosterSection from './home/EuPosterSection'
 import SeamIntro from './home/SeamIntro'
 import ServicesSection from './home/ServicesSection'
 import SplitHero from './home/SplitHero'
+import TeaserSection from './home/TeaserSection'
 import WorksSection from './home/WorksSection'
 import './home/home.css'
 
 // Home, `/` (spec §8.1): the seam intro, once per session; the split opening
 // with the two buildings and slogan A, under the see-through header; the
-// company; the services; the completed works; the closing inquiry; and
-// production's EU poster section, always last. The floor-by-floor teaser
-// comes before the inquiry with the explorer.
+// company; the services; the completed works; Golden Residence floor by
+// floor, the explorer's teaser; the closing inquiry; and production's EU
+// poster section, always last.
 
 // How the site's shell frames this page (src/shell/handle.js): the header's
 // „Запитване“ goes to the inquiry on the page.
@@ -45,6 +46,7 @@ export default function Home() {
       <CompanySection />
       <ServicesSection />
       <WorksSection />
+      <TeaserSection />
       <InquirySection page="home" />
       <EuPosterSection />
     </>

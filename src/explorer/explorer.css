@@ -1,0 +1,608 @@
+/* The explorer (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
+   §7.2–7.5, §8.2 #3; extract §4.19–4.22, §4.25): the section's head and
+   legend, the facade with its rails, the edge panel, the plans and the
+   phone's sheet, ported from the concept's css/diptych.css (:453-543 the
+   section, the facade, the panel and the plans, :553-563 the segmented
+   control and the stepper, :816-828 and :869-889 their phone rules) with
+   the tokens of src/index.css, --screen-h for vh, and the spec's fixes:
+   - the layout is CSS only (§7.2): a wrapper is the container, and the
+     facade's root inside it evaluates --pw, --sw, --sh and --pitch, because
+     container units never resolve against the element that declares the
+     container; the stage is never narrower than 860 px from 901 px, so the
+     floors stay at least 24 px apart;
+   - a phone crops one block by the root's data-block, in CSS: the grid's
+     frame moves under a stage of the crop's aspect, and the rails follow;
+   - the rails are buttons, each row min(30px, var(--pitch)) tall, so no two
+     overlap, the count at least 24 px, a floor's colour a glyph, never a
+     dot; a zero dims to 3.36:1;
+   - the sheet sits at z 45, over the header (spec §2.2);
+   - a control's border is hair-ctl; hover effects need a fine pointer;
+     nothing takes the focus ring away (ruling F9): a floor shows its focus
+     as the dashed highlight and the ring on its rail (spec §11).
+
+   The explorer's own stylesheet (Facade.jsx, PlanSvg.jsx): plain CSS, in no
+   Tailwind layer, loaded with the page that shows the explorer. The status
+   chips are src/components/ui/status.css's. */
+
+/* ---------- the section (extract §4.19) ---------- */
+/* Its own padding, not a .sec's; clipped across, so a panel sliding in from
+   past the page's edge never widens the page. */
+.explorer {
+  position: relative;
+  overflow-x: clip;
+  padding: clamp(80px, calc(var(--screen-h) * .13), 140px) 0 clamp(64px, calc(var(--screen-h) * .1), 110px);
+  background: var(--onyx);
+}
+/* The hinge (src/styles/diptych.css), closer to the legend, its seam within
+   the head. */
+.hinge.explorer__head { margin-bottom: 34px; }
+.hinge.explorer__head .seam { top: 0; bottom: 0; }
+.explorer__head .lead { font-size: 15px; }
+.explorer__legend {
+  display: flex;
+  justify-content: center;
+  margin: 0 var(--gut) 18px;
+}
+.explorer__legend .legend { justify-content: center; }
+
+/* The stale-data notice (spec §9; StaleNotice.jsx). */
+.stale {
+  max-width: 46em;
+  margin: 0 auto 18px;
+  padding: 0 var(--gut);
+  color: var(--ivory-2);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+.stale__tel {
+  color: var(--ivory);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--brass);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- the facade (spec §7.2; extract §4.20) ---------- */
+/* The container the root's sizes measure. */
+.fx-wrap { container-type: inline-size; }
+/* The panel's width; the stage's width, its height and the smallest gap
+   between two floors on screen (floors 1 and 2, 33.5 of the grid's 1200);
+   and the part of the grid the stage shows, the desktop crop. */
+.fx {
+  --pw: clamp(284px, 20cqw, 380px);
+  --sw: max(860px, min(calc((50cqw - var(--pw) - 18px) * 2.6087), calc((var(--screen-h) - 300px) * 2.6432), 1500px));
+  --sh: calc(var(--sw) * 454 / 1200);
+  --pitch: calc(var(--sw) * 33.5 / 1200);
+  --vbx: 0;
+  --vby: 112;
+  --vbw: 1200;
+  --vbh: 454;
+  position: relative;
+  height: calc(var(--sh) + 100px);
+}
+.fx--compact {
+  --sw: max(860px, min(calc(100cqw - 340px), calc((var(--screen-h) - 300px) * 2.6432), 1180px));
+}
+/* The stage: grid x 605, the seam, on the page's centre. */
+.fx__stage {
+  position: absolute;
+  top: 52px;
+  left: calc(50% - var(--sw) * .504167);
+  width: var(--sw);
+  height: var(--sh);
+}
+/* The picture and the drawing over it, on the whole grid (1200 × 599),
+   placed so the stage shows its crop. Only they are clipped: the rails,
+   which take the focus, are not. */
+.fx__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.fx__frame {
+  position: absolute;
+  left: calc(var(--vbx) / var(--vbw) * -100%);
+  top: calc(var(--vby) / var(--vbh) * -100%);
+  width: calc(1200 / var(--vbw) * 100%);
+  height: calc(599 / var(--vbh) * 100%);
+}
+.fx__pic,
+.fx__pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.fx__pic {
+  position: absolute;
+  inset: 0;
+}
+.fx__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+/* The lens: the building dims around the hot floor, the floor takes its
+   colour at 0.2, and a brass-l line draws round it (dashed for the
+   keyboard). */
+.fx__dim {
+  fill: var(--onyx);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s var(--e-soft);
+}
+.fx.is-hot .fx__dim { opacity: .6; }
+.fx__tint {
+  fill: var(--status-blocked);
+  pointer-events: none;
+}
+.fx__tint[data-colour="available"] { fill: var(--status-free); }
+.fx__tint[data-colour="reserved"] { fill: var(--status-reserved); }
+.fx__tint[data-colour="sold"] { fill: var(--status-sold); }
+.fx__hl {
+  fill: transparent;
+  stroke: var(--brass-l);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s var(--e-soft);
+}
+.fx.is-hot .fx__hl { opacity: 1; }
+.fx.is-kbd .fx__hl {
+  stroke-width: 2px;
+  stroke-dasharray: 6 4;
+}
+.fx__seam {
+  stroke: var(--brass);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+/* The floors: pointer targets only. */
+.fx__floor {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+.fx__bname {
+  position: absolute;
+  top: -46px;
+  color: var(--ivory);
+  font: 500 30px/1 var(--serif);
+  white-space: nowrap;
+}
+.fx__bname--a { right: calc(49.583% + 18px); }
+.fx__bname--b { left: calc(50.417% + 18px); }
+
+/* ---------- the rails (spec §7.2) ---------- */
+/* Zero-wide columns just outside each block's outer edge (grid x 71 and
+   1129), in the crop's terms. */
+.fx__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+}
+.fx__rail--a { left: calc((71 - var(--vbx)) / var(--vbw) * 100%); }
+.fx__rail--b { left: calc((1129 - var(--vbx)) / var(--vbw) * 100%); }
+/* A floor's row, at its floor's centre (--cy, on the grid): never taller
+   than the pitch, so no two overlap. Блок А's reads floor · glyph · count,
+   Блок Б's is mirrored, so the count is always nearest the facade. */
+.fx__cnt {
+  --c: var(--status-blocked);
+  position: absolute;
+  top: calc((var(--cy) - var(--vby)) / var(--vbh) * 100%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: min(30px, var(--pitch));
+  margin-top: calc(min(30px, var(--pitch)) / -2);
+  color: var(--ivory);
+  white-space: nowrap;
+}
+.fx__cnt[data-colour="available"] { --c: var(--status-free); }
+.fx__cnt[data-colour="reserved"] { --c: var(--status-reserved); }
+.fx__cnt[data-colour="sold"] { --c: var(--status-sold); }
+.fx__cnt > span { transition: opacity .25s var(--e-soft), color .2s; }
+.fx__rail--a .fx__cnt {
+  right: 14px;
+  flex-direction: row;
+}
+.fx__rail--b .fx__cnt {
+  left: 14px;
+  flex-direction: row-reverse;
+}
+/* The free count: large text always, by the pitch on a desktop. */
+.fx__cnt .n {
+  min-width: 1.1ch;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(24px, calc(var(--pitch) * .93), 28px);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  transition: color .2s;
+}
+.fx__cnt .f {
+  width: 18px;
+  color: var(--stone);
+  font-size: 11px;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: .04em;
+  text-align: center;
+}
+.fx__cnt .d {
+  display: grid;
+  place-items: center;
+}
+/* The floor's colour, as its status glyph (spec §7.9). */
+.fx__cnt .g {
+  width: 10px;
+  height: 10px;
+  color: var(--c);
+}
+.fx__cnt.is-zero .n { color: rgba(155, 148, 136, .65); }
+.fx__cnt.is-hot .n { color: var(--brass-l); }
+.fx.is-hot .fx__cnt:not(.is-hot) > span { opacity: .32; }
+/* Below 1000 px the stage's 860 px reach the page's edges: the counts stay
+   on screen without the floor numbers, as on a phone. */
+@media (max-width: 999px) {
+  .fx__cnt .f { display: none; }
+}
+
+/* ---------- the caption ---------- */
+.fx__cap {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  color: var(--stone);
+  font-size: 13px;
+  text-align: center;
+}
+.fx__cap b {
+  color: var(--ivory-2);
+  font-weight: 500;
+}
+/* Compact (Home): the hot floor and its counts, or the hint. */
+.fx--compact .fx__cap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 22px;
+  min-height: 30px;
+  color: var(--ivory-2);
+  font-size: 14px;
+}
+.fx--compact .fx__cap .t {
+  margin-right: 6px;
+  color: var(--ivory);
+  font: 500 26px/1 var(--serif);
+}
+.fx--compact .fx__cap .t em { color: var(--brass-l); }
+.fx--compact .fx__cap .st { font-size: 13px; }
+.fx--compact .fx__cap .hint {
+  color: var(--stone);
+  font-size: 13px;
+}
+.cap-phone { display: none; }
+
+/* ---------- the edge panel (spec §7.3; extract §4.21) ---------- */
+/* Over its block's outer edge, from the root's top; hidden until it opens.
+   Its motion is FloorPanel.jsx's. */
+.fxp {
+  position: absolute;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: var(--pw);
+  height: 100%;
+  min-height: 470px;
+  padding: 26px 26px 22px;
+  background: rgba(26, 23, 20, .97);
+  visibility: hidden;
+}
+.fxp[data-open] { visibility: visible; }
+.fxp--a {
+  left: 0;
+  border-right: 1px solid var(--brass);
+}
+.fxp--b {
+  right: 0;
+  border-left: 1px solid var(--brass);
+}
+.fxp__title { font: 500 34px/1 var(--serif); }
+.fxp__title em,
+.sheet__title em { color: var(--brass-l); }
+.fxp__meta {
+  margin-top: -6px;
+  color: var(--stone);
+  font-size: 12.5px;
+}
+.fxp__plan {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 120px;
+}
+.fxp__plan svg,
+.sheet__plan svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.fxp__counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.fxp__counts .st {
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.fxp__range {
+  padding-top: 12px;
+  border-top: 1px solid var(--hair-2);
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.fxp__range b,
+.sheet__range b {
+  color: var(--ivory);
+  font-weight: 600;
+}
+.fxp__soldout {
+  color: var(--status-sold);
+  font-family: var(--serif);
+  font-size: 28px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1;
+}
+.fxp__go { align-self: flex-start; }
+.fxp__go .arr { width: 16px; }
+
+/* ---------- the plans (spec §7.4; extract §4.22) ---------- */
+/* --fs, --hs, --lw and --dash keep the label, its halo, the outline and the
+   dash at their sizes on screen (PlanSvg.jsx's fit()). */
+.plan .u-shape {
+  stroke: var(--brass);
+  stroke-width: var(--lw, 1px);
+  stroke-linejoin: round;
+  transition: stroke .15s;
+}
+.plan .u-fill { stroke: none; }
+.plan .u-label {
+  fill: var(--ivory);
+  font-family: var(--sans);
+  font-size: var(--fs, 11px);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: rgba(14, 13, 11, .88);
+  stroke-linejoin: round;
+  stroke-width: var(--hs, 3px);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.plan .u[data-status="sold"] .u-label,
+.plan .u[data-status="blocked"] .u-label,
+.plan .u[data-status="unknown"] .u-label { fill: rgba(239, 233, 221, .7); }
+.plan .u-blocked {
+  fill: none;
+  stroke: var(--status-blocked);
+  stroke-width: var(--lw, 1px);
+  stroke-dasharray: var(--dash, 4 3);
+}
+.plan .u-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+/* ---------- the block switch and the stepper ---------- */
+.fxm { display: none; }
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--hair-ctl);
+}
+.seg button {
+  min-width: 92px;
+  height: 42px;
+  padding: 0 16px;
+  color: var(--stone);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color .2s, background-color .2s;
+}
+.seg button[aria-pressed="true"] {
+  background: var(--ivory);
+  color: var(--onyx);
+}
+.step {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--hair-ctl);
+}
+.step button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 42px;
+  color: var(--ivory);
+  transition: color .2s, background-color .2s;
+}
+.step button:disabled {
+  color: rgba(155, 148, 136, .4);
+  cursor: default;
+}
+.step button svg {
+  width: 12px;
+  height: 8px;
+}
+.step output {
+  min-width: 74px;
+  border-right: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
+  color: var(--ivory-2);
+  font-size: 13px;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 42px;
+  text-align: center;
+}
+.step output b {
+  margin-left: 4px;
+  color: var(--ivory);
+  font: 600 22px/1 var(--serif);
+  vertical-align: -2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .seg button:not([aria-pressed="true"]):hover { color: var(--ivory); }
+  .step button:hover:not(:disabled) { background: rgba(184, 149, 74, .12); }
+}
+
+/* ---------- phones: one block at a time, and the sheet (spec §7.5) ---------- */
+@media (max-width: 900px) {
+  .explorer__legend { justify-content: flex-start; }
+  .explorer__legend .legend {
+    justify-content: flex-start;
+    gap: 8px 18px;
+  }
+  .stale {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  /* The crop of the block on show (FACADE.vbPhone): its pitch on the stage,
+     which spans the page between the gutters. */
+  .fx {
+    --vby: 132;
+    --vbw: 628;
+    --vbh: 388;
+    --pitch: calc((100cqw - 2 * var(--gut)) * 33.5 / 628);
+    height: auto;
+    padding-bottom: 8px;
+  }
+  .fx[data-block="Б"] { --vbx: 572; }
+  .fxm {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 0 var(--gut) 14px;
+  }
+  .fxm .small { font-size: 12px; }
+  .seg button {
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+  }
+  .fx__stage {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    margin: 0 var(--gut);
+    aspect-ratio: 628 / 388;
+  }
+  .fx__bname { display: none; }
+  /* Only the block on show responds. */
+  .fx[data-block="А"] .fx__rail--b,
+  .fx[data-block="А"] .fx__floor[data-block="Б"],
+  .fx[data-block="Б"] .fx__rail--a,
+  .fx[data-block="Б"] .fx__floor[data-block="А"] { display: none; }
+  .fx__cnt { gap: 7px; }
+  .fx__cnt .f { display: none; }
+  .fx__cnt .n { font-size: 24px; }
+  .fx__cap {
+    position: static;
+    margin: 16px var(--gut) 0;
+    text-align: left;
+  }
+  .cap-desk { display: none; }
+  .cap-phone { display: inline; }
+  .fxp { display: none !important; }
+
+  /* The sheet: over the page at the bottom of the screen, above the header
+     (z 45, spec §2.2); hidden until it opens. Its motion is
+     FloorSheet.jsx's. */
+  .sheet {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 45;
+    display: grid;
+    gap: 12px;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--brass);
+    background: var(--umber);
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, .55);
+    visibility: hidden;
+  }
+  .sheet[data-open] { visibility: visible; }
+  .sheet__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .sheet__title { font: 500 30px/1 var(--serif); }
+  .sheet__x {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -8px;
+    color: var(--stone);
+    font-size: 22px;
+  }
+  .sheet__plan {
+    position: relative;
+    height: 150px;
+  }
+  .sheet__counts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
+  }
+  .sheet__counts .st {
+    color: var(--ivory-2);
+    font-size: 12.5px;
+  }
+  .sheet__range {
+    color: var(--ivory-2);
+    font-size: 12.5px;
+  }
+  .sheet__act {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .sheet__act .btn { min-height: 48px; }
+  .sheet .step button {
+    width: 48px;
+    height: 48px;
+  }
+  .sheet .step output {
+    min-width: 64px;
+    line-height: 48px;
+  }
+}
+@media (min-width: 901px) {
+  .sheet { display: none !important; }
+}

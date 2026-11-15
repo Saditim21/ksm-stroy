@@ -9,7 +9,9 @@
 // fails on:
 //   - a console error or warning, a page error, or a React hydration message
 //     in any console line (HYDRATION);
-//   - a same-origin request that fails or answers 400 or more;
+//   - a same-origin request that fails or answers 400 or more. A request
+//     Chrome drops (net::ERR_ABORTED) fails only if no other request of the
+//     visit loaded its URL (see `loaded` in visit());
 //   - the wrong status, redirect or final URL;
 //   - two copies of the site: more than one main#main, or a tree at the top
 //     of <body> (or a main#main) that React does not own. That is what a
@@ -240,6 +242,19 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
   const report = (problem) => {
     if (!closing) problems.push(problem)
   }
+  // A request Chrome drops (net::ERR_ABORTED) is a failure only if no other
+  // request of the visit loaded its URL, so it is judged at the end. Chrome
+  // drops a duplicate it holds for nobody at its next garbage collection:
+  // the availability API's preload, when the page's fetch went to the
+  // network itself, or the background revalidation Chrome makes after the
+  // fetch takes the preloaded response, which is stale at once (its
+  // Cache-Control is the CDN's: s-maxage=30, stale-while-revalidate=300,
+  // pinned by api/availability.js and its contract). On any build a forced
+  // collection after the load drops it (Task 6, base d3c4d6b included), and
+  // a page whose motion runs during the visit, as Home's facade intro on the
+  // way to the poster, collects garbage within it. The page had its data.
+  const loaded = new Set()
+  const aborted = []
   const context = await browser.createBrowserContext()
   try {
     const page = await context.newPage()
@@ -257,8 +272,14 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       }
     })
     page.on('pageerror', (error) => report(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
+    page.on('requestfinished', (request) => {
+      const answer = request.response()
+      if (sameOrigin(request.url()) && answer && answer.status() < 400) loaded.add(request.url())
+    })
     page.on('requestfailed', (request) => {
-      if (sameOrigin(request.url())) report(`request failed: ${relative(request.url())} (${request.failure()?.errorText})`)
+      if (!sameOrigin(request.url())) return
+      if (request.failure()?.errorText === 'net::ERR_ABORTED') aborted.push(request)
+      else report(`request failed: ${relative(request.url())} (${request.failure()?.errorText})`)
     })
     page.on('response', (response) => {
       const url = response.url()
@@ -328,6 +349,10 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         for (const { index, issues } of posterLinks) {
           if (issues.length > 0) problems.push(`poster PDF link ${index + 1} is not visible when scrolled to: ${issues.join(', ')}`)
         }
+      }
+
+      for (const request of aborted) {
+        if (!loaded.has(request.url())) report(`request failed: ${relative(request.url())} (${request.failure()?.errorText})`)
       }
     } catch (error) {
       // A navigation nobody expected, for one, takes the page's context away.

@@ -2,7 +2,7 @@
 // API rows as units, and the counts the shell shows (spec §9).
 import { PROJECT_BLOCKS } from '../../config/blocks'
 import { normalizeStatus, statusKey } from '../../utils/propertyStatus'
-import { normalizeUnitId, parseArea } from '../../utils/units'
+import { normalizeUnitId, parseArea, toApartment } from '../../utils/units'
 
 const text = (value) => String(value ?? '').trim()
 
@@ -16,27 +16,22 @@ function suffixOf(label) {
 
 // One API row (src/services/sheetsCore.js: { unit, floor, type, area: { built,
 // ideal, total }, exposure, status, price }) of block `letter`, or null for a
-// row that names no unit or no floor.
+// row that names no unit or no floor. The row goes back under the sheet's
+// own column names, so M1's toApartment() (src/utils/units.js) makes the one
+// unit model of every page (ruling C6); only the suffix and the price are
+// added here.
 function toUnit(row, letter) {
-  const label = text(row.unit)
-  const floor = parseInt(row.floor, 10)
-  if (!label || !Number.isFinite(floor)) return null
-  return {
-    id: normalizeUnitId(label),
-    label,
-    kind: 'apartment',
-    block: letter,
-    floor,
-    suffix: suffixOf(label),
-    builtArea: parseArea(row.area?.built),
-    idealParts: parseArea(row.area?.ideal),
-    totalArea: parseArea(row.area?.total),
-    type: text(row.type),
-    exposure: text(row.exposure),
-    price: text(row.price),
-    status: statusKey(row.status),
-    statusText: normalizeStatus(row.status),
-  }
+  const unit = toApartment({
+    'Апартамент': row.unit,
+    'Етаж': row.floor,
+    'Застроена': row.area?.built,
+    'Идеални': row.area?.ideal,
+    'Обща': row.area?.total,
+    'Вид': row.type,
+    'Изложение': row.exposure,
+    'Статус': row.status,
+  }, letter)
+  return unit && { ...unit, suffix: suffixOf(unit.label), price: text(row.price) }
 }
 
 /** M1's unit model (src/utils/units.js) plus suffix and price:

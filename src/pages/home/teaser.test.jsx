@@ -1,0 +1,85 @@
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
+import { beforeEach, expect, it, vi } from 'vitest'
+import { snapshotAvailability } from '../../explorer/testing'
+import TeaserSection from './TeaserSection'
+
+// Home's floor-by-floor teaser, #etazhi (spec §6.11, §8.1 #5, §9): the
+// hinge, the facade in compact mode, the stale-data notice when the data is
+// built in, and the two ways into the Golden Residence explorer. The
+// availability store is stood in for by the sheets snapshot.
+
+let availability
+vi.mock('../../data/availability/useAvailability', () => ({ useAvailability: () => availability }))
+
+const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
+
+// Where the router is, with the hash.
+function Where() {
+  const { pathname, search, hash } = useLocation()
+  return <output data-testid="where">{decodeURIComponent(`${pathname}${search}${hash}`)}</output>
+}
+
+function renderTeaser() {
+  return render(
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path="*" element={<><TeaserSection /><Where /></>} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+beforeEach(() => {
+  availability = snapshotAvailability()
+})
+
+it('heads #etazhi „Golden Residence, етаж по етаж“, its italic word „етаж“, with the concept’s lead', () => {
+  renderTeaser()
+  const section = document.querySelector('section#etazhi')
+  const heading = within(section).getByRole('heading', { level: 2 })
+
+  expect(text(heading)).toBe('Golden Residence, етаж по етаж')
+  expect(heading.querySelector('em')).toHaveTextContent(/^етаж$/)
+  expect(section).toHaveAccessibleName('Golden Residence, етаж по етаж')
+  expect(text(section.querySelector('.hinge .lead'))).toBe('Цифрите са свободните апартаменти в момента: блок А вляво, блок Б вдясно. Посочете етаж, кликнете, за да видите плана му.')
+})
+
+it('shows the facade in compact mode, its floors with their counts', () => {
+  renderTeaser()
+  const facade = document.querySelector('section#etazhi .fx')
+
+  expect(facade).toHaveClass('fx--compact')
+  expect(document.querySelector('.fxp')).toBeNull()
+  expect(screen.getByRole('button', { name: /^Блок А, етаж 5: 4 свободни/ })).toBeInTheDocument()
+})
+
+it('leads both ways into the explorer: „Визуално“ and „По критерии“', () => {
+  renderTeaser()
+  const ways = screen.getByRole('navigation', { name: 'Два начина да изберете апартамент' })
+
+  expect(within(ways).getByRole('link', { name: /^Визуално/ })).toHaveAttribute('href', '/projects/golden-residence#explorer')
+  expect(within(ways).getByRole('link', { name: /^По критерии/ })).toHaveAttribute('href', '/projects/golden-residence?view=list#explorer')
+  expect(text(within(ways).getByRole('link', { name: /^Визуално/ }))).toBe('Визуално Изберете етаж от фасадата')
+  expect(text(within(ways).getByRole('link', { name: /^По критерии/ }))).toBe('По критерии Всички 192 апартамента в списък с филтри')
+})
+
+// Spec §9: Home never shows the built-in counts without saying so.
+it('shows the notice when a Golden Residence slot is built-in, and not over live data', () => {
+  availability = snapshotAvailability({ garages: 'built-in' })
+  const { unmount } = renderTeaser()
+  expect(within(document.querySelector('section#etazhi')).getByText(/^Наличността не се зареди\./)).toBeInTheDocument()
+  unmount()
+
+  availability = snapshotAvailability()
+  renderTeaser()
+  expect(screen.queryByText(/Наличността не се зареди/)).toBeNull()
+})
+
+// Spec §7.2, ruling F11: a floor opens on the Golden Residence page, at the
+// explorer (Task 7 drops the hash for the page's own jump).
+it('opens a floor on the Golden Residence page, at the explorer', () => {
+  renderTeaser()
+  fireEvent.click(screen.getByRole('button', { name: /^Блок А, етаж 5:/ }))
+  expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence?floor=А-5#explorer')
+})

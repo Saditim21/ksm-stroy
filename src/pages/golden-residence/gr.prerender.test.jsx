@@ -54,6 +54,24 @@ it('prerenders the free counts as —', () => {
   expect(textOf(doc.querySelector('#blk-a .blk__free'))).toMatch(/^— свободни от 96$/)
   expect(textOf(doc.querySelector('#park-g .park__big'))).toMatch(/^— свободни от 113$/)
   expect(textOf(doc.querySelector('#park-g summary'))).toBe('Свободните гаражи (—)')
+  expect(textOf(doc.querySelector('#explorer .lead'))).toMatch(/: — от 192\.$/)
+  expect([...doc.querySelectorAll('#explorer .legend li')].map(textOf)).toEqual(['— свободни', '— резервирани', '— продадени', '— блокирани'])
+  expect([...doc.querySelectorAll('#explorer .fx__cnt .n')].map(textOf)).toEqual(Array(16).fill('—'))
+})
+
+// The explorer's facade is in the HTML at rest: its rails, the picture and
+// the floors. No edge panel and no sheet: their chunk loads in the browser,
+// and only a hot floor shows them. No notice, which only the browser's data
+// can call for (spec §9).
+it('prerenders the explorer at rest', () => {
+  const doc = parse(prerender())
+  const explorer = doc.querySelector('#explorer')
+
+  expect(explorer.querySelectorAll('.fx__floor')).toHaveLength(16)
+  expect(explorer.querySelector('.fx picture img').getAttribute('loading')).toBe('lazy')
+  expect(explorer.querySelector('.fx').getAttribute('data-block')).toBe('А')
+  expect(doc.querySelectorAll('.fxp, .sheet')).toHaveLength(0)
+  expect(explorer.textContent).not.toMatch(/Наличността не се зареди/)
 })
 
 // What an entrance's first frame would write, kept out of the hero: an

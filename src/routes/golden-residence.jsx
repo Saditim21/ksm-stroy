@@ -1,5 +1,6 @@
 import InquirySection from '../components/inquiry/InquirySection'
 import { availabilityPreload } from '../data/availability/useAvailability'
+import ExplorerSection from '../explorer/ExplorerSection'
 import BlocksSection from '../pages/golden-residence/BlocksSection'
 import GallerySection from '../pages/golden-residence/GallerySection'
 import GrHero from '../pages/golden-residence/GrHero'
@@ -11,10 +12,10 @@ import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
 import '../pages/golden-residence/gr.css'
 
 // The Golden Residence page, /projects/golden-residence (spec §8.2): the hero,
-// where Home's half lands; the building's story; the two blocks; the gallery;
-// the garages and parking places; and the inquiry, which КСМ Строй takes
-// (decision A1). The explorer comes after the story with Task 6. The page
-// never names the agency that sells through its own landing, nor links to it.
+// where Home's half lands; the building's story; the explorer, floor by
+// floor; the two blocks; the gallery; the garages and parking places; and
+// the inquiry, which КСМ Строй takes (decision A1). The page never names the
+// agency that sells through its own landing, nor links to it.
 
 // How the site's shell frames this page (src/shell/handle.js): under the
 // see-through header, a page of the project, with the inquiry the header's
@@ -40,6 +41,7 @@ export default function GoldenResidence() {
     <>
       <GrHero />
       <StorySection />
+      <ExplorerSection />
       <BlocksSection />
       <GallerySection />
       <ParkingSection />

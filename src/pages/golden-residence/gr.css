@@ -4,13 +4,15 @@
    the garages and parking places, ported from the concept's css/diptych.css
    (:417-430 and :799-807 the hero, :432-451, :808-814 and :906-914 the
    story, :653-676 and :834-839 the blocks, :678-691 and :840-844 the
-   gallery, :693-715 and :845-848 the parking, :255-270 the status chips of
-   its legend) with the tokens of src/index.css, --screen-h for vh, and the
+   gallery, :693-715 and :845-848 the parking) with the tokens of
+   src/index.css, --screen-h for vh, and the
    spec's fixes: the hero's entrance is CSS from the first paint and names no
    view transition (ruling F8); without motion the story stays in one column
    with its pictures inline (spec §5.8); a control's border is hair-ctl;
    hover effects need a fine pointer; nothing takes the focus ring away, and
-   no box that holds a control clips it (spec §11).
+   no box that holds a control clips it (spec §11). The parking legend's
+   status counts are src/components/ui/status.css's, the explorer's styles
+   src/explorer/explorer.css's.
 
    The page's own stylesheet (src/routes/golden-residence.jsx), after the
    site's: plain CSS, in no Tailwind layer. A section's padding, the seam,
@@ -395,7 +397,8 @@
   padding-top: 22px;
 }
 /* The outer side keeps the gutter (extract §3.1): a long caption wraps
-   before the screen's edge, in the two lines it has room for. */
+   before the screen's edge, in the two lines it has room for, balanced, so
+   no word is left alone on its second line (ruling C6.2). */
 .gal__cap {
   display: flex;
   align-items: center;
@@ -405,6 +408,7 @@
   color: var(--ivory-2);
   font-size: 15px;
   text-align: right;
+  text-wrap: balance;
 }
 .gal__ctl {
   display: flex;
@@ -467,62 +471,9 @@
   font-size: 15px;
 }
 .park__half--b > .link { justify-self: start; }
-/* The legend: each status's swatch, its pattern and glyph, the count and the
-   word, in the status order (spec §7.9). */
-.park .legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 26px;
-}
+/* The legend, the status counts (src/components/ui/status.css), against the
+   seam in the first half. */
 .park__half--a .legend { justify-content: flex-end; }
-.park .st {
-  --c: var(--stone);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.park .st b {
-  color: var(--ivory);
-  font-weight: 600;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.park .st--free { --c: var(--status-free); }
-.park .st--reserved { --c: var(--status-reserved); }
-.park .st--sold { --c: var(--status-sold); }
-.park .st--blocked { --c: var(--status-blocked); }
-.park .sw {
-  position: relative;
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--c);
-  color: var(--c);
-}
-.park .sw svg {
-  width: 10px;
-  height: 10px;
-}
-.park .st--free .sw {
-  background: var(--c);
-  color: var(--onyx);
-}
-.park .st--reserved .sw { background: repeating-linear-gradient(-45deg, var(--c) 0 1.5px, transparent 1.5px 4px); }
-.park .st--reserved .sw svg {
-  border-radius: 50%;
-  background: var(--umber);
-}
-.park .st--sold .sw {
-  background-image: radial-gradient(var(--c) 1px, transparent 1.3px);
-  background-size: 4px 4px;
-}
-.park .st--sold .sw svg { background: var(--umber); }
-.park .st--blocked .sw { border-style: dashed; }
 /* A cell a place, in its status's pattern: plain hair outlines until the
    data arrives. */
 .park__cells {

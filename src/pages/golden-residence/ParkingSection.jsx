@@ -3,6 +3,8 @@ import { presetInquiry } from '../../components/inquiry/inquiryStore'
 import Button from '../../components/ui/Button'
 import RollingNumber from '../../components/ui/RollingNumber'
 import Seam from '../../components/ui/Seam'
+import StatusCount from '../../components/ui/StatusCount'
+import { STATUS_ORDER, statusLook } from '../../components/ui/status'
 import { GR_FACTS } from '../../config/facts'
 import { spotUnits } from '../../data/availability/select'
 import { useAvailability } from '../../data/availability/useAvailability'
@@ -25,37 +27,13 @@ import { summarize } from '../../utils/units'
 // cells are a picture of the counts and the list, hidden from assistive
 // technology; each names its place, area and status to a pointer.
 //
-// The legend draws the concept's status chips (core.js:23-50,
-// diptych.css:255-270), the swatch with its pattern and glyph, the count and
-// the word (spec §7.9), until the explorer's status vocabulary comes.
+// The legend is the site's status counts (StatusCount, spec §7.9): the
+// swatch with its pattern and glyph, the count and the word (ruling C6.1).
 
 const PLACES = [
   { slot: 'garages', id: 'park-g', side: 'a', name: 'Гаражи', total: GR_FACTS.garages, list: 'Свободните гаражи', action: 'Запитване за гараж' },
   { slot: 'parking', id: 'park-p', side: 'b', name: 'Паркоместа', total: GR_FACTS.parking, list: 'Свободните паркоместа', action: 'Запитване за паркомясто' },
 ]
-
-// The statuses in their order (spec §7.9), each with its look's name (the
-// concept's), its words and its glyph (10 × 10). A status the rules do not
-// know looks blocked.
-const STATUSES = ['available', 'reserved', 'sold', 'blocked']
-const LOOK = { available: 'free', reserved: 'reserved', sold: 'sold', blocked: 'blocked', unknown: 'blocked' }
-const WORDS = {
-  available: ['свободен', 'свободни'],
-  reserved: ['резервиран', 'резервирани'],
-  sold: ['продаден', 'продадени'],
-  blocked: ['блокиран', 'блокирани'],
-}
-const GLYPHS = {
-  available: <path d="M1.6 5.3l2.2 2.2 4.6-4.9" fill="none" stroke="currentColor" strokeWidth="1.7" />,
-  reserved: (
-    <>
-      <circle cx="5" cy="5" r="3.7" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M5 2.9v2.3l1.6 1" fill="none" stroke="currentColor" strokeWidth="1.2" />
-    </>
-  ),
-  sold: <path d="M2.6 2.6l4.8 4.8M7.4 2.6L2.6 7.4" stroke="currentColor" strokeWidth="1.5" />,
-  blocked: <path d="M2 5h6" stroke="currentColor" strokeWidth="1.6" />,
-}
 
 // What a cell says to a pointer: „Г-001 · 34,01 м² · Продаден“.
 const statusOf = (unit) => (unit.status === 'unknown' ? unit.statusText || STATUS_LABEL.unknown : STATUS_LABEL[unit.status])
@@ -77,7 +55,7 @@ function Half({ place, availability }) {
   const units = live && availability.data?.['golden-residence']?.[slot] ? spotUnits(availability.data, slot) : null
   const counts = units ? summarize(units) : null
   const free = counts ? counts.available : null
-  const shownInLegend = STATUSES.filter((status) => status === 'available' || status === 'sold' || counts?.[status] > 0)
+  const shownInLegend = STATUS_ORDER.filter((status) => status === 'available' || status === 'sold' || counts?.[status] > 0)
 
   return (
     <div className={`park__half park__half--${side}`} id={id}>
@@ -89,23 +67,15 @@ function Half({ place, availability }) {
         </span>
       </p>
       <ul className="legend">
-        {shownInLegend.map((status) => {
-          const count = counts ? counts[status] : null
-          return (
-            <li key={status} className={`st st--${LOOK[status]}`}>
-              <span className="sw" aria-hidden="true">
-                <svg viewBox="0 0 10 10" focusable="false">
-                  {GLYPHS[status]}
-                </svg>
-              </span>
-              <b>{count ?? '—'}</b> {WORDS[status][count === 1 ? 0 : 1]}
-            </li>
-          )
-        })}
+        {shownInLegend.map((status) => (
+          <li key={status}>
+            <StatusCount status={status} count={counts ? counts[status] : null} />
+          </li>
+        ))}
       </ul>
       <div className="park__cells" aria-hidden="true">
         {units
-          ? units.map((unit, i) => <i key={i} className={`s-${LOOK[unit.status] ?? 'blocked'}`} title={cellTitle(unit)} />)
+          ? units.map((unit, i) => <i key={i} className={`s-${statusLook(unit.status)}`} title={cellTitle(unit)} />)
           : Array.from({ length: total }, (_, i) => <i key={i} />)}
       </div>
       <details>

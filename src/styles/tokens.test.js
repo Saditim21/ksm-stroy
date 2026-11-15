@@ -66,6 +66,16 @@ it('meets the contrast floors', () => {
   expect(contrast(brass, onyx)).toBeGreaterThanOrEqual(4.5)
 })
 
+// Spec §7.2: a floor's zero free count on the facade dims to stone at .65
+// (src/explorer/explorer.css), 3.36:1 on onyx. The count is never under
+// 24 px, so the large-text floor of 3:1 is the one that applies; the
+// concept's .55 gave 2.71:1.
+it('keeps a zero count on the facade at 3:1 on onyx', () => {
+  const zero = contrast(blend('rgba(155, 148, 136, 0.65)', PALETTE.onyx), PALETTE.onyx)
+  expect(zero).toBeGreaterThanOrEqual(3)
+  expect(contrast(blend('rgba(155, 148, 136, 0.55)', PALETTE.onyx), PALETTE.onyx)).toBeLessThan(3)
+})
+
 it('sets the split breakpoint, hover gating and the type stacks', () => {
   expect(Object.entries(config.theme.screens)).toEqual([['sm', '640px'], ['md', '768px'], ['split', '901px'], ['lg', '1024px'], ['xl', '1280px'], ['2xl', '1536px']])
   expect(config.future.hoverOnlyWhenSupported).toBe(true)

@@ -1,0 +1,76 @@
+/* The status vocabulary (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
+   §7.9): a status is never colour alone. Ported from the concept's
+   css/diptych.css:255-270 with the status tokens of src/index.css; the
+   swatch takes its look from a class of its own (sw--free …), not from the
+   chip around it, so it draws the same wherever it stands.
+
+   The components' own stylesheet (StatusSwatch.jsx): plain CSS, in no
+   Tailwind layer, loaded with the page that shows a status. */
+
+/* A chip or a count: the swatch, then the word. */
+.st {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+/* A count's number (StatusCount). */
+.st b {
+  color: var(--ivory);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The swatch: 16 × 16, a 1 px border in the status colour, the 10 × 10 glyph
+   centred. Blocked, and a status the rules do not know, by default. */
+.sw {
+  --c: var(--status-blocked);
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--c);
+  color: var(--c);
+}
+.sw svg {
+  width: 10px;
+  height: 10px;
+}
+/* Available: solid, the ✓ in onyx. */
+.sw--free {
+  --c: var(--status-free);
+  background: var(--c);
+  color: var(--onyx);
+}
+/* Reserved: stripes, the clock on an umber disc. */
+.sw--reserved {
+  --c: var(--status-reserved);
+  background: repeating-linear-gradient(-45deg, var(--c) 0 1.5px, transparent 1.5px 4px);
+}
+.sw--reserved svg {
+  border-radius: 50%;
+  background: var(--umber);
+}
+/* Sold: dots, the ✕ on umber. */
+.sw--sold {
+  --c: var(--status-sold);
+  background-image: radial-gradient(var(--c) 1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+.sw--sold svg { background: var(--umber); }
+/* Blocked: a dashed border and no fill. */
+.sw--blocked { border-style: dashed; }
+
+/* A row of chips or counts (StatusLegend, the explorer's totals, a parking
+   half's key), each item as tall as its chip. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 26px;
+}
+.legend > li { display: flex; }

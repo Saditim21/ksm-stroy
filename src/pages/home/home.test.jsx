@@ -5,9 +5,10 @@ import { resetInquiry } from '../../components/inquiry/inquiryStore'
 import * as homeModule from '../Home'
 
 // Home (spec §8.1): the split opening with slogan A, the company, the
-// services, the completed works, the closing inquiry and production's EU
-// poster section, opened as a visitor opens it (tests/contracts/site.jsx),
-// offline, so the counts come from the data built into the site.
+// services, the completed works, the floor-by-floor teaser, the closing
+// inquiry and production's EU poster section, opened as a visitor opens it
+// (tests/contracts/site.jsx), offline, so the counts come from the data built
+// into the site. The teaser's own cases are teaser.test.jsx's.
 
 const MN_NAME = 'Многофамилна сграда, ж.к. Връбница-1: 16 свободни апартамента от 144 по данни към 01.12.2025. Запитване за сградата.'
 // Where the browser, which follows the router here, says the page is.
@@ -97,12 +98,12 @@ it('keeps production’s EU poster section last', () => {
     expect(s).toHaveTextContent(t)
 })
 
-// The sections in order (Task 6 puts the floor-by-floor teaser before the
-// inquiry), and the hero as the next tasks find it: the Golden Residence
+// The sections in order (spec §8.1), the floor-by-floor teaser before the
+// inquiry, and the hero as the next tasks find it: the Golden Residence
 // half, a link inside section.hero, is what the hero move grows (spec §6.7).
-it('runs the opening, the company, the services, the works, the inquiry and the EU poster, in that order', () => {
+it('runs the opening, the company, the services, the works, the teaser, the inquiry and the EU poster, in that order', () => {
   expect([...document.querySelectorAll('main section[id]')].map((section) => section.id))
-    .toEqual(['proekti', 'za-nas', 'uslugi', 'obekti', 'kontakti', 'es-proekt'])
+    .toEqual(['proekti', 'za-nas', 'uslugi', 'obekti', 'etazhi', 'kontakti', 'es-proekt'])
   expect(document.querySelector('section.hero#proekti a.half.half--gr[href="/projects/golden-residence"]')).not.toBeNull()
   expect(document.querySelector('section.hero#proekti > h1:first-child')).not.toBeNull()
 })

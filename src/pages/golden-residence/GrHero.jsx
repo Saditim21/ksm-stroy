@@ -13,8 +13,8 @@ import { plural } from '../../utils/format'
 // address, and two facts on either side of a seam: the 192 apartments in 2
 // blocks, and the free ones now, live: `—` in the prerendered HTML and until
 // the data arrives (RollingNumber), then the count, rolling once. Then the
-// two actions: the apartments (the blocks until the explorer comes), and the
-// inquiry on this page.
+// two actions: the apartments, in the explorer, and the inquiry on this
+// page.
 //
 // The render and its framing are Home's Golden Residence half's (sizes 100vw,
 // 50 % 62 %), at the same height, so the hero move from Home (spec §6.7)
@@ -66,7 +66,7 @@ export default function GrHero() {
           </p>
         </div>
         <div className="grhero__actions">
-          <Button href="#blokove" variant="solid">
+          <Button href="#explorer" variant="solid">
             Изберете апартамент
           </Button>
           <Button href="#zapitvane">Запитване</Button>

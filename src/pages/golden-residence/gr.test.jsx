@@ -7,10 +7,11 @@ import * as grModule from '../../routes/golden-residence'
 import { setLenis } from '../../utils/lenis'
 import { EXPO_IN_OUT } from '../../utils/motion'
 
-// The Golden Residence page (spec §8.2): the hero, the story, the two blocks,
-// the gallery, the garages and parking places, and the inquiry, opened as a
-// visitor opens it (tests/contracts/site.jsx), offline, so the counts come
-// from the data built into the site. The explorer comes with Task 6.
+// The Golden Residence page (spec §8.2): the hero, the story, the explorer,
+// the two blocks, the gallery, the garages and parking places, and the
+// inquiry, opened as a visitor opens it (tests/contracts/site.jsx), offline,
+// so the counts come from the data built into the site. The explorer's own
+// cases are src/explorer/ExplorerSection.test.jsx's, on the sheets snapshot.
 
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const section = (id) => document.getElementById(id)
@@ -49,10 +50,9 @@ describe('the hero (spec §6.14)', () => {
     await waitFor(() => expect(text(free)).toMatch(/^\d+ свободни в момента$/))
   })
 
-  // Task 6 sends „Изберете апартамент“ to the explorer (#explorer).
-  it('leads to the blocks and to the inquiry', () => {
+  it('leads to the explorer and to the inquiry', () => {
     const hero = within(section('top'))
-    expect(hero.getByRole('link', { name: 'Изберете апартамент' })).toHaveAttribute('href', '#blokove')
+    expect(hero.getByRole('link', { name: 'Изберете апартамент' })).toHaveAttribute('href', '#explorer')
     expect(hero.getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', '#zapitvane')
   })
 })
@@ -184,6 +184,19 @@ describe('the garages and parking places (spec §6.18)', () => {
     expect(text(parking.querySelector('summary'))).toMatch(/^Свободните паркоместа \(\d+\)$/)
   })
 
+  // Ruling C6.1: the legend is the status counts of spec §7.9 (StatusCount),
+  // free and sold always, reserved and blocked only where there are any. The
+  // data built into the site has neither, in either half.
+  it('keys each half by its free and its sold places, each with its swatch', async () => {
+    const garages = section('park-g')
+    await waitFor(() => expect(text(garages.querySelector('.park__big'))).toMatch(/^\d+ свободни от 113$/))
+    for (const half of [garages, section('park-p')]) {
+      const counts = [...half.querySelectorAll('.legend > li > .st')]
+      expect(counts.map(text).map((words) => words.replace(/^\d+ /, ''))).toEqual([expect.stringMatching(/^свободни?$/), expect.stringMatching(/^продадени?$/)])
+      expect(counts.map((count) => count.querySelector('.sw').dataset.status)).toEqual(['available', 'sold'])
+    }
+  })
+
   // The cells are a picture of the places, hidden from assistive technology:
   // the counts and the list carry the numbers.
   it('draws one cell a place, hidden from assistive technology', async () => {
@@ -215,11 +228,10 @@ describe('the inquiry (spec §6.12, decision A1)', () => {
   })
 })
 
-// Spec §8.2's order; the explorer (#explorer) comes after the story with
-// Task 6.
-it('runs the hero, the story, the blocks, the gallery, parking and the inquiry, in that order', () => {
+// Spec §8.2's order.
+it('runs the hero, the story, the explorer, the blocks, the gallery, parking and the inquiry, in that order', () => {
   expect([...document.querySelectorAll('main section[id]')].map(({ id }) => id))
-    .toEqual(['top', 'sgradata', 'blokove', 'galeriya', 'garazhi', 'kontakti'])
+    .toEqual(['top', 'sgradata', 'explorer', 'blokove', 'galeriya', 'garazhi', 'kontakti'])
 })
 
 // The route module (spec §8.2): under the see-through header, a page of the

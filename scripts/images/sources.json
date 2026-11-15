@@ -193,6 +193,31 @@
     ]
   },
   {
+    "id": "facade-cut",
+    "group": "golden-residence",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/facade-cut-2400.webp",
+    "widths": [
+      1200,
+      2400
+    ]
+  },
+  {
+    "id": "plan-a",
+    "group": "golden-residence",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/plan-a.webp",
+    "widths": [
+      1200
+    ]
+  },
+  {
+    "id": "plan-b",
+    "group": "golden-residence",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/plan-b.webp",
+    "widths": [
+      1200
+    ]
+  },
+  {
     "id": "mn-dusk",
     "group": "home",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/mn-dusk-2400.webp",

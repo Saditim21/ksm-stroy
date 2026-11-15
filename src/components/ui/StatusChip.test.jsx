@@ -1,27 +1,33 @@
 import { render, screen } from '@testing-library/react'
 import StatusChip from './StatusChip'
 
-// StatusChip (plan Task 7, Ruling R1): a dot in the status colour and the
-// status's label. Colour never stands alone: the label is always there.
+// StatusChip (spec §7.9, Ruling R1): the status's 16 px swatch, with its
+// pattern and glyph, and its label. Colour never stands alone: the label is
+// always there.
 
-const dotOf = (label) => screen.getByText(label).querySelector('[aria-hidden="true"]')
+const chipOf = (label) => screen.getByText(label)
 
 test.each([
-  ['available', 'Свободен', 'bg-status-free'],
-  ['reserved', 'Резервиран', 'bg-status-reserved'],
-  ['sold', 'Продаден', 'bg-status-sold'],
-  ['blocked', 'Блокиран', 'bg-status-blocked'],
-])('%s reads „%s“ beside a %s dot', (status, label, colour) => {
+  ['available', 'Свободен', 'sw--free'],
+  ['reserved', 'Резервиран', 'sw--reserved'],
+  ['sold', 'Продаден', 'sw--sold'],
+  ['blocked', 'Блокиран', 'sw--blocked'],
+])('%s reads „%s“ beside its swatch (%s)', (status, label, look) => {
   render(<StatusChip status={status} />)
-  expect(screen.getByText(label)).toHaveTextContent(new RegExp(`^${label}$`))
-  expect(dotOf(label)).toHaveClass('rounded-full', colour)
+  const chip = chipOf(label)
+  expect(chip).toHaveTextContent(new RegExp(`^${label}$`))
+  expect(chip).toHaveClass('st')
+  const swatch = chip.querySelector('.sw')
+  expect(swatch).toHaveClass(look)
+  expect(swatch).toHaveAttribute('data-status', status)
+  expect(swatch).toHaveAttribute('aria-hidden', 'true')
 })
 
-test('unknown reads „Няма информация“ beside a hollow dot', () => {
+test('unknown reads „Няма информация“ beside the blocked look', () => {
   render(<StatusChip status="unknown" />)
-  const dot = dotOf('Няма информация')
-  expect(dot).toHaveClass('rounded-full', 'border')
-  expect(dot.className).not.toMatch(/bg-status/)
+  const swatch = chipOf('Няма информация').querySelector('.sw')
+  expect(swatch).toHaveClass('sw--blocked')
+  expect(swatch).toHaveAttribute('data-status', 'unknown')
 })
 
 // Ruling R1: an unknown status shows the text the owner wrote in the sheet
