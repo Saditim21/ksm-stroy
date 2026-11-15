@@ -178,6 +178,15 @@ describe('the motion', () => {
   })
 })
 
+// The scroll lock hides the page's scrollbar and keeps its gutter
+// (src/index.css: scrollbar-gutter), which then shows <html>'s background:
+// umber while the menu is open, as its right half beside the strip.
+it('paints the scrollbar’s strip umber while it is open', () => {
+  renderMenu()
+  expect(document.documentElement.style.overflow).toBe('hidden')
+  expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
+})
+
 // The shared trap (src/utils/trapTab.js): from outside the menu, where the
 // focus may still be while it opens, Tab goes in to its first stop and
 // Shift+Tab to its last, „Затвори“.

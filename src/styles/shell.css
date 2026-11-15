@@ -498,6 +498,13 @@
   .ftr__office + .ftr__office {
     margin-top: 12px;
   }
+  /* The address lies over its Maps link's 44 px box, which reaches up over
+     its last line, as the link's own words do: a press there selects the
+     address, and opens no map. */
+  .ftr__office > p {
+    position: relative;
+    z-index: 1;
+  }
   .ftr__maps {
     display: block;
     width: fit-content;
@@ -566,6 +573,23 @@
     }
     .menu__pages a[aria-current="page"]::before { display: none; }
     .menu__info { padding-left: 0; }
+    /* „Затвори“ stays in the bar while the menu scrolls under it (spec
+       §6.4), over an onyx strip from the screen's top: the EU row's place
+       too, until the page has scrolled. The strip is the button's own, so it
+       fades with it, and a tap on it is a tap on „Затвори“, never on a link
+       scrolled under it. */
+    .menu__close { position: fixed; }
+    .menu__close::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      right: calc(-1 * var(--gut));
+      bottom: 0;
+      width: 100vw;
+      background: var(--onyx);
+    }
+    :root:has(.hdr:not([data-scrolled])) .menu__close::before { top: calc(-1 * var(--eu-h)); }
 
     .ftr__grid { grid-template-columns: 1fr; }
     .ftr__grid > .seam { display: none; }

@@ -336,7 +336,8 @@ describe('the menu', () => {
     // A portal on <body>, never inside the fixed header.
     expect(menu.parentElement).toBe(document.body)
     expect(document.documentElement.style.overflow).toBe('hidden')
-    expect(document.documentElement.style.backgroundColor).toBe('rgb(14, 13, 11)')
+    // The scrollbar's kept gutter takes the umber of the menu's right half.
+    expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
   })
 
   it('moves focus into the menu, keeps Tab inside, and Escape returns it to „Меню“', async () => {

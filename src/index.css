@@ -299,9 +299,13 @@
 }
 
 /* An in-page jump leaves room for the bar; the EU row has slid away by then
-   (spec §4). */
+   (spec §4). A classic scrollbar (Windows) keeps its gutter while a scroll
+   lock hides it (src/hooks/useScrollLock.js, which paints the strip in its
+   overlay's colour), so the menu and the dialogs never move the page and the
+   fixed header sideways as they open or close. */
 html {
   scroll-padding-top: var(--bar-h);
+  scrollbar-gutter: stable;
 }
 
 /* The menu's fade without motion (the rule is in the base layer, after the

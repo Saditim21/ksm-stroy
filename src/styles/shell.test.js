@@ -199,6 +199,27 @@ describe('the menu (spec §6.4)', () => {
     expect(declaredFor('.menu', [LAYER, PHONE])['grid-template-columns']).toBe('1fr')
     expect(declaredFor('.menu > .menu__seam', [LAYER, PHONE]).display).toBe('none')
   })
+
+  // Spec §6.4: „Затвори“ in the bar. On a phone the whole menu scrolls, and
+  // the close stays in the bar's band, over an onyx strip from the screen's
+  // top (the EU row's place too, until the page has scrolled) that the menu
+  // scrolls under. The strip is the button's own: it fades with it, and a
+  // tap on it is a tap on „Затвори“, never on a link scrolled under it.
+  it('keeps „Затвори“ in the bar on a phone while the menu scrolls under it', () => {
+    expect(declaredFor('.menu', [LAYER, PHONE]).overflow).toBe('auto')
+    expect(declaredFor('.menu__close', [LAYER, PHONE]).position).toBe('fixed')
+    expect(declaredFor('.menu__close::before', [LAYER, PHONE])).toMatchObject({
+      content: "''",
+      position: 'absolute',
+      'z-index': '-1',
+      top: '0',
+      right: 'calc(-1 * var(--gut))',
+      bottom: '0',
+      width: '100vw',
+      background: 'var(--onyx)',
+    })
+    expect(declaredFor(':root:has(.hdr:not([data-scrolled])) .menu__close::before', [LAYER, PHONE]).top).toBe('calc(-1 * var(--eu-h))')
+  })
 })
 
 describe('the footer (spec §6.5)', () => {
@@ -207,6 +228,14 @@ describe('the footer (spec §6.5)', () => {
     expect(declaredFor('.ftr__half--r').background).toBe('var(--umber)')
     expect(declaredFor('.ftr__logo').width).toBe('156px')
     expect(declaredFor('.ftr__grid', [LAYER, PHONE])['grid-template-columns']).toBe('1fr')
+  })
+
+  // „Отвори в Google Maps“ is 13 px text, so its 44 px hit box reaches up
+  // over the lower half of the address's last line. The address lies over
+  // the box, as the link's own words do: a press there selects the address
+  // and opens no map.
+  it('lays each office’s address over its Maps link’s hit box', () => {
+    expect(declaredFor('.ftr__office > p')).toEqual({ position: 'relative', 'z-index': '1' })
   })
 })
 
@@ -276,6 +305,14 @@ describe('src/index.css', () => {
     expect(declaredFor(':root', [PHONE], indexRules)['--bar-h']).toBe('64px')
     expect(declaredFor('html', [], indexRules)['scroll-padding-top']).toBe('var(--bar-h)')
     expect(indexRules.filter((rule) => rule.selector.includes('eu-line'))).toEqual([])
+  })
+
+  // A scroll lock hides <html>'s overflow (src/hooks/useScrollLock.js), and
+  // with it a classic scrollbar (Windows). The gutter stays, so the menu or
+  // a dialog never moves the page and the fixed header sideways as it opens
+  // or closes; the lock paints the strip in its overlay's colour.
+  it('keeps the scrollbar’s gutter while a lock hides the scrollbar', () => {
+    expect(declaredFor('html', [], indexRules)['scrollbar-gutter']).toBe('stable')
   })
 
   // Spec §5.8, ruling F13: without motion the menu fades in over 0.2 s. The

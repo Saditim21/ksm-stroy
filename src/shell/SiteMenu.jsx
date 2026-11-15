@@ -25,8 +25,10 @@ import { NAV, currentFor } from './nav'
 //   <body>, so no transformed or blurred ancestor (the header) sizes it.
 // - A modal dialog: focus moves to the first page, Tab stays inside, and
 //   Escape or „Затвори“ closes it; the header gives „Меню“ the focus back.
-// - The page holds still under it (useScrollLock, which stops Lenis); on a
-//   phone the menu scrolls on its own, so Lenis leaves its wheel alone.
+// - The page holds still under it (useScrollLock, which stops Lenis), and
+//   a classic scrollbar's kept gutter takes the umber of its right half
+//   (src/index.css); on a phone the menu scrolls on its own, so Lenis leaves
+//   its wheel alone.
 // - A page link needs nothing of its own: the router commits the new page,
 //   the header unmounts the menu in that same commit, and only the old view
 //   transition snapshot holds it, which the doors close over the header, as
@@ -67,7 +69,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
   const closing = useRef(false)
   const motionNow = useMotionNow()
   const free = grFree(useAvailability())
-  useScrollLock(PALETTE.onyx)
+  useScrollLock(PALETTE.umber)
 
   // The opening, before the menu's first paint, so the motion starts from
   // its first frame; then the focus moves in, unless the keyboard has already
