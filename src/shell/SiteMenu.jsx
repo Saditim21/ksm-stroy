@@ -11,6 +11,7 @@ import { PALETTE } from '../styles/palette'
 import { bindAddress, plural } from '../utils/format'
 import { EASE_IN_OUT, EASE_OUT } from '../utils/motion'
 import { normalizePathname } from '../utils/pathname'
+import { trapTab } from '../utils/trapTab'
 import EuLine from './EuLine'
 import { NAV, currentFor } from './nav'
 
@@ -40,7 +41,6 @@ import { NAV, currentFor } from './nav'
 // reduced-motion clamp); it closes at once.
 
 const PAGES = [NAV[0], { label: 'Golden Residence', href: '/projects/golden-residence', live: true }, ...NAV.slice(1)]
-const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
 // When the first page takes the focus: once the halves are in, or at once
 // without the motion.
 const FOCUS_AFTER_MS = 650
@@ -125,21 +125,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
         close()
         return
       }
-      if (event.key !== 'Tab') return
-      const stops = [...root.current.querySelectorAll(FOCUSABLE)]
-      const first = stops[0]
-      const last = stops[stops.length - 1]
-      const active = document.activeElement
-      if (!root.current.contains(active)) {
-        event.preventDefault()
-        first.focus()
-      } else if (event.shiftKey && active === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault()
-        first.focus()
-      }
+      if (event.key === 'Tab') trapTab(event, root.current)
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
