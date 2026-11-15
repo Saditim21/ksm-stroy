@@ -80,6 +80,32 @@ function railName({ block, floor }, stats) {
 // A no-break space after the one-letter „и“ (spec §3.3).
 const IDLE_CAPTION = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
 
+// The page's latest press: a key's, or a pointer's and the element it landed
+// on. A key without Ctrl, Alt or ⌘ makes the next focus the keyboard's, and a
+// pointer's press, wherever it lands, a pointer's: the rule :focus-visible
+// follows. It watches the whole page, because Tab reaches a rail from
+// anywhere, and in the capture phase, so it is set before any handler moves
+// the focus. (jsdom matches :focus-visible on every focus, so the tests could
+// not tell the selector's two cases apart.)
+function useLastPress() {
+  const last = useRef({ keyboard: true, target: null })
+  useEffect(() => {
+    const onKey = (event) => {
+      if (!event.ctrlKey && !event.altKey && !event.metaKey) last.current = { keyboard: true, target: null }
+    }
+    const onPointer = (event) => {
+      last.current = { keyboard: false, target: event.target }
+    }
+    document.addEventListener('keydown', onKey, true)
+    document.addEventListener('pointerdown', onPointer, true)
+    return () => {
+      document.removeEventListener('keydown', onKey, true)
+      document.removeEventListener('pointerdown', onPointer, true)
+    }
+  }, [])
+  return last
+}
+
 export default function Facade({ model, mode = 'full', initialBlock = 'А', onOpenFloor }) {
   const compact = mode === 'compact'
   const rootRef = useRef(null)
@@ -96,8 +122,12 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   // The floor the lens is on: the last hot one, where it stays while it fades.
   const [lens, setLens] = useState(null)
   const closeTimer = useRef(0)
-  const lastPointer = useRef('mouse')
-  const pressing = useRef(false)
+  // The press a click comes from (the stage's pointerdown): its pointer, and
+  // the floor that was hot as it began. A touch or pen tap on any other floor
+  // only previews it. The click spends it, so a click with no press of its
+  // own (an assistive technology's) opens the floor, as Enter does.
+  const stagePress = useRef(null)
+  const lastPress = useLastPress()
   // A rail Enter or Space opened: the click a browser may still send it
   // (Space's, on its keyup) is not a second opening.
   const keyed = useRef(false)
@@ -225,12 +255,12 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
   const keyOf = (event) => event.target.closest?.('[data-k]')?.dataset.k
 
   const onPointerDown = (event) => {
-    lastPointer.current = event.pointerType || 'mouse'
-    pressing.current = true
+    stagePress.current = { pointer: event.pointerType || 'mouse', hot: hot?.key ?? null }
     needSurfaces()
   }
-  const onPointerUp = () => {
-    pressing.current = false
+  // A press the browser takes for a scroll ends in no click.
+  const onPointerCancel = () => {
+    stagePress.current = null
   }
   // A mouse (or a pointer that hovers) makes a floor hot; a finger or a pen
   // never does by passing over it.
@@ -243,30 +273,37 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
     if (event.pointerType === 'mouse') scheduleClose()
   }
   const onClick = (event) => {
-    pressing.current = false
+    const pressed = stagePress.current
+    stagePress.current = null
     const key = keyOf(event)
     if (!key) return
     if (keyed.current) {
       keyed.current = false
       return
     }
-    if ((lastPointer.current === 'touch' || lastPointer.current === 'pen') && hot?.key !== key) {
+    if ((pressed?.pointer === 'touch' || pressed?.pointer === 'pen') && pressed.hot !== key) {
       setHot(key, 'tap')
       return
     }
     openFromFacade(key)
   }
-  // The keyboard's focus on a rail makes its floor hot; a pointer's press,
-  // which also focuses the rail, leaves that to the click.
+  // The keyboard's focus on a rail makes its floor hot. A pointer's press
+  // focuses the rail too, a mouse's before its pointerup and a finger's after
+  // it: that leaves the floor to the click.
   const onFocus = (event) => {
     needSurfaces()
     const key = event.target.closest?.('.fx__cnt')?.dataset.k
-    if (key && !pressing.current) setHot(key, 'kbd')
+    if (key && lastPress.current.keyboard) setHot(key, 'kbd')
   }
   // Focus leaving the facade and its panels clears the floor, as the mouse
-  // leaving does (not on a phone, whose sheet stays until it is closed).
+  // leaving does (not on a phone, whose sheet stays until it is closed). A
+  // pointer's press on the building or in a panel takes the focus off a rail
+  // without leaving them: a finger has already left the panel when its press
+  // moves the focus.
   const onBlur = (event) => {
     if (rootRef.current?.contains(event.relatedTarget) || overPanel.current || isPhone()) return
+    const area = lastPress.current.target?.closest?.('.fx__stage, .fxp')
+    if (area && rootRef.current?.contains(area)) return
     scheduleClose()
   }
   const onKeyDown = (event) => {
@@ -345,8 +382,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', onOp
           role="group"
           aria-label="Фасада на Golden Residence. Изберете етаж."
           onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          onPointerCancel={onPointerCancel}
           onPointerOver={onPointerOver}
           onPointerLeave={onPointerLeave}
           onClick={onClick}

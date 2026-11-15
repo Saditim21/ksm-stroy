@@ -4,9 +4,10 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { NO_PREFERENCE, firstViewportMotionProblems } from './css'
 import { mockMatchMedia } from './media'
+import { mouseClick, tap } from './pointer'
 
 // The test harness itself (src/test/setup.js, src/test/media.js,
-// src/test/css.js).
+// src/test/css.js, src/test/pointer.js).
 
 describe('test environment', () => {
   it('has no window.matchMedia, so motion code renders its static final state', () => {
@@ -64,6 +65,58 @@ describe('mockMatchMedia', () => {
     } finally {
       restore()
     }
+  })
+})
+
+// src/test/pointer.js: presses in Chrome's order, where a finger's focus comes
+// after it lets go and leaves, and a mouse's with its press.
+describe('pointer presses', () => {
+  let listening
+  afterEach(() => {
+    listening?.abort()
+    document.body.innerHTML = ''
+  })
+
+  const TYPES = ['pointerover', 'pointerenter', 'pointerdown', 'pointerup', 'pointerout', 'pointerleave', 'focusin', 'focusout', 'click']
+  function logged() {
+    document.body.innerHTML = '<button type="button" id="b">b</button><p id="p">p</p>'
+    listening = new AbortController()
+    const log = []
+    for (const type of TYPES) {
+      document.addEventListener(type, (event) => log.push(`${type}${event.pointerType ? `:${event.pointerType}` : ''} ${event.target.id}`), { capture: true, signal: listening.signal })
+    }
+    return log
+  }
+  const touch = (id) => [`pointerover:touch ${id}`, `pointerenter:touch ${id}`, `pointerdown:touch ${id}`, `pointerup:touch ${id}`, `pointerout:touch ${id}`, `pointerleave:touch ${id}`]
+
+  it('tap focuses after the finger lets go and leaves, a mouse click with the press, and neither focuses twice', () => {
+    const log = logged()
+    const button = document.getElementById('b')
+
+    tap(button)
+    tap(button)
+    expect(log).toEqual([...touch('b'), 'focusin b', 'click b', ...touch('b'), 'click b'])
+
+    button.blur()
+    log.length = 0
+    mouseClick(button)
+    expect(log).toEqual(['pointerdown:mouse b', 'focusin b', 'pointerup:mouse b', 'click b'])
+
+    button.blur()
+    log.length = 0
+    tap(button, 'pen', { focusOnPress: true })
+    expect(log).toEqual(['pointerover:pen b', 'pointerenter:pen b', 'pointerdown:pen b', 'focusin b', 'pointerup:pen b', 'pointerout:pen b', 'pointerleave:pen b', 'click b'])
+  })
+
+  it('takes the focus off what had it when the press lands on something that takes none', () => {
+    const log = logged()
+    const button = document.getElementById('b')
+    button.focus()
+    log.length = 0
+
+    tap(document.getElementById('p'))
+    expect(log).toEqual([...touch('p'), 'focusout b', 'click p'])
+    expect(document.activeElement).toBe(document.body)
   })
 })
 

@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockMatchMedia } from '../test/media'
+import { mouseClick, tap } from '../test/pointer'
 import Facade from './Facade'
 import { loadSurfaces } from './loadSurfaces'
 import { buildModel } from './model'
@@ -193,10 +194,48 @@ describe('the keys on a rail (spec §7.2)', () => {
     fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' })
     expect(document.activeElement).toBe(rail('Б', 1))
   })
+
+  // A mouse press on a rail let go outside the stage sends the stage neither
+  // a pointerup nor a click (the Task 6 review's drag-off case).
+  it('still move the hot floor after a mouse press let go outside the stage', () => {
+    vi.useFakeTimers()
+    try {
+      renderFacade()
+      fireEvent.pointerOver(rail('Б', 6), { pointerType: 'mouse' })
+      fireEvent.pointerDown(rail('Б', 6), { pointerType: 'mouse' })
+      act(() => rail('Б', 6).focus())
+      fireEvent.pointerLeave(document.querySelector('.fx__stage'), { pointerType: 'mouse' })
+      fireEvent.pointerUp(document.body, { pointerType: 'mouse' })
+      act(() => vi.advanceTimersByTime(600))
+      expect(panel('b')).not.toHaveAttribute('data-open')
+
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowDown' })
+      expect(document.activeElement).toBe(rail('Б', 5))
+      expect(panel('b')).toHaveAttribute('data-open')
+      expect(text(panel('b').querySelector('.fxp__title'))).toBe('Блок Б · Етаж 5')
+      expect(document.querySelector('.fx')).toHaveClass('is-kbd')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  // Tab may come from anywhere on the page, whatever pressed the facade before.
+  it('make the rail that Tab reaches from outside the facade hot, as the keyboard’s, after a tap on the facade', () => {
+    renderFacade()
+    tap(floorPath('Б-2'))
+    fireEvent.keyDown(document.body, { key: 'Tab' })
+    act(() => rail('А', 8).focus())
+
+    expect(panel('a')).toHaveAttribute('data-open')
+    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 8')
+    expect(document.querySelector('.fx')).toHaveClass('is-kbd')
+  })
 })
 
 // Review Focus 3: a touch screen at desktop width. The first tap previews,
-// the second opens, and a touch never counts as hovering.
+// the second opens, and a touch never counts as hovering. The presses come in
+// Chrome's order (src/test/pointer.js): a finger's tap focuses a rail after
+// its pointerup, and that focus is not the keyboard's.
 describe('touch at desktop width', () => {
   it('a touch tap at desktop width previews first', () => {
     const onOpenFloor = renderFacade()
@@ -205,38 +244,102 @@ describe('touch at desktop width', () => {
     fireEvent.pointerOver(floor, { pointerType: 'touch' })
     expect(panel('a')).not.toHaveAttribute('data-open')
 
-    fireEvent.pointerDown(floor, { pointerType: 'touch' })
-    fireEvent.click(floor)
+    tap(floor)
     expect(panel('a')).toHaveAttribute('data-open')
     expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
     expect(onOpenFloor).not.toHaveBeenCalled()
 
-    fireEvent.pointerDown(floor, { pointerType: 'touch' })
-    fireEvent.click(floor)
+    tap(floor)
     expect(onOpenFloor).toHaveBeenCalledTimes(1)
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 5])
   })
 
-  it('takes a pen tap on a rail the same way, and a tap on another floor previews that one', () => {
+  it('previews a rail on the first touch tap, though the tap focuses it, and opens it on the second', () => {
     const onOpenFloor = renderFacade()
 
-    fireEvent.pointerDown(rail('А', 5), { pointerType: 'pen' })
-    act(() => rail('А', 5).focus())
-    fireEvent.click(rail('А', 5))
-    expect(onOpenFloor).not.toHaveBeenCalled()
+    tap(rail('А', 5))
+    expect(document.activeElement).toBe(rail('А', 5))
+    expect(panel('a')).toHaveAttribute('data-open')
+    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
+    expect(rail('А', 5)).toHaveClass('is-hot')
     expect(document.querySelector('.fx')).not.toHaveClass('is-kbd')
-
-    fireEvent.pointerDown(rail('А', 4), { pointerType: 'pen' })
-    fireEvent.click(rail('А', 4))
     expect(onOpenFloor).not.toHaveBeenCalled()
-    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 4')
+
+    tap(rail('А', 5))
+    expect(onOpenFloor).toHaveBeenCalledTimes(1)
+    expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 5])
   })
 
-  it('opens at once on a mouse click', () => {
+  it('takes a pen tap on a rail the same way, whichever side of the pointerup it focuses, and a tap on another floor previews that one', () => {
     const onOpenFloor = renderFacade()
-    fireEvent.pointerDown(floorPath('Б-2'), { pointerType: 'mouse' })
-    fireEvent.click(floorPath('Б-2'))
+
+    tap(rail('А', 5), 'pen', { focusOnPress: true })
+    expect(onOpenFloor).not.toHaveBeenCalled()
+    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
+    expect(document.querySelector('.fx')).not.toHaveClass('is-kbd')
+
+    tap(rail('А', 4), 'pen')
+    expect(onOpenFloor).not.toHaveBeenCalled()
+    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 4')
+    expect(document.querySelector('.fx')).not.toHaveClass('is-kbd')
+
+    tap(rail('А', 4), 'pen', { focusOnPress: true })
+    expect(onOpenFloor).toHaveBeenCalledTimes(1)
+    expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 4])
+  })
+
+  // Spec §7.3: entering a panel cancels the close. A finger has left the panel
+  // (its pointerleave) before its press takes the focus off the rail it had
+  // tapped. A tap off the building and the panels, even on the caption under
+  // the building, leaves them.
+  it('keeps the panel through a tap inside it, after a tap on a rail, and closes it for a tap off the building and the panels', () => {
+    vi.useFakeTimers()
+    try {
+      renderFacade()
+      tap(rail('А', 5))
+      tap(panel('a').querySelector('.fxp__title'))
+      act(() => vi.advanceTimersByTime(600))
+      expect(panel('a')).toHaveAttribute('data-open')
+      expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
+
+      tap(rail('Б', 6))
+      expect(panel('b')).toHaveAttribute('data-open')
+      tap(document.querySelector('.fx__cap'))
+      act(() => vi.advanceTimersByTime(319))
+      expect(panel('b')).toHaveAttribute('data-open')
+      act(() => vi.advanceTimersByTime(1))
+      expect(panel('b')).not.toHaveAttribute('data-open')
+      expect(document.querySelector('.fx')).not.toHaveClass('is-hot')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('previews another floor tapped on the building after a rail, and opens it on the second tap', () => {
+    const onOpenFloor = renderFacade()
+
+    tap(rail('А', 5))
+    tap(floorPath('А-3'))
+    expect(document.activeElement).toBe(document.body)
+    expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 3')
+    expect(onOpenFloor).not.toHaveBeenCalled()
+
+    tap(floorPath('А-3'))
+    expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 3])
+  })
+
+  it('opens at once on a mouse click, on a floor or on a rail, whose focus is no keyboard’s', () => {
+    const onOpenFloor = renderFacade()
+    mouseClick(floorPath('Б-2'))
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['Б', 2])
+
+    fireEvent.pointerDown(rail('А', 7), { pointerType: 'mouse' })
+    act(() => rail('А', 7).focus())
+    expect(document.querySelector('.fx')).not.toHaveClass('is-hot')
+    fireEvent.pointerUp(rail('А', 7), { pointerType: 'mouse' })
+    fireEvent.click(rail('А', 7))
+    expect(onOpenFloor).toHaveBeenCalledTimes(2)
+    expect(onOpenFloor.mock.calls[1].slice(0, 2)).toEqual(['А', 7])
   })
 })
 
@@ -262,15 +365,28 @@ describe('compact mode (spec §7.2)', () => {
 
 // Spec §7.5: on a phone one block shows at a time; the first tap brings up
 // the sheet, whose stepper walks the block's floors, and the second opens.
+// The taps come in Chrome's order (src/test/pointer.js).
 describe('phones (spec §7.5)', () => {
   const sheet = () => document.querySelector('.sheet')
   beforeEach(() => {
     window.matchMedia('(max-width: 900px)').matches = true
   })
-  const tap = (element) => {
-    fireEvent.pointerDown(element, { pointerType: 'touch' })
-    fireEvent.click(element)
-  }
+
+  // A finger's tap focuses the rail after its pointerup (the Task 6 review).
+  it('shows the sheet on a first tap on a rail, though the tap focuses the rail, and opens the floor on the second', () => {
+    const onOpenFloor = renderFacade()
+
+    tap(rail('А', 5))
+    expect(document.activeElement).toBe(rail('А', 5))
+    expect(sheet()).toHaveAttribute('data-open')
+    expect(text(sheet().querySelector('.sheet__title'))).toBe('Блок А · Етаж 5')
+    expect(document.querySelector('.fx')).not.toHaveClass('is-kbd')
+    expect(onOpenFloor).not.toHaveBeenCalled()
+
+    tap(rail('А', 5))
+    expect(onOpenFloor).toHaveBeenCalledTimes(1)
+    expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 5])
+  })
 
   it('shows a tapped floor in the sheet, steps through the block, opens on a second tap, and closes on ×', () => {
     const onOpenFloor = renderFacade()

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { snapshotAvailability } from '../../explorer/testing'
+import { tap } from '../../test/pointer'
 import TeaserSection from './TeaserSection'
 
 // Home's floor-by-floor teaser, #etazhi (spec §6.11, §8.1 #5, §9): the
@@ -81,5 +82,20 @@ it('shows the notice when a Golden Residence slot is built-in, and not over live
 it('opens a floor on the Golden Residence page, at the explorer', () => {
   renderTeaser()
   fireEvent.click(screen.getByRole('button', { name: /^Блок А, етаж 5:/ }))
+  expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence?floor=А-5#explorer')
+})
+
+// Spec §7.2: on Home too, a finger's first tap on a rail names the floor in
+// the caption, and only the second leaves for the Golden Residence page. The
+// tap comes in Chrome's order, its focus after its pointerup (src/test/pointer.js).
+it('names a floor on the first touch tap on its rail, and opens it on the second', () => {
+  renderTeaser()
+  const a5 = screen.getByRole('button', { name: /^Блок А, етаж 5:/ })
+
+  tap(a5)
+  expect(text(document.querySelector('#etazhi .fx__cap .t'))).toBe('Блок А · етаж 5')
+  expect(screen.getByTestId('where')).toHaveTextContent(/^\/$/)
+
+  tap(a5)
   expect(screen.getByTestId('where')).toHaveTextContent('/projects/golden-residence?floor=А-5#explorer')
 })
