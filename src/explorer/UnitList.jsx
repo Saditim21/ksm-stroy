@@ -9,7 +9,8 @@ import { filterUnits, sortUnitsBy } from './filterUnits'
 // of Golden Residence's apartments in one table, with its filters in a bar
 // above it and the live meta „**N** от 192 · K свободни“ at the bar's end.
 // - Filters: Блок, Вид and Статус as pills (aria-pressed), Етаж, Площ and
-//   Изложение as selects; each starts at its „all“.
+//   Изложение as selects; each starts at its „all“, but Блок at `block`
+//   when given: a block page's list starts on its own block (spec §7.11).
 // - The table: Имот, Етаж, Вид, Обща площ, Изложение and Статус; Имот, Етаж
 //   and Обща площ sort (aria-sort), a second click turning the order; Етаж
 //   and Изложение hide on a phone (explorer.css). Rows are in the tab order,
@@ -77,8 +78,8 @@ function SortHead({ by, label, sort, onSort, className }) {
   )
 }
 
-export default function UnitList({ model, onUnit }) {
-  const [filters, setFilters] = useState(NO_FILTERS)
+export default function UnitList({ model, block = ALL, onUnit }) {
+  const [filters, setFilters] = useState(() => ({ ...NO_FILTERS, block }))
   const [sort, setSort] = useState({ key: 'id', dir: 'asc' })
   const rows = useMemo(() => (model ? sortUnitsBy(filterUnits(model.units, filters), sort) : []), [model, filters, sort])
   const free = model ? rows.filter((unit) => unit.status === 'available').length : null

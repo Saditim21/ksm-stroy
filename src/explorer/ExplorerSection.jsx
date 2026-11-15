@@ -35,6 +35,9 @@ import ViewTabs from './ViewTabs'
 //   comes after the rails' own (the availability contract clicks the first).
 //   The panel not on show is hidden; the facade keeps its state there, with
 //   no floor hot.
+// - `initialBlock` is a block page's letter (spec §7.11): its facade and its
+//   list start on that block. On the Golden Residence page there is none:
+//   the facade starts on А, the list on both.
 // - The list is a lazy chunk (loadUnitList.js, ruling C8.5): it loads on the
 //   first switch to it, or on a ?view=list landing, and usually before
 //   either, as the surfaces' chunk preloads it (surfaces.js, ruling C8.6). It
@@ -54,7 +57,7 @@ import ViewTabs from './ViewTabs'
 // it has one #explorer.
 const ID = 'ex'
 
-export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' }) {
+export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)
   const viewsRef = useRef(null)
   useReveals(ref)
@@ -199,7 +202,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
           />
         </div>
         <div id={`${ID}-list`} role="tabpanel" aria-labelledby={`${ID}-tab-list`} data-view="list" hidden={view !== 'list'}>
-          {UnitList ? <UnitList model={model} onUnit={openUnit} /> : null}
+          {UnitList ? <UnitList model={model} block={initialBlock} onUnit={openUnit} /> : null}
         </div>
       </div>
     </section>

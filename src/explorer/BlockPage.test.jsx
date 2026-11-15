@@ -66,3 +66,15 @@ describe.each([
     expect(mainText()).toMatch(/Golden Residence/)
   })
 })
+
+// Spec §7.11, ruling FR3: „По критерии“ on a block page starts on that block,
+// as its facade does: 96 of the 192, its pill pressed.
+it.each([
+  ['block-a', 'А'],
+  ['block-b', 'Б'],
+])('/projects/golden-residence/%s?view=list starts the list on its own block', async (id, letter) => {
+  renderSiteAt(`/projects/golden-residence/${id}?view=list`)
+  const blocks = await screen.findByRole('group', { name: 'Блок' }, { timeout: 15000 })
+  expect(within(blocks).getByRole('button', { name: letter })).toHaveAttribute('aria-pressed', 'true')
+  expect(text(document.querySelector('.lv__meta'))).toMatch(/^96 от 192 · /)
+})

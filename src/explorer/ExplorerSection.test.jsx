@@ -274,6 +274,16 @@ describe('„Визуално“ and „По критерии“', () => {
     expect(within(panels()[1]).getByText((_, element) => element?.classList.contains('lv__meta') && text(element) === '192 от 192 · 69 свободни')).toBeInTheDocument()
   })
 
+  // Spec §7.11, ruling FR3: a block page's list starts on its own block, as
+  // its facade does; the Golden Residence page's (above) on both.
+  it('starts the list on the block it is given', async () => {
+    renderSection({ initialBlock: 'Б' }, '/projects/golden-residence?view=list')
+    await waitFor(() => expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true'))
+    const blocks = within(panels()[1]).getByRole('group', { name: 'Блок' })
+    expect(within(blocks).getByRole('button', { name: 'Б' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(panels()[1]).getByText((_, element) => element?.classList.contains('lv__meta') && text(element) === '96 от 192 · 27 свободни')).toBeInTheDocument()
+  })
+
   // Ruling F10, spec §7.8: a row opens its unit in the unit panel, through
   // the address, with no stage under it; closing it gives the row the focus
   // back.

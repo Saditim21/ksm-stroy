@@ -36,6 +36,14 @@ describe('the filters', () => {
     }
   })
 
+  // Spec §7.11, ruling FR3: a block page's list starts on its own block.
+  it('starts on the block it is given, its pill pressed', () => {
+    renderList({ block: 'Б' })
+    expect(pills('Блок').map((each) => each.getAttribute('aria-pressed'))).toEqual(['false', 'false', 'true'])
+    expect(text(meta())).toBe('96 от 192 · 27 свободни')
+    expect(firstCells()[0]).toBe('Б 101')
+  })
+
   it('presses the pill chosen, and only it in its group', () => {
     renderList()
     fireEvent.click(pill('Блок', 'Б'))
