@@ -2,58 +2,59 @@
 import { describe, expect, it } from 'vitest'
 import { median, medians, metricsOf, parseArgs, summary } from './lighthouse.mjs'
 
-// A Lighthouse 13 report, cut down to what metricsOf reads. The trace's clock
-// is in microseconds; the network requests' times are in milliseconds from
-// the first request. The four categories' scores are those of a recorded run
-// with --categories=performance,accessibility,best-practices,seo on a
-// preview-stage build, whose noindex costs the SEO score.
-const report = (overrides = {}) => ({
+// A recorded report, cut down to what metricsOf reads: Lighthouse 13.6.0 on
+// / (the preview-stage build of the M2 results, run 1, served on
+// 127.0.0.1:4190), with --categories=performance,accessibility,best-practices,seo.
+// Its noindex costs the SEO score. The trace's clock is in microseconds; the
+// requests' times are in milliseconds from the first request. Three of its
+// requests: the document, the hero picture and the motion chunk.
+const recorded = () => ({
   configSettings: { formFactor: 'mobile' },
   categories: {
-    performance: { score: 0.83 },
-    accessibility: { score: 0.96 },
+    performance: { score: 0.82 },
+    accessibility: { score: 1 },
     'best-practices': { score: 1 },
-    seo: { score: 0.66 },
+    seo: { score: 0.69 },
   },
   audits: {
-    'largest-contentful-paint': { numericValue: 4675.2 },
-    'cumulative-layout-shift': { numericValue: 0.012 },
-    'total-blocking-time': { numericValue: 40 },
-    metrics: { details: { items: [{ observedLargestContentfulPaintTs: 5_000_357_000 }] } },
+    'largest-contentful-paint': { numericValue: 4626.3554 },
+    'cumulative-layout-shift': { numericValue: 0 },
+    'total-blocking-time': { numericValue: 0 },
+    metrics: { details: { items: [{ observedLargestContentfulPaintTs: 5_239_117_229_645 }] } },
     'network-requests': {
       details: {
-        debugData: { networkStartTimeTs: 5_000_000_000 },
+        debugData: { networkStartTimeTs: 5_239_116_829_079 },
         items: [
-          { url: 'http://127.0.0.1:4190/', rendererStartTime: 0, transferSize: 9443 },
-          { url: 'http://127.0.0.1:4190/assets/photo-4.webp', rendererStartTime: 25.6, transferSize: 220904 },
-          { url: 'http://127.0.0.1:4190/assets/engine.js', rendererStartTime: 400, transferSize: 50000 },
+          { url: 'http://127.0.0.1:4190/', rendererStartTime: 0, transferSize: 12472 },
+          { url: 'http://127.0.0.1:4190/img/gr-dusk-800.avif', rendererStartTime: 52.972, transferSize: 24725 },
+          { url: 'http://127.0.0.1:4190/assets/engine-D-K32A_u.js', rendererStartTime: 175.931, transferSize: 52717 },
         ],
       },
     },
   },
-  ...overrides,
 })
+const report = (overrides = {}) => ({ ...recorded(), ...overrides })
 
 const ALL = ['performance', 'accessibility', 'best-practices', 'seo']
 
 describe('metricsOf', () => {
   it('reads LCP, CLS, TBT and, by default, the performance score alone', () => {
     const metrics = metricsOf(report())
-    expect(metrics).toMatchObject({ lcp: 4675.2, cls: 0.012, tbt: 40 })
-    expect(metrics.scores).toEqual({ performance: 83 })
+    expect(metrics).toMatchObject({ lcp: 4626.3554, cls: 0, tbt: 0 })
+    expect(metrics.scores).toEqual({ performance: 82 })
   })
 
   it('carries the score of each category asked for, out of 100', () => {
-    expect(metricsOf(report(), ALL).scores).toEqual({ performance: 83, accessibility: 96, 'best-practices': 100, seo: 66 })
-    expect(metricsOf(report(), ['accessibility']).scores).toEqual({ accessibility: 96 })
+    expect(metricsOf(report(), ALL).scores).toEqual({ performance: 82, accessibility: 100, 'best-practices': 100, seo: 69 })
+    expect(metricsOf(report(), ['seo']).scores).toEqual({ seo: 69 })
   })
 
   // A category the run left out, or one Lighthouse could not score (its
   // score is null), is never written down as a number.
   it('throws when a category asked for is missing from the report or has no score', () => {
-    const performanceOnly = report({ categories: { performance: { score: 0.83 } } })
+    const performanceOnly = report({ categories: { performance: { score: 0.82 } } })
     expect(() => metricsOf(performanceOnly, ['performance', 'seo'])).toThrow(/seo/)
-    const unscored = report({ categories: { performance: { score: 0.83 }, accessibility: { score: null } } })
+    const unscored = report({ categories: { performance: { score: 0.82 }, accessibility: { score: null } } })
     expect(() => metricsOf(unscored, ['performance', 'accessibility'])).toThrow(/accessibility/)
   })
 
@@ -65,8 +66,12 @@ describe('metricsOf', () => {
   })
 
   it('counts the bytes of the requests made before the LCP was painted, in the trace', () => {
-    // The LCP painted 357 ms after the first request; engine.js was asked for at 400 ms.
-    expect(metricsOf(report()).bytesBeforeLcp).toBe(9443 + 220904)
+    // The LCP painted 400.566 ms after the first request: all three count.
+    expect(metricsOf(report()).bytesBeforeLcp).toBe(12472 + 24725 + 52717)
+    // A request asked for after that does not.
+    const later = recorded()
+    later.audits['network-requests'].details.items.push({ url: 'http://127.0.0.1:4190/assets/surfaces.js', rendererStartTime: 401, transferSize: 5000 })
+    expect(metricsOf(later).bytesBeforeLcp).toBe(12472 + 24725 + 52717)
   })
 
   it('throws when the run failed', () => {
@@ -119,7 +124,7 @@ describe('medians', () => {
 
 it('summary: the figures, then each category’s score; the scores alone without figures', () => {
   expect(summary(metricsOf(report(), ALL))).toBe(
-    'LCP 4.68 s, CLS 0.012, TBT 40 ms, before LCP 224.9 KiB, performance 83, accessibility 96, best-practices 100, seo 66',
+    'LCP 4.63 s, CLS 0.000, TBT 0 ms, before LCP 87.8 KiB, performance 82, accessibility 100, best-practices 100, seo 69',
   )
   expect(summary({ scores: { seo: 100 } })).toBe('seo 100')
 })
