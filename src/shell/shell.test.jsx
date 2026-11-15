@@ -83,6 +83,18 @@ describe('the header', () => {
     }
   })
 
+  // The footer's plate sets its logos larger than the row's (128 and 102 px
+  // against 91 and 73), which a phone's DPR 3 turns into the 600 w files: far
+  // below the fold, it loads them only as it nears the screen.
+  it('loads the footer’s EU logos only as they near the screen', async () => {
+    renderSiteAt('/about')
+    const footer = within(await screen.findByRole('contentinfo'))
+
+    for (const name of ['Съфинансирано от Европейския съюз', 'Програма „Конкурентоспособност и иновации в предприятията“']) {
+      expect(footer.getByRole('img', { name })).toHaveAttribute('loading', 'lazy')
+    }
+  })
+
   // Home, the Golden Residence page and its block pages have an inquiry of
   // their own (their handle's `inquiry`); a Многофамилна block page, still
   // legacy, takes its project to the contact page.

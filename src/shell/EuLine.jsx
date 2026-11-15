@@ -35,23 +35,25 @@ function ShortText() {
   return <>Проект {NUMBER}, съфинансиран от ЕС.</>
 }
 
-// Each logo's width at the height its line sets it at: its `sizes`. They load
-// at once (`eager`): the header's row shows them in every first viewport, and
-// the menu and the footer ask for the same files, which have loaded by then.
+// Each logo's width at the height its line sets it at: its `sizes`. The
+// header's row loads its logos at once (`eager`): it shows them in every
+// first viewport. The footer's and the menu's plates set them larger, which
+// a high-DPR phone turns into the next files up, so theirs load only as they
+// near the screen: the footer's far below the fold, the menu's as it opens.
 const WIDTHS = {
   row: { emblem: '91px', programme: '73px' },
   plate: { emblem: '128px', programme: '102px' },
 }
 
-function Plate({ widths }) {
+function Plate({ widths, eager }) {
   return (
     <span className="eu__plate">
-      <ResponsivePicture image={images['eu-cofunded-bg']} alt="Съфинансирано от Европейския съюз" sizes={widths.emblem} eager />
+      <ResponsivePicture image={images['eu-cofunded-bg']} alt="Съфинансирано от Европейския съюз" sizes={widths.emblem} eager={eager} />
       <ResponsivePicture
         image={images['eu-pkip']}
         alt="Програма „Конкурентоспособност и иновации в предприятията“"
         sizes={widths.programme}
-        eager
+        eager={eager}
       />
     </span>
   )
@@ -81,7 +83,7 @@ export default function EuLine({ variant = 'row' }) {
 
   return (
     <div className="eu eu--row">
-      <Plate widths={WIDTHS.row} />
+      <Plate widths={WIDTHS.row} eager />
       <p className="eu__text">
         <span className="eu__short">
           <ShortText />
