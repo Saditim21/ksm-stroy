@@ -13,9 +13,13 @@ import useReveals from '../../motion/useReveals'
 //
 // Pointing at a work with a mouse, focusing it or clicking it chooses it.
 // With motion its cover wipes in from the seam (from the top on a phone) over
-// the one before, 1 s expo.inOut, settling from 1.08 as it does; a quicker
-// change wipes over a wipe still under way, as in the concept. Without
-// motion the cover changes at once. The covers are production's photos
+// the covers before it, 1 s expo.inOut, settling from 1.08 as it does, and
+// those go once it has landed. As in the concept, which appends a layer for
+// every change (home.js:238-253), each choice wipes in over everything on
+// show: a quick change wipes over a wipe still under way, and a work chosen
+// again before its cover has left the stack wipes in as a fresh layer, so the
+// covers under it stay and the frame never shows through. Without motion the
+// cover changes at once. The covers are production's photos
 // (src/assets/projects), all six in the panel from the start, hidden but
 // for the chosen one, so a change never waits for a download. The panel is
 // decoration, hidden from assistive technology: the list carries the names,
@@ -57,7 +61,15 @@ const WORKS = [
 const COVER_SIZES = '(max-width: 900px) 100vw, 92vw'
 const PHONE = '(max-width: 900px)'
 
-const layerIn = (root, work) => root?.querySelector(`.works__img[data-work="${work}"]`)
+// The covers on show, bottom to top, one show per choice:
+// { work, key, own, wipe }.
+// - key: the show's own number, never reused.
+// - own: the show uses its work's layer, one of the six in the panel. A work
+//   chosen again while an earlier show of it still holds that layer (its
+//   cover under a wipe) gets a layer of its own over the stack, made for the
+//   show and gone with it.
+// - wipe: the show wipes in; the first, and a change made at once, do not.
+const FIRST_SHOW = [{ work: 0, key: 0, own: true, wipe: false }]
 
 // Stops the wipes under way and takes off what they left on the covers, for
 // a change made at once.
@@ -70,60 +82,83 @@ function clearWipes(root, wipes) {
   })
 }
 
+// Wipes `layer` in from the seam, or from the top on a phone, over the layers
+// under it (home.js:248-252).
+function wipeIn(gsap, layer, onComplete) {
+  const fromSeam = window.matchMedia(PHONE).matches ? 'inset(0% 0% 100% 0%)' : 'inset(0% 0% 0% 100%)'
+  return gsap
+    .timeline({ onComplete })
+    .fromTo(layer, { clipPath: fromSeam }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'expo.inOut' })
+    .fromTo(layer.firstElementChild, { scale: 1.08 }, { scale: 1, duration: 1.3, ease: 'expo.out' }, 0.15)
+}
+
 export default function WorksSection() {
   const ref = useRef(null)
   useReveals(ref)
   const motionNow = useMotionNow()
-  // The covers on show, bottom to top: the chosen work's last, over any it
-  // is still wiping in over.
-  const [shown, setShown] = useState([0])
-  const chosen = shown[shown.length - 1]
-  // The wipes under way, by work, and the work whose cover wipes in once the
-  // render that shows it has committed.
+  const [shown, setShown] = useState(FIRST_SHOW)
+  const chosen = shown[shown.length - 1].work
+  // The last show's key; the wipes under way, by show; the shows whose wipe
+  // has started.
+  const lastKey = useRef(0)
   const wipes = useRef(new Map())
-  const wipeNext = useRef(null)
+  const started = useRef(new Set())
 
   function choose(work) {
     if (work === chosen) return
+    const key = ++lastKey.current
     if (!motionNow()) {
       clearWipes(ref.current, wipes.current)
-      setShown([work])
+      setShown([{ work, key, own: true, wipe: false }])
       return
     }
-    wipeNext.current = work
-    setShown((current) => [...current.filter((w) => w !== work), work])
+    setShown((current) => {
+      // Two choices of one work before a render are one show.
+      if (current[current.length - 1].work === work) return current
+      const own = !current.some((show) => show.own && show.work === work)
+      return [...current, { work, key, own, wipe: true }]
+    })
   }
 
+  // Once a render has put a new show's layer on the stack, its wipe starts,
+  // before the browser paints it in full.
   useLayoutEffect(() => {
-    const work = wipeNext.current
-    if (work === null) return
-    wipeNext.current = null
-    const motion = motionNow()
-    const layer = layerIn(ref.current, work)
-    if (!motion || !layer) {
-      clearWipes(ref.current, wipes.current)
-      setShown([work])
-      return
+    const onStack = new Set(shown.map((show) => show.key))
+    // A show that has left the stack has no wipe left to run.
+    for (const [key, wipe] of wipes.current) {
+      if (onStack.has(key)) continue
+      wipe.kill()
+      wipes.current.delete(key)
     }
-    const { gsap } = motion
-    wipes.current.get(work)?.kill()
-    const fromSeam = window.matchMedia(PHONE).matches ? 'inset(0% 0% 100% 0%)' : 'inset(0% 0% 0% 100%)'
-    const wipe = gsap.timeline({
-      onComplete: () => {
-        wipes.current.delete(work)
+    for (const key of started.current) if (!onStack.has(key)) started.current.delete(key)
+
+    const pending = shown.filter((show) => show.wipe && !started.current.has(show.key))
+    if (pending.length === 0) return
+    const motion = motionNow()
+    for (const { key } of pending) {
+      started.current.add(key)
+      const layer = ref.current?.querySelector(`.works__img[data-show="${key}"]`)
+      if (!motion || !layer) {
+        // Motion went between the choice and its render: the cover changes
+        // at once.
+        clearWipes(ref.current, wipes.current)
+        const settled = ++lastKey.current
+        setShown((current) => [{ work: current[current.length - 1].work, key: settled, own: true, wipe: false }])
+        return
+      }
+      const { gsap } = motion
+      const wipe = wipeIn(gsap, layer, () => {
+        wipes.current.delete(key)
         gsap.set(layer, { clearProps: 'clipPath' })
         gsap.set(layer.firstElementChild, { clearProps: 'transform' })
-        // The covers it has wiped over go; any chosen after it stay.
+        // The shows it has wiped over go; any chosen after it stay.
         setShown((current) => {
-          const at = current.indexOf(work)
-          return at < 0 ? current : current.slice(at)
+          const at = current.findIndex((show) => show.key === key)
+          return at > 0 ? current.slice(at) : current
         })
-      },
-    })
-    wipe
-      .fromTo(layer, { clipPath: fromSeam }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'expo.inOut' })
-      .fromTo(layer.firstElementChild, { scale: 1.08 }, { scale: 1, duration: 1.3, ease: 'expo.out' }, 0.15)
-    wipes.current.set(work, wipe)
+      })
+      wipes.current.set(key, wipe)
+    }
   }, [shown, motionNow])
 
   useEffect(() => {
@@ -134,6 +169,22 @@ export default function WorksSection() {
     }
   }, [])
 
+  // One cover's layer: one of the six, or a show's own. A show's own layer
+  // loads its picture at once rather than lazily: the file is the one its
+  // work's layer has loaded already.
+  const cover = (work, show, depth, key) => (
+    <div
+      key={key}
+      className="works__img"
+      data-work={work}
+      data-show={show ? show.key : undefined}
+      data-shown={show ? (depth === shown.length - 1 ? 'top' : 'under') : undefined}
+      style={show ? { zIndex: depth + 1 } : undefined}
+    >
+      <ResponsivePicture image={WORKS[work].image} alt="" sizes={COVER_SIZES} eager={Boolean(show && !show.own)} />
+    </div>
+  )
+
   const { name, place } = WORKS[chosen]
 
   return (
@@ -142,20 +193,10 @@ export default function WorksSection() {
       <div className="works__media" aria-hidden="true">
         <div className="works__frame">
           {WORKS.map(({ image }, work) => {
-            const depth = shown.indexOf(work)
-            const on = depth >= 0
-            return (
-              <div
-                key={image.path}
-                className="works__img"
-                data-work={work}
-                data-shown={on ? (depth === shown.length - 1 ? 'top' : 'under') : undefined}
-                style={on ? { zIndex: depth + 1 } : undefined}
-              >
-                <ResponsivePicture image={image} alt="" sizes={COVER_SIZES} />
-              </div>
-            )
+            const depth = shown.findIndex((show) => show.own && show.work === work)
+            return cover(work, shown[depth], depth, image.path)
           })}
+          {shown.map((show, depth) => (show.own ? null : cover(show.work, show, depth, `show-${show.key}`)))}
         </div>
         <p className="works__cap">
           {name}, {place}

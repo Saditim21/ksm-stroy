@@ -203,6 +203,17 @@ it('sizes nothing by vh or svh', () => {
 })
 
 describe('the services (spec §6.9; extract §4.11)', () => {
+  // The section's padding is the site's (.sec, src/styles/diptych.css, which
+  // loads before this stylesheet). Side by side the row runs into the works
+  // with none below it; a phone keeps the section's 88 px, as in the concept,
+  // where the phone `.sec` comes after `.svc` (css/diptych.css:339, :736). An
+  // unscoped `.svc` here would beat that phone rule.
+  it('ends the row on the works side by side, and leaves a phone the section’s 88 px below it', () => {
+    expect(declaredFor('.svc', ['@media (min-width: 901px)'])).toEqual({ 'padding-bottom': '0' })
+    const padding = rulesFor(rules, '.svc').filter((rule) => rule.declarations.some(({ prop }) => prop.startsWith('padding')))
+    expect(padding.map((rule) => rule.atRules)).toEqual([['@media (min-width: 901px)']])
+  })
+
   it('sets the three columns in an umber row, the screen’s .6 tall within 470–600 px', () => {
     expect(declaredFor('.svc__cols')).toMatchObject({
       display: 'flex',

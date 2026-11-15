@@ -403,8 +403,14 @@
 
 /* ---------- the services (spec §6.9; extract §4.11) ---------- */
 /* After the hinge, three columns on umber, split by brass seams that travel
-   with them as one widens. */
-.svc { padding-bottom: 0; }
+   with them as one widens. Side by side the row runs into the works with no
+   padding below it. A phone keeps the section's 88 px (.sec,
+   src/styles/diptych.css), as in the concept, where the phone rule comes
+   after this one: the site's stylesheet loads before this one, so an
+   unscoped rule here would beat it. */
+@media (min-width: 901px) {
+  .svc { padding-bottom: 0; }
+}
 .svc__cols {
   position: relative;
   display: flex;
@@ -639,7 +645,9 @@
   overflow: hidden;
 }
 /* Every cover is in the frame, hidden but for those on show: the chosen
-   one, over any it is still wiping in over (WorksSection.jsx stacks them). */
+   one, over any it is still wiping in over (WorksSection.jsx stacks them,
+   with a layer of its own for a work chosen again while its cover is still
+   under a wipe). */
 .works__img {
   position: absolute;
   inset: 0;
