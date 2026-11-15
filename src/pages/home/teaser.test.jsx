@@ -50,6 +50,8 @@ it('heads #etazhi „Golden Residence, етаж по етаж“, its italic wor
   expect(heading.querySelector('em')).toHaveTextContent(/^етаж$/)
   expect(section).toHaveAccessibleName('Golden Residence, етаж по етаж')
   expect(text(section.querySelector('.hinge .lead'))).toBe('Цифрите са свободните апартаменти в момента: блок А вляво, блок Б вдясно. Посочете етаж, кликнете, за да видите плана му.')
+  // Spec §3.3: a block's letter stays with „блок“ and with the word after it.
+  expect(section.querySelector('.hinge .lead').textContent).toContain('блок А вляво, блок Б вдясно')
 })
 
 it('shows the facade in compact mode, its floors with their counts', () => {

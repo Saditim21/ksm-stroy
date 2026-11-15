@@ -44,7 +44,7 @@ export default function TeaserSection() {
           Golden Residence, <em>етаж</em> по етаж
         </h2>
         <p className="lead" data-fade="">
-          Цифрите са свободните апартаменти в&nbsp;момента: блок&nbsp;А вляво, блок&nbsp;Б вдясно. Посочете етаж, кликнете,
+          Цифрите са свободните апартаменти в&nbsp;момента: блок&nbsp;А&nbsp;вляво, блок&nbsp;Б&nbsp;вдясно. Посочете етаж, кликнете,
           за да видите плана му.
         </p>
         <Seam draw />
