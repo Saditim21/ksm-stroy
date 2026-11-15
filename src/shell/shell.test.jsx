@@ -285,6 +285,27 @@ describe('the menu', () => {
     expect(inMenu.getByRole('link', { name: 'За проекта' })).toHaveAttribute('href', '/eu-proekt')
   })
 
+  // The prerender renders /about as /about/ and the browser runs it at
+  // /about: both mark the same page (src/utils/pathname.js).
+  it.each(['/about', '/about/'])('marks За нас as the page shown at %s', async (path) => {
+    const { menu } = await openMenu(path)
+    const inMenu = within(menu)
+
+    expect(inMenu.getByRole('link', { name: 'За нас' })).toHaveAttribute('aria-current', 'page')
+    expect(inMenu.getByRole('link', { name: 'Начало' })).not.toHaveAttribute('aria-current')
+  })
+
+  // A project's pages sit under Продажби, and a block's under Golden
+  // Residence: each marks itself as their section.
+  it('marks the sections of a block page', async () => {
+    const { menu } = await openMenu('/projects/golden-residence/block-a')
+    const inMenu = within(menu)
+
+    expect(inMenu.getByRole('link', { name: 'Продажби' })).toHaveAttribute('aria-current', 'true')
+    expect(inMenu.getByRole('link', { name: 'Golden Residence' })).toHaveAttribute('aria-current', 'true')
+    expect(inMenu.getByRole('link', { name: 'Начало' })).not.toHaveAttribute('aria-current')
+  })
+
   it('is a modal dialog on <body> that holds the page still while it is open', async () => {
     const { button, menu } = await openMenu('/projects/golden-residence')
 
