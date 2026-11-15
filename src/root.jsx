@@ -10,6 +10,7 @@ import { useRouteHandle } from './shell/handle'
 import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { trackScreenHeight } from './utils/screenHeight'
+import { focusOn } from './utils/scroll'
 import { seoData } from './utils/seo'
 import { clearTransitionCut, cutOnPop, keepRootSnapshot, liftCutWhenDone } from './utils/viewTransition'
 import './index.css'
@@ -38,8 +39,9 @@ export const links = () => [
 ]
 
 // The page's ground from the first paint, before the stylesheet: onyx with
-// ivory text (spec §2.1), the colours of the shell around every page.
-const CRITICAL_CSS = 'html,body{margin:0;padding:0}body{background-color:#0E0D0B;color:#EFE9DD}'
+// ivory text (spec §2.1), the colours of the shell around every page. Only
+// <body> has a margin of its own to drop.
+const CRITICAL_CSS = 'body{margin:0;background-color:#0E0D0B;color:#EFE9DD}'
 
 // <html> carries no className: the motion gate's class is the one attribute a
 // script writes there, before React hydrates (src/utils/motionGate.js), and
@@ -161,9 +163,11 @@ function RouteTransition() {
 // arrival it mounted with as data-arrive, which sets the page's entrance
 // delay (--arrive, src/styles/motion.css), through any later render; the
 // prerender and the hydration both render the first page, with none. A page
-// the app mounted after the first takes the focus to <main>, without
-// scrolling (spec §5.6); a hash or query change keeps the frame, and the
-// focus where it is.
+// the app mounted after the first takes the focus, without scrolling (spec
+// §5.6): to the element its address's hash names, where ScrollRestoration
+// has brought the page (ruling FR2: Home's teaser ways into #explorer start
+// the keyboard there), else to <main>. A hash or query change keeps the
+// frame, and the focus where it is.
 //
 // A page the doors bring has its doors. A cut still on then was left by a
 // change that never came (Back to a page still loading when a link was
@@ -175,11 +179,13 @@ function RouteTransition() {
 // the light ground (.page-frame, src/styles/diptych.css).
 function PageFrame({ arrive: arrival }) {
   const [arrive] = useState(arrival)
+  // The hash the page arrived with.
+  const arrivedAt = useRef(useLocation().hash)
   useLayoutEffect(() => {
     if (arrive === 'doors') clearTransitionCut()
   }, [arrive])
   useEffect(() => {
-    if (arrive !== undefined) document.getElementById('main')?.focus({ preventScroll: true })
+    if (arrive !== undefined) focusOn(document.getElementById(arrivedAt.current.slice(1)) ?? document.getElementById('main'))
   }, [arrive])
   return (
     <div className="page-frame" data-arrive={arrive}>

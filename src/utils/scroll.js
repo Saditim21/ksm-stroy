@@ -122,6 +122,14 @@ export function glideToHash(event) {
   if (!target) return
   event.preventDefault()
   scrollToId(id)
-  if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
-  target.focus({ preventScroll: true })
+  focusOn(target)
+}
+
+// Moves the focus to `el` with no scroll of its own, so a keyboard or a
+// screen reader goes on from there; an element that takes no focus gets
+// tabindex="-1" for it. A glide to a section (glideToHash) and a page that
+// arrives at a hash (src/root.jsx) end here.
+export function focusOn(el) {
+  if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
+  el.focus({ preventScroll: true })
 }

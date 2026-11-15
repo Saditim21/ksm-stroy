@@ -120,6 +120,16 @@ describe('arrival and focus', () => {
           { index: true, ...page('Начало', { header: 'overlay' }) },
           { path: 'eu-proekt', ...page('Проект на ЕС') },
           { path: 'about', ...page('Страницата за нас') },
+          // A page with a section a link's hash can name.
+          {
+            path: 'team',
+            Component: () => (
+              <section id="ekip" aria-label="Екипът">
+                <p>Екипът</p>
+              </section>
+            ),
+            handle: { header: 'solid' },
+          },
         ],
       }],
       { initialEntries: [path] },
@@ -143,6 +153,30 @@ describe('arrival and focus', () => {
     fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('link', { name: 'За нас' }))
     await shows('Страницата за нас')
     expect(frame()).toHaveAttribute('data-arrive', 'doors')
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('main#main')))
+  })
+
+  // Ruling FR2 (spec §5.6 as amended): a page a link with a hash opens lands
+  // at the hash's element (ScrollRestoration scrolls it into view), and the
+  // focus goes there too, with no scroll of its own, so the keyboard and a
+  // screen reader start where the link promised (Home's teaser ways into
+  // #explorer). An element that takes no focus gets tabindex="-1" for it.
+  it('focuses the element a link’s hash names on the page it opens', async () => {
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus')
+    const { router } = renderApp('/eu-proekt')
+    await act(() => router.navigate('/team#ekip'))
+    await shows('Екипът')
+    const section = document.getElementById('ekip')
+    await waitFor(() => expect(document.activeElement).toBe(section))
+    expect(section).toHaveAttribute('tabindex', '-1')
+    const call = focus.mock.contexts.indexOf(section)
+    expect(focus.mock.calls[call]).toEqual([{ preventScroll: true }])
+  })
+
+  it('focuses <main> when the hash names nothing on the page', async () => {
+    const { router } = renderApp('/eu-proekt')
+    await act(() => router.navigate('/about#nowhere'))
+    await shows('Страницата за нас')
     await waitFor(() => expect(document.activeElement).toBe(document.querySelector('main#main')))
   })
 
