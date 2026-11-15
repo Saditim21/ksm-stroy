@@ -9,9 +9,17 @@
 // fails on:
 //   - a console error or warning, a page error, or a React hydration message
 //     in any console line (HYDRATION);
-//   - a same-origin request that fails or answers 400 or more. A request
-//     Chrome drops (net::ERR_ABORTED) fails only if no other request of the
-//     visit loaded its URL (see `loaded` in visit());
+//   - a same-origin request that fails or answers 400 or more. Of the
+//     requests Chrome drops (net::ERR_ABORTED), only the two duplicates it
+//     makes for nobody pass, and only when another request of the visit
+//     loaded their URL: its own background revalidation (initiator
+//     "other"), and a preload of the document the page fetched for itself
+//     (excusedAbort()). Any other, the availability store's own fetch above
+//     all, fails;
+//   - the stale-data notice (src/explorer/StaleNotice.jsx) on the page: the
+//     availability store ended on the data built into the site, though the
+//     local API answers (checked once, before the visits: the static server
+//     runs api/availability.js over saved sheets);
 //   - the wrong status, redirect or final URL;
 //   - two copies of the site: more than one main#main, or a tree at the top
 //     of <body> (or a main#main) that React does not own. That is what a
@@ -52,6 +60,20 @@
 // never overlaps the Golden Residence info. jsdom lays out no text; Chrome
 // does.
 //
+// And the explorer (spec §7.2–7.6, §7.10), each step failing with its name:
+//   - desktop mouse, /projects/golden-residence at 1440×900: #explorer
+//     scrolled into view, a real mouse over the centre of floor А-5's
+//     polygon shows aside.fxp--a, titled „Блок А · Етаж 5“, within 600 ms;
+//     a click opens the dialog of that name, and Escape closes it;
+//   - keyboard, the same page at 1440×900: Tab from the top reaches a rail,
+//     whose floor's panel shows, and the rail carries its solid 2 px ring;
+//   - phone, the same page at 390×844 with touch: a tap on floor А-3 shows
+//     the sheet, titled „Блок А · Етаж 3“, and only that; a second tap
+//     opens the dialog of that name;
+//   - deep link, /projects/golden-residence/block-a?floor=3 at 1440×900:
+//     the dialog „Блок А · Етаж 3“ once the page has hydrated.
+// No step may log a console error or warning, or a page error.
+//
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
 // 3.5 s after the load event in Chrome 157 (for an as="fetch" preload, such
@@ -61,13 +83,14 @@
 // <os tmpdir>/ksmstroy-smoke). Chrome is $CHROME_PATH, else its usual place
 // on Windows and macOS, else `google-chrome` on the PATH.
 //
-// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock] [--focus-ring] [--phone-hero]
+// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock] [--focus-ring] [--phone-hero] [--explorer]
 //   with arguments, only the paths given (a path not listed below is
 //   expected to answer 200), the scroll lock only with --scroll-lock, the
-//   focus ring only with --focus-ring and the phone opening only with
-//   --phone-hero.
+//   focus ring only with --focus-ring, the phone opening only with
+//   --phone-hero and the explorer only with --explorer.
 
 import fs from 'node:fs'
+import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import puppeteer from 'puppeteer-core'
@@ -115,7 +138,7 @@ const VISITS = [
   { path: '/index.html', redirect: { status: 308, to: '/' } },
   { path: '/About', status: 404, text: NOT_FOUND_TEXT },
 ]
-const CHECKS = ['--scroll-lock', '--focus-ring', '--phone-hero']
+const CHECKS = ['--scroll-lock', '--focus-ring', '--phone-hero', '--explorer']
 const ARGS = process.argv.slice(2)
 const FULL_RUN = ARGS.length === 0
 const ONLY = ARGS.filter((arg) => !CHECKS.includes(arg))
@@ -123,6 +146,7 @@ const RUN = FULL_RUN ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path ===
 const RUN_SCROLL_LOCK = FULL_RUN || ARGS.includes('--scroll-lock')
 const RUN_FOCUS_RING = FULL_RUN || ARGS.includes('--focus-ring')
 const RUN_PHONE_HERO = FULL_RUN || ARGS.includes('--phone-hero')
+const RUN_EXPLORER = FULL_RUN || ARGS.includes('--explorer')
 
 // The scroll lock check: where the page is scrolled to when the menu opens.
 const SCROLL_LOCK = { path: '/about', y: 1500 }
@@ -164,6 +188,30 @@ const PHONE_HERO = {
   ],
 }
 
+// The explorer's steps (spec §7): the Golden Residence page's, and a deep
+// link to a floor of block А. A floor's title, in its panel, its sheet and
+// its plan stage's name, is „Блок А · Етаж 5“ (titleOf).
+const titleOf = (key) => {
+  const [block, floor] = key.split('-')
+  return `Блок ${block} · Етаж ${floor}`
+}
+const EXPLORER = {
+  path: '/projects/golden-residence',
+  // The floor the mouse points at, and the one a finger taps.
+  mouseFloor: 'А-5',
+  tapFloor: 'А-3',
+  deepLink: { path: '/projects/golden-residence/block-a?floor=3', floor: 'А-3' },
+  // How soon the edge panel must show once the mouse is over its floor.
+  panelWithinMs: 600,
+  // The rails' focus ring (spec §11): its style and width.
+  ring: 'solid 2px',
+}
+
+// The availability API, which the static server runs over the saved sheets:
+// Golden Residence's four sources must read, so every store ends on live rows.
+const AVAILABILITY = '/api/availability'
+const GOLDEN_RESIDENCE_SOURCES = ['BLOCK_A', 'BLOCK_B', 'GARAGES', 'PARKING']
+
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH
   if (process.platform === 'win32') return 'C:/Program Files/Google/Chrome/Application/chrome.exe'
@@ -185,6 +233,53 @@ const relative = (url) => {
 }
 const slugOf = (pathname) =>
   decodeURIComponent(pathname).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'home'
+
+// A request Chrome dropped (net::ERR_ABORTED) that is no failure: a
+// duplicate it made for nobody and drops at its next garbage collection, of
+// a URL another request of the visit loaded (Task 6's analysis). Either its
+// own background revalidation of a response stale on arrival, initiator
+// "other" (the availability API's Cache-Control is the CDN's,
+// s-maxage=30, stale-while-revalidate=300, pinned by api/availability.js and
+// its contract), or a preload of the document (`preloads`, the hrefs of its
+// <link rel="preload">) that the page's own fetch did not take. Anything else
+// is a failure: above all the store's own fetch (initiator "script"), whose
+// 10 s timeout would drop the page to the built-in data.
+function excusedAbort(request, { loaded, preloads }) {
+  const url = request.url()
+  if (!loaded.has(url)) return false
+  const initiator = request.initiator()?.type
+  return initiator === 'other' || ((initiator === 'parser' || initiator === 'preload') && preloads.includes(url))
+}
+
+// Whether the local availability API answers with Golden Residence's live
+// rows: null if it does, else what it answered. Not fetch(), which refuses
+// port 4190 (a bad port in the Fetch standard).
+function availabilityProblem() {
+  return new Promise((resolve) => {
+    const request = http.get(`${ORIGIN}${AVAILABILITY}`, { timeout: 15000 }, (response) => {
+      let body = ''
+      response.setEncoding('utf8')
+      response.on('data', (chunk) => {
+        body += chunk
+      })
+      response.on('end', () => {
+        if (response.statusCode !== 200) {
+          resolve(`it answered ${response.statusCode}`)
+          return
+        }
+        try {
+          const { sources = {} } = JSON.parse(body)
+          const missing = GOLDEN_RESIDENCE_SOURCES.filter((source) => sources[source] !== 'ok')
+          resolve(missing.length === 0 ? null : missing.map((source) => `${source} ${sources[source] ?? 'absent'}`).join(', '))
+        } catch (error) {
+          resolve(`its answer is not JSON: ${error.message}`)
+        }
+      })
+    })
+    request.on('timeout', () => request.destroy(new Error('no answer in 15 s')))
+    request.on('error', (error) => resolve(error.message))
+  })
+}
 
 // In the page: the links to `pathname` (with `text`, when given), each as
 // whether a visitor sees it now: nothing over it either, so a dialog over the
@@ -261,24 +356,18 @@ function appTrees() {
 }
 
 // One visit at one size: every problem found, and the first viewport's shot.
-async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog }, size, shot) {
+async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog }, size, shot, { liveData }) {
   const problems = []
   // Closing the profile aborts what is still loading; that is not the page's doing.
   let closing = false
   const report = (problem) => {
     if (!closing) problems.push(problem)
   }
-  // A request Chrome drops (net::ERR_ABORTED) is a failure only if no other
-  // request of the visit loaded its URL, so it is judged at the end. Chrome
-  // drops a duplicate it holds for nobody at its next garbage collection:
-  // the availability API's preload, when the page's fetch went to the
-  // network itself, or the background revalidation Chrome makes after the
-  // fetch takes the preloaded response, which is stale at once (its
-  // Cache-Control is the CDN's: s-maxage=30, stale-while-revalidate=300,
-  // pinned by api/availability.js and its contract). On any build a forced
-  // collection after the load drops it (Task 6, base d3c4d6b included), and
-  // a page whose motion runs during the visit, as Home's facade intro on the
-  // way to the poster, collects garbage within it. The page had its data.
+  // A request Chrome drops (net::ERR_ABORTED) is judged at the end, against
+  // what the visit loaded (excusedAbort()). On any build a forced garbage
+  // collection after the load drops the duplicates it excuses (Task 6, base
+  // d3c4d6b included), and a page whose motion runs during the visit, as
+  // Home's facade intro on the way to the poster, collects garbage within it.
   const loaded = new Set()
   const aborted = []
   const context = await browser.createBrowserContext()
@@ -382,8 +471,17 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         }
       }
 
+      // The store's data, once the visit has waited for it (src/data/availability).
+      if (liveData) {
+        const notice = await page.evaluate(() => document.querySelector('.stale')?.textContent.replace(/\s+/g, ' ').trim() ?? null)
+        if (notice) problems.push(`the availability ended on the data built into the site, though the local API answers: the page shows „${notice.slice(0, 48)}…“`)
+      }
+
+      const preloads = await page.evaluate(() => [...document.querySelectorAll('link[rel="preload"]')].map((link) => link.href))
       for (const request of aborted) {
-        if (!loaded.has(request.url())) report(`request failed: ${relative(request.url())} (${request.failure()?.errorText})`)
+        if (!excusedAbort(request, { loaded, preloads })) {
+          report(`request failed: ${relative(request.url())} (${request.failure()?.errorText}, initiator ${request.initiator()?.type ?? 'unknown'})`)
+        }
       }
     } catch (error) {
       // A navigation nobody expected, for one, takes the page's context away.
@@ -604,6 +702,224 @@ async function phoneHero(browser, userAgents) {
   return problems
 }
 
+// The explorer (spec §7.2–7.6, §7.10): its four steps, each in a fresh
+// profile, each failing with its name.
+
+// Whether the page shows the surface `selector` (an edge panel, the sheet)
+// open with the title `title` (its `titleSelector`): a box of its own on the
+// screen, visible, and that title.
+function surfaceShows(selector, titleSelector, title) {
+  const surface = document.querySelector(selector)
+  if (!surface) return { shows: false, state: 'not in the page' }
+  const style = getComputedStyle(surface)
+  const box = surface.getBoundingClientRect()
+  const said = surface.querySelector(titleSelector)?.textContent.replace(/\s+/g, ' ').trim() ?? ''
+  const onScreen = box.width > 0 && box.height > 0 && box.right > 0 && box.bottom > 0 && box.left < innerWidth && box.top < innerHeight
+  const state = `${surface.hasAttribute('data-open') ? 'open' : 'closed'}, visibility ${style.visibility}, ${onScreen ? 'on screen' : `off screen (${Math.round(box.left)},${Math.round(box.top)} ${Math.round(box.width)}×${Math.round(box.height)})`}, titled „${said}“`
+  const shows = surface.hasAttribute('data-open') && style.visibility === 'visible' && style.display !== 'none' && onScreen && said === title
+  return { shows, state }
+}
+
+// In the page: the centre of a floor's polygon on the facade, and what the
+// pointer would land on there.
+function floorCentre(key) {
+  const floor = document.querySelector(`.fx__floor[data-k="${key}"]`)
+  if (!floor) return null
+  const { left, top, width, height } = floor.getBoundingClientRect()
+  const x = left + width / 2
+  const y = top + height / 2
+  const there = document.elementFromPoint(x, y)
+  const onScreen = x > 0 && y > 0 && x < innerWidth && y < innerHeight
+  return { x, y, onScreen, hits: there === floor, there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
+}
+
+// Waits until the page's scroll has held still for 300 ms (Lenis glides).
+async function settled(page) {
+  let last = await page.evaluate(() => scrollY)
+  for (let at = 0; at < 4000; at += 150) {
+    await delay(150)
+    const now = await page.evaluate(() => scrollY)
+    if (now === last && at >= 300) return
+    last = now
+  }
+}
+
+// Polls the page until `fn` (in the page) answers { shows: true }, for at
+// most `ms`: its last answer.
+async function within(page, ms, fn, ...args) {
+  const until = Date.now() + ms
+  let answer = await page.evaluate(fn, ...args)
+  while (!answer.shows && Date.now() < until) {
+    await delay(25)
+    answer = await page.evaluate(fn, ...args)
+  }
+  return answer
+}
+
+// Whether the dialog `name` is open on top, within `ms`.
+async function dialogOpens(page, name, ms) {
+  try {
+    await page.waitForFunction((wanted) => {
+      const names = [...document.querySelectorAll('[role="dialog"]')]
+        .filter((dialog) => dialog.getAttribute('aria-hidden') !== 'true')
+        .map((dialog) => (document.getElementById(dialog.getAttribute('aria-labelledby'))?.textContent ?? dialog.getAttribute('aria-label') ?? '').replace(/\s+/g, ' ').trim())
+      return names.includes(wanted)
+    }, { timeout: ms }, name)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// A page in a fresh profile at `size`, its console errors and warnings, page
+// errors and hydration messages reported as the step's problems, at the
+// Golden Residence page (or `path`), hydrated.
+async function explorerPage(context, userAgents, size, problems, path = EXPLORER.path) {
+  const page = await context.newPage()
+  page.on('console', (message) => {
+    const type = message.type()
+    const line = message.text()
+    if (['error', 'warn', 'warning', 'assert'].includes(type) || HYDRATION.test(line)) problems.push(`console.${type}: ${line.slice(0, 300)}`)
+  })
+  page.on('pageerror', (error) => problems.push(`page error: ${String(error?.message ?? error).slice(0, 300)}`))
+  await page.setViewport(size.viewport)
+  await page.setUserAgent(size.viewport.isMobile ? userAgents.mobile : userAgents.desktop)
+  await page.goto(`${ORIGIN}${path}`, { waitUntil: 'load', timeout: 30000 })
+  await page.waitForFunction(() => {
+    const main = document.getElementById('main')
+    return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
+  }, { timeout: HYDRATION_TIMEOUT_MS })
+  return page
+}
+
+// The edge panel of a floor's block.
+const panelOf = (key) => `aside.fxp--${key.startsWith('А') ? 'a' : 'b'}`
+const openNames = async (page) => (await page.evaluate(openDialogs)).map((name) => `„${name}“`).join(', ') || 'none'
+
+// Desktop mouse: #explorer in view, a real mouse over the centre of floor
+// А-5's polygon shows block А's edge panel within 600 ms; a click opens the
+// floor's plan stage, and Escape closes it.
+async function explorerMouse(page, problems) {
+  const key = EXPLORER.mouseFloor
+  const panelSelector = panelOf(key)
+  await page.evaluate(() => document.getElementById('explorer').scrollIntoView({ block: 'start' }))
+  await settled(page)
+  // The facade loads its panels as it nears the screen.
+  await page.waitForSelector(panelSelector, { timeout: 10000 })
+  let floor = await page.evaluate(floorCentre, key)
+  if (floor && !floor.onScreen) {
+    await page.evaluate((y) => window.scrollBy(0, y - innerHeight / 2), floor.y)
+    await settled(page)
+    floor = await page.evaluate(floorCentre, key)
+  }
+  if (!floor?.onScreen || !floor.hits) {
+    problems.push(`floor ${key}'s polygon cannot be pointed at: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
+    return
+  }
+  await page.mouse.move(floor.x - 40, floor.y, { steps: 2 })
+  await page.mouse.move(floor.x, floor.y, { steps: 4 })
+  const panel = await within(page, EXPLORER.panelWithinMs, surfaceShows, panelSelector, '.fxp__title', titleOf(key))
+  if (!panel.shows) problems.push(`${panelSelector} does not show „${titleOf(key)}“ within ${EXPLORER.panelWithinMs} ms of the hover (${panel.state})`)
+
+  await page.mouse.click(floor.x, floor.y)
+  if (!(await dialogOpens(page, titleOf(key), 5000))) {
+    problems.push(`a click on floor ${key} opens no dialog „${titleOf(key)}“ (open: ${await openNames(page)})`)
+    return
+  }
+  await delay(300)
+  await page.keyboard.press('Escape')
+  try {
+    await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), { timeout: 3000 })
+  } catch {
+    problems.push(`Escape leaves a dialog open: ${await openNames(page)}`)
+  }
+}
+
+// Keyboard: Tab from the top reaches a rail; its floor's edge panel shows, and
+// the rail carries the solid 2 px ring (spec §11; ruling T6a: the panel lies
+// over its own rail while it is open, and the dashed lens shows the focus).
+async function explorerKeyboard(page, problems) {
+  let rail = null
+  for (let tabs = 0; tabs < MAX_TABS && !rail; tabs += 1) {
+    await page.keyboard.press('Tab')
+    rail = await page.evaluate(() => (document.activeElement?.matches('.fx__cnt') ? document.activeElement.dataset.k : null))
+  }
+  if (!rail) {
+    problems.push(`${MAX_TABS} Tabs never reached a rail (focus on „${await page.evaluate(focusedText)}“)`)
+    return
+  }
+  const panel = await within(page, EXPLORER.panelWithinMs, surfaceShows, panelOf(rail), '.fxp__title', titleOf(rail))
+  if (!panel.shows) problems.push(`the first rail, ${rail}, has the focus, but ${panelOf(rail)} does not show „${titleOf(rail)}“ (${panel.state})`)
+  const focused = await page.evaluate(focusedRing)
+  if (!focused.visible) problems.push(`the rail ${rail} has the focus without :focus-visible`)
+  if (!focused.ring.startsWith(`${EXPLORER.ring} `)) problems.push(`the rail ${rail} shows a ${focused.ring} ring, not ${EXPLORER.ring}`)
+}
+
+// Phone: a tap on floor А-3 shows the sheet, titled „Блок А · Етаж 3“, and
+// opens nothing; a second tap on it opens its plan stage.
+async function explorerPhone(page, problems) {
+  const key = EXPLORER.tapFloor
+  await page.evaluate((k) => document.querySelector(`.fx__floor[data-k="${k}"]`).scrollIntoView({ block: 'center' }), key)
+  await settled(page)
+  await page.waitForNetworkIdle({ idleTime: 300, timeout: 5000 }).catch(() => {})
+  let floor = await page.evaluate(floorCentre, key)
+  if (!floor?.onScreen || !floor.hits) {
+    problems.push(`floor ${key}'s polygon cannot be tapped: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
+    return
+  }
+  await page.touchscreen.tap(floor.x, floor.y)
+  const sheet = await within(page, 1500, surfaceShows, '.sheet', '.sheet__title', titleOf(key))
+  if (!sheet.shows) problems.push(`the first tap on floor ${key} shows no sheet with „${titleOf(key)}“ (${sheet.state})`)
+  if ((await page.evaluate(openDialogs)).length > 0) {
+    problems.push(`the first tap on floor ${key} opened ${await openNames(page)} instead of previewing it`)
+    return
+  }
+
+  // The page makes room for the sheet under the facade.
+  await settled(page)
+  floor = await page.evaluate(floorCentre, key)
+  if (!floor?.onScreen || !floor.hits) {
+    problems.push(`with the sheet up, floor ${key}'s polygon cannot be tapped again: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
+    return
+  }
+  await page.touchscreen.tap(floor.x, floor.y)
+  if (!(await dialogOpens(page, titleOf(key), 5000))) {
+    problems.push(`a second tap on floor ${key} opens no dialog „${titleOf(key)}“ (open: ${await openNames(page)})`)
+  }
+}
+
+// Deep link: the floor's plan stage, once the page has hydrated.
+async function explorerDeepLink(page, problems) {
+  const dialog = titleOf(EXPLORER.deepLink.floor)
+  if (!(await dialogOpens(page, dialog, 10000))) {
+    problems.push(`no dialog „${dialog}“ after hydration (open: ${await openNames(page)})`)
+  }
+  // Time for a late error to show.
+  await delay(1000)
+}
+
+const EXPLORER_STEPS = [
+  { name: 'desktop mouse', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerMouse },
+  { name: 'keyboard', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerKeyboard },
+  { name: 'phone', size: VIEWPORTS[1], path: EXPLORER.path, run: explorerPhone },
+  { name: 'deep link', size: VIEWPORTS[0], path: EXPLORER.deepLink.path, run: explorerDeepLink },
+]
+
+// One step of the explorer's, in a fresh profile: its problems.
+async function explorerStep(browser, userAgents, { size, path: pathname, run }) {
+  const problems = []
+  const context = await browser.createBrowserContext()
+  try {
+    const page = await explorerPage(context, userAgents, size, problems, pathname)
+    await run(page, problems)
+  } catch (error) {
+    problems.push(`the step stopped: ${error.message.split('\n')[0]}`)
+  } finally {
+    await context.close()
+  }
+  return problems
+}
+
 const COLUMNS = [44, 11, 42, 10, 10]
 const row = (cells) => `  ${cells.map((cell, i) => String(cell).padEnd(COLUMNS[i])).join(' ').trimEnd()}`
 const clip = (value, width) => (value.length > width ? `${value.slice(0, width - 1)}…` : value)
@@ -634,6 +950,10 @@ async function main() {
   let browser
   const started = Date.now()
   const failures = []
+  // Every visit's availability must end on live rows, which the local API
+  // serves; without them the visits cannot be held to that.
+  const apiProblem = await availabilityProblem()
+  if (apiProblem) failures.push(`${AVAILABILITY} on the local server does not answer with Golden Residence's live rows: ${apiProblem}`)
   try {
     browser = await puppeteer.launch({
       executablePath: chromePath(),
@@ -656,7 +976,7 @@ async function main() {
       const number = String(VISITS.indexOf(entry) + 1).padStart(2, '0')
       const [results, heading] = await Promise.all([
         Promise.all(VIEWPORTS.map((size) =>
-          visit(browser, userAgents, entry, size, path.join(SHOTS, `${number}-${slugOf(entry.path)}-${size.slug}.png`)))),
+          visit(browser, userAgents, entry, size, path.join(SHOTS, `${number}-${slugOf(entry.path)}-${size.slug}.png`), { liveData: !apiProblem }))),
         headingWithoutJs(browser, entry.path),
       ])
       results.forEach(({ problems }, i) => {
@@ -689,6 +1009,15 @@ async function main() {
       for (const problem of problems) failures.push(`${label}: ${problem}`)
       console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
     }
+
+    if (RUN_EXPLORER) {
+      for (const step of EXPLORER_STEPS) {
+        const label = `explorer, ${step.name}: ${step.path} at ${step.size.label}`
+        const problems = await explorerStep(browser, userAgents, step)
+        for (const problem of problems) failures.push(`${label}: ${problem}`)
+        console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
+      }
+    }
   } finally {
     await browser?.close()
     server.closeAllConnections()
@@ -701,7 +1030,7 @@ async function main() {
     for (const failure of failures) console.error(`  ${failure}`)
     return 1
   }
-  const checks = [RUN_SCROLL_LOCK && 'the scroll lock', RUN_FOCUS_RING && 'the focus ring', RUN_PHONE_HERO && 'the phone opening'].filter(Boolean)
+  const checks = [RUN_SCROLL_LOCK && 'the scroll lock', RUN_FOCUS_RING && 'the focus ring', RUN_PHONE_HERO && 'the phone opening', RUN_EXPLORER && 'the explorer'].filter(Boolean)
   console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes${checks.map((check) => ` and ${check}`).join('')} (${seconds} s)`)
   return 0
 }
