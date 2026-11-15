@@ -343,7 +343,9 @@
 }
 .bros__motto blockquote em { color: var(--brass-l); }
 .bros__motto .q { color: var(--brass); }
+/* A container, so the triad stacks by the column's width (below). */
 .bros__story {
+  container-type: inline-size;
   display: grid;
   align-content: center;
   gap: 22px;
@@ -379,6 +381,19 @@
   margin: 0 18px 6px;
   background: var(--brass);
   vertical-align: middle;
+}
+/* The triad's row needs about 435 px at its 28 px: in a column under 460 px
+   (25 px to spare for another face's widths), a phone's up to about 500 px
+   or the split's from 901 to about 1100 px, a wrapped row would start a line
+   with a dash. The words stack instead, a brass dash leading the second and
+   the third. */
+@container (max-width: 460px) {
+  .bros__story .triad {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .bros__story .triad span + span::before { margin: 0 16px 6px 0; }
 }
 .facts-row {
   display: grid;
@@ -592,6 +607,26 @@
   opacity: 0;
   transform: none;
   transition: opacity .25s var(--e-soft) !important;
+}
+/* With no widening the fixed measure has nothing to keep still, and an equal
+   column narrower than 23em (901 to about 1100 px) would cut its line at its
+   overflow: the line takes the column's width, at most 23em (spec §5.8: the
+   feedback stays). No `js`, or reduced motion switched on later, where `js`
+   stays but the widening's media query no longer holds. Touch screens and
+   phones keep their own measure. */
+@media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+  :root:not(.js) .svc__d {
+    width: auto;
+    max-width: 23em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+    .svc__d {
+      width: auto;
+      max-width: 23em;
+    }
+  }
 }
 
 /* Phones: the columns stack, each with its photo and its line, a brass rule
@@ -1020,14 +1055,6 @@
 }
 
 @media (max-width: 560px) {
-  /* At its 28 px the triad's row is wider than a small phone: the words
-     stack, a brass dash leading the second and the third. */
-  .bros__story .triad {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  .bros__story .triad span + span::before { margin: 0 16px 6px 0; }
   .facts-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .poster__facts { grid-template-columns: minmax(0, 1fr); }
 }

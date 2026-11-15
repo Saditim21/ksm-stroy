@@ -275,6 +275,20 @@ it('sets the triad at its role size, scoped so the story’s paragraphs never be
   expect(rulesFor(rules, '.triad')).toEqual([])
 })
 
+// A wrapped triad starts its second line with a dash („коректност — бързина“
+// / „— точност“), so where its row does not fit, the words stack, a dash
+// leading the second and the third. Its row needs about 435 px at its 28 px,
+// so it stacks in a column under 460 px (25 px to spare for another face's
+// widths): a phone's up to about 500 px, and the split's story column from
+// 901 to about 1100 px. So the column's width decides, not the screen's.
+it('stacks the triad wherever its column is too narrow for its row, a phone’s or the split’s', () => {
+  const NARROW_COLUMN = '@container (max-width: 460px)'
+  expect(declaredFor('.bros__story')['container-type']).toBe('inline-size')
+  expect(declaredFor('.bros__story .triad', [NARROW_COLUMN])).toMatchObject({ 'flex-direction': 'column', 'align-items': 'flex-start', gap: '12px' })
+  expect(declaredFor('.bros__story .triad span + span::before', [NARROW_COLUMN]).margin).toBe('0 16px 6px 0')
+  expect(rulesFor(rules, '.bros__story .triad').map((rule) => rule.atRules)).toEqual([[], [NARROW_COLUMN]])
+})
+
 // Ruling C4.1: the phone name keeps its binding 32 px (extract §2.2) wherever
 // „Многофамилна сграда“ fits on one line at that size, from about 328 px
 // (287 px of text between two 20 px gutters), and only below that scales
@@ -393,6 +407,20 @@ describe('the services (spec §6.9; extract §4.11)', () => {
     expect(declaredFor(':root:not(.js) .svc__img')['clip-path']).toBe('none')
     expect(declaredFor(':root:not(.js) .svc__img img').transform).toBe('none')
     expect(declaredFor(':root:not(.js) .svc__d').transform).toBe('none')
+  })
+
+  // Spec §5.8: hover and focus feedback stay without motion, and the line is
+  // that feedback. Without the widening the columns stay equal: with no `js`
+  // (reduced motion, Save-Data), or with reduced motion switched on later,
+  // where `js` stays but the widening's media query no longer holds. The
+  // fixed measure then has nothing to keep still, and an equal column
+  // narrower than 23em (from 901 to about 1100 px) would cut the line at its
+  // overflow. So the line takes its column's width, at most 23em, where a
+  // fine pointer hovers; touch screens and phones keep their own measure.
+  it('without motion the line takes its column’s width', () => {
+    const REDUCE = '@media (prefers-reduced-motion: reduce)'
+    expect(declaredFor(':root:not(.js) .svc__d', [FINE_WIDE])).toEqual({ width: 'auto', 'max-width': '23em' })
+    expect(declaredFor('.svc__d', [REDUCE, FINE_WIDE])).toEqual({ width: 'auto', 'max-width': '23em' })
   })
 
   it('stacks the columns on a phone, each with its photo and its line', () => {
