@@ -39,6 +39,18 @@ it('lays the grain over the whole screen at 4.5 %, out of the pointer’s way', 
   expect(grain['background-image']).toMatch(/feTurbulence/)
 })
 
+// A view transition group of its own, over all the others
+// (src/styles/motion.css), as it lies live over the page, the header and the
+// menu. In the root snapshot, which the browser paints beneath the page's
+// group, it went missing wherever the arriving page is opaque until the change
+// was over. No view-transition-class, so no class rule of the page's doors or
+// crossfade reaches it.
+it('is a view-transition group of its own, grain, with no class', () => {
+  const grain = rulesFor(rules, '.grain')
+  expect(grain.map((rule) => valueOf(rule, 'view-transition-name')).filter(Boolean)).toEqual(['grain'])
+  expect(grain.filter((rule) => valueOf(rule, 'view-transition-class'))).toEqual([])
+})
+
 describe('the header (spec §6.2)', () => {
   it('turns solid in 0.45 s and moves in 0.5 s', () => {
     expect(declaredFor('.hdr').transition).toBe('background-color .45s var(--e-soft), transform .5s var(--e-out)')

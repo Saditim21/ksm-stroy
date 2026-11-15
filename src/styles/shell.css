@@ -495,13 +495,18 @@
 
   /* ---------- the grain (extract §1.2) ---------- */
   /* A breath of fractal noise over the black, on every page M2 has rebuilt
-     (src/root.jsx). */
+     (src/root.jsx). A view transition group of its own, over all the others
+     (src/styles/motion.css), so it lies over the page, the header and an open
+     menu through a route change as it does live. In the root snapshot, which
+     the browser paints beneath the page's group, it would be missing wherever
+     the arriving page is opaque until the change was over. */
   .grain {
     position: fixed;
     inset: 0;
     z-index: 70;
     pointer-events: none;
     opacity: .045;
+    view-transition-name: grain;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
 import { atRulesOf, rulesFor, rulesOf, valueOf } from '../test/css'
@@ -112,9 +112,10 @@ describe('vt-cut, the hero move and Back/Forward', () => {
   })
 
   // Back and Forward are instant (spec §5.6), as a browser's own Back from its
-  // page cache is: the root (the footer, the grain) switches with the page. A
-  // root that faded would show the old view's footer through the new page for
-  // a moment. The hero move's two roots are both onyx.
+  // page cache is: the root (the footer, the ground) switches with the page,
+  // under the grain, a group of its own. A root that faded would show the old
+  // view's footer through the new page for a moment. The hero move's two roots
+  // are both onyx.
   it('switches the root at once', () => {
     expect(declared(':root.vt-cut::view-transition-old(root)').display).toBe('none')
     expect(declared(':root.vt-cut::view-transition-new(root)').animation).toBe('none')
@@ -173,6 +174,44 @@ it('keeps an open menu over the header during the change, as it lies live', () =
   const header = only('::view-transition-group(site-header)')
   expect(Number(valueOf(menu, 'z-index'))).toBeGreaterThan(Number(valueOf(header, 'z-index')))
   expect(menu.atRules).toEqual([])
+})
+
+// The grain (src/styles/shell.css, view-transition-name: grain) lies over the
+// whole site live, over the header and an open menu, and keeps that place
+// through every change, doors, cut or crossfade: a group of its own over all
+// the others, with the browser's own crossfade on its two images. They are the
+// same, so it stays as it is; to or from a legacy page, which has no grain, it
+// fades out or in over the browser's 0.25 s. The doors close the page, the
+// root and a menu beneath it, and uncover onyx under it, as the live ground
+// shows it. In the root snapshot, which the browser paints beneath the page's
+// group, the grain went missing over an opaque arriving page (Home's halves,
+// the Golden Residence hero) until the change was over: the hero move dipped
+// 3.9/255 from the cut, and Back onto Home ended on a step of as much.
+describe('the grain', () => {
+  it('is a group of its own over all the others, as it lies live, with or without motion', () => {
+    const grain = only('::view-transition-group(grain)')
+    expect(grain.declarations.map(({ prop, value }) => [prop, value])).toEqual([['z-index', '3']])
+    expect(grain.atRules).toEqual([])
+    const others = rules.filter((rule) => rule !== grain && rule.selectors.some((selector) => selector.startsWith('::view-transition-group(')))
+    expect(others.map((rule) => rule.selector).sort()).toEqual(['::view-transition-group(site-header)', '::view-transition-group(site-menu)'])
+    for (const rule of others) expect(Number(valueOf(rule, 'z-index')), rule.selector).toBeLessThan(3)
+    const shell = rulesOf('src/styles/shell.css')
+    const live = (selector) => Number(rulesFor(shell, selector).map((rule) => valueOf(rule, 'z-index')).filter(Boolean).at(-1))
+    expect(live('.grain')).toBeGreaterThan(live('.menu'))
+    expect(live('.grain')).toBeGreaterThan(live('.hdr'))
+  })
+
+  // No rule anywhere styles its images, or its image pair: the browser's own
+  // crossfade and timing. A name's wildcard (*) would reach them too.
+  it('keeps the browser’s own crossfade: no stylesheet reaches its images', () => {
+    const sheets = readdirSync(join(cwd(), 'src'), { recursive: true }).filter((file) => file.endsWith('.css'))
+    const motion = join('styles', 'motion.css')
+    expect(sheets).toContain(motion)
+    const reaching = sheets.flatMap((file) => rulesOf(join('src', file)).flatMap((rule) => rule.selectors
+      .filter((selector) => /::view-transition-(old|new|image-pair|group)\(\s*(grain|\*)[\s).]/.test(selector))
+      .map((selector) => `${file}: ${selector}`)))
+    expect(reaching).toEqual([`${motion}: ::view-transition-group(grain)`])
+  })
 })
 
 // The entrance delay (spec §5.5): the first page waits for the intro, a page

@@ -7,11 +7,13 @@
    reduced-motion preference), the doors: the old view closes onto the seam
    (0–400 ms), a 1 px brass seam appears (0–120 ms) and glints (400–520 ms),
    and the new view opens from it (520–1120 ms) as the seam fades. The doors
-   close the whole view: the page, the root snapshot (the footer, the grain,
-   the site's onyx) and an open menu (its group, `site-menu`), and uncover
-   onyx. The header is a group of its own and switches at once, over the page
-   and the root; an open menu lies over it, as it does live, and the doors
-   uncover it as they close the menu.
+   close the whole view beneath the grain: the page, the root snapshot (the
+   footer and the site's onyx) and an open menu (its group, `site-menu`), and
+   uncover onyx under the grain, as the live ground shows it. The header is a
+   group of its own and switches at once, over the page and the root; an open
+   menu lies over it, as it does live, and the doors uncover it as they close
+   the menu. The grain is a group of its own over them all (`grain`, below),
+   and stays as it is.
 
    The root snapshot spans the scrollbar's gutter as well, so with a classic
    scrollbar its doors run half a gutter right of the page's, which close on
@@ -51,7 +53,7 @@
 @media (prefers-reduced-motion: no-preference) {
   /* What the doors uncover. */
   :root.js::view-transition { background: var(--onyx); }
-  /* The page, the root snapshot (footer, grain, onyx) and an open menu close together. */
+  /* The page, the root snapshot (footer, onyx) and an open menu close together, under the grain. */
   :root.js::view-transition-old(.page-out),
   :root.js:not(.vt-cut)::view-transition-old(site-menu),
   :root.js:not(.vt-cut)::view-transition-old(root) { animation: door-close 400ms var(--e-io) both; }
@@ -75,8 +77,9 @@
      through the new one wherever the new one lies on the root's onyx, as a
      rebuilt page does, for the whole transition (React runs one on Back and
      Forward too). And the old root, fading out, would show the old view's
-     footer and grain through the new page for a moment, and without the
-     gate (Save-Data) a legacy page's ground. */
+     footer through the new page for a moment, and without the gate
+     (Save-Data) a legacy page's ground. The grain, a group of its own, stays
+     over the new page. */
   :root.vt-cut::view-transition-old(.page-out),
   :root.vt-cut::view-transition-old(root) { display: none; }
 }
@@ -109,3 +112,14 @@
    the menu fades over it. Under the header, the menu's top band would vanish
    at the click and the header show over the closing menu. */
 ::view-transition-group(site-menu) { z-index: 2; }
+
+/* The grain (src/styles/shell.css, view-transition-name: grain) lies over the
+   whole site, the header and an open menu too, and keeps that place through
+   every change: a group of its own over all the others, doors, cut or
+   crossfade. Its two images keep the browser's own crossfade: they are the
+   same, so the grain stays as it is, and to or from a legacy page, which has
+   none, it fades out or in over the browser's 0.25 s. In the root snapshot,
+   which the browser paints beneath the page's group, it went missing over an
+   opaque arriving page (Home's halves, the Golden Residence hero) until the
+   change was over, and came back with a step. */
+::view-transition-group(grain) { z-index: 3; }
