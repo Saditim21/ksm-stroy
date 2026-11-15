@@ -70,6 +70,21 @@ it('stacks the halves and the form’s rows on a phone, the form under a brass r
   expect(declaredFor('.contact__l', [PHONE])).toMatchObject({ 'justify-items': 'start', 'text-align': 'left' })
 })
 
+// On a phone the select gives its label more room: the chevron at its edge,
+// the label at 16 px, never less (iOS zooms in on a field under 16 px), and
+// a label still too long ends in an ellipsis rather than mid-word. The
+// labels the pages preset, „Многофамилна сграда, ж.к. Връбница-1“ and
+// „Гараж или паркомясто в Golden Residence“, then fit from 360 and from
+// about 377 px.
+it('gives the select’s label more room on a phone, never under 16 px, an ellipsis past it', () => {
+  expect(declaredFor('.field select', [PHONE])).toEqual({
+    'padding-right': '18px',
+    'background-position': 'right 0 center',
+    'font-size': '16px',
+    'text-overflow': 'ellipsis',
+  })
+})
+
 it('sizes nothing by vh or svh', () => {
   for (const rule of rules) {
     for (const { prop, value } of rule.declarations) expect(value, `${rule.selector} { ${prop} }`).not.toMatch(/\d(s|d|l)?vh\b/)

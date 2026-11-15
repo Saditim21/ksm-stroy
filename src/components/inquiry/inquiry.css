@@ -190,4 +190,15 @@
     border-top: 1px solid var(--brass);
   }
   .form__row { grid-template-columns: 1fr; }
+  /* The select gives its label more room: the chevron at its edge, the label
+     at 16 px, never less (iOS zooms in on a field under 16 px), and a label
+     still too long ends in an ellipsis rather than mid-word. The labels the
+     pages preset, „Многофамилна сграда, ж.к. Връбница-1“ and „Гараж или
+     паркомясто в Golden Residence“, then fit from 360 and about 377 px. */
+  .field select {
+    padding-right: 18px;
+    background-position: right 0 center;
+    font-size: 16px;
+    text-overflow: ellipsis;
+  }
 }

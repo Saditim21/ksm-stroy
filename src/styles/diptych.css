@@ -192,6 +192,9 @@
   .hinge > :first-child { text-align: right; padding-right: clamp(24px, 3vw, 52px); }
   .hinge > :nth-child(2) { padding-left: clamp(24px, 3vw, 52px); }
   .hinge .seam { top: -18px; bottom: -18px; }
+  /* A lead keeps a lone word off its last line (Chrome, Safari; Firefox
+     ignores it): no „Строй.“ alone, the client's name broken in two. */
+  .hinge .lead { text-wrap: pretty; }
 
   /* At 900 px and under the halves stack and the seams hide. The hinge's
      lead goes under a brass rule; a section's second half takes its own rule

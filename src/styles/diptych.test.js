@@ -145,6 +145,13 @@ describe('the seam and the halves (spec §4)', () => {
     expect(declared(only('.hinge .seam'))).toEqual({ top: '-18px', bottom: '-18px' })
   })
 
+  // A hinge's lead keeps a lone word off its last line (Chrome, Safari;
+  // Firefox ignores it), so a lead never ends on „Строй.“ alone, the
+  // client's name broken in two, or „апартамента.“ alone.
+  it('.hinge .lead keeps a lone word off its last line', () => {
+    expect(declared(only('.hinge .lead'))).toEqual({ 'text-wrap': 'pretty' })
+  })
+
   // At 900 px and under the halves stack and the seams hide; the hinge's lead
   // goes under a brass rule, 22 px from each side of it.
   it('stacks on a phone', () => {
