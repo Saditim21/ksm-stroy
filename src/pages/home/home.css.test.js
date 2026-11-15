@@ -9,6 +9,7 @@ const rules = rulesOf(HOME)
 // Widening needs a pointer that hovers, and the halves side by side.
 const FINE_WIDE = '@media (hover: hover) and (pointer: fine) and (min-width: 901px)'
 const PHONE = '@media (max-width: 900px)'
+const NARROW_PHONE = '@media (max-width: 359px)'
 // The first viewport's blocks: the hero, its halves and slogan, the intro.
 const FIRST_VIEWPORT = '.hero, .half, .sl, .intro-doors, .door, .doors'
 
@@ -130,6 +131,18 @@ describe('the seam (spec §6.7)', () => {
     ])
     for (const rule of shades) expect(rule.atRules).toEqual([NO_PREFERENCE, FINE_WIDE])
   })
+})
+
+// Spec §3.2: the phone slogan takes two lines down to 320 px, and its floor
+// is 28 px, the italic's (§3.3, §14.11). At the role's -.01em, „Създаваме
+// пространства“ is 10.5 em: 294 px at 28 px, where a 320 px phone has 280 px
+// between the gutters. So below 360 px the title tracks tighter and gives
+// its ragged right 12 px, and it never gets smaller. The smoke run's phone
+// opening measures the two lines in Chrome.
+it('keeps the phone slogan on two lines down to 320 px: tighter below 360 px, never smaller', () => {
+  expect(declaredFor('.hero__title', [PHONE])['font-size']).toBe('clamp(28px, 8.4vw, 46px)')
+  expect(declaredFor('.hero__title', [NARROW_PHONE])).toEqual({ 'padding-right': '12px', 'letter-spacing': '-.03em' })
+  expect(rules.filter((rule) => rule.atRules.includes(NARROW_PHONE)).flatMap((rule) => rule.selectors)).toEqual(['.hero__title'])
 })
 
 // Spec §11: a link over positioned media carries its ring on an inset

@@ -535,7 +535,8 @@
   .half__count .num { font-size: 40px; }
   .half__place { font-size: 13px; }
 
-  /* Two lines, broken after „пространства“; a part never breaks inside. */
+  /* Two lines, broken after „пространства“; a part never breaks inside.
+     Below 360 px the title tracks tighter (after the small phones' rules). */
   .hero__title {
     top: calc(var(--header-h) + 14px);
     right: 0;
@@ -595,6 +596,19 @@
   .bros__story .triad span + span::before { margin: 0 16px 6px 0; }
   .facts-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .poster__facts { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The slogan keeps two lines down to 320 px (spec §3.2), at its 28 px floor,
+   the italic's (§3.3). At the role's -.01em its first row, „Създаваме
+   пространства“, is 10.5 em: 294 px at 28 px, where a 320 px phone has
+   280 px between the gutters, and at 8.4vw it only just fits from 340 px.
+   Below 360 px it tracks -.03em (10.06 em: 282 px) and its ragged right
+   keeps 12 px, so the row fits from 314 px. From 360 px it is the role's. */
+@media (max-width: 359px) {
+  .hero__title {
+    padding-right: 12px;
+    letter-spacing: -.03em;
+  }
 }
 
 /* ---------- motion (spec §5.5, §6.7) ---------- */

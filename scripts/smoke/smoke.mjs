@@ -37,8 +37,10 @@
 // colour; Chrome can.
 //
 // And the phone opening (spec §6.7): on / at real phone screens under the EU
-// row (PHONE_HERO), once its entrance has settled, the H1 and the Golden
-// Residence info never overlap.
+// row (PHONE_HERO), once its entrance has settled, the H1 sits on two lines,
+// broken after „пространства“ (spec §3.2: two lines down to 320 px), and it
+// never overlaps the Golden Residence info. jsdom lays out no text; Chrome
+// does.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
@@ -139,7 +141,8 @@ const FOCUS_RING = [
 const MAX_TABS = 60
 
 // The phone opening check (spec §6.7): real phone screens under the EU row,
-// where the H1 and the Golden Residence info must not overlap.
+// where the H1 must take two lines, broken after „пространства“ (spec §3.2),
+// and stay clear of the Golden Residence info.
 const PHONE_HERO = {
   path: '/',
   sizes: [
@@ -483,8 +486,10 @@ async function focusRingOn(browser, userAgents, { path: pathname, stops }) {
   return problems
 }
 
-// In the page: the boxes of the H1 and of the Golden Residence info, once the
-// fonts have loaded and the opening's entrance has settled.
+// In the page: the boxes of the H1 and of the Golden Residence info, and the
+// line each part of the slogan sits on (0 for the first), once the fonts have
+// loaded and the opening's entrance has settled. Parts whose tops lie within
+// half the H1's font size of each other share a line.
 async function openingBoxes() {
   await document.fonts.ready
   await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => {})))
@@ -494,11 +499,21 @@ async function openingBoxes() {
     const { top, right, bottom, left } = element.getBoundingClientRect()
     return { top, right, bottom, left }
   }
-  return { title: box('h1'), info: box('.half--gr .half__info') }
+  const title = document.querySelector('h1')
+  const near = title ? parseFloat(getComputedStyle(title).fontSize) / 2 : 0
+  const tops = []
+  const lines = [...(title?.querySelectorAll('[data-part]') ?? [])].map((part) => {
+    const { top } = part.getBoundingClientRect()
+    const line = tops.findIndex((other) => Math.abs(other - top) < near)
+    return line >= 0 ? line : tops.push(top) - 1
+  })
+  return { title: box('h1'), info: box('.half--gr .half__info'), lines }
 }
 
 // The phone opening (PHONE_HERO): at each real phone screen, in a fresh
-// profile, the H1's box and the Golden Residence info's box must not overlap.
+// profile, the slogan's four parts must sit two to a line, „Създаваме
+// пространства“ over „за мечтания живот“, and the H1's box and the Golden
+// Residence info's box must not overlap.
 async function phoneHero(browser, userAgents) {
   const problems = []
   for (const { width, height } of PHONE_HERO.sizes) {
@@ -512,12 +527,17 @@ async function phoneHero(browser, userAgents) {
         const main = document.getElementById('main')
         return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
       }, { timeout: HYDRATION_TIMEOUT_MS })
-      const { title, info } = await page.evaluate(openingBoxes)
+      const { title, info, lines } = await page.evaluate(openingBoxes)
       const size = `${width}×${height}`
       if (!title || !info) {
         problems.push(`${size}: no ${title ? 'Golden Residence info' : 'H1'} in the opening`)
-      } else if (title.bottom > info.top && info.bottom > title.top && title.right > info.left && info.right > title.left) {
-        problems.push(`${size}: the H1 (${Math.round(title.top)}–${Math.round(title.bottom)}) overlaps the Golden Residence info (${Math.round(info.top)}–${Math.round(info.bottom)})`)
+      } else {
+        if (lines.join(' ') !== '0 0 1 1') {
+          problems.push(`${size}: the H1 takes ${new Set(lines).size} lines, not two broken after „пространства“ (its parts sit on lines ${lines.map((line) => line + 1).join(', ')})`)
+        }
+        if (title.bottom > info.top && info.bottom > title.top && title.right > info.left && info.right > title.left) {
+          problems.push(`${size}: the H1 (${Math.round(title.top)}–${Math.round(title.bottom)}) overlaps the Golden Residence info (${Math.round(info.top)}–${Math.round(info.bottom)})`)
+        }
       }
     } catch (error) {
       problems.push(`${width}×${height}: the check stopped: ${error.message.split('\n')[0]}`)
@@ -608,7 +628,7 @@ async function main() {
     }
 
     if (RUN_PHONE_HERO) {
-      const label = `phone opening: ${PHONE_HERO.path} at ${PHONE_HERO.sizes.map(({ width, height }) => `${width}×${height}`).join(', ')}, the H1 clear of the Golden Residence info`
+      const label = `phone opening: ${PHONE_HERO.path} at ${PHONE_HERO.sizes.map(({ width, height }) => `${width}×${height}`).join(', ')}, the H1 on two lines, clear of the Golden Residence info`
       const problems = await phoneHero(browser, userAgents)
       for (const problem of problems) failures.push(`${label}: ${problem}`)
       console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
