@@ -32,11 +32,11 @@ function Where() {
 
 // An address the page is sent to without the explorer's own calls, as a
 // link or a hand-edited address would.
-function Go() {
+function Go({ to, children }) {
   const navigate = useNavigate()
   return (
-    <button type="button" onClick={() => navigate('/projects/golden-residence?floor=А-3', { replace: true })}>
-      go
+    <button type="button" onClick={() => navigate(to, { replace: true })}>
+      {children}
     </button>
   )
 }
@@ -45,7 +45,17 @@ function renderSection(props = {}, url = '/projects/golden-residence') {
   return render(
     <MemoryRouter initialEntries={[url]}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection {...props} /><Where /><Go /></ExplorerProvider>} />
+        <Route
+          path="*"
+          element={(
+            <ExplorerProvider routeBlock={null}>
+              <ExplorerSection {...props} />
+              <Where />
+              <Go to="/projects/golden-residence?floor=А-3">go</Go>
+              <Go to="/projects/golden-residence?view=list&unit=А%20502">go to А 502</Go>
+            </ExplorerProvider>
+          )}
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -296,6 +306,81 @@ describe('„Визуално“ and „По критерии“', () => {
     } finally {
       restore()
     }
+  })
+})
+
+// Ruling C8.1 over the list (spec §11): a dialog the address opened over the
+// list (a ?view=list link, a reload, Back onto it) has no opener, and the
+// floor's rail is in the facade's panel, which is hidden, so no browser
+// would focus it, nor the block switch beside it. As the dialog closes, the
+// focus goes to the unit's row, else to the selected tab: never to the
+// page's body. jsdom, unlike a browser, focuses inside a hidden subtree, so
+// the focus on the row or the tab, not on the rail, also shows that the
+// explorer never tries the hidden rail.
+describe('the focus after a dialog over the list', () => {
+  const selectedTab = () => screen.getByRole('tab', { name: 'По критерии' })
+  const row = (label) => screen.queryByRole('row', { name: new RegExp(`^${label}\\b`) })
+  afterEach(() => vi.restoreAllMocks())
+
+  it('goes to the unit’s row as a unit panel with no stage under it closes', async () => {
+    renderSection({}, '/projects/golden-residence?view=list&unit=А%20502')
+    await screen.findByRole('dialog', { name: 'А 502' })
+    expect(document.querySelector('.ps')).toBeNull()
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?view=list$/)
+    expect(row('А 502')).not.toBeNull()
+    expect(document.activeElement).toBe(row('А 502'))
+  })
+
+  // The list's table scrolls in a box of its own, under a sticky head: the
+  // row is brought into the box's view, just under the head, so its ring
+  // shows, and only the box scrolls (the page stays where the landing put
+  // it, as every focus given back here keeps it). jsdom lays nothing out:
+  // the box spans 575–1205 px with a 51 px head, and А 502, the 50th row of
+  // 65 px, lies 49 rows under the head.
+  it('scrolls the table’s own box to the row, under its head, and not the page', async () => {
+    renderSection({}, '/projects/golden-residence?view=list&unit=А%20502')
+    await screen.findByRole('dialog', { name: 'А 502' })
+    const box = document.querySelector('#ex-list .lv__table')
+    const target = row('А 502')
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
+      const [top, height] = this === box ? [575, 630] : this === box.querySelector('thead') ? [575, 51] : this === target ? [575 + 51 + 49 * 65, 65] : [0, 0]
+      return { top, bottom: top + height, height, left: 0, right: 1440, width: 1440, x: 0, y: top }
+    })
+    const pageScroll = vi.spyOn(window, 'scrollTo')
+    const intoView = vi.spyOn(HTMLElement.prototype, 'scrollIntoView')
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(target)
+    expect(box.scrollTop).toBe(49 * 65)
+    expect(pageScroll).not.toHaveBeenCalled()
+    expect(intoView).not.toHaveBeenCalled()
+  })
+
+  it('goes to the selected tab when the filters leave the unit’s row out', async () => {
+    renderSection({}, '/projects/golden-residence?view=list')
+    const blocks = within(document.getElementById('ex-list')).getByRole('group', { name: 'Блок' })
+    fireEvent.click(within(blocks).getByRole('button', { name: 'Б' }))
+    fireEvent.click(screen.getByRole('button', { name: 'go to А 502' }))
+    await screen.findByRole('dialog', { name: 'А 502' })
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(row('А 502')).toBeNull()
+    expect(document.activeElement).toBe(selectedTab())
+  })
+
+  it('goes to the selected tab as a stage with no opener closes', async () => {
+    renderSection({}, '/projects/golden-residence?view=list&floor=А-5')
+    const stage = await screen.findByRole('dialog', { name: named('Блок А · Етаж 5') })
+
+    fireEvent.click(within(stage).getByRole('button', { name: 'Към сградата' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?view=list$/)
+    expect(document.activeElement).toBe(selectedTab())
   })
 })
 

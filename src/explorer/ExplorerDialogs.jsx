@@ -20,8 +20,12 @@ import UnitPanel from './UnitPanel'
 //   as the sheet's button) to its floor's rail. A rail off screen, of the
 //   block a phone's facade does not show, takes no focus: the facade shows
 //   that block first, then focuses it (focusRail, the provider's;
-//   Facade.jsx). An inquiry's close gives the focus to nothing: the inquiry
-//   focuses the form's first field once its glide ends (spec §7.7).
+//   Facade.jsx). While the list is on show, the facade's panel is hidden,
+//   its rails and block switch with it (ExplorerSection.jsx): the unit's row
+//   in the list takes the focus then, its table scrolled to it, else (a
+//   stage's floor, or a row the filters leave out) the selected tab. An
+//   inquiry's close gives the focus to nothing: the inquiry focuses the
+//   form's first field once its glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
 //   and ?unit), then presets the form (presetInquiry), whose glide waits for
 //   the first frame with no scroll lock held: after this close's commit.
@@ -32,19 +36,48 @@ import UnitPanel from './UnitPanel'
 // focusRail the provider's (its setFloor and setBlock call off a unit still
 // to open, ruling C8.2).
 
-// Gives `element` the focus if it can take it: in the page, not inert, and
-// focusable. Whether it did.
+// Gives `element` the focus if it can take it: in the page, neither inert nor
+// hidden, and focusable. Whether it did. (No browser focuses an element under
+// [hidden]; jsdom would, so the check is spelled out.)
 function focusInto(element) {
-  if (!element?.isConnected || element.closest('[inert]')) return false
+  if (!element?.isConnected || element.closest('[inert], [hidden]')) return false
   element.focus({ preventScroll: true })
   return document.activeElement === element
 }
 
 const railOf = ({ block, floor }) => document.querySelector(`#explorer .fx__cnt[data-k="${floorKey(block, floor)}"]`)
+// A unit's row in the list (UnitList.jsx): the row whose first cell reads its
+// label.
+const rowOf = (label) => [...document.querySelectorAll('#explorer .lv tr.row')].find((row) => row.querySelector('.uid')?.textContent === label)
+const selectedTab = () => document.querySelector('#explorer [role="tab"][aria-selected="true"]')
 
-// Gives the focus to a floor's rail, or has the facade show it first.
+// Brings a row into view in the list's table, which scrolls in a box of its
+// own under a sticky head (explorer.css): only that box scrolls, the row just
+// under the head. The page stays where it is, as preventScroll keeps it.
+function showRow(row) {
+  const box = row.closest('.lv__table')
+  if (!box) return
+  const head = box.querySelector('thead')?.getBoundingClientRect().height ?? 0
+  const view = box.getBoundingClientRect()
+  const at = row.getBoundingClientRect()
+  if (at.top < view.top + head || at.bottom > view.bottom) box.scrollTop += at.top - view.top - head
+}
+
+// Gives the focus to a floor's rail, or has the facade show it first. A rail
+// under [hidden] is in the facade's panel while the list is on show: the
+// focus goes to the unit's row then (`at.label`, a unit panel's), brought
+// into the table's view, else to the selected tab, and the facade is not
+// asked.
 function focusRailOf(at, focusRail) {
-  if (!focusInto(railOf(at))) focusRail(at)
+  const rail = railOf(at)
+  if (focusInto(rail)) return
+  if (!rail?.closest('[hidden]')) {
+    focusRail(at)
+    return
+  }
+  const row = at.label ? rowOf(at.label) : null
+  if (focusInto(row)) showRow(row)
+  else focusInto(selectedTab())
 }
 
 export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage, setFloor, setBlock, focusRail }) {
@@ -54,7 +87,8 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
   const showUnit = Boolean(unit)
   const quiet = useRef(false)
 
-  // What was on show: the dialogs, the stage's floor and the unit's.
+  // What was on show: the dialogs, the stage's floor, and the unit's floor
+  // with its label.
   const shown = useRef({ stage: false, unit: false, at: null, unitAt: null })
   useLayoutEffect(() => {
     const was = shown.current
@@ -62,7 +96,7 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
       stage: showStage,
       unit: showUnit,
       at: stage ?? was.at,
-      unitAt: unit ? { block: unit.block, floor: unit.floor } : was.unitAt,
+      unitAt: unit ? { block: unit.block, floor: unit.floor, label: unit.label } : was.unitAt,
     }
     // An inquiry's close: the focus goes nowhere, and the opening goes with
     // the dialogs, so a stage the address opens later has none (ruling C8.3).
