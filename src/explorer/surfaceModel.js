@@ -12,8 +12,11 @@ import { floorKey } from './model'
  * - { kind: 'single', area, one }: every free unit has one area (`one` when
  *   only one is free);
  * - { kind: 'reserved' }: none free, some reserved;
- * - { kind: 'soldout' }: otherwise.
- * Null for free units without a known area: nothing to say.
+ * - { kind: 'soldout' }: every unit sold or blocked, the floor the facade
+ *   colours sold (summarizeFloor, spec §9).
+ * Null for free units without a known area, and for a floor whose other units
+ * carry a status the rules do not know („Скоро“, ruling R1), which is not sold
+ * out: nothing to say.
  */
 export function rangeLine({ counts, minFree, maxFree }) {
   if (counts.available > 0) {
@@ -21,7 +24,8 @@ export function rangeLine({ counts, minFree, maxFree }) {
     if (minFree === maxFree) return { kind: 'single', area: minFree, one: counts.available === 1 }
     return { kind: 'range', min: minFree, max: maxFree }
   }
-  return counts.reserved > 0 ? { kind: 'reserved' } : { kind: 'soldout' }
+  if (counts.reserved > 0) return { kind: 'reserved' }
+  return counts.sold + counts.blocked === counts.total ? { kind: 'soldout' } : null
 }
 
 /** The unit `delta` places from `unit` on its floor, going round from either

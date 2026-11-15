@@ -24,6 +24,24 @@ describe('rangeLine (spec §7.3)', () => {
   it('says a floor with none free but some reserved has reserved ones', () => {
     expect(rangeLine(stats(0, 2, null, null))).toEqual({ kind: 'reserved' })
   })
+
+  // „Разпродаден етаж“ only where every unit is sold or blocked, the floor
+  // the facade colours sold (summarizeFloor, spec §9). Ruling R1 adds a case
+  // §7.3's „otherwise“ was not written for: units whose status the rules do
+  // not know („Скоро“). Such a floor is not sold out, and its rail shows the
+  // unknown dash, so its line says nothing, as for free units without an
+  // area.
+  it('calls a floor sold out only when every unit is sold or blocked', () => {
+    const data = snapshotData()
+    const rows = data['golden-residence']['block-b'].filter((row) => String(row.floor) === '6')
+    rows.slice(6).forEach((row) => Object.assign(row, { status: 'Скоро' }))
+    const floor = buildModel(data).floors.get('Б-6')
+
+    expect(floor.counts).toEqual({ available: 0, reserved: 0, sold: 6, blocked: 0, total: 12 })
+    expect(floor.colour).toBe('unknown')
+    expect(rangeLine(floor)).toBeNull()
+    expect(rangeLine({ counts: { available: 0, reserved: 0, sold: 6, blocked: 6, total: 12 }, minFree: null, maxFree: null })).toEqual({ kind: 'soldout' })
+  })
 })
 
 // Spec §7.7: the unit panel's previous and next go round the floor.
