@@ -20,12 +20,17 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInqu
 //
 // What the visitor asks about comes from the page's options
 // (inquiryStore.js), and the page can preset it, with apartments picked in
-// the explorer as chips. While an inquiry is on its way (the EmailJS chunk,
-// the round trip) the form is busy and its action reads as the legacy
-// Contact form's does then, „Изпращане...“, and takes no second send. A sent
-// inquiry turns into the thank-you, a status that takes the focus, rising
-// into place with motion (spec §5.7); a failed one says so and keeps what
-// was typed. A new preset after a thank-you brings the form back.
+// the explorer as chips. The picks go with a Golden Residence subject only,
+// its apartments or its garages (ruling FR4): under another they neither
+// show nor go with the lead, and they stay in the store, so choosing Golden
+// Residence again brings them back.
+//
+// While an inquiry is on its way (the EmailJS chunk, the round trip) the form
+// is busy and its action reads as the legacy Contact form's does then,
+// „Изпращане...“, and takes no second send. A sent inquiry turns into the
+// thank-you, a status that takes the focus, rising into place with motion
+// (spec §5.7); a failed one says so and keeps what was typed. A new preset
+// after a thank-you brings the form back.
 
 const ERRORS = {
   name: 'Въведете име.',
@@ -87,6 +92,7 @@ export default function InquiryForm({ page = 'home' }) {
   const options = INQUIRY_OPTIONS[page] ?? INQUIRY_OPTIONS.home
   const { option, picks } = useInquiryState()
   const chosen = options.some(({ value }) => value === option) ? option : options[0].value
+  const shown = chosen === 'golden-residence' || chosen === 'garage' ? picks : []
   const [values, setValues] = useState(BLANK)
   // Once a send has been tried, each field's problem shows, and follows the
   // typing until it is fixed.
@@ -164,7 +170,7 @@ export default function InquiryForm({ page = 'home' }) {
       email: values.email,
       phone: values.phone,
       subject,
-      picks: [...picks],
+      picks: [...shown],
       message: values.message,
     })
     if (!mounted.current) return
@@ -219,13 +225,13 @@ export default function InquiryForm({ page = 'home' }) {
             ))}
           </select>
         </div>
-        {picks.length > 0 ? (
+        {shown.length > 0 ? (
           <div className="field">
             <span className="field__label" id="f-picks">
               Избрани апартаменти
             </span>
             <ul className="chips" role="list" aria-labelledby="f-picks">
-              {picks.map((pick) => (
+              {shown.map((pick) => (
                 <li key={pick} className="chip">
                   Апартамент {pick}
                   <button type="button" aria-label={`Махнете ${pick}`} onClick={unpick(pick)}>

@@ -176,6 +176,34 @@ describe('sending', () => {
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Golden Residence, гараж или паркомясто', picks: ['А 301'] }))
   })
 
+  // Ruling FR4: the apartments picked in the explorer go only with a Golden
+  // Residence subject (its apartments, or its garages). Under another
+  // subject their chips hide and the lead names none; the picks stay in the
+  // store, so choosing Golden Residence again brings them back.
+  it('sends no apartment picked under another subject, and shows none', async () => {
+    render(<InquiryForm page="home" />)
+    act(() => presetInquiry({ option: 'golden-residence', pick: 'А 301' }))
+    expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
+    // Home's Многофамилна half.
+    act(() => presetInquiry({ option: 'mnogofamilna' }))
+    expect(screen.queryByRole('list', { name: 'Избрани апартаменти' })).toBeNull()
+    await fill(user)
+    await user.click(submit())
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Многофамилна сграда, ж.к. Връбница-1', picks: [] }))
+  })
+
+  it('brings the apartments picked back with Golden Residence chosen again', async () => {
+    render(<InquiryForm page="golden-residence" />)
+    act(() => presetInquiry({ option: 'golden-residence', pick: 'А 301' }))
+    await user.selectOptions(field('Интересувам се от'), 'other')
+    expect(screen.queryByText('Апартамент А 301')).toBeNull()
+    await user.selectOptions(field('Интересувам се от'), 'golden-residence')
+    expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
+    await fill(user)
+    await user.click(submit())
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Golden Residence', picks: ['А 301'] }))
+  })
+
   // Ruling C5.2: while the inquiry is on its way (the EmailJS chunk, the
   // round trip), the form says so: it is busy, and its action reads as the
   // legacy Contact form's does while it sends, and takes no second send.
