@@ -36,3 +36,21 @@ it('loads the motion engine with it', async () => {
   await loadFlip()
   expect(runtime.getMotion()).toBe(fake.motion)
 })
+
+// The explorer's surfaces' chunk preloads Flip at idle (ruling C8.6): a load
+// that failed then (offline for a moment) must not cost the switch its Flip
+// for the rest of the visit. The engine's load fails once here.
+it('tries again after a load that failed', async () => {
+  vi.resetModules()
+  const loadMotion = vi.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue(fake.motion)
+  vi.doMock('./runtime', () => ({ loadMotion }))
+  try {
+    const { loadFlip: fresh } = await import('./flip')
+    await expect(fresh()).rejects.toThrow('offline')
+    await expect(fresh()).resolves.toBe(fake.Flip)
+    expect(loadMotion).toHaveBeenCalledTimes(2)
+    expect(fake.motion.gsap.registerPlugin).toHaveBeenCalledTimes(1)
+  } finally {
+    vi.doUnmock('./runtime')
+  }
+})

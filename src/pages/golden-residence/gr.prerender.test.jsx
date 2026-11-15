@@ -110,6 +110,24 @@ it('prerenders each block’s 96 squares before the data', () => {
   expect(doc.querySelector('#blk-a .blk__grid button').getAttribute('aria-label')).toBe('А 801')
 })
 
+// Ruling T8a: each grid is one tab stop, its first square until another is
+// focused. Ruling C8.11: before the data the room types read `—`, and block
+// А's note and block Б's exposures' (empty) list are in place, so nothing
+// under the blocks moves when the data lands.
+it('prerenders one tab stop per grid, and the blocks’ stats with their room kept', () => {
+  const doc = parse(prerender())
+  for (const id of ['blk-a', 'blk-b']) {
+    const cells = [...doc.querySelectorAll(`#${id} .blk__grid button`)]
+    expect(cells.filter((cell) => cell.getAttribute('tabindex') === '0')).toEqual([cells[0]])
+    expect(cells.filter((cell) => cell.getAttribute('tabindex') === '-1')).toHaveLength(95)
+    expect(textOf(doc.querySelector(`#${id} .blk__types`))).toBe('— двустайни · — тристайни · — ателиета')
+  }
+  expect(textOf(doc.querySelector('#blk-a .blk__note'))).toBe('Изложението на блок А не е попълнено в таблицата.')
+  expect(doc.querySelector('#blk-a .blk__expo')).toBeNull()
+  expect(doc.querySelector('#blk-b .blk__expo').outerHTML).toBe('<ul class="blk__expo"></ul>')
+  expect(doc.querySelector('#blk-b .blk__note')).toBeNull()
+})
+
 // What an entrance's first frame would write, kept out of the hero: an
 // element faded out, collapsed, moved away, clipped or hidden.
 it('starts nothing in #top hidden, faded, moved or clipped', () => {

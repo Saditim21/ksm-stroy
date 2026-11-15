@@ -18,10 +18,14 @@ import { plural } from '../../utils/format'
 // opens its unit in the unit panel (the provider's openUnit; the section sits
 // inside the page's ExplorerProvider, src/routes/golden-residence.jsx).
 //
-// Until the data arrives the counts read `—`, never a zero, the squares wait
-// in a neutral outline, and the types and exposures are not there yet. The
-// headings rise line by line, the copy fades in and the seams draw as the
-// section comes into view (useReveals); the markup is the final state.
+// Until the data arrives the counts and the room types read `—`, never a
+// zero, and the squares wait in a neutral outline. What follows keeps its
+// room too (ruling C8.11), so nothing under it moves when the data lands
+// late (Review Focus 1): block А's note, which spec §6.16 gives that block,
+// is there from the start, and block Б's exposures wait in empty rows
+// (gr.css); the data then tells which a block has. The headings rise line by
+// line, the copy fades in and the seams draw as the section comes into view
+// (useReveals); the markup is the final state.
 
 const PER_BLOCK = GR_FACTS.apartments / GR_FACTS.blocks
 const FACTS = `${PER_BLOCK} апартамента · ${GR_FACTS.floors} етажа · ${GR_FACTS.perFloor} на етаж`
@@ -40,11 +44,13 @@ const typeWord = (type, count) => (TYPE_WORDS[type] ? plural(count, ...TYPE_WORD
 
 // The block's counts by status, its room types, and its exposures or the
 // note; `stats` is the model's block (buildModel()'s `blocks[letter]`), or
-// null until the data arrives.
+// null until the data arrives: the types then read `—`, block А has its note
+// and block Б its exposures' empty rows.
 function BlockStats({ letter, stats }) {
-  const types = stats ? Object.entries(stats.types) : []
+  const types = stats ? Object.entries(stats.types) : Object.keys(TYPE_WORDS).map((type) => [type, '—'])
   // Sorted the largest first; equal counts keep the sheet's order.
   const exposures = stats ? Object.entries(stats.exposure).sort((a, b) => b[1] - a[1]) : []
+  const note = stats ? !exposures.length : letter === 'А'
   return (
     <>
       <div className="blk__stats">
@@ -55,18 +61,18 @@ function BlockStats({ letter, stats }) {
             </li>
           ))}
         </ul>
-        {types.length ? (
-          <p className="blk__types">
-            {types.map(([type, count], i) => (
-              <span key={type}>
-                {i > 0 ? ' · ' : null}
-                <b>{count}</b> {typeWord(type, count)}
-              </span>
-            ))}
-          </p>
-        ) : null}
+        <p className="blk__types">
+          {types.map(([type, count], i) => (
+            <span key={type}>
+              {i > 0 ? ' · ' : null}
+              <b>{count}</b> {typeWord(type, count)}
+            </span>
+          ))}
+        </p>
       </div>
-      {exposures.length ? (
+      {note ? (
+        <p className="blk__note">Изложението на блок&nbsp;{letter} не е попълнено в&nbsp;таблицата.</p>
+      ) : (
         <ul className="blk__expo">
           {exposures.map(([exposure, count]) => (
             <li key={exposure}>
@@ -74,10 +80,7 @@ function BlockStats({ letter, stats }) {
             </li>
           ))}
         </ul>
-      ) : null}
-      {stats && !exposures.length ? (
-        <p className="blk__note">Изложението на блок&nbsp;{letter} не е попълнено в&nbsp;таблицата.</p>
-      ) : null}
+      )}
     </>
   )
 }

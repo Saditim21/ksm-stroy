@@ -3,7 +3,12 @@
 // търсите“, „Визуално“ and „По критерии“, the selected one in the tab order
 // alone (a roving tabindex), ← and → selecting the other one and focusing
 // it. `value` is the parent's ('visual' or 'list', the address's ?view;
-// ExplorerSection.jsx), and onChange(view) asks for a change.
+// ExplorerSection.jsx), and onChange(view) asks for a view.
+//
+// Every click and arrow asks, the selected tab's too (ruling C8.8): a switch
+// may still be waiting for what it shows, with the tab it left still
+// selected, and a click on that tab, or an arrow back to it, calls the switch
+// off. The parent ignores a view it already shows when no switch waits.
 //
 // The brass-l underline lies under the selected tab by CSS alone
 // (explorer.css: the tablist's data-view puts it in that tab's column), so
@@ -23,9 +28,8 @@ export default function ViewTabs({ value, onChange, idBase }) {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
     event.preventDefault()
     const tab = event.currentTarget
-    const other = view === 'visual' ? 'list' : 'visual'
     ;(view === 'visual' ? tab.nextElementSibling : tab.previousElementSibling).focus()
-    if (other !== value) onChange(other)
+    onChange(view === 'visual' ? 'list' : 'visual')
   }
 
   return (
@@ -39,7 +43,7 @@ export default function ViewTabs({ value, onChange, idBase }) {
           aria-controls={`${idBase}-${view}`}
           aria-selected={view === value}
           tabIndex={view === value ? 0 : -1}
-          onClick={() => view !== value && onChange(view)}
+          onClick={() => onChange(view)}
           onKeyDown={(event) => onKeyDown(event, view)}
         >
           {label}

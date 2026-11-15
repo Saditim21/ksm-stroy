@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import { presetInquiry } from '../components/inquiry/inquiryStore'
+import { getLenis } from '../utils/lenis'
 import { findUnit, floorKey, stepUnit } from './model'
 import PlanStage from './PlanStage'
 import UnitPanel from './UnitPanel'
@@ -22,8 +23,9 @@ import UnitPanel from './UnitPanel'
 //   that block first, then focuses it (focusRail, the provider's;
 //   Facade.jsx). While the list is on show, the facade's panel is hidden,
 //   its rails and block switch with it (ExplorerSection.jsx): the unit's row
-//   in the list takes the focus then, its table scrolled to it, else (a
-//   stage's floor, or a row the filters leave out) the selected tab. An
+//   in the list takes the focus then, its table scrolled to it and the page
+//   to it where it is still off the screen (showRow), else (a stage's floor,
+//   or a row the filters leave out) the selected tab. An
 //   inquiry's close gives the focus to nothing: the inquiry focuses the
 //   form's first field once its glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
@@ -51,16 +53,35 @@ const railOf = ({ block, floor }) => document.querySelector(`#explorer .fx__cnt[
 const rowOf = (label) => [...document.querySelectorAll('#explorer .lv tr.row')].find((row) => row.querySelector('.uid')?.textContent === label)
 const selectedTab = () => document.querySelector('#explorer [role="tab"][aria-selected="true"]')
 
-// Brings a row into view in the list's table, which scrolls in a box of its
-// own under a sticky head (explorer.css): only that box scrolls, the row just
-// under the head. The page stays where it is, as preventScroll keeps it.
+// Brings a row into view: first in the list's table, which scrolls in a box
+// of its own under a sticky head (explorer.css), the row just under the
+// head; then, if the row is still off the screen (on a phone, or one of the
+// table's last rows), the page, by the least that shows the row and its
+// ring, which lies inside it (ruling T8b). At once, with no glide, and
+// through Lenis where it runs: Lenis, stopped by the dialog's lock until the
+// passive effects, takes the scroll forced and keeps it (as jumpToId does,
+// src/utils/scroll.js). The page moves for no other focus given back: each
+// keeps it still (focusInto's preventScroll).
 function showRow(row) {
   const box = row.closest('.lv__table')
-  if (!box) return
-  const head = box.querySelector('thead')?.getBoundingClientRect().height ?? 0
-  const view = box.getBoundingClientRect()
-  const at = row.getBoundingClientRect()
-  if (at.top < view.top + head || at.bottom > view.bottom) box.scrollTop += at.top - view.top - head
+  if (box) {
+    const head = box.querySelector('thead')?.getBoundingClientRect().height ?? 0
+    const view = box.getBoundingClientRect()
+    const at = row.getBoundingClientRect()
+    if (at.top < view.top + head || at.bottom > view.bottom) box.scrollTop += at.top - view.top - head
+  }
+  // The fixed bar covers the top of the screen (scroll-padding-top,
+  // src/index.css).
+  const bar = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0
+  const { top, bottom } = row.getBoundingClientRect()
+  const by = bottom > window.innerHeight ? Math.ceil(bottom - window.innerHeight) : top < bar ? Math.floor(top - bar) : 0
+  if (!by) return
+  const y = window.scrollY + by
+  window.scrollTo(0, y)
+  const lenis = getLenis()
+  if (!lenis) return
+  lenis.dimensions?.resize()
+  lenis.scrollTo(y, { immediate: true, force: true })
 }
 
 // Gives the focus to a floor's rail, or has the facade show it first. A rail

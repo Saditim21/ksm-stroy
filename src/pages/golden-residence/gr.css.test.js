@@ -142,6 +142,15 @@ describe('the blocks (spec §6.16; extract §4.27)', () => {
     expect(declaredFor('.blk__note')).toMatchObject({ 'font-size': '13px', color: 'var(--stone)', 'max-width': '30em' })
   })
 
+  // Ruling C8.11: before the data, block Б's exposures (BlocksSection.jsx)
+  // keep the room their rows take once the data fills them, so nothing
+  // under the blocks moves: two rows of four, four of two on a small phone,
+  // each the count's 26 px over a 13 px line at the page's 1.6 leading.
+  it('keeps the room of block Б’s exposure rows while they wait for the data', () => {
+    expect(declaredFor('.blk__expo:empty')['min-height']).toBe('calc(2 * (26px + 1.6em) + 10px)')
+    expect(declaredFor('.blk__expo:empty', ['@media (max-width: 560px)'])['min-height']).toBe('calc(4 * (26px + 1.6em) + 3 * 10px)')
+  })
+
   // Extract §4.27, phones: left-aligned, block А's floors moved to the left.
   it('turns block А’s floors to the left of its squares on a phone, and its counts left-aligned', () => {
     expect(declaredFor('.blk--a .blk__floors', [PHONE])['grid-template-columns']).toBe('auto 1fr')

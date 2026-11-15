@@ -4,10 +4,10 @@ import Seam from '../components/ui/Seam'
 import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
 import { GR_FACTS } from '../config/facts'
-import { loadFlip } from '../motion/flip'
 import useMotionNow from '../motion/useMotionNow'
 import useReveals from '../motion/useReveals'
 import Facade from './Facade'
+import { loadSurfaces } from './loadSurfaces'
 import { loadedUnitList, loadUnitList } from './loadUnitList'
 import StaleNotice from './StaleNotice'
 import useExplorer from './useExplorer'
@@ -36,14 +36,19 @@ import ViewTabs from './ViewTabs'
 //   The panel not on show is hidden; the facade keeps its state there, with
 //   no floor hot.
 // - The list is a lazy chunk (loadUnitList.js, ruling C8.5): it loads on the
-//   first switch to it, or on a ?view=list landing. It stays once shown.
+//   first switch to it, or on a ?view=list landing, and usually before
+//   either, as the surfaces' chunk preloads it (surfaces.js, ruling C8.6). It
+//   stays once shown. If it fails on a landing, the explorer goes back to
+//   „Визуално“, never an empty panel, and a later switch tries again (ruling
+//   C8.7).
 // - The switch (spec §5.7, §7.8; the concept's gr.js:79-93): Flip (a lazy
-//   chunk of its own, loadFlip) records the views and the tabs' underline
-//   before it, then plays them from there (playSwitch, viewMotion.js, in the
-//   list's chunk): 0.7 s expo.inOut for the views and the underline's own
-//   0.25 s, while the panel coming in rises 26 px over 0.7 s expo.out, 0.12 s
-//   late; ScrollTrigger measures the page again once the views have settled.
-//   Without motion it switches at once.
+//   chunk of its own, whose loader the surfaces' chunk hands over, with the
+//   list's, surfaces.js) records the views and the tabs' underline before
+//   it, then plays them from there (playSwitch, viewMotion.js, in the list's
+//   chunk): 0.7 s expo.inOut for the views and the underline's own 0.25 s,
+//   while the panel coming in rises 26 px over 0.7 s expo.out, 0.12 s late;
+//   ScrollTrigger measures the page again once the views have settled.
+//   Without motion it switches at once; without Flip (its load failed) too.
 
 // The tabs' and the panels' ids (ViewTabs.jsx): a page has one explorer, as
 // it has one #explorer.
@@ -70,12 +75,15 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
       (module) => {
         if (live) setList(module)
       },
-      (error) => console.error('[explorer] the list did not load:', error),
+      (error) => {
+        console.error('[explorer] the list did not load:', error)
+        if (live) setView('visual')
+      },
     )
     return () => {
       live = false
     }
-  }, [listWanted, list])
+  }, [listWanted, list, setView])
 
   // What the views showed at the last commit, and a switch's Flip, recorded
   // before its commit and played after it.
@@ -84,14 +92,16 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
 
   // A switch waits for what it shows (the list, and Flip where motion plays),
   // then records the views and the underline and changes the address. A
-  // later switch overtakes one still waiting.
+  // later switch overtakes one still waiting, a click on the tab still
+  // selected or an arrow back to it too (ViewTabs passes them on, ruling
+  // C8.8); with no switch waiting, that tab asks for nothing.
   const waiting = useRef(null)
   const switchTo = (next) => {
     if (next === view && !waiting.current) return
     waiting.current = next
     const motion = motionNow()
     Promise.all([
-      motion ? loadFlip().catch(() => null) : null,
+      motion ? loadSurfaces().then((surfaces) => surfaces.loadFlip()).catch(() => null) : null,
       next === 'list' ? loadUnitList() : null,
     ]).then(
       ([Flip, module]) => {

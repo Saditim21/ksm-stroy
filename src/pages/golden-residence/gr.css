@@ -410,6 +410,12 @@
   color: var(--ivory);
   font-variant-numeric: lining-nums;
 }
+/* Block Б's exposures before the data: their rows' room, empty (ruling
+   C8.11), so nothing under the blocks moves when the data lands. The sheets'
+   seven exposures fill two rows of four here, four rows of two on a small
+   phone; a row is the count's 26 px over a line of the 13 px text at the
+   page's 1.6 leading. */
+.blk__expo:empty { min-height: calc(2 * (26px + 1.6em) + 10px); }
 .blk__note {
   max-width: 30em;
   color: var(--stone);
@@ -740,6 +746,7 @@
 @media (max-width: 560px) {
   .park__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .blk__expo { grid-template-columns: repeat(2, auto); }
+  .blk__expo:empty { min-height: calc(4 * (26px + 1.6em) + 3 * 10px); }
 }
 
 /* ---------- the hero's entrance (spec §5.5) ---------- */

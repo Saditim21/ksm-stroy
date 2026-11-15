@@ -4,6 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { resetInquiry } from '../components/inquiry/inquiryStore'
 import { mockMatchMedia } from '../test/media'
 import { tap } from '../test/pointer'
+import { setLenis } from '../utils/lenis'
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
 import { loadSurfaces } from './loadSurfaces'
@@ -334,30 +335,93 @@ describe('the focus after a dialog over the list', () => {
     expect(document.activeElement).toBe(row('А 502'))
   })
 
-  // The list's table scrolls in a box of its own, under a sticky head: the
-  // row is brought into the box's view, just under the head, so its ring
-  // shows, and only the box scrolls (the page stays where the landing put
-  // it, as every focus given back here keeps it). jsdom lays nothing out:
-  // the box spans 575–1205 px with a 51 px head, and А 502, the 50th row of
-  // 65 px, lies 49 rows under the head.
-  it('scrolls the table’s own box to the row, under its head, and not the page', async () => {
-    renderSection({}, '/projects/golden-residence?view=list&unit=А%20502')
-    await screen.findByRole('dialog', { name: 'А 502' })
+  // jsdom lays nothing out. The list's table as a browser would place it:
+  // its box at `boxTop` px on the screen, 630 px tall under a 51 px head, and
+  // the unit's row `under` rows of 65 px below the head, carried up as the
+  // box scrolls. Placed once the landing has jumped to #explorer and its
+  // dialog is open.
+  async function landOnRow(label, under, boxTop) {
+    renderSection({}, `/projects/golden-residence?view=list&unit=${encodeURIComponent(label)}`)
+    await screen.findByRole('dialog', { name: label })
     const box = document.querySelector('#ex-list .lv__table')
-    const target = row('А 502')
+    const head = box.querySelector('thead')
+    const target = row(label)
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
-      const [top, height] = this === box ? [575, 630] : this === box.querySelector('thead') ? [575, 51] : this === target ? [575 + 51 + 49 * 65, 65] : [0, 0]
+      const [top, height] = this === box ? [boxTop, 630] : this === head ? [boxTop, 51] : this === target ? [boxTop + 51 + under * 65 - box.scrollTop, 65] : [0, 0]
       return { top, bottom: top + height, height, left: 0, right: 1440, width: 1440, x: 0, y: top }
     })
+    return { box, target }
+  }
+  const close = async () => {
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  }
+
+  // The list's table scrolls in a box of its own, under a sticky head: the
+  // row is brought into the box's view, just under the head, so its ring
+  // shows. Then it is on the screen, and the page stays where the landing
+  // put it, as every focus given back here keeps it. At 1440 × 900: the box
+  // spans 575–1205 px, and А 502, the 50th row, lies 49 rows under the head;
+  // it comes to 626–691 px, on jsdom's 768 px screen.
+  it('scrolls the table’s own box to the row, under its head, and not the page when the row is then on the screen', async () => {
+    const { box, target } = await landOnRow('А 502', 49, 575)
     const pageScroll = vi.spyOn(window, 'scrollTo')
     const intoView = vi.spyOn(HTMLElement.prototype, 'scrollIntoView')
 
-    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await close()
     expect(document.activeElement).toBe(target)
     expect(box.scrollTop).toBe(49 * 65)
+    expect(target.getBoundingClientRect()).toMatchObject({ top: 626, bottom: 691 })
     expect(pageScroll).not.toHaveBeenCalled()
     expect(intoView).not.toHaveBeenCalled()
+  })
+
+  // Ruling T8b: a row still off the screen once its box has scrolled (a
+  // phone; the table's last rows at 1440) is brought on by the page, by the
+  // least that shows it and its ring (inside the row, at −2 px), at once:
+  // natively, and through Lenis where it runs, forced, as the dialog's lock
+  // still holds it. At 390 × 844: the box starts at 900 px, below the
+  // screen, and Б 101 is the 97th row; once the box has scrolled it lies at
+  // 951–1016 px, 172 px under the screen's foot.
+  it('then scrolls the page by the least that shows a row still under the screen, at once and through Lenis', async () => {
+    vi.stubGlobal('innerHeight', 844)
+    vi.stubGlobal('scrollY', 1200)
+    const { box, target } = await landOnRow('Б 101', 96, 900)
+    const lenis = { stop: vi.fn(), start: vi.fn(), scrollTo: vi.fn(), dimensions: { resize: vi.fn() } }
+    setLenis(lenis)
+    const pageScroll = vi.spyOn(window, 'scrollTo')
+    try {
+      await close()
+      expect(document.activeElement).toBe(target)
+      expect(box.scrollTop).toBe(96 * 65)
+      expect(pageScroll.mock.calls).toEqual([[0, 1200 + 172]])
+      expect(lenis.dimensions.resize).toHaveBeenCalled()
+      expect(lenis.scrollTo.mock.calls).toEqual([[1200 + 172, { immediate: true, force: true }]])
+    } finally {
+      setLenis(null)
+      vi.unstubAllGlobals()
+    }
+  })
+
+  // The page scrolled down past the table's top, the row under its head is
+  // above the screen: the page comes up by the least that shows it below the
+  // fixed bar (scroll-padding-top, here 72 px). Without Lenis, natively.
+  it('scrolls the page up by the least that shows a row above the screen, below the bar', async () => {
+    vi.stubGlobal('scrollY', 3000)
+    const { target } = await landOnRow('А 502', 49, -500)
+    const computed = window.getComputedStyle
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => (
+      element === document.documentElement ? { scrollPaddingTop: '72px' } : computed(element, pseudo)
+    ))
+    const pageScroll = vi.spyOn(window, 'scrollTo')
+    try {
+      await close()
+      expect(document.activeElement).toBe(target)
+      // The row lies at -449 px once its box has scrolled: 521 px up.
+      expect(pageScroll.mock.calls).toEqual([[0, 3000 - 521]])
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   it('goes to the selected tab when the filters leave the unit’s row out', async () => {

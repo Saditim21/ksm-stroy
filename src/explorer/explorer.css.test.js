@@ -279,6 +279,20 @@ describe('the list (spec §7.8; extract §4.26)', () => {
     expect(declaredFor('.lv .utable th button[data-dir]::after')).toMatchObject({ 'border-top': '5px solid var(--brass)' })
     expect(declaredFor('.lv .utable th button[data-dir="asc"]::after').transform).toBe('rotate(180deg)')
   })
+
+  // Ruling C8.12, spec §11: on a small phone the cells sit closer, but the
+  // first column keeps room for the „Имот“ sort button's ring, 2 px at a
+  // 3 px offset (src/index.css, which no rule here changes), inside the
+  // table's box, which clips what passes its edge.
+  it('keeps the „Имот“ button’s ring inside the table’s box on a small phone', () => {
+    const SMALL = ['@media (max-width: 560px)']
+    expect(declaredFor('.lv .utable th', SMALL)).toMatchObject({ 'padding-left': '8px', 'padding-right': '8px' })
+    const first = Number.parseFloat(declaredFor('.lv .utable th:first-child', SMALL)['padding-left'])
+    expect(first).toBeGreaterThanOrEqual(2 + 3)
+    // The rows' first cells stay in line with their head.
+    expect(declaredFor('.lv .utable td:first-child', SMALL)['padding-left']).toBe(`${first}px`)
+    expect(rules.filter((rule) => /th\b[^,]*button/.test(rule.selector) && rule.declarations.some(({ prop }) => prop.startsWith('outline')))).toEqual([])
+  })
 })
 
 // Spec §2.1: a control's border is hair-ctl.

@@ -1315,7 +1315,10 @@
   .bp__id { justify-items: start; }
 }
 
-/* Small phones: the list's cells closer. */
+/* Small phones: the list's cells closer. The first column keeps 5 px, not
+   the concept's 4 (its :902): the „Имот“ sort button's ring, 2 px at a 3 px
+   offset, then ends on the table box's edge, which clips what passes it
+   (ruling C8.12, spec §11). */
 @media (max-width: 560px) {
   .lv .utable td,
   .lv .utable th {
@@ -1323,5 +1326,5 @@
     padding-left: 8px;
   }
   .lv .utable td:first-child,
-  .lv .utable th:first-child { padding-left: 4px; }
+  .lv .utable th:first-child { padding-left: 5px; }
 }

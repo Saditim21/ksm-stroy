@@ -279,6 +279,11 @@ describe('the garages and parking places (spec §6.18)', () => {
     await waitFor(() => expect(garages.querySelectorAll('.park__cells [class^="s-"]')).toHaveLength(113))
     expect(garages.querySelector('.park__cells')).toHaveAttribute('aria-hidden', 'true')
     expect(section('park-p').querySelectorAll('.park__cells [class^="s-"]')).toHaveLength(68)
+    // Each names its place, its area and its status to a pointer, as the
+    // block grids' squares do (cellTitle.js).
+    for (const cell of section('garazhi').querySelectorAll('.park__cells i')) {
+      expect(cell.getAttribute('title').replace(/\s+/g, ' ')).toMatch(/^(Г-\d{3}|ПМ-\d{2}) · \d+,\d{2} м² · (Свободен|Резервиран|Продаден|Блокиран)$/)
+    }
   })
 
   // Spec §6.18, §5.3: both actions choose the garage option, which glides

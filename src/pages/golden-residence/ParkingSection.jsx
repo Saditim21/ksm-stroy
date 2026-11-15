@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { presetInquiry } from '../../components/inquiry/inquiryStore'
 import Button from '../../components/ui/Button'
+import { cellTitle, statusText } from '../../components/ui/cellTitle'
 import RollingNumber from '../../components/ui/RollingNumber'
 import Seam from '../../components/ui/Seam'
 import StatusCount from '../../components/ui/StatusCount'
@@ -10,7 +11,6 @@ import { spotUnits } from '../../data/availability/select'
 import { useAvailability } from '../../data/availability/useAvailability'
 import useReveals from '../../motion/useReveals'
 import { formatArea, plural } from '../../utils/format'
-import { STATUS_LABEL } from '../../utils/propertyStatus'
 import { summarize } from '../../utils/units'
 
 // The garages and parking places, #garazhi (spec §6.18, §8.2; extract
@@ -35,9 +35,9 @@ const PLACES = [
   { slot: 'parking', id: 'park-p', side: 'b', name: 'Паркоместа', total: GR_FACTS.parking, list: 'Свободните паркоместа', action: 'Запитване за паркомясто' },
 ]
 
-// What a cell says to a pointer: „Г-001 · 34,01 м² · Продаден“.
-const statusOf = (unit) => (unit.status === 'unknown' ? unit.statusText || STATUS_LABEL.unknown : STATUS_LABEL[unit.status])
-const cellTitle = (unit) => [unit.label, unit.totalArea == null ? null : formatArea(unit.totalArea), statusOf(unit)].filter(Boolean).join(' · ')
+// What a cell says to a pointer: „Г-001 · 34,01 м² · Продаден“, as the block
+// grids' squares say theirs (cellTitle.js).
+const titleOf = (unit) => cellTitle(unit.label, unit.totalArea == null ? null : formatArea(unit.totalArea), statusText(unit))
 
 // Both actions choose the garage option, which glides the page to the form
 // (spec §5.3), and take the jump from the browser and the router, so the
@@ -75,7 +75,7 @@ function Half({ place, availability }) {
       </ul>
       <div className="park__cells" aria-hidden="true">
         {units
-          ? units.map((unit, i) => <i key={i} className={`s-${statusLook(unit.status)}`} title={cellTitle(unit)} />)
+          ? units.map((unit, i) => <i key={i} className={`s-${statusLook(unit.status)}`} title={titleOf(unit)} />)
           : Array.from({ length: total }, (_, i) => <i key={i} />)}
       </div>
       <details>

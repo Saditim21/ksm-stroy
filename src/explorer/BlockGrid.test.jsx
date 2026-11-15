@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import BlockGrid from './BlockGrid'
 import { buildModel } from './model'
@@ -89,5 +90,111 @@ describe('BlockGrid', () => {
     const cell = screen.getByRole('button', { name: 'А 501, Няма информация' })
     expect(cell).toHaveClass('s-blocked')
     expect(title(cell)).toBe('А 501 · Няма информация')
+  })
+})
+
+// Ruling T8a: each grid is one tab stop, the square last focused, else its
+// first; the arrows move between the squares (← → along a floor, ↑ ↓ between
+// floors), Home and End go to the floor's ends, and Enter and Space open the
+// unit. So a keyboard passes #blokove in two stops, not 192.
+describe('the grid by keyboard', () => {
+  const square = (label) => screen.getByRole('button', { name: new RegExp(`^${label}(,|$)`) })
+  const stops = (block) => cells(block).filter((cell) => cell.tabIndex === 0)
+  // A key on the focused square: whether the page's own action for it (a
+  // scroll, Home's and End's jump) was kept back.
+  const press = (key, init = {}) => !fireEvent.keyDown(document.activeElement, { key, ...init })
+
+  it('puts one square in the tab order, the first, before and after the data', () => {
+    const { rerender } = render(<BlockGrid model={null} block="А" onUnit={() => {}} />)
+    expect(stops('А')).toEqual([square('А 801')])
+    expect(cells('А').filter((cell) => cell.tabIndex === -1)).toHaveLength(95)
+    rerender(<BlockGrid model={MODEL} block="А" onUnit={() => {}} />)
+    expect(stops('А')).toEqual([square('А 801')])
+  })
+
+  it('moves along a floor with ← and →, between floors with ↑ and ↓, and to the floor’s ends with Home and End', () => {
+    render(<BlockGrid model={MODEL} block="А" onUnit={() => {}} />)
+    square('А 801').focus()
+    const path = [
+      ['ArrowRight', 'А 802'],
+      ['ArrowDown', 'А 702'],
+      ['End', 'А 712'],
+      ['ArrowRight', 'А 712'],
+      ['Home', 'А 701'],
+      ['ArrowLeft', 'А 701'],
+      ['ArrowUp', 'А 801'],
+      ['ArrowUp', 'А 801'],
+      ['ArrowDown', 'А 701'],
+      ['ArrowDown', 'А 601'],
+      ['ArrowDown', 'А 501'],
+      ['ArrowDown', 'А 401'],
+      ['ArrowDown', 'А 301'],
+      ['ArrowDown', 'А 201'],
+      ['ArrowDown', 'А 101'],
+      ['ArrowDown', 'А 101'],
+      ['End', 'А 112'],
+    ]
+    for (const [key, label] of path) {
+      // Kept back even at an edge, where the focus stays: the page holds
+      // still under the grid.
+      expect(press(key), key).toBe(true)
+      expect(document.activeElement, `${key} → ${label}`).toBe(square(label))
+      // The square the focus reached is the grid's tab stop now.
+      expect(stops('А')).toEqual([square(label)])
+    }
+  })
+
+  it('leaves other keys, and an arrow with Alt or ⌘ (the browser’s Back), alone', () => {
+    render(<BlockGrid model={MODEL} block="Б" onUnit={() => {}} />)
+    square('Б 805').focus()
+    expect(press('ArrowLeft', { altKey: true })).toBe(false)
+    expect(press('ArrowRight', { altKey: true })).toBe(false)
+    expect(press('ArrowLeft', { metaKey: true })).toBe(false)
+    expect(press('PageDown')).toBe(false)
+    expect(press('a')).toBe(false)
+    expect(document.activeElement).toBe(square('Б 805'))
+  })
+
+  it('opens the focused square’s unit with Enter and with Space', async () => {
+    const user = userEvent.setup()
+    const onUnit = vi.fn()
+    render(<BlockGrid model={MODEL} block="Б" onUnit={onUnit} />)
+    square('Б 801').focus()
+    await user.keyboard('{ArrowDown}{ArrowRight}{Enter}')
+    expect(onUnit).toHaveBeenCalledTimes(1)
+    expect(onUnit.mock.calls[0]).toEqual(['Б 702', square('Б 702')])
+    await user.keyboard('{ArrowRight} ')
+    expect(onUnit).toHaveBeenCalledTimes(2)
+    expect(onUnit.mock.calls[1]).toEqual(['Б 703', square('Б 703')])
+  })
+
+  // Tab goes from one grid to the other and on: two stops for the 192
+  // squares. Coming back, the grid's stop is the square last focused, by
+  // the keyboard or a click.
+  it('is one stop per grid with Tab, coming back to the square last focused', async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <button type="button">before</button>
+        <BlockGrid model={MODEL} block="А" onUnit={() => {}} />
+        <BlockGrid model={MODEL} block="Б" onUnit={() => {}} />
+        <button type="button">after</button>
+      </>,
+    )
+    screen.getByRole('button', { name: 'before' }).focus()
+    await user.tab()
+    expect(document.activeElement).toBe(square('А 801'))
+    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{End}')
+    expect(document.activeElement).toBe(square('А 512'))
+    await user.tab()
+    expect(document.activeElement).toBe(square('Б 801'))
+    await user.tab()
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'after' }))
+
+    await user.click(square('Б 304'))
+    await user.tab({ shift: true })
+    expect(document.activeElement).toBe(square('А 512'))
+    await user.tab()
+    expect(document.activeElement).toBe(square('Б 304'))
   })
 })

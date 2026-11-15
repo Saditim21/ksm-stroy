@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ExplorerProvider } from './ExplorerContext'
@@ -95,6 +95,77 @@ describe('the switch with motion', () => {
     fireEvent.click(tab('Визуално'))
     await waitFor(() => expect(motion.gsap.fromTo).toHaveBeenCalledTimes(2))
     expect(motion.gsap.fromTo.mock.calls[1][0]).toBe(panel('visual'))
+  })
+})
+
+// Ruling C8.8: a switch waits for Flip (and the list) before the tab
+// changes. Meanwhile the tab it left is still selected; a click on it, or an
+// arrow back to it, calls the waiting switch off, so the view stays, and the
+// focus is on the selected tab. Flip arrives late here, shared by every call,
+// as loadFlip() shares one promise.
+describe('a switch still waiting', () => {
+  let arrive
+  beforeEach(() => {
+    const late = new Promise((resolve) => {
+      arrive = () => resolve(Flip)
+    })
+    loadFlip.mockImplementation(() => late)
+  })
+  afterEach(() => {
+    loadFlip.mockImplementation(() => Promise.resolve(Flip))
+  })
+
+  // Every promise the switches wait on settles before a macrotask; React's
+  // updates are flushed inside act.
+  const flush = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+  const settles = async () => {
+    arrive()
+    await flush()
+  }
+
+  it('is called off by a click on the tab still selected', async () => {
+    renderSection()
+    fireEvent.click(tab('По критерии'))
+    expect(tab('Визуално')).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(tab('Визуално'))
+    await settles()
+
+    expect(tab('Визуално')).toHaveAttribute('aria-selected', 'true')
+    expect(panel('visual').hidden).toBe(false)
+    expect(panel('list').hidden).toBe(true)
+    expect(Flip.getState).not.toHaveBeenCalled()
+    expect(Flip.from).not.toHaveBeenCalled()
+  })
+
+  it('is called off by an arrow back, the focus on the tab that stays selected', async () => {
+    renderSection()
+    tab('Визуално').focus()
+    fireEvent.keyDown(tab('Визуално'), { key: 'ArrowRight' })
+    expect(document.activeElement).toBe(tab('По критерии'))
+    fireEvent.keyDown(tab('По критерии'), { key: 'ArrowLeft' })
+    expect(document.activeElement).toBe(tab('Визуално'))
+    await settles()
+
+    expect(tab('Визуално')).toHaveAttribute('aria-selected', 'true')
+    expect(tab('Визуално')).toHaveAttribute('tabindex', '0')
+    expect(document.activeElement).toBe(tab('Визуално'))
+    expect(panel('list').hidden).toBe(true)
+    expect(Flip.getState).not.toHaveBeenCalled()
+  })
+
+  // Without a switch waiting, the selected tab asks for nothing.
+  it('switches once Flip is in when nothing calls it off, and a click on the selected tab then does nothing', async () => {
+    renderSection()
+    fireEvent.click(tab('По критерии'))
+    await settles()
+    await waitFor(() => expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true'))
+    expect(Flip.getState).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(tab('По критерии'))
+    await flush()
+    expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true')
+    expect(Flip.getState).toHaveBeenCalledTimes(1)
+    expect(loadFlip).toHaveBeenCalledTimes(1)
   })
 })
 

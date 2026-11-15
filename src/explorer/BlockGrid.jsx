@@ -1,8 +1,8 @@
-import { useMemo, useRef } from 'react'
-import { statusKeyOf, statusLook } from '../components/ui/status'
+import { useRef, useState } from 'react'
+import { cellTitle, statusText } from '../components/ui/cellTitle'
+import { statusLook } from '../components/ui/status'
 import useMotion from '../motion/useMotion'
 import { formatArea } from '../utils/format'
-import { STATUS_LABEL } from '../utils/propertyStatus'
 
 // A block in numbers (spec §6.16; extract §4.27; the concept's gr.js:185-210):
 // its 96 apartments as a 12 × 8 grid of squares, floors 8 → 1 from the top,
@@ -12,6 +12,12 @@ import { STATUS_LABEL } from '../utils/propertyStatus'
 // grid, before block Б's. A click opens the unit (onUnit, with its label and
 // the square, for the focus to come back to as the unit panel closes:
 // Safari and Firefox on a Mac do not focus a button they click).
+//
+// The keyboard (ruling T8a): a grid is one tab stop, the square last
+// focused, else its first, so the 192 squares never stand between a visitor
+// and the gallery. ← and → move along a floor, ↑ and ↓ between floors, Home
+// and End to the floor's ends; Enter and Space open the unit, as a button's
+// own keys do. One handler for the whole grid.
 //
 // `model` is buildModel()'s, or null until the data arrives: every square is
 // there before it, in a neutral outline and named by its unit alone, so
@@ -27,19 +33,17 @@ import { STATUS_LABEL } from '../utils/propertyStatus'
 const FLOORS = [8, 7, 6, 5, 4, 3, 2, 1]
 const NUMBERS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'))
 
-// What a unit's status reads (StatusChip's rule): its label, or a status the
-// rules do not know as the unit's own text („Скоро“), else „Няма информация“.
-function statusOf(unit) {
-  const key = statusKeyOf(unit?.status)
-  return key === 'unknown' ? unit?.statusText?.trim() || STATUS_LABEL.unknown : STATUS_LABEL[key]
-}
+// The place in its grid of the square an event came from: twelve a floor,
+// floor 8's first.
+const indexIn = (event) => [...event.currentTarget.children].indexOf(event.target)
 
 export default function BlockGrid({ model, block, onUnit }) {
   const ref = useRef(null)
-  const units = useMemo(
-    () => new Map((model?.units ?? []).filter((unit) => unit.block === block).map((unit) => [`${unit.floor}${unit.suffix}`, unit])),
-    [model, block],
-  )
+  // The square in the tab order: its place in the grid.
+  const [stop, setStop] = useState(0)
+  // The block's units by floor and number: 96 at most, cheaper to build at
+  // each render than to keep.
+  const units = new Map((model?.units ?? []).filter((unit) => unit.block === block).map((unit) => [`${unit.floor}${unit.suffix}`, unit]))
 
   useMotion(ref, ({ gsap }) => {
     const half = ref.current?.closest('.blk') ?? ref.current
@@ -54,6 +58,26 @@ export default function BlockGrid({ model, block, onUnit }) {
     })
   }, [block])
 
+  // The step a key of the grid's takes from square i: along its floor, to the
+  // floor above or below (twelve squares), or to the floor's ends; none at
+  // the grid's edge. The page never scrolls for one, even there; a key with
+  // Alt or ⌘ (Back) is the browser's.
+  const onKeyDown = (event) => {
+    const i = indexIn(event)
+    const column = i % 12
+    const step = {
+      ArrowLeft: column ? -1 : 0,
+      ArrowRight: column < 11 ? 1 : 0,
+      ArrowUp: i > 11 ? -12 : 0,
+      ArrowDown: i < 84 ? 12 : 0,
+      Home: -column,
+      End: 11 - column,
+    }[event.key]
+    if (step === undefined || event.altKey || event.metaKey) return
+    event.preventDefault()
+    event.currentTarget.children[i + step].focus()
+  }
+
   const floors = (
     <div className="blk__fl" aria-hidden="true">
       {FLOORS.map((floor) => (
@@ -65,22 +89,26 @@ export default function BlockGrid({ model, block, onUnit }) {
   return (
     <div ref={ref} className="blk__floors">
       {block === 'А' ? null : floors}
-      <div className="blk__grid" role="group" aria-label={`Апартаментите на блок\u00a0${block}`}>
-        {FLOORS.flatMap((floor) => NUMBERS.map((number) => {
+      <div
+        className="blk__grid"
+        role="group"
+        aria-label={`Апартаментите на блок\u00a0${block}`}
+        onFocus={(event) => setStop(indexIn(event))}
+        onKeyDown={onKeyDown}
+      >
+        {FLOORS.flatMap((floor, row) => NUMBERS.map((number, column) => {
           const label = `${block} ${floor}${number}`
           const unit = units.get(`${floor}${number}`)
           const known = Boolean(model)
-          const status = known ? statusOf(unit) : null
-          const title = unit
-            ? [label, unit.type, unit.totalArea != null ? formatArea(unit.totalArea) : null, status].filter(Boolean).join(' · ')
-            : `${label} · ${status}`
+          const status = known ? statusText(unit) : null
           return (
             <button
               key={label}
               type="button"
               className={known ? `s-${statusLook(unit?.status)}` : 's-none'}
               aria-label={known ? `${label}, ${status}` : label}
-              title={known ? title : undefined}
+              title={known ? cellTitle(label, unit?.type, unit?.totalArea != null ? formatArea(unit.totalArea) : null, status) : undefined}
+              tabIndex={row * 12 + column === stop ? 0 : -1}
               onClick={(event) => onUnit(unit?.label ?? label, event.currentTarget)}
             />
           )

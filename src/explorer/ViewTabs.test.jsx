@@ -74,13 +74,34 @@ describe('ViewTabs', () => {
     expect(document.activeElement).toBe(tab('По критерии'))
   })
 
-  it('switches on a click, and a click on the selected tab changes nothing', () => {
+  it('switches on a click', () => {
     const onChange = vi.fn()
     render(<Kept onChange={onChange} />)
-    fireEvent.click(tab('Визуално'))
-    expect(onChange).not.toHaveBeenCalled()
     fireEvent.click(tab('По критерии'))
     expect(onChange).toHaveBeenCalledWith('list')
+    expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true')
+  })
+
+  // Ruling C8.8: while a switch waits for what it shows, the tab it left is
+  // still the selected one. A click on it, or an arrow back to it, is passed
+  // on, so the parent can call the waiting switch off (ExplorerSection, which
+  // ignores the view it shows when no switch waits).
+  it('passes a click on the selected tab on, and an arrow back to it', () => {
+    const onChange = vi.fn()
+    render(<ViewTabs value="visual" idBase="v" onChange={onChange} />)
+    fireEvent.click(tab('Визуално'))
+    expect(onChange).toHaveBeenLastCalledWith('visual')
+
+    // The parent has not switched yet: → asks for the list and focuses it,
+    // and ← asks for „Визуално“ again, the focus back on it.
+    tab('Визуално').focus()
+    fireEvent.keyDown(tab('Визуално'), { key: 'ArrowRight' })
+    expect(onChange).toHaveBeenLastCalledWith('list')
+    expect(document.activeElement).toBe(tab('По критерии'))
+    fireEvent.keyDown(tab('По критерии'), { key: 'ArrowLeft' })
+    expect(onChange).toHaveBeenLastCalledWith('visual')
+    expect(document.activeElement).toBe(tab('Визуално'))
+    expect(onChange).toHaveBeenCalledTimes(3)
   })
 
   it('leaves other keys alone', () => {
