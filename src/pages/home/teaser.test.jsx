@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { beforeEach, expect, it, vi } from 'vitest'
+import { loadSurfaces } from '../../explorer/loadSurfaces'
 import { snapshotAvailability } from '../../explorer/testing'
 import { tap } from '../../test/pointer'
 import TeaserSection from './TeaserSection'
@@ -12,6 +13,11 @@ import TeaserSection from './TeaserSection'
 
 let availability
 vi.mock('../../data/availability/useAvailability', () => ({ useAvailability: () => availability }))
+// The stage's chunk, watched: a floor's click starts loading it.
+vi.mock('../../explorer/loadSurfaces', async (importOriginal) => {
+  const actual = await importOriginal()
+  return { ...actual, loadSurfaces: vi.fn(actual.loadSurfaces) }
+})
 
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 
@@ -79,11 +85,14 @@ it('shows the notice when a Golden Residence slot is built-in, and not over live
 
 // Spec §7.2, ruling F11: a floor opens on the Golden Residence page, whose
 // deep link jumps to the explorer and opens the floor's plan (spec §7.10):
-// no hash.
-it('opens a floor on the Golden Residence page, by the floor alone', () => {
+// no hash. The stage's chunk starts loading with the click.
+it('opens a floor on the Golden Residence page, by the floor alone, loading the stage’s chunk', () => {
+  loadSurfaces.mockClear()
   renderTeaser()
+  expect(loadSurfaces).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button', { name: /^Блок А, етаж 5:/ }))
   expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?floor=А-5$/)
+  expect(loadSurfaces).toHaveBeenCalledTimes(1)
 })
 
 // Spec §7.2: on Home too, a finger's first tap on a rail names the floor in

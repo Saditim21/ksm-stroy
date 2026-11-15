@@ -4,6 +4,7 @@ import Seam from '../../components/ui/Seam'
 import { GR_FACTS } from '../../config/facts'
 import { useAvailability } from '../../data/availability/useAvailability'
 import Facade from '../../explorer/Facade'
+import { loadSurfaces } from '../../explorer/loadSurfaces'
 import { buildModel } from '../../explorer/model'
 import StaleNotice from '../../explorer/StaleNotice'
 import useReveals from '../../motion/useReveals'
@@ -16,8 +17,11 @@ import useReveals from '../../motion/useReveals'
 //
 // A floor opens on the Golden Residence page by its floor alone
 // (/projects/golden-residence?floor=А-5, ruling F11): the page jumps to its
-// explorer and opens the floor's plan stage (spec §7.10). The headings and
-// the seam reveal as everywhere (useReveals); the markup is the final state.
+// explorer and opens the floor's plan stage (spec §7.10). The stage's chunk
+// (surfaces.js), which Home's compact facade never needs, starts loading
+// with the click, beside the page's own, so the stage need not wait for it
+// after the doors. The headings and the seam reveal as everywhere
+// (useReveals); the markup is the final state.
 
 const GR = '/projects/golden-residence'
 
@@ -27,7 +31,11 @@ export default function TeaserSection() {
   const { data } = useAvailability()
   const model = useMemo(() => buildModel(data), [data])
   const navigate = useNavigate()
-  const openFloor = useCallback((block, floor) => navigate(`${GR}?floor=${block}-${floor}`), [navigate])
+  const openFloor = useCallback((block, floor) => {
+    // The page's provider loads it again, and says so, if this load fails.
+    loadSurfaces().catch(() => {})
+    navigate(`${GR}?floor=${block}-${floor}`)
+  }, [navigate])
 
   return (
     <section ref={ref} className="sec teaser" id="etazhi" aria-labelledby="teaser-h">
