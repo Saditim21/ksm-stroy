@@ -28,9 +28,9 @@ import { NAV, currentFor } from './nav'
 //   phone the menu scrolls on its own, so Lenis leaves its wheel alone.
 // - A page link needs nothing of its own: the router commits the new page,
 //   the header unmounts the menu in that same commit, and only the old view
-//   transition snapshot holds it, which the doors close (its group,
-//   `site-menu`, src/styles/motion.css). A link to the page already shown
-//   closes it at once, then the router follows it.
+//   transition snapshot holds it, which the doors close over the header, as
+//   it lay (its group, `site-menu`, src/styles/motion.css). A link to the
+//   page already shown closes it at once, then the router follows it.
 //
 // With motion (useMotionNow), the halves slide in from above and below, the
 // seam draws and the items rise; closing, the items fade and the halves slide

@@ -161,6 +161,21 @@ describe('without the doors', () => {
   })
 })
 
+// An open menu (src/shell/SiteMenu.jsx) lies over the header, which it hides
+// (src/styles/shell.css: .menu over .hdr), and keeps that place during the
+// change, doors or crossfade: the doors close the whole menu, „Затвори“ in its
+// top band with it, and uncover the header, which has switched at once. Under
+// it, the header would show over the closing menu from the first frame.
+it('keeps an open menu over the header during the change, as it lies live', () => {
+  const shell = rulesOf('src/styles/shell.css')
+  const live = (selector) => Number(rulesFor(shell, selector).map((rule) => valueOf(rule, 'z-index')).filter(Boolean).at(-1))
+  expect(live('.menu')).toBeGreaterThan(live('.hdr'))
+  const menu = only('::view-transition-group(site-menu)')
+  const header = only('::view-transition-group(site-header)')
+  expect(Number(valueOf(menu, 'z-index'))).toBeGreaterThan(Number(valueOf(header, 'z-index')))
+  expect(menu.atRules).toEqual([])
+})
+
 // The entrance delay (spec §5.5): the first page waits for the intro, a page
 // the doors bring waits for them to open, the hero move's target and a page
 // Back or Forward brings start at once.

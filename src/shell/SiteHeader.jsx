@@ -20,7 +20,8 @@ import { inquiryTarget, useRouteHandle } from './handle'
 // - Once the page has scrolled 40 px (data-scrolled) it moves up by the EU
 //   row, which slides away; the bar stays. It never hides.
 // - It is a view-transition group of its own: the doors leave it out, and it
-//   takes the new page's look at once (src/styles/motion.css).
+//   takes the new page's look at once, under an open menu as it lies live
+//   (src/styles/motion.css).
 // - „Запитване“ goes to the page's own inquiry where it has one, else to the
 //   contact page with the page's project (inquiryTarget).
 //

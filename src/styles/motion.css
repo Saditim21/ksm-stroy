@@ -9,7 +9,9 @@
    and the new view opens from it (520–1120 ms) as the seam fades. The doors
    close the whole view: the page, the root snapshot (the footer, the grain,
    the ground) and an open menu (its group, `site-menu`), and uncover onyx.
-   The header is a group of its own and switches at once, over them.
+   The header is a group of its own and switches at once, over the page and
+   the root; an open menu lies over it, as it does live, and the doors
+   uncover it as they close the menu.
 
    Without motion (reduced motion, Save-Data, no matchMedia), a 200 ms
    crossfade. `vt-cut` on <html> (src/utils/viewTransition.js) turns the doors
@@ -86,3 +88,11 @@
 ::view-transition-group(site-header) { z-index: 1; }
 ::view-transition-old(site-header) { display: none; }
 ::view-transition-new(site-header) { animation: none; }
+
+/* An open menu (src/shell/SiteMenu.jsx, view-transition-name: site-menu)
+   keeps its place over the header (src/styles/shell.css: .menu over .hdr),
+   which it hides while open. The doors close the whole menu, „Затвори“ in its
+   top band with it, and uncover the header as they close; without the doors
+   the menu fades over it. Under the header, the menu's top band would vanish
+   at the click and the header show over the closing menu. */
+::view-transition-group(site-menu) { z-index: 2; }

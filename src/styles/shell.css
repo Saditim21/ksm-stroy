@@ -271,7 +271,8 @@
   /* ---------- the menu (spec §6.4) ---------- */
   /* A diptych of its own over the whole screen and the header: the pages on
      onyx, the details on umber, the seam between. A view transition group of
-     its own, so the doors close over it (src/styles/motion.css). */
+     its own that keeps its place over the header's, so the doors close the
+     whole menu, its top band too (src/styles/motion.css). */
   .menu {
     position: fixed;
     inset: 0;
