@@ -458,7 +458,7 @@ export default MnogofamilnaBlockSelection;
 // How the site's shell frames this page (src/shell/handle.js): the solid
 // header, as on every legacy page; the page opens below it, on production's
 // light ground.
-export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', object: 'Многофамилна жилищна сграда', legacy: true }
+export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', legacy: true }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({

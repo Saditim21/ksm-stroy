@@ -1,0 +1,549 @@
+/* The site's shell in Diptych: the skip link, the header with its EU row, the
+   menu, the footer, the EU line and the grain (spec
+   docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md, §2.2, §6.2–6.5,
+   §11), ported from the concept's css/diptych.css with the tokens of
+   src/index.css: the header from :101-134, the menu from :156-173 and
+   :738-745, the EU line from :175-182, the footer from :201-230, the grain
+   from :40-43 (extract §1.2).
+
+   In Tailwind's components layer, after diptych.css: after the base styles,
+   so a class always beats Preflight's element rules, and after the seam
+   (.seam), which the menu's seam adjusts. Longhands, not the `font`
+   shorthand, which would reset .tab's tabular figures.
+
+   The concept's vh are --screen-h (spec §2.2). Hover effects only where a
+   pointer hovers (spec §2.2): a tap never leaves one behind. */
+
+@layer components {
+  /* ---------- the skip link (extract §6) ---------- */
+  /* Onyx on ivory at the top left, over everything (spec §2.2), seen only
+     when the keyboard reaches it. */
+  .skip {
+    position: fixed;
+    left: 16px;
+    top: 12px;
+    z-index: 90;
+    padding: 10px 16px;
+    background: var(--ivory);
+    color: var(--onyx);
+    font-weight: 600;
+  }
+  .skip:not(:focus) {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ---------- small links: the 44 px hit box (spec §11) ---------- */
+  /* A transparent box that reaches 44 px each way around a small link (the
+     phones, the email, the footer's links, „За проекта“), over what lies
+     around it. The link's words, in their span, sit above every such box, so
+     where the boxes of two stacked links meet, a click on a link's words is
+     that link's. */
+  .hit {
+    position: relative;
+  }
+  .hit::before {
+    content: '';
+    position: absolute;
+    inset: min(0px, (100% - 44px) / 2);
+  }
+  .hit > span {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- the header (spec §6.2) ---------- */
+  /* The EU row over the bar, one fixed element: see-through over the page's
+     hero, on a scrim, until the page scrolls; then onyx at 86 % with a blur.
+     Scrolled, it moves up by the EU row, and the bar stays. It is a view
+     transition group of its own (src/styles/motion.css). */
+  .hdr {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 40;
+    color: var(--ivory);
+    font-family: var(--sans);
+    transition: background-color .45s var(--e-soft), transform .5s var(--e-out);
+    view-transition-name: site-header;
+  }
+  .hdr::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -40px;
+    background: linear-gradient(rgba(14, 13, 11, .55), rgba(14, 13, 11, 0));
+    pointer-events: none;
+    transition: opacity .45s;
+    z-index: -1;
+  }
+  .hdr[data-look="solid"] {
+    background-color: rgba(14, 13, 11, .86);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+  }
+  .hdr[data-look="solid"]::before {
+    opacity: 0;
+  }
+  .hdr[data-scrolled] {
+    transform: translateY(calc(-1 * var(--eu-h)));
+  }
+  /* The keyboard on the EU row brings it back. */
+  .hdr[data-scrolled]:has(.hdr__eu :focus-visible) {
+    transform: none;
+  }
+  .hdr__eu {
+    height: var(--eu-h);
+    padding: 0 var(--gut);
+  }
+  .hdr__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    height: var(--bar-h);
+    padding: 0 var(--gut);
+    border-bottom: 1px solid transparent;
+    transition: border-color .45s var(--e-soft);
+  }
+  .hdr[data-look="solid"] .hdr__bar {
+    border-color: var(--hair-2);
+  }
+  /* The mark in brass (markClassName), the wordmark in ivory. */
+  .hdr__logo {
+    display: block;
+    width: 142px;
+    color: var(--ivory);
+  }
+  .hdr__logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .hdr__right {
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 2.2vw, 34px);
+  }
+  .hdr__menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+  /* Two lines, the lower one shorter until the pointer comes. */
+  .hdr__menu i {
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 8px;
+  }
+  .hdr__menu i::before,
+  .hdr__menu i::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: currentColor;
+    transition: right .35s var(--e-out);
+  }
+  .hdr__menu i::before { top: 0; }
+  .hdr__menu i::after { bottom: 0; right: 7px; }
+  .hdr__tel {
+    padding: 10px 0;
+    color: var(--ivory-2);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    transition: color .2s;
+  }
+
+  /* ---------- the EU line (spec §6.3) ---------- */
+  /* The logos on the light plate (their lettering is dark), the text, and
+     „За проекта“ underlined in brass. */
+  .eu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 22px;
+    color: var(--ivory-3);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .eu__plate {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 14px;
+    background: #F7F4EE;
+  }
+  .eu__plate img {
+    width: auto;
+    height: 28px;
+  }
+  .eu--menu p {
+    flex: 1 1 260px;
+    max-width: 46em;
+  }
+  .eu a {
+    display: inline-block;
+    color: var(--ivory);
+    text-decoration: underline;
+    text-decoration-color: var(--brass);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color .2s;
+  }
+  .nb {
+    white-space: nowrap;
+  }
+
+  /* The footer's: the full text under the plate. */
+  .eu--footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    font-size: 14px;
+  }
+  .eu--footer p {
+    flex: none;
+    max-width: 34em;
+  }
+
+  /* The header's row, 36 px: the plate with 20 px logos, the text, and
+     „За проекта“ at the end; the plate and the link fit a 320 px phone
+     (186 + 73 px and the two gaps in its 280 px). The text takes the room
+     the other two leave, a container that shows the full text when it holds
+     it through the project number, else the short text when that fits
+     through the number, else nothing; an ellipsis may end the rest of a
+     text, never the number. Each threshold is the 13 px text through „…C01“
+     (the short one) or „…C01, “ (the full one) plus the ellipsis, measured
+     in Chrome in KSM Text and its fallback faces and rounded up past the
+     widest, Arial (284 and 526 px; KSM Text 254 and 502, Segoe UI 273 and
+     516, Roboto 267 and 509): short 286 px, full 528 px. `safe center`:
+     should the text take more room than the row (a reader's text spacing,
+     WCAG 1.4.12), it stays below the top of the screen. */
+  .eu--row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: safe center;
+    column-gap: 10px;
+    height: 100%;
+  }
+  .eu--row .eu__plate {
+    gap: 8px;
+    padding: 4px 7px;
+  }
+  .eu--row .eu__plate img {
+    height: 20px;
+  }
+  .eu__text {
+    container-type: inline-size;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .eu__text > span {
+    display: none;
+  }
+  @container (min-width: 286px) {
+    .eu__text > .eu__short {
+      display: inline;
+    }
+  }
+  @container (min-width: 528px) {
+    .eu__text > .eu__short {
+      display: none;
+    }
+    .eu__text > .eu__full {
+      display: inline;
+    }
+  }
+
+  /* ---------- the menu (spec §6.4) ---------- */
+  /* A diptych of its own over the whole screen and the header: the pages on
+     onyx, the details on umber, the seam between. A view transition group of
+     its own, so the doors close over it (src/styles/motion.css). */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    color: var(--ivory);
+    font-family: var(--sans);
+    view-transition-name: site-menu;
+  }
+  .menu > .menu__seam {
+    z-index: 2;
+  }
+  .menu__half {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--bar-h) + var(--screen-h) * .06) var(--gut) calc(var(--screen-h) * .06);
+    overflow: auto;
+  }
+  .menu__half--l {
+    justify-content: center;
+    background: var(--onyx);
+  }
+  .menu__half--r {
+    justify-content: center;
+    gap: 30px;
+    background: var(--umber);
+  }
+  .menu__pages {
+    display: grid;
+    gap: 2px;
+    justify-items: end;
+    padding-right: clamp(10px, 3vw, 48px);
+    text-align: right;
+  }
+  .menu__pages a {
+    position: relative;
+    display: inline-block;
+    padding: 2px 0;
+    color: var(--ivory);
+    font-family: var(--serif);
+    font-size: clamp(40px, 4.6vw, 72px);
+    font-weight: 500;
+    line-height: 1.08;
+    transition: color .25s;
+  }
+  .menu__pages a[aria-current] {
+    color: var(--brass-l);
+  }
+  /* The page shown: a brass dash before it. */
+  .menu__pages a[aria-current="page"]::before {
+    content: '';
+    position: absolute;
+    right: calc(100% + 18px);
+    top: 55%;
+    width: 34px;
+    height: 1px;
+    background: var(--brass);
+  }
+  .menu__pages .sub {
+    display: block;
+    margin: -2px 0 10px;
+    color: var(--stone);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: .02em;
+  }
+  .menu__info {
+    display: grid;
+    gap: 26px;
+    max-width: 520px;
+    padding-left: clamp(10px, 3vw, 48px);
+    font-size: 15px;
+  }
+  .menu__info h2 {
+    margin-bottom: 6px;
+    color: var(--stone);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: .02em;
+  }
+  .menu__info a {
+    transition: color .2s;
+  }
+  .menu__info > div > a:not(.menu__tel) {
+    display: inline-block;
+  }
+  .menu__tel {
+    display: block;
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+  /* „Затвори“ in the header's bar, where „Меню“ is: below the EU row until
+     the page has scrolled, as the header is. */
+  .menu__close {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    right: var(--gut);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: var(--bar-h);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+  :root:has(.hdr:not([data-scrolled])) .menu__close {
+    top: var(--eu-h);
+  }
+  .menu__close i {
+    position: relative;
+    width: 18px;
+    height: 18px;
+  }
+  .menu__close i::before,
+  .menu__close i::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 50%;
+    height: 1px;
+    background: currentColor;
+    transform: rotate(45deg);
+  }
+  .menu__close i::after {
+    transform: rotate(-45deg);
+  }
+
+  /* ---------- the footer (spec §6.5) ---------- */
+  .ftr {
+    position: relative;
+    border-top: 1px solid var(--hair-2);
+    background: var(--onyx);
+    color: var(--ivory);
+    font-family: var(--sans);
+  }
+  .ftr__grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .ftr__half {
+    padding: clamp(64px, calc(var(--screen-h) * .1), 110px) clamp(28px, 5vw, 96px) 48px;
+  }
+  .ftr__half--r {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 40px;
+    background: var(--umber);
+  }
+  .ftr__logo {
+    display: block;
+    width: 156px;
+    margin-bottom: 28px;
+    color: var(--ivory);
+  }
+  .ftr__logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .ftr__blurb {
+    max-width: 30em;
+    margin-bottom: 36px;
+    color: var(--ivory-3);
+    font-size: 15px;
+  }
+  .ftr__cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 32px;
+    font-size: 15px;
+  }
+  .ftr h2 {
+    margin-bottom: 8px;
+    color: var(--stone);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: .02em;
+  }
+  .ftr a {
+    transition: color .2s;
+  }
+  .ftr__link {
+    display: block;
+    width: fit-content;
+  }
+  .ftr__office + .ftr__office {
+    margin-top: 12px;
+  }
+  .ftr__maps {
+    display: block;
+    width: fit-content;
+    color: var(--stone);
+    font-size: 13px;
+    text-decoration: underline;
+    text-decoration-color: var(--hair);
+    text-underline-offset: 3px;
+  }
+  .ftr__copy {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    color: var(--stone);
+    font-size: 13px;
+  }
+
+  /* ---------- the grain (extract §1.2) ---------- */
+  /* A breath of fractal noise over the black, on every page M2 has rebuilt
+     (src/root.jsx). */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+    opacity: .045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- hover, where a pointer hovers ---------- */
+  @media (hover: hover) and (pointer: fine) {
+    .hdr__menu:hover i::after { right: 0; }
+    .hdr__tel:hover { color: var(--ivory); }
+    .eu a:hover { text-decoration-color: var(--brass-l); }
+    .menu__pages a:hover { color: var(--brass-l); }
+    .menu__info a:hover { color: var(--brass-l); }
+    .ftr a:hover { color: var(--brass-l); }
+  }
+
+  /* ---------- a phone: 900 px and under ---------- */
+  @media (max-width: 900px) {
+    .hdr__logo { width: 120px; }
+    .hdr__tel,
+    .hdr__cta { display: none; }
+
+    /* One column; the whole menu scrolls. */
+    .menu {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      overflow: auto;
+    }
+    .menu__half { overflow: visible; }
+    .menu__half--l { padding-bottom: 36px; }
+    .menu__half--r { padding-top: 36px; }
+    .menu > .menu__seam { display: none; }
+    .menu__pages {
+      justify-items: start;
+      padding-right: 0;
+      text-align: left;
+    }
+    .menu__pages a[aria-current="page"]::before { display: none; }
+    .menu__info { padding-left: 0; }
+
+    .ftr__grid { grid-template-columns: 1fr; }
+    .ftr__grid > .seam { display: none; }
+    .ftr__half { padding: 56px var(--gut) 40px; }
+  }
+
+  @media (max-width: 560px) {
+    .ftr__cols { grid-template-columns: 1fr; }
+  }
+}

@@ -5,9 +5,9 @@ import App from '../root'
 
 // The build prerenders every page in Node, where there is no window, and that
 // HTML is the final visual state until the JS runs (plan, global rules; spec
-// §5.2.1). The shell renders there in full: the EU line, the bar, the footer
-// and its title block, with nothing hidden, faded or moved, and no menu, which
-// only a tap opens.
+// §5.5). The shell renders there in full: the EU row, the bar, the footer,
+// with nothing hidden, faded or moved, the header in its top-of-page state,
+// and no menu, which only a tap opens.
 
 const page = (handle) => ({ Component: () => <p>Страница</p>, handle })
 
@@ -19,7 +19,7 @@ function prerender(path) {
       children: [
         { index: true, ...page({ header: 'overlay' }) },
         { path: 'about', ...page() },
-        { path: 'projects/golden-residence', ...page({ header: 'solid', project: 'golden-residence', object: 'Golden Residence' }) },
+        { path: 'projects/golden-residence', ...page({ header: 'solid', project: 'golden-residence' }) },
       ],
     }],
     { initialEntries: [path] },
@@ -28,6 +28,8 @@ function prerender(path) {
   return renderToString(<RouterProvider router={router} />).replaceAll('<!-- -->', '')
 }
 
+// „Продажби“ comes from the footer's quick links: the header holds no page
+// links (spec §6.2).
 test.each(['/', '/about', '/projects/golden-residence'])('%s: the shell prerenders complete with no window', (path) => {
   expect(typeof window).toBe('undefined')
   const html = prerender(path)
@@ -43,15 +45,10 @@ test.each(['/', '/about', '/projects/golden-residence'])('%s: nothing in the she
   const styles = [...html.matchAll(/\sstyle="([^"]*)"/g)].map(([, style]) => style)
 
   expect(styles.filter((style) => /opacity|transform|translate|scale|visibility|clip/.test(style))).toEqual([])
-  expect(html).not.toMatch(/\bopacity-0\b|\binvisible\b|-translate-y-full|data-hidden/)
+  expect(html).not.toMatch(/\bopacity-0\b|\binvisible\b|-translate-y-full|data-hidden|data-scrolled/)
 })
 
 test('the header starts see-through only over a page that asks for it', () => {
   expect(prerender('/')).toContain('data-look="overlay"')
   expect(prerender('/about')).toContain('data-look="solid"')
-})
-
-test('the title block names the object on a project page only', () => {
-  expect(prerender('/projects/golden-residence')).toContain('Обект: Golden Residence')
-  expect(prerender('/about')).not.toContain('Обект:')
 })

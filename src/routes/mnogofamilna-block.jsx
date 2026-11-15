@@ -12,7 +12,7 @@ import NotFound, { meta as notFoundMeta } from './not-found'
 const PROJECT = 'mnogofamilna-sgrada'
 
 // How the site's shell frames this page (src/shell/handle.js).
-export const handle = { header: 'solid', project: PROJECT, object: 'Многофамилна жилищна сграда', legacy: true }
+export const handle = { header: 'solid', project: PROJECT, legacy: true }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = ({ matches }) => {

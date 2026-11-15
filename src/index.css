@@ -1,5 +1,6 @@
 @import './styles/fonts.css';
 @import './styles/diptych.css';
+@import './styles/shell.css';
 @import './styles/motion.css';
 
 @tailwind base;
@@ -131,6 +132,14 @@
     }
   }
 
+  /* Without motion (no `js` on <html>: reduced motion, Save-Data), the menu
+     (src/shell/SiteMenu.jsx) fades in over 0.2 s (spec §5.8). After the
+     clamp above, and with a duration of its own that outranks the clamp's,
+     so reduced motion keeps the fade. */
+  :root:not(.js) .menu {
+    animation: menu-fade .2s var(--e-soft) !important;
+  }
+
   /* Better touch behavior for interactive elements */
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
@@ -251,95 +260,29 @@
 }
 
 :root {
-  /* The site header (src/shell/SiteHeader.jsx): the EU line and the bar under
-     it. The page starts below both, or below the EU line alone under an
-     overlay header (root.jsx). The EU line is one 36 px row, and two under
-     640 px, where its text takes a row of its own (below). */
-  --eu-row: 36px;
-  --eu-h: var(--eu-row);
-  --bar-h: 72px;
+  /* The header (src/shell/SiteHeader.jsx, spec §2.2, §4): the EU row, one
+     36 px row everywhere, over the bar, 76 px and 64 px on a phone. A page
+     starts below both, or at the top under an overlay header (root.jsx). */
+  --eu-h: 36px;
+  --bar-h: 76px;
   --header-h: calc(var(--eu-h) + var(--bar-h));
 }
-@media (max-width: 639.98px) {
+@media (max-width: 900px) {
   :root {
-    --eu-h: calc(var(--eu-row) * 2);
+    --bar-h: 64px;
   }
 }
 
-/* The header's EU line (src/shell/EuLine.jsx): the logos, the text and
-   „За проекта“ in one row.
-
-   The text's box is the room the other two leave, and it shows the longest
-   version whose project number fits there whole; an ellipsis ends the rest,
-   so the number is never cut. Each width is the 12 px text through „…C01, “
-   plus the ellipsis: short 255 px and full 490 px in KSM Text, rounded up to
-   cover the widest fallback face that paints the text until the font arrives
-   (Arial: 278 and 505 px). From 640 px the box is at least 291 px, so the
-   short text's number always fits; the full text takes over from about
-   883 px. */
-.eu-line {
-  display: grid;
-  grid-template: "logos text more" var(--eu-row) / auto minmax(0, 1fr) auto;
-  column-gap: 14px;
-  align-items: center;
-  height: var(--eu-h);
-}
-.eu-line-logos {
-  grid-area: logos;
-}
-.eu-line-more {
-  grid-area: more;
-}
-.eu-line-text {
-  grid-area: text;
-  container-type: inline-size;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.eu-line-text > span {
-  display: none;
-}
-@container (min-width: 280px) {
-  .eu-line-text > .eu-line-short {
-    display: inline;
-  }
-}
-@container (min-width: 510px) {
-  .eu-line-text > .eu-line-short {
-    display: none;
-  }
-  .eu-line-text > .eu-line-full {
-    display: inline;
-  }
+/* An in-page jump leaves room for the bar; the EU row has slid away by then
+   (spec §4). */
+html {
+  scroll-padding-top: var(--bar-h);
 }
 
-/* Under 640 px not even the short text's number fits beside both logos and
-   „За проекта“, so the short text takes the second row, whole, in its two
-   lines: „Проект № BG16RFPR001-1.012-1485-C01,“ and „съфинансиран от ЕС.“
-   (two 15 px lines and 6 px under them fill the 36 px row). After the rules
-   above, so it wins at any width of the box. */
-@media (max-width: 639.98px) {
-  .eu-line {
-    grid-template:
-      "logos . more" var(--eu-row)
-      "text text text" 1fr
-      / auto minmax(0, 1fr) auto;
-  }
-  .eu-line-text {
-    align-self: start;
-    overflow: visible;
-    white-space: normal;
-  }
-  .eu-line-text > .eu-line-short {
-    display: block;
-  }
-  .eu-line-text > .eu-line-full {
-    display: none;
-  }
-  .eu-line-short > span {
-    display: block;
-  }
+/* The menu's fade without motion (the rule is in the base layer, after the
+   reduced-motion clamp). */
+@keyframes menu-fade {
+  from { opacity: 0; }
 }
 
 /* Safe-area aware horizontal + bottom padding helpers */

@@ -184,15 +184,18 @@ function PageFrame({ arrive: arrival }) {
 }
 
 // The site's shell (src/shell) around every page: the fixed header with the
-// EU line, the page, the footer. The header is out of the flow, so the page
-// starts below it, or, under an overlay header (the route's handle,
-// src/shell/handle.js), right below the EU line, its hero running under the
-// see-through bar.
+// EU row, the page, the footer, and the grain over them. The header is out of
+// the flow, so the page starts below it, or, under an overlay header (the
+// route's handle, src/shell/handle.js), at the top, its hero running under
+// the see-through header (spec §4). The shell is at least one screen tall.
 //
-// The site is dark (spec §2.1). A page M2 has not rebuilt yet (its handle's
-// `legacy`) keeps production's light ground inside the dark shell: its <main>
-// is .legacy-ground, and .on-light turns its focus rings onyx
-// (src/styles/diptych.css, src/index.css).
+// The site is dark (spec §2.1), with a breath of grain over every page
+// (.grain, src/styles/shell.css). A page M2 has not rebuilt yet (its handle's
+// `legacy`) keeps production's light ground inside the dark shell, with no
+// grain: its <main> is .legacy-ground, and .on-light turns its focus rings
+// onyx (src/styles/diptych.css, src/index.css). That ground starts below the
+// header (bg-clip-content): the room under the header keeps the site's onyx,
+// so the solid header, onyx at 86 %, reads onyx there too.
 //
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
@@ -208,16 +211,17 @@ export default function App() {
   return (
     <ApartmentProvider>
       <SmoothScroll>
-        <div className="flex min-h-screen flex-col overscroll-none">
+        <div className="flex min-h-[var(--screen-h)] flex-col overscroll-none">
           <SiteHeader />
           <main
             id="main"
             tabIndex={-1}
-            className={`flex-1 overscroll-none focus:outline-none ${legacy ? 'on-light legacy-ground ' : ''}${header === 'overlay' ? 'pt-[var(--eu-h)]' : 'pt-[var(--header-h)]'}`}
+            className={`flex-1 overscroll-none focus:outline-none${legacy ? ' on-light legacy-ground bg-clip-content' : ''}${header === 'overlay' ? '' : ' pt-[var(--header-h)]'}`}
           >
             <RouteTransition />
           </main>
           <SiteFooter />
+          {legacy ? null : <div className="grain" aria-hidden="true" />}
         </div>
       </SmoothScroll>
       <ConditionalAnalytics />

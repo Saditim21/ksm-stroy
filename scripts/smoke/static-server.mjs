@@ -9,8 +9,10 @@
 //   3. the filesystem: the file itself, or <path>/index.html, by the exact
 //      case of every name, as Vercel looks them up (a Windows or macOS disk
 //      would find /About as about/);
-//   4. "rewrites", in order. /api/* is a Vercel Function, which this server
-//      does not run: it answers 501;
+//   4. "rewrites", in order. /api/* is a Vercel Function. /api/availability
+//      runs api/availability.js itself, over the sheets saved in
+//      scripts/smoke/fixtures/sheets/ (below); this server runs no other
+//      function: it answers 501;
 //   5. nothing matched: 404.html with a 404 status. There is no SPA fallback.
 // A redirect keeps the query string. Every other answer carries the "headers"
 // whose source matches the path, over Vercel's default Cache-Control for a
@@ -53,6 +55,72 @@ const NOT_EMULATED = ['routes', 'cleanUrls']
 
 function readVercelConfig() {
   return JSON.parse(fs.readFileSync(path.join(REPO, 'vercel.json'), 'utf8'))
+}
+
+// The availability API over saved sheets, so a page that reads availability
+// (the menu's Golden Residence line) gets the answer a deploy gives, and no
+// visit reaches Google. The function answers itself, api/availability.js,
+// inside this process: its six variables name `fixture:<name>` URLs, which a
+// wrapped fetch reads from scripts/smoke/fixtures/sheets/<name>.csv (the
+// concept's Golden Residence snapshot); Многофамилна's are blank, as on
+// Vercel. Any other URL goes to the real fetch.
+const AVAILABILITY = '/api/availability'
+const FIXTURES = path.join(REPO, 'scripts', 'smoke', 'fixtures', 'sheets')
+const FIXTURE_SCHEME = 'fixture:'
+const FIXTURE_SHEETS = {
+  VITE_GOOGLE_SHEET_BLOCK_A: 'fixture:gr-block-a',
+  VITE_GOOGLE_SHEET_BLOCK_B: 'fixture:gr-block-b',
+  VITE_GOOGLE_SHEET_GARAGES: 'fixture:gr-garages',
+  VITE_GOOGLE_SHEET_PARKING: 'fixture:gr-parking',
+  VITE_GOOGLE_SHEET_MNOGO_A: '',
+  VITE_GOOGLE_SHEET_MNOGO_B: '',
+}
+
+// `realFetch`, except that a fixture: URL answers with its saved sheet. The
+// query (the function's cache buster) is ignored.
+function withFixtureSheets(realFetch) {
+  const fetchSheet = async (input, init) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+    if (!url.startsWith(FIXTURE_SCHEME)) return realFetch(input, init)
+    const name = url.slice(FIXTURE_SCHEME.length).split(/[?#]/)[0]
+    if (!/^[\w-]+$/.test(name)) return new Response('Not a fixture name', { status: 400 })
+    try {
+      const sheet = await fs.promises.readFile(path.join(FIXTURES, `${name}.csv`), 'utf8')
+      return new Response(sheet, { status: 200, headers: { 'content-type': 'text/csv; charset=utf-8' } })
+    } catch {
+      return new Response('No such fixture', { status: 404 })
+    }
+  }
+  fetchSheet.readsFixtureSheets = true
+  return fetchSheet
+}
+
+let availabilityFunction = null
+
+// api/availability.js's handler, over the fixture sheets.
+async function availabilityHandler() {
+  Object.assign(process.env, FIXTURE_SHEETS)
+  if (!globalThis.fetch.readsFixtureSheets) globalThis.fetch = withFixtureSheets(globalThis.fetch)
+  availabilityFunction ??= import(pathToFileURL(path.join(REPO, 'api', 'availability.js')).href).then((module) => module.default)
+  return availabilityFunction
+}
+
+// Writes an answer, its text compressed as Vercel's edge does: br, else
+// gzip, over 1 KiB. HEAD gets the headers alone.
+function send(req, res, status, headers, body) {
+  let content = body
+  const accepts = String(req.headers['accept-encoding'] || '')
+  if (COMPRESSIBLE.test(headers['content-type'] ?? '') && content.length > 1024 && /\b(br|gzip)\b/.test(accepts)) {
+    const br = /\bbr\b/.test(accepts)
+    headers['content-encoding'] = br ? 'br' : 'gzip'
+    headers.vary = 'Accept-Encoding'
+    content = br
+      ? zlib.brotliCompressSync(content, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5 } })
+      : zlib.gzipSync(content)
+  }
+  headers['content-length'] = content.length
+  res.writeHead(status, headers)
+  res.end(req.method === 'HEAD' ? undefined : content)
 }
 
 const unsupported = (source) =>
@@ -185,6 +253,23 @@ export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig
     return headers
   }
 
+  // /api/availability, as the function answers it: its status and headers
+  // over the "headers" rules', and its body.
+  async function answerAvailability(req, res, pathname) {
+    try {
+      const handler = await availabilityHandler()
+      const response = await handler.fetch(new Request(`http://localhost${AVAILABILITY}`, { method: req.method }))
+      const headers = { ...headersFor(pathname), 'x-emulator-file': 'api/availability.js (fixture sheets)' }
+      response.headers.forEach((value, name) => {
+        headers[name] = value
+      })
+      send(req, res, response.status, headers, Buffer.from(await response.arrayBuffer()))
+    } catch (error) {
+      res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' })
+      res.end(`static-server: ${AVAILABILITY} failed: ${error.message}`)
+    }
+  }
+
   function answer(req, res) {
     // Concatenated, so a path starting with // stays a path.
     const { pathname, search } = new URL(`http://localhost${req.url}`)
@@ -207,6 +292,10 @@ export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig
       const rule = rewrites.find((r) => matchOf(r, pathname))
       if (rule) {
         const destination = destinationOf(rule, matchOf(rule, pathname))
+        if (destination === AVAILABILITY) {
+          answerAvailability(req, res, pathname)
+          return
+        }
         if (destination.startsWith('/api/')) {
           res.writeHead(501, { 'content-type': 'application/json; charset=utf-8' })
           res.end(JSON.stringify({ error: `${destination} is a Vercel Function, which this static server does not run` }))
@@ -227,25 +316,12 @@ export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig
       return
     }
 
-    const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream'
     const headers = {
       ...headersFor(pathname),
-      'content-type': type,
+      'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'x-emulator-file': encodeURI(path.relative(ROOT, file).split(path.sep).join('/')) + note,
     }
-    let body = fs.readFileSync(file)
-    const accepts = String(req.headers['accept-encoding'] || '')
-    if (COMPRESSIBLE.test(type) && body.length > 1024 && /\b(br|gzip)\b/.test(accepts)) {
-      const br = /\bbr\b/.test(accepts)
-      headers['content-encoding'] = br ? 'br' : 'gzip'
-      headers.vary = 'Accept-Encoding'
-      body = br
-        ? zlib.brotliCompressSync(body, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5 } })
-        : zlib.gzipSync(body)
-    }
-    headers['content-length'] = body.length
-    res.writeHead(status, headers)
-    res.end(req.method === 'HEAD' ? undefined : body)
+    send(req, res, status, headers, fs.readFileSync(file))
   }
 
   return http.createServer((req, res) => {

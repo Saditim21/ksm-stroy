@@ -391,7 +391,7 @@ export default GoldenResidenceBlockSelection;
 // How the site's shell frames this page (src/shell/handle.js): the solid
 // header, as on every legacy page; the page opens below it, on production's
 // light ground.
-export const handle = { header: 'solid', project: 'golden-residence', object: 'Golden Residence', legacy: true }
+export const handle = { header: 'solid', project: 'golden-residence', legacy: true }
 
 // The page's head (root.jsx <Meta/>).
 export const meta = () => pageMeta({

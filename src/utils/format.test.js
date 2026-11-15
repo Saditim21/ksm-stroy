@@ -1,4 +1,4 @@
-import { freeApartmentsLine, formatArea, plural } from './format'
+import { bindOneLetterWords, freeApartmentsLine, formatArea, plural } from './format'
 
 test('freeApartmentsLine handles no data, zero, one and many', () => {
   expect(freeApartmentsLine(null)).toBe('Апартаменти в продажба')
@@ -19,4 +19,13 @@ test('plural picks the singular for exactly one and the plural otherwise', () =>
   expect(plural(2, 'свободен гараж', 'свободни гаража')).toBe('свободни гаража')
   expect(plural(11, 'свободен гараж', 'свободни гаража')).toBe('свободни гаража')
   expect(plural(21, 'свободен гараж', 'свободни гаража')).toBe('свободни гаража')
+})
+
+// Spec §3.3: a one-letter word never ends a line (the offices in the menu
+// and the footer).
+test('bindOneLetterWords ties each one-letter word to the next', () => {
+  expect(bindOneLetterWords('гр. Гоце Делчев, ул. Кирил и Методий 17, вх. Б, ет.1'))
+    .toBe('гр. Гоце Делчев, ул. Кирил и\u00a0Методий 17, вх. Б, ет.1')
+  expect(bindOneLetterWords('в и с думи')).toBe('в\u00a0и\u00a0с\u00a0думи')
+  expect(bindOneLetterWords('гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38')).toBe('гр. София, ж.к Връбница 1, блок 537А, етаж 9, ап.38')
 })

@@ -17,7 +17,9 @@ const VARIANTS = {
   },
 }
 
-export default function Logo({ variant = 'horizontal', className }) {
+// `markClassName` goes on the mark alone, whose strokes follow its colour:
+// the shell's brass mark beside the wordmark in the text colour (spec §6.2).
+export default function Logo({ variant = 'horizontal', className, markClassName }) {
   const v = VARIANTS[variant] ?? VARIANTS.horizontal
   return (
     <svg
@@ -28,7 +30,7 @@ export default function Logo({ variant = 'horizontal', className }) {
       aria-label="КСМ Строй"
       {...STROKE_PROPS}
     >
-      <g transform={v.emblem}>
+      <g transform={v.emblem} className={markClassName}>
         <EmblemPaths />
       </g>
       <path fill="currentColor" stroke="none" fillRule="evenodd" transform={v.word} d={WORDMARK_D} />

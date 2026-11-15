@@ -10,6 +10,19 @@ describe('brand', () => {
     expect(screen.getByRole('img', { name: 'КСМ Строй' })).toBeTruthy()
   })
 
+  // The shell sets the mark in brass and the wordmark in the text colour
+  // (spec §6.2): markClassName goes on the mark's group alone, whose strokes
+  // follow its colour.
+  it('Logo gives markClassName to the mark alone', () => {
+    const { container } = render(<Logo className="logo" markClassName="text-brass" />)
+    const svg = container.querySelector('svg')
+    const mark = svg.querySelector('g')
+    expect(svg).toHaveClass('logo')
+    expect(mark).toHaveClass('text-brass')
+    expect(mark.querySelectorAll('path')).toHaveLength(26)
+    expect(svg.querySelector(':scope > path')).not.toHaveClass('text-brass')
+  })
+
   it('Emblem draws 26 paths with pathLength=1 in draw order', () => {
     const { container } = render(<Emblem />)
     const paths = container.querySelectorAll('path[pathLength="1"]')

@@ -156,8 +156,10 @@ describe('vercel.json', () => {
     expect(response.status).toBe(404)
   })
 
-  it('does not run the Vercel Functions in api/: 501', async () => {
-    const response = await get('/api/availability')
+  // The availability API is answered from the fixture sheets (below); the
+  // other functions are not run.
+  it('does not run the other Vercel Functions in api/: 501', async () => {
+    const response = await get('/api/odoo-lead')
     expect(response.status).toBe(501)
     expect((await response.json()).error).toMatch(/Vercel Function/)
   })
@@ -169,6 +171,40 @@ describe('vercel.json', () => {
     expect(script.headers.get('x-frame-options')).toBe('DENY')
     const page = await get('/about')
     expect(page.headers.get('cache-control')).toBe('public, max-age=0, must-revalidate')
+  })
+})
+
+// The smoke run's pages read availability (the menu's Golden Residence line),
+// so the server answers /api/availability as the deploy does: through
+// api/availability.js itself, over the Golden Residence sheets saved in
+// scripts/smoke/fixtures/sheets/ (the concept's snapshot, 96 apartments a
+// block). No sheet is read from the network.
+describe('the availability API, over the fixture sheets', () => {
+  it('answers GET with every Golden Residence tab read and Многофамилна missing', async () => {
+    const response = await get('/api/availability')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toMatch(/^application\/json/)
+    const body = await response.json()
+    expect(body.sources).toEqual({ BLOCK_A: 'ok', BLOCK_B: 'ok', GARAGES: 'ok', PARKING: 'ok', MNOGO_A: 'missing', MNOGO_B: 'missing' })
+    const goldenResidence = body.projects['golden-residence']
+    expect(goldenResidence['block-a']).toHaveLength(96)
+    expect(goldenResidence['block-b']).toHaveLength(96)
+    expect(goldenResidence['block-a'][0]).toMatchObject({ unit: 'А 101', floor: '1', status: 'Свободен' })
+    expect(goldenResidence.garages.length).toBeGreaterThan(0)
+    expect(goldenResidence.parking.length).toBeGreaterThan(0)
+    expect(body.projects['mnogofamilna-sgrada']).toEqual({ 'block-a': null, 'block-b': null })
+  })
+
+  it('answers HEAD with GET’s status and no body', async () => {
+    const response = await get('/api/availability', { method: 'HEAD' })
+    expect(response.status).toBe(200)
+    expect(await response.text()).toBe('')
+  })
+
+  it('refuses any other method, as the function does', async () => {
+    const response = await get('/api/availability', { method: 'POST' })
+    expect(response.status).toBe(405)
+    expect(response.headers.get('allow')).toBe('GET, HEAD')
   })
 })
 

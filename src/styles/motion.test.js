@@ -187,6 +187,6 @@ it('hides nothing outside :root.js or a @keyframes block', () => {
 // and no rule that cuts the view transition under reduced motion.
 it('is the only place that styles the route change', () => {
   const index = readFileSync(join(cwd(), 'src/index.css'), 'utf8').replace(/\r\n/g, '\n')
-  expect(index).toMatch(/^@import '\.\/styles\/fonts\.css';\n@import '\.\/styles\/diptych\.css';\n@import '\.\/styles\/motion\.css';\n/)
+  expect(index).toMatch(/^@import '\.\/styles\/fonts\.css';\n@import '\.\/styles\/diptych\.css';\n@import '\.\/styles\/shell\.css';\n@import '\.\/styles\/motion\.css';\n/)
   expect(rulesOf('src/index.css').filter((rule) => rule.selector.includes('::view-transition'))).toEqual([])
 })

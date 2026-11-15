@@ -19,3 +19,9 @@ export function formatArea(n) {
 export function plural(n, one, many) {
   return n === 1 ? one : many
 }
+
+// A non-breaking space after each one-letter word (spec §3.3), so none ends a
+// line: „Кирил и Методий“.
+export function bindOneLetterWords(text) {
+  return text.replace(/(?<=^|\s)(\p{L})\s+/gu, '$1 ')
+}

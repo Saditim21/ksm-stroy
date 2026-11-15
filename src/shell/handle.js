@@ -1,22 +1,24 @@
 import { useMatches } from 'react-router'
 
-// The route `handle` contract (plan Task 9). A route module may export
+// The route `handle` contract. A route module may export
 //
 //   export const handle = {
 //     header: 'overlay' | 'solid',
 //     project?: 'golden-residence' | 'mnogofamilna-sgrada',
-//     object?: string,
+//     inquiry?: true,
 //     legacy?: true,
 //   }
 //
 // - header: 'overlay' for a page whose hero runs under the header, which stays
-//   see-through over it until the page has scrolled 80 px (spec §8.1);
-//   'solid' for any other page;
+//   see-through over it until the page has scrolled 40 px; the page starts at
+//   the top of the screen. 'solid' for any other page, which starts below the
+//   header (spec §4, §6.2);
 // - project: the project the page belongs to; „Запитване“ carries it to the
-//   form as /contact?project=…;
-// - object: the project's name, for the footer's title block;
+//   contact form as /contact?project=…;
+// - inquiry: the page has an inquiry of its own, #zapitvane, where the
+//   header's „Запитване“ goes instead (spec §6.2, §6.12);
 // - legacy: a page M2 has not rebuilt yet. It keeps production's light look
-//   inside the dark shell (src/root.jsx).
+//   inside the dark shell, with no grain over it (src/root.jsx).
 //
 // The shell reads the deepest route's handle. A route without one is solid.
 const DEFAULT_HANDLE = Object.freeze({ header: 'solid' })
@@ -34,3 +36,8 @@ export function inquiryHref(project) {
   return project ? `/contact?project=${encodeURIComponent(project)}` : '/contact'
 }
 
+// Where the header's „Запитване“ goes: the page's own inquiry, or else the
+// contact page with the page's project.
+export function inquiryTarget(handle) {
+  return handle.inquiry ? '#zapitvane' : inquiryHref(handle.project)
+}
