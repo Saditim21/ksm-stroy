@@ -28,7 +28,7 @@ export default [
   index('pages/Home.jsx'),
   page('about', 'pages/About.jsx'),
   page('projects', 'pages/Projects.jsx'),
-  page('projects/golden-residence', 'components/GoldenResidenceBlockSelection.jsx'),
+  page('projects/golden-residence', 'routes/golden-residence.jsx'),
   ...blockPages('golden-residence', 'routes/golden-residence-block.jsx'),
   page('projects/mnogofamilna-sgrada', 'components/MnogofamilnaBlockSelection.jsx'),
   ...blockPages('mnogofamilna-sgrada', 'routes/mnogofamilna-block.jsx'),

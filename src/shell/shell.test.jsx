@@ -83,11 +83,14 @@ describe('the header', () => {
     }
   })
 
-  // Home has an inquiry of its own (its handle's `inquiry`).
+  // Home and the Golden Residence page have an inquiry of their own (their
+  // handle's `inquiry`); a block page, still legacy, takes its project to the
+  // contact page.
   it.each([
     ['/', '#zapitvane'],
     ['/about', '/contact'],
-    ['/projects/golden-residence', '/contact?project=golden-residence'],
+    ['/projects/golden-residence', '#zapitvane'],
+    ['/projects/golden-residence/block-a', '/contact?project=golden-residence'],
     ['/projects/mnogofamilna-sgrada/block-a', '/contact?project=mnogofamilna-sgrada'],
   ])('on %s, „Запитване“ opens %s', async (path, href) => {
     renderSiteAt(path)
@@ -163,10 +166,22 @@ describe('the header as the page scrolls', () => {
     expect(header).not.toHaveAttribute('data-hidden')
   })
 
-  // The project pages open on production's light ground, so the bar is solid
-  // over them from the top, as on every page with no hero under it; the EU
-  // row stays until the page scrolls.
-  it.each(['/about', '/projects/golden-residence', '/projects/mnogofamilna-sgrada'])('is solid from the top of %s', async (path) => {
+  // The Golden Residence page, rebuilt in Diptych, opens on its hero, under
+  // the see-through header, as Home does.
+  it('is see-through over the Golden Residence hero until the page scrolls', async () => {
+    renderSiteAt('/projects/golden-residence')
+    const header = await siteHeader()
+    expect(header).toHaveAttribute('data-look', 'overlay')
+
+    scrollTo(41)
+    await waitFor(() => expect(header).toHaveAttribute('data-look', 'solid'))
+    expect(header).toHaveAttribute('data-scrolled')
+  })
+
+  // Многофамилна's page opens on production's light ground, so the bar is
+  // solid over it from the top, as on every page with no hero under it; the
+  // EU row stays until the page scrolls.
+  it.each(['/about', '/projects/mnogofamilna-sgrada'])('is solid from the top of %s', async (path) => {
     renderSiteAt(path)
     const header = await siteHeader()
 
@@ -178,18 +193,19 @@ describe('the header as the page scrolls', () => {
 })
 
 // How each page of src/routes.js frames the shell: its module's `handle`
-// (src/shell/handle.js), read from the real modules. Home, rebuilt in Diptych,
-// runs under the see-through header. The two project pages open on
-// production's light ground, so they are solid, as are the explorers and every
-// other page. The pages M2 has not yet rebuilt are legacy: they keep
-// production's light look.
+// (src/shell/handle.js), read from the real modules. Home and the Golden
+// Residence page, rebuilt in Diptych, run under the see-through header, each
+// with an inquiry of its own. Многофамилна's page opens on production's
+// light ground, so it is solid, as are the explorers and every other page.
+// The pages M2 has not yet rebuilt are legacy: they keep production's light
+// look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
   '/': { header: 'overlay', inquiry: true },
   '/about': { header: 'solid', legacy: true },
   '/projects': { header: 'solid', legacy: true },
-  '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
+  '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
   '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },
   '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA, legacy: true },

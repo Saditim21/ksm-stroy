@@ -7,13 +7,14 @@ import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
 import Contact from './Contact'
-import GoldenResidenceBlockSelection from '../components/GoldenResidenceBlockSelection'
 import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 
 // The build pre-renders the legacy pages in Node, and a visitor sees that HTML
 // until the JS runs. It is their final visual state (plan, global rules): no
 // element starts faded out, collapsed or moved away for an entrance animation
-// to bring it in later.
+// to bring it in later. (Home and the Golden Residence page, rebuilt, are
+// src/pages/home/home.prerender.test.jsx's and
+// src/pages/golden-residence/gr.prerender.test.jsx's.)
 
 const prerender = (Page) => renderToString(
   <MemoryRouter>
@@ -36,7 +37,6 @@ const hiddenElements = (html) =>
 
 test.each([
   { path: '/about', Page: About, text: 'Мисия и визия' },
-  { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection, text: 'Изберете блок за преглед' },
   { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection, text: 'Многофамилна жилищна сграда' },
 ])('$path pre-renders every element in its final place', ({ Page, text }) => {
   const html = prerender(Page)

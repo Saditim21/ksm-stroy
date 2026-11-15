@@ -1,4 +1,5 @@
-import { Link } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { presetInquiry } from '../../components/inquiry/inquiryStore'
 import ResponsivePicture from '../../components/ui/ResponsivePicture'
 import RollingNumber from '../../components/ui/RollingNumber'
@@ -8,11 +9,13 @@ import { useAvailability } from '../../data/availability/useAvailability'
 import grImages from '../../data/images/golden-residence.json'
 import homeImages from '../../data/images/home.json'
 import { plural } from '../../utils/format'
+import { cutNextTransition } from '../../utils/viewTransition'
 
 // Home's opening (spec §6.7; extract §4.6): the two buildings, one seam.
 // Each half is a link across the whole hero, its picture spanning the hero
 // (sizes 100vw) and clipped at the seam, which is the registered number --s
-// (home.css): Golden Residence to its page, Многофамилна to the inquiry on
+// (home.css): Golden Residence to its page, where on a desktop it first
+// grows over the whole hero (the hero move), Многофамилна to the inquiry on
 // this page with its building chosen (until its page comes in M3). The
 // slogan (spec §1.2) comes first in the DOM and reads row by row across the
 // seam: each part is a nowrap mask, the left one ending .2 em before the
@@ -25,7 +28,8 @@ import { plural } from '../../utils/format'
 // (MNOGO_DATED) and prerendered.
 //
 // Widening, the entrance and the framing are home.css's, all CSS: nothing
-// here reads the pointer, the motion setting or the screen.
+// here reads the pointer, the motion setting or the screen to render. Only a
+// click on the Golden Residence half asks, for the hero move (below).
 
 const NBSP = ' '
 const LEVSKI = `жк${NBSP}Левски${NBSP}Г`
@@ -60,6 +64,33 @@ function toInquiry(event) {
   presetInquiry({ option: 'mnogofamilna' })
 }
 
+// The hero move (spec §6.7): the Golden Residence half grows over the whole
+// hero, --s to 1 over 0.8 s (home.css, `data-moving`), and the page that
+// follows lands on the same picture, framed the same: the Golden Residence
+// hero (gr.css), with the doors cut and its title rising.
+const MOVE_MS = 800
+const FINE_POINTER = '(hover: hover) and (pointer: fine)'
+const SIDE_BY_SIDE = 901
+const AT_THE_TOP = 8
+
+// Whether a click on the Golden Residence half makes the move (ruling F12): a
+// plain left click (a modifier opens a tab or a window), with a fine pointer
+// that hovers, the halves side by side, under the motion gate's `js`, and the
+// page at its top, where the half fills the screen. And no reduced-motion
+// preference now: the gate's class stays on <html> when the visitor switches
+// reduced motion on after the page has loaded, and the move's CSS (inside
+// no-preference, ruling F3) would then stand still for 0.8 s before the page
+// changed. Any other click follows the link through the doors.
+function makesTheMove(event) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false
+  if (typeof window.matchMedia !== 'function') return false
+  return window.matchMedia(FINE_POINTER).matches
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    && window.innerWidth >= SIDE_BY_SIDE
+    && document.documentElement.classList.contains('js')
+    && window.scrollY <= AT_THE_TOP
+}
+
 // One part of the slogan: its mask, and the line that rises inside it.
 function Part({ side, children }) {
   return (
@@ -71,9 +102,40 @@ function Part({ side, children }) {
 
 export default function SplitHero() {
   const free = grFree(useAvailability())
+  const navigate = useNavigate()
+  const [moving, setMoving] = useState(false)
+  const move = useRef(0)
+
+  // A move given up (another page taken, or Back, before it lands) leaves no
+  // navigation behind it.
+  useEffect(() => () => clearTimeout(move.current), [])
+
+  // The click takes the link from the browser and the router while the half
+  // grows (a second click starts nothing more), then changes the page itself:
+  // the doors cut for this one change, the page arriving as the hero
+  // (src/root.jsx: data-arrive="hero", which starts its entrance at once).
+  function toGoldenResidence(event) {
+    if (moving) {
+      event.preventDefault()
+      return
+    }
+    if (!makesTheMove(event)) return
+    event.preventDefault()
+    setMoving(true)
+    move.current = setTimeout(() => {
+      cutNextTransition()
+      navigate('/projects/golden-residence', { state: { arrive: 'hero' } })
+    }, MOVE_MS)
+  }
 
   return (
-    <section className="hero" id="proekti" aria-label="Нашите сгради">
+    <section
+      className="hero"
+      id="proekti"
+      aria-label="Нашите сгради"
+      data-moving={moving ? '' : undefined}
+      style={moving ? { '--s': 1 } : undefined}
+    >
       <h1 className="hero__title">
         <span className="sl__row">
           <Part side="l">Създаваме</Part>{' '}
@@ -88,7 +150,13 @@ export default function SplitHero() {
         </span>
       </h1>
 
-      <Link to="/projects/golden-residence" prefetch="intent" className="half half--gr" aria-label={grName(free)}>
+      <Link
+        to="/projects/golden-residence"
+        prefetch="intent"
+        className="half half--gr"
+        aria-label={grName(free)}
+        onClick={toGoldenResidence}
+      >
         <div className="half__media">
           <ResponsivePicture image={grImages['gr-dusk']} alt="" sizes="100vw" priority />
         </div>

@@ -1,4 +1,14 @@
 {
+  "gr-balconies": {
+    "path": "/img/gr-balconies",
+    "w": 1300,
+    "h": 1352,
+    "widths": [
+      800,
+      1300
+    ],
+    "color": "#645C50"
+  },
   "gr-balconiesFromBelow": {
     "path": "/img/gr-balconiesFromBelow",
     "w": 1304,
@@ -22,6 +32,16 @@
       864
     ],
     "color": "#605A45"
+  },
+  "gr-corner": {
+    "path": "/img/gr-corner",
+    "w": 1600,
+    "h": 1244,
+    "widths": [
+      900,
+      1600
+    ],
+    "color": "#5B5647"
   },
   "gr-cornerView": {
     "path": "/img/gr-cornerView",
@@ -49,18 +69,34 @@
     ],
     "color": "#433C30"
   },
-  "gr-endTowers": {
-    "path": "/img/gr-endTowers",
-    "w": 2452,
-    "h": 1220,
+  "gr-end-towers": {
+    "path": "/img/gr-end-towers",
+    "w": 1600,
+    "h": 796,
     "widths": [
-      640,
-      1024,
-      1600,
-      2048,
-      2452
+      900,
+      1600
     ],
-    "color": "#848985"
+    "color": "#6B6A60"
+  },
+  "gr-entrance": {
+    "path": "/img/gr-entrance",
+    "w": 1920,
+    "h": 760,
+    "widths": [
+      1000,
+      1920
+    ],
+    "color": "#49443E"
+  },
+  "gr-facade-detail": {
+    "path": "/img/gr-facade-detail",
+    "w": 640,
+    "h": 820,
+    "widths": [
+      640
+    ],
+    "color": "#736E63"
   },
   "gr-frontElevation": {
     "path": "/img/gr-frontElevation",
@@ -74,6 +110,16 @@
       2452
     ],
     "color": "#7A7D77"
+  },
+  "gr-garden": {
+    "path": "/img/gr-garden",
+    "w": 1600,
+    "h": 633,
+    "widths": [
+      900,
+      1600
+    ],
+    "color": "#4C4F39"
   },
   "gr-hero-desktop": {
     "path": "/img/gr-hero-desktop",
@@ -93,17 +139,33 @@
     ],
     "color": "#52504E"
   },
-  "gr-longFacade": {
-    "path": "/img/gr-longFacade",
-    "w": 2452,
-    "h": 1372,
+  "gr-long-facade": {
+    "path": "/img/gr-long-facade",
+    "w": 1024,
+    "h": 573,
     "widths": [
-      640,
-      1024,
-      1600,
-      2048,
-      2452
+      1024
     ],
-    "color": "#878A82"
+    "color": "#767363"
+  },
+  "gr-parking": {
+    "path": "/img/gr-parking",
+    "w": 1600,
+    "h": 633,
+    "widths": [
+      900,
+      1600
+    ],
+    "color": "#5F5A52"
+  },
+  "gr-terrace": {
+    "path": "/img/gr-terrace",
+    "w": 1600,
+    "h": 633,
+    "widths": [
+      900,
+      1600
+    ],
+    "color": "#645C55"
   }
 }

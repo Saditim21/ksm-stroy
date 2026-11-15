@@ -62,3 +62,34 @@ export function grFree(snapshot) {
   if (!slots || PROJECT_BLOCKS['golden-residence'].some(({ id }) => !slots[id])) return null
   return apartmentUnits(snapshot.data).filter((unit) => unit.status === 'available').length
 }
+
+/** The free apartments of one block (`block` its letter, 'А' or 'Б') among
+ * `units` (apartmentUnits()): a number, which is 0 for no units. A page asks
+ * only once grFree() has a count, so it never shows a fake zero. */
+export function blockFree(units, block) {
+  return units.filter((unit) => unit.block === block && unit.status === 'available').length
+}
+
+// One spot row (src/services/sheetsCore.js: { number, type, area: { built,
+// ideal, total }, status }), or null for a row that names no place.
+function toSpot(row) {
+  const label = text(row.number)
+  if (!label) return null
+  return {
+    id: normalizeUnitId(label),
+    label,
+    totalArea: parseArea(row.area?.total),
+    type: text(row.type),
+    status: statusKey(row.status),
+    statusText: normalizeStatus(row.status),
+  }
+}
+
+/** Golden Residence's garages (`slot` 'garages') or parking places
+ * ('parking'), from useAvailability()'s `data`:
+ * { id: 'Г001', label: 'Г-001', totalArea: number | null, type: string,
+ *   status: 'available' | 'reserved' | 'sold' | 'blocked' | 'unknown', statusText: string }
+ * in the sheet's order; [] for null data, and for a slot without rows. */
+export function spotUnits(data, slot) {
+  return (data?.['golden-residence']?.[slot] ?? []).map(toSpot).filter(Boolean)
+}

@@ -125,3 +125,14 @@ export function resetInquiry() {
   cancelGlide()
   update(EMPTY)
 }
+
+// For the inquiry's section as it leaves the page (ruling C5.1): the store
+// outlives the page, and an option preset on one page (Home's Многофамилна)
+// would still be chosen on the next page's form, which may offer it too, and
+// file that page's inquiry under the wrong subject. So the option goes, and a
+// glide on its way to the section that left with it, whose focus would land
+// on the next page's form. The picks stay: the explorer pages hand them on.
+export function clearInquiryOption() {
+  cancelGlide()
+  if (state.option !== null) update({ ...state, option: null })
+}

@@ -135,6 +135,43 @@ describe('the seam (spec §6.7)', () => {
   })
 })
 
+// Spec §6.7, ruling F3: a click on the Golden Residence half (SplitHero.jsx)
+// sets data-moving and --s: 1 on the hero, which grows the half over the
+// whole hero before the page changes. That exists only with motion, and only
+// where the halves widen: a fine pointer, side by side.
+describe('the hero move (spec §6.7)', () => {
+  const moving = rules.filter((rule) => rule.selectors.some((selector) => selector.includes('[data-moving]')))
+
+  it('lives only with motion, where a fine pointer hovers and the halves sit side by side', () => {
+    expect(moving.length).toBeGreaterThan(0)
+    for (const rule of moving) {
+      expect(rule.atRules, rule.selector).toEqual([NO_PREFERENCE, FINE_WIDE])
+      for (const selector of rule.selectors) expect(selector).toMatch(/^:root\.js \.hero\[data-moving\]/)
+    }
+  })
+
+  it('moves the seam to 1 over 0.8 s expo.inOut, fading the title and the infos over 0.3 s and the seam from 0.55 s', () => {
+    expect(declaredFor(':root.js .hero[data-moving]', [NO_PREFERENCE, FINE_WIDE]).transition).toBe('--s .8s var(--e-io)')
+    for (const part of ['.hero__title', '.half__info']) {
+      expect(declaredFor(`:root.js .hero[data-moving] ${part}`, [NO_PREFERENCE, FINE_WIDE]), part)
+        .toMatchObject({ opacity: '0', transition: 'opacity .3s var(--e-soft)' })
+    }
+    expect(declaredFor(':root.js .hero[data-moving] .hero__seam', [NO_PREFERENCE, FINE_WIDE]))
+      .toMatchObject({ opacity: '0', transition: 'opacity .25s var(--e-soft) .55s' })
+  })
+
+  // The move lands on the Golden Residence hero (gr.css, .grhero::after): the
+  // half's overlay gives way to the hero's as it grows, so the frame it lands
+  // on is the one that page shows.
+  it('turns the half’s overlay into the Golden Residence hero’s as it grows', () => {
+    const heroOverlay = valueOf(rulesFor(rulesOf('src/pages/golden-residence/gr.css'), '.grhero::after')[0], 'background')
+    expect(declaredFor(':root.js .hero[data-moving] .half--gr .half__shade', [NO_PREFERENCE, FINE_WIDE]))
+      .toMatchObject({ background: heroOverlay, opacity: '1', transition: 'opacity .8s var(--e-io)' })
+    expect(declaredFor(':root.js .hero[data-moving] .half--gr::before', [NO_PREFERENCE, FINE_WIDE]))
+      .toMatchObject({ opacity: '0', transition: 'opacity .8s var(--e-io)' })
+  })
+})
+
 // Spec §3.2: the phone slogan takes two lines down to 320 px, and its floor
 // is 28 px, the italic's (§3.3, §14.11). At the role's -.01em, „Създаваме
 // пространства“ is 10.5 em: 294 px at 28 px, where a 320 px phone has 280 px

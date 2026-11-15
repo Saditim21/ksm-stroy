@@ -1,0 +1,773 @@
+/* The Golden Residence page (spec
+   docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md §5.5, §5.8,
+   §6.14–6.18, §8.2): the hero, the story, the two blocks, the gallery and
+   the garages and parking places, ported from the concept's css/diptych.css
+   (:417-430 and :799-807 the hero, :432-451, :808-814 and :906-914 the
+   story, :653-676 and :834-839 the blocks, :678-691 and :840-844 the
+   gallery, :693-715 and :845-848 the parking, :255-270 the status chips of
+   its legend) with the tokens of src/index.css, --screen-h for vh, and the
+   spec's fixes: the hero's entrance is CSS from the first paint and names no
+   view transition (ruling F8); without motion the story stays in one column
+   with its pictures inline (spec §5.8); a control's border is hair-ctl;
+   hover effects need a fine pointer; nothing takes the focus ring away, and
+   no box that holds a control clips it (spec §11).
+
+   The page's own stylesheet (src/routes/golden-residence.jsx), after the
+   site's: plain CSS, in no Tailwind layer. A section's padding, the seam,
+   the split and the hinge are the site's (src/styles/diptych.css), the
+   inquiry's styles its component's (src/components/inquiry/inquiry.css).
+
+   The hero moves by CSS from first paint (spec §5.5), and only under the
+   motion gate (`:root.js`, src/utils/motionGate.js) inside
+   @media (prefers-reduced-motion: no-preference). The markup is the final
+   state: each entrance's starting state lives in its keyframes, held by a
+   `both` fill, so reduced motion switched on mid-page leaves nothing hidden,
+   moved or covered. Every entrance waits --arrive (src/styles/motion.css):
+   .52s behind the doors, 0s otherwise. */
+
+/* ---------- the hero (spec §6.14; extract §4.17) ---------- */
+/* One screen, 640 px at least, as Home's opening is (spec §6.7, §14.9): the
+   hero move from Home lands on the same render, framed the same, at the same
+   height. The entrance's starts (spec §5.5): a normal arrival's, and the
+   hero move's, sooner, its picture already in place. */
+.grhero {
+  --gr-title: .25s;
+  --gr-addr: .45s;
+  --gr-seam: .55s;
+  --gr-facts: .6s;
+  --gr-actions: .7s;
+  position: relative;
+  height: max(640px, var(--screen-h));
+  background: var(--onyx);
+}
+[data-arrive="hero"] .grhero {
+  --gr-title: .05s;
+  --gr-addr: .2s;
+  --gr-seam: .3s;
+  --gr-facts: .32s;
+  --gr-actions: .42s;
+}
+.grhero__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.grhero__media picture,
+.grhero__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.grhero__media img {
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 62%;
+}
+/* The overlay that keeps the title and the facts legible (extract §1.2).
+   Home's hero move fades its half's overlay into this one (home.css). */
+.grhero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(14, 13, 11, .62) 0%, rgba(14, 13, 11, 0) 30%, rgba(14, 13, 11, 0) 50%, rgba(14, 13, 11, .9) 100%);
+}
+.grhero__in {
+  position: absolute;
+  right: 0;
+  bottom: clamp(36px, calc(var(--screen-h) * .07), 80px);
+  left: 0;
+  z-index: 2;
+}
+.grhero__title {
+  font-family: var(--serif);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: .9;
+  letter-spacing: -.012em;
+  text-align: center;
+}
+.grhero__title em { color: var(--brass-l); }
+/* Each word rises in a mask of its own (src/styles/diptych.css: .line-mask,
+   its room for the descenders and the italic's overhang), side by side. */
+.grhero__title .line-mask {
+  display: inline-block;
+  vertical-align: top;
+}
+.grhero__title .split-line { display: block; }
+.grhero__title .line-mask + .line-mask { --n: 1; }
+.grhero__addr {
+  margin: 18px auto 0;
+  color: var(--ivory-2);
+  font-size: 15px;
+  text-align: center;
+}
+/* Two facts either side of a seam: the 192 apartments against it, the free
+   ones after it. */
+.grhero__facts {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  margin-top: clamp(28px, calc(var(--screen-h) * .05), 52px);
+}
+.grhero__facts .seam {
+  top: -6px;
+  bottom: -6px;
+}
+.fact {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 clamp(22px, 2.4vw, 40px);
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.fact--l { justify-content: flex-end; }
+.fact--r { --n: 1; }
+.fact .num {
+  color: var(--ivory);
+  font-size: clamp(40px, 3.6vw, 60px);
+  font-weight: 600;
+  line-height: .9;
+}
+/* The live count (RollingNumber) stands its digits, and its `—`, in a window
+   1 em tall: it gives back what the role's line-height leaves out (.9), so
+   its line is as tall as the written number's beside it. The block and
+   parking counts do the same. */
+.fact--r .num { margin-block: -.05em; }
+.grhero__actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: clamp(26px, calc(var(--screen-h) * .044), 44px);
+}
+.grhero__actions > :nth-child(2) { --n: 1; }
+
+/* ---------- the story (spec §6.15; extract §4.18) ---------- */
+/* One column, each block with its picture inline above it, wherever the
+   picture half does not stay beside the text: without motion (spec §5.8),
+   and on a phone. With motion, side by side (below), the half stays and its
+   pictures wipe in from the seam (StorySection.jsx). */
+.story {
+  align-items: stretch;
+  grid-template-columns: 1fr;
+  background: var(--onyx);
+}
+.story > .seam { display: none; }
+.story__pin { display: none; }
+/* The frame under the bar, the index and the caption below it. */
+.story__frame {
+  position: absolute;
+  inset: calc(var(--bar-h) + var(--screen-h) * .04) 0 calc(var(--screen-h) * .07) 0;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--umber);
+}
+.story__img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.story__img picture,
+.story__img img,
+.story__inline picture,
+.story__inline img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.story__img img,
+.story__inline img {
+  max-width: none;
+  object-fit: cover;
+}
+.story__photo--entrance { object-position: 40% 50%; }
+.story__photo--terrace { object-position: 52% 50%; }
+.story__photo--garden { object-position: 48% 50%; }
+.story__idx {
+  position: absolute;
+  right: 28px;
+  bottom: calc(var(--screen-h) * .07 + 18px);
+  z-index: 2;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.story__idx span {
+  color: var(--stone);
+  font-weight: 500;
+}
+.story__cap {
+  position: absolute;
+  bottom: calc(var(--screen-h) * .07 - 32px);
+  left: var(--gut);
+  z-index: 2;
+  color: var(--stone);
+  font-size: 13px;
+}
+.story__text {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 var(--gut);
+}
+.story__block {
+  display: grid;
+  align-content: center;
+  gap: 22px;
+  padding: 64px 0;
+}
+.story__block p {
+  max-width: 30em;
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.story__inline {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--umber);
+}
+/* „500 м до метростанция“ under a rule. */
+.metro {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hair-2);
+}
+.metro .num {
+  font-size: clamp(56px, 5vw, 84px);
+  font-weight: 600;
+  line-height: .9;
+}
+.metro p {
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+/* The building's figures, two by two under a rule. */
+.kv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 34px;
+  max-width: 520px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair-2);
+}
+.kv dt {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+.kv dd {
+  margin-top: 6px;
+  color: var(--stone);
+  font-size: 13px;
+}
+
+/* With motion, the halves side by side: the picture half one screen tall,
+   sticky beside the text (no pin), each picture after the first waiting
+   clipped at the seam, its right edge, until its block wipes it in; the
+   first block one screen tall, the others .84 of it (spec §6.15). */
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 901px) {
+    :root.js .story { grid-template-columns: 1fr 1fr; }
+    :root.js .story > .seam { display: block; }
+    :root.js .story__pin {
+      display: block;
+      position: sticky;
+      top: 0;
+      height: var(--screen-h);
+    }
+    :root.js .story__img + .story__img { clip-path: inset(0 0 0 100%); }
+    :root.js .story__text {
+      max-width: none;
+      margin: 0;
+      padding: 0 var(--gut) 0 clamp(28px, 5vw, 104px);
+    }
+    :root.js .story__block {
+      min-height: calc(var(--screen-h) * .84);
+      padding: calc(var(--screen-h) * .08) 0;
+    }
+    :root.js .story__block:first-child { min-height: var(--screen-h); }
+    :root.js .story__inline { display: none; }
+  }
+}
+
+/* ---------- the blocks (spec §6.16; extract §4.27) ---------- */
+/* Блок А against the seam, right-aligned; Блок Б after it. */
+.blocks { background: var(--onyx); }
+.blk {
+  display: grid;
+  align-content: start;
+  gap: 26px;
+  padding: 0 clamp(28px, 5vw, 96px);
+}
+.blk--a {
+  justify-items: end;
+  text-align: right;
+}
+.blk__name {
+  font-family: var(--serif);
+  font-size: clamp(52px, 5.2vw, 88px);
+  font-weight: 500;
+  line-height: .9;
+}
+.blk__name em { color: var(--brass-l); }
+.blk__sub {
+  margin-top: -10px;
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+/* The block's free apartments, a count as the hero's facts are. */
+.blk__free {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.blk--a .blk__free { justify-content: flex-end; }
+.blk__free .num {
+  margin-block: -.05em;
+  color: var(--ivory);
+  font-size: clamp(40px, 3.6vw, 60px);
+  font-weight: 600;
+  line-height: .9;
+}
+/* A link's underline is its words' (as it is against the seam): in the
+   second half it would otherwise stretch across the column. */
+.blk--b > .link { justify-self: start; }
+
+/* ---------- the gallery (spec §6.17; extract §4.28) ---------- */
+/* Two halves on the seam, each a stack of renders: hidden but for the
+   spreads on show, which GallerySection.jsx stacks in the order chosen. */
+.gal { background: var(--onyx); }
+.gal__stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: min(calc(var(--screen-h) * .78), 780px);
+}
+.gal__half {
+  position: relative;
+  overflow: hidden;
+  background: var(--umber);
+}
+.gal__img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.gal__img[data-shown] { visibility: visible; }
+.gal__img picture,
+.gal__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gal__img img {
+  max-width: none;
+  object-fit: cover;
+}
+.gal__photo--corner { object-position: 50% 40%; }
+.gal__photo--towers { object-position: 28% 50%; }
+.gal__photo--parking { object-position: 60% 50%; }
+.gal__photo--facade { object-position: 40% 50%; }
+.gal__photo--dusk { object-position: 18% 60%; }
+/* Under the stage: the caption against the seam, the arrows and the counter
+   after it. */
+.gal__bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding-top: 22px;
+}
+/* The outer side keeps the gutter (extract §3.1): a long caption wraps
+   before the screen's edge, in the two lines it has room for. */
+.gal__cap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 3.2em;
+  padding: 0 clamp(24px, 3vw, 52px) 0 var(--gut);
+  color: var(--ivory-2);
+  font-size: 15px;
+  text-align: right;
+}
+.gal__ctl {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-left: clamp(24px, 3vw, 52px);
+}
+.gal__ctl button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--hair-ctl);
+  color: var(--ivory);
+  transition: border-color .2s, background-color .2s;
+}
+.gal__ctl svg {
+  width: 18px;
+  height: 10px;
+}
+.gal__n {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.gal__n span {
+  color: var(--stone);
+  font-weight: 500;
+}
+
+/* ---------- the garages and parking places (spec §6.18; extract §4.29) ---------- */
+/* The garages against the seam, right-aligned; the parking places after it. */
+.park { background: var(--umber); }
+.park__half {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  padding: 0 clamp(28px, 5vw, 96px);
+}
+.park__half--a {
+  justify-items: end;
+  text-align: right;
+}
+.park__big {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.park__half--a .park__big { justify-content: flex-end; }
+.park__big .num {
+  margin-block: -.075em;
+  font-size: clamp(72px, 7vw, 120px);
+  font-weight: 600;
+  line-height: .85;
+}
+.park__big > span:last-child {
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.park__half--b > .link { justify-self: start; }
+/* The legend: each status's swatch, its pattern and glyph, the count and the
+   word, in the status order (spec §7.9). */
+.park .legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 26px;
+}
+.park__half--a .legend { justify-content: flex-end; }
+.park .st {
+  --c: var(--stone);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.park .st b {
+  color: var(--ivory);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.park .st--free { --c: var(--status-free); }
+.park .st--reserved { --c: var(--status-reserved); }
+.park .st--sold { --c: var(--status-sold); }
+.park .st--blocked { --c: var(--status-blocked); }
+.park .sw {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--c);
+  color: var(--c);
+}
+.park .sw svg {
+  width: 10px;
+  height: 10px;
+}
+.park .st--free .sw {
+  background: var(--c);
+  color: var(--onyx);
+}
+.park .st--reserved .sw { background: repeating-linear-gradient(-45deg, var(--c) 0 1.5px, transparent 1.5px 4px); }
+.park .st--reserved .sw svg {
+  border-radius: 50%;
+  background: var(--umber);
+}
+.park .st--sold .sw {
+  background-image: radial-gradient(var(--c) 1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+.park .st--sold .sw svg { background: var(--umber); }
+.park .st--blocked .sw { border-style: dashed; }
+/* A cell a place, in its status's pattern: plain hair outlines until the
+   data arrives. */
+.park__cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 460px;
+}
+.park__half--a .park__cells { justify-content: flex-end; }
+.park__cells i {
+  --c: var(--hair);
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--c);
+}
+.park__cells .s-free {
+  --c: var(--status-free);
+  background: rgba(79, 191, 133, .55);
+}
+.park__cells .s-reserved {
+  --c: var(--status-reserved);
+  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
+}
+.park__cells .s-sold {
+  --c: rgba(212, 87, 78, .55);
+  background-image: radial-gradient(rgba(212, 87, 78, .8) 1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+.park__cells .s-blocked {
+  --c: var(--status-blocked);
+  border-style: dashed;
+}
+/* The free places, listed under a rule; + and − in brass-l, which assistive
+   technology does not read out. */
+.park details {
+  width: 100%;
+  max-width: 460px;
+  border-top: 1px solid var(--hair-2);
+}
+.park summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+.park summary::-webkit-details-marker { display: none; }
+.park summary::after {
+  content: '+';
+  content: '+' / '';
+  color: var(--brass-l);
+  font-size: 18px;
+  line-height: 1;
+}
+.park details[open] summary::after {
+  content: '−';
+  content: '−' / '';
+}
+.park__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 18px;
+  padding-bottom: 12px;
+  font-size: 13px;
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: left;
+}
+.park__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--hair-2);
+}
+.park__list li > span:last-child { color: var(--stone); }
+
+@media (hover: hover) and (pointer: fine) {
+  .gal__ctl button:hover {
+    border-color: var(--brass);
+    background: rgba(184, 149, 74, .08);
+  }
+}
+
+/* ---------- phones: the halves stack (spec §4) ---------- */
+@media (max-width: 900px) {
+  /* The hero: the render framed to the tall tower, the facts stacked around
+     a 56 px brass tick, the actions in a column. */
+  .grhero__media img { object-position: 68% 62%; }
+  .grhero__title { font-size: clamp(48px, 13.5vw, 80px); }
+  .grhero__addr {
+    padding: 0 var(--gut);
+    font-size: 14px;
+  }
+  .grhero__facts {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .grhero__facts .seam {
+    top: calc(50% - .5px);
+    bottom: auto;
+    width: 56px;
+    height: 1px;
+    margin-left: -28px;
+    transform-origin: 50% 50%;
+  }
+  .fact,
+  .fact--l {
+    justify-content: center;
+    padding: 0 var(--gut);
+  }
+  .fact--l { padding-bottom: 8px; }
+  .fact--r { padding-top: 8px; }
+  .fact .num { font-size: 40px; }
+  .grhero__actions {
+    flex-direction: column;
+    padding: 0 var(--gut);
+  }
+
+  /* The story: full-bleed 4:3 pictures over a brass line, inline. */
+  .story__text {
+    max-width: none;
+    padding: 0 var(--gut);
+  }
+  .story__block { padding: 56px 0; }
+  .story__inline {
+    aspect-ratio: 4 / 3;
+    margin: 0 calc(var(--gut) * -1) 6px;
+  }
+  .story__inline::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: var(--brass);
+  }
+
+  /* The blocks and the parking: left-aligned, the second half under a brass
+     rule. */
+  .blk,
+  .blk--a {
+    justify-items: start;
+    padding: 0 var(--gut);
+    text-align: left;
+  }
+  .blk--a { padding-bottom: 56px; }
+  .blk--b {
+    margin: 0 var(--gut);
+    padding: 56px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .blk--a .blk__free { justify-content: flex-start; }
+  .blk__free .num { font-size: 40px; }
+
+  /* The gallery: the halves stacked at 4:3 under a brass rule, no seams. */
+  .gal__stage {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .gal__half { aspect-ratio: 4 / 3; }
+  .gal__half + .gal__half { border-top: 1px solid var(--brass); }
+  .gal__stage > .seam,
+  .gal__bar > .seam { display: none; }
+  .gal__bar { grid-template-columns: 1fr; }
+  .gal__cap {
+    justify-content: flex-start;
+    padding: 0 var(--gut) 16px;
+    text-align: left;
+  }
+  .gal__ctl { padding: 0 var(--gut); }
+
+  .park__half,
+  .park__half--a {
+    justify-items: start;
+    padding: 0 var(--gut);
+    text-align: left;
+  }
+  .park__half--a { padding-bottom: 56px; }
+  .park__half--b {
+    margin: 0 var(--gut);
+    padding: 56px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .park__half--a .park__big,
+  .park__half--a .park__cells,
+  .park__half--a .legend { justify-content: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .park__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- the hero's entrance (spec §5.5) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The render settles from 1.12 (never faded: it is the page's LCP), but
+     not after the hero move, which brings it in place from Home. The title's
+     two words rise from their masks, 0.1 s apart; a mask clips only while
+     its word rises, so nothing cuts a glyph once it lands (spec §3.3). Then
+     the address comes up 14 px, the facts' seam draws down, the facts and
+     the actions come up 16 px, 0.08 s apart. */
+  :root.js .grhero__media img {
+    animation: gr-settle 1.4s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js [data-arrive="hero"] .grhero__media img { animation: none; }
+  :root.js .grhero__title .line-mask {
+    animation: gr-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + var(--gr-title) + var(--n, 0) * .1s);
+  }
+  :root.js .grhero__title .split-line {
+    animation: gr-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--gr-title) + var(--n, 0) * .1s);
+  }
+  :root.js .grhero__addr {
+    animation: gr-up-short .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--gr-addr));
+  }
+  :root.js .grhero__facts .seam {
+    animation: gr-draw .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--gr-seam));
+  }
+  :root.js .fact {
+    animation: gr-up .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--gr-facts) + var(--n, 0) * .08s);
+  }
+  :root.js .grhero__actions > * {
+    animation: gr-up .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--gr-actions) + var(--n, 0) * .08s);
+  }
+  /* On a phone the facts' seam is a tick across, drawn from its middle. */
+  @media (max-width: 900px) {
+    :root.js .grhero__facts .seam { animation-name: gr-draw-across; }
+  }
+}
+
+@keyframes gr-settle { from { transform: scale(1.12); } }
+@keyframes gr-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its word rises: under the landed word's descenders,
+   above the ascenders of a word waiting 112 % down. */
+@keyframes gr-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes gr-up-short { from { opacity: 0; transform: translateY(14px); } }
+@keyframes gr-up { from { opacity: 0; transform: translateY(16px); } }
+@keyframes gr-draw { from { transform: scaleY(0); } }
+@keyframes gr-draw-across { from { transform: scaleX(0); } }

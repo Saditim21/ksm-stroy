@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { SITE } from '../../config/site'
 import useReveals from '../../motion/useReveals'
 import Seam from '../ui/Seam'
 import InquiryForm from './InquiryForm'
+import { clearInquiryOption } from './inquiryStore'
 import './inquiry.css'
 
 // The closing inquiry (spec §6.12, §8.1, §8.2; extract §4.14), a split on the
@@ -15,6 +16,10 @@ import './inquiry.css'
 //
 // The headings rise line by line, the copy fades in and the seam draws as the
 // section comes into view (useReveals); the markup is the final state.
+//
+// The form's state is a store that outlives the page (inquiryStore.js), so
+// the section clears the option it leaves (ruling C5.1): each page's form
+// starts on its own subject.
 
 const COPY = {
   home: {
@@ -45,6 +50,7 @@ const COPY = {
 export default function InquirySection({ page = 'home' }) {
   const ref = useRef(null)
   useReveals(ref)
+  useEffect(() => clearInquiryOption, [])
   const copy = COPY[page] ?? COPY.home
   const [primary, second] = SITE.phones
 

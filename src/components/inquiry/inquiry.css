@@ -155,6 +155,9 @@
   font-size: 14px;
   line-height: 1.5;
 }
+/* While the inquiry is on its way the action reads „Изпращане...“
+   (InquiryForm.jsx) and takes no second send. */
+.form [aria-disabled='true'] { cursor: progress; }
 
 /* The thank-you, in the form's place. */
 .form__ok {

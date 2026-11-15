@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { acquireScrollLock, releaseScrollLock, setLenis } from '../../utils/lenis'
-import { chooseInquiryOption, INQUIRY_OPTIONS, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
+import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry's shared state (spec §10, §5.3): the option the form's select
 // shows and the apartments sent to it, which any action on the page can
@@ -66,6 +66,16 @@ describe('the store', () => {
     act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
     act(() => resetInquiry())
     expect(result.current).toEqual({ option: null, picks: [] })
+  })
+
+  // Ruling C5.1: what the inquiry section calls as it leaves the page, so the
+  // next page's form starts on its own subject. The picks stay: the explorer
+  // pages hand them on.
+  it('clearInquiryOption drops the option, and keeps the picks', () => {
+    const { result } = state()
+    act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+    act(() => clearInquiryOption())
+    expect(result.current).toEqual({ option: null, picks: ['А 301'] })
   })
 })
 
@@ -138,6 +148,23 @@ describe('the glide to the form', () => {
     presetInquiry({ pick: 'А 302' })
     vi.advanceTimersToNextFrame()
     vi.advanceTimersByTime(1500)
+    expect(lenis.scrollTo).toHaveBeenCalledTimes(1)
+  })
+
+  // A section that leaves the page (clearInquiryOption) calls off a glide on
+  // its way, and the focus after it: the next page may have a form of its
+  // own, whose name the visitor never asked for.
+  it('calls off a glide on its way when the inquiry’s section leaves the page', () => {
+    presetInquiry({ option: 'mnogofamilna' })
+    vi.advanceTimersToNextFrame()
+    expect(lenis.scrollTo).toHaveBeenCalledTimes(1)
+    clearInquiryOption()
+    vi.advanceTimersByTime(1500)
+    expect(document.activeElement).not.toBe(input)
+
+    presetInquiry({ option: 'mnogofamilna' })
+    clearInquiryOption()
+    vi.advanceTimersToNextFrame()
     expect(lenis.scrollTo).toHaveBeenCalledTimes(1)
   })
 })

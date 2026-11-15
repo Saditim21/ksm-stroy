@@ -3,7 +3,6 @@ import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../tests/contracts/site'
-import GoldenResidenceBlockSelection from '../components/GoldenResidenceBlockSelection'
 import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 import { ApartmentProvider } from '../context/ApartmentContext'
 import Blog from './Blog'
@@ -74,8 +73,8 @@ it('/contact: the closing band is on dusk; the form is not', () => {
 })
 
 // A project page's photo gallery and its full-screen viewer: dark throughout.
+// (The Golden Residence page, rebuilt in Diptych, is dark throughout.)
 it.each([
-  { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection },
   { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
 ])('$path: the photo gallery and its full-screen viewer are on dusk', async ({ Page }) => {
   renderPage(Page)
@@ -116,7 +115,6 @@ it.each([
 // ring stays onyx; „Преглед на блока“ inside it sits on the photo's dark
 // overlay. (framer-motion makes both focusable: they respond to a tap.)
 it.each([
-  { path: '/projects/golden-residence', Page: GoldenResidenceBlockSelection },
   { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
 ])('$path: „Преглед на блока“ on each card’s photo is on dusk; the cards are not', ({ Page }) => {
   renderPage(Page)

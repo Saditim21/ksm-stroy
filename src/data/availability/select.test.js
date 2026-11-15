@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apartmentUnits, grFree } from './select'
+import { apartmentUnits, blockFree, grFree, spotUnits } from './select'
 
 // The pages read availability as units (spec §9): M1's unit model
 // (src/utils/units.js) built from the API's rows, which useAvailability()
@@ -82,6 +82,54 @@ describe('apartmentUnits', () => {
     const data = projects({ mnogoA: [row('А-901', '10', 'Свободен')] })
 
     expect(apartmentUnits(data, 'mnogofamilna-sgrada')).toMatchObject([{ id: 'А901', label: 'А-901', block: 'А', floor: 10, suffix: '01' }])
+  })
+})
+
+// The Golden Residence page's garages and parking places (spec §6.18): the
+// API's spot rows (src/services/sheetsCore.js: { number, type, area, status })
+// as places, each status through src/utils/propertyStatus.js.
+describe('spotUnits', () => {
+  const spots = (garages, parking = []) => ({ 'golden-residence': { 'block-a': [], 'block-b': [], garages, parking } })
+
+  it('gives each row of a slot as a place: its id, label, area, type and status', () => {
+    const data = spots([{ number: 'Г-001', type: 'Гараж', area: { total: '34,01' }, status: 'Продадени' }])
+
+    expect(spotUnits(data, 'garages')).toEqual([
+      { id: 'Г001', label: 'Г-001', totalArea: 34.01, type: 'Гараж', status: 'sold', statusText: 'Продадени' },
+    ])
+  })
+
+  it('reads the slot asked for, an empty status as free, and leaves out a row that names no place', () => {
+    const data = spots([], [
+      { number: 'ПМ-03', type: 'Паркомясто', area: { built: '12.50', ideal: '0', total: '12.50' }, status: '' },
+      { number: ' ', type: 'Паркомясто', area: { total: '12.50' }, status: 'Свободен' },
+      { number: 'ПМ-04', type: 'Паркомясто', area: { total: '-' }, status: 'Скоро' },
+    ])
+
+    expect(spotUnits(data, 'parking')).toEqual([
+      { id: 'ПМ03', label: 'ПМ-03', totalArea: 12.5, type: 'Паркомясто', status: 'available', statusText: 'Свободен' },
+      { id: 'ПМ04', label: 'ПМ-04', totalArea: null, type: 'Паркомясто', status: 'unknown', statusText: 'Скоро' },
+    ])
+  })
+
+  it('gives no places for no data, and none for a slot without rows', () => {
+    expect(spotUnits(null, 'garages')).toEqual([])
+    expect(spotUnits(spots(null), 'garages')).toEqual([])
+  })
+})
+
+// A block's free apartments (spec §6.16): the units of that block whose
+// status is free, and no other.
+describe('blockFree', () => {
+  it('counts the free units of one block', () => {
+    const units = apartmentUnits(projects({
+      a: [row('А 101', '1', 'Свободен'), row('А 102', '1', ''), row('А 103', '1', 'Резервиран'), row('А 104', '1', 'Скоро')],
+      b: [row('Б 101', '1', 'Свободен'), row('Б 102', '1', 'Продадени'), row('Б 103', '1', 'Блокиран')],
+    }))
+
+    expect(blockFree(units, 'А')).toBe(2)
+    expect(blockFree(units, 'Б')).toBe(1)
+    expect(blockFree([], 'А')).toBe(0)
   })
 })
 

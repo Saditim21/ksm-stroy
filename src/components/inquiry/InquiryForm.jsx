@@ -20,10 +20,12 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInqu
 //
 // What the visitor asks about comes from the page's options
 // (inquiryStore.js), and the page can preset it, with apartments picked in
-// the explorer as chips. A sent inquiry turns into the thank-you, a status
-// that takes the focus, rising into place with motion (spec §5.7); a failed
-// one says so and keeps what was typed. A new preset after a thank-you
-// brings the form back.
+// the explorer as chips. While an inquiry is on its way (the EmailJS chunk,
+// the round trip) the form is busy and its action reads as the legacy
+// Contact form's does then, „Изпращане...“, and takes no second send. A sent
+// inquiry turns into the thank-you, a status that takes the focus, rising
+// into place with motion (spec §5.7); a failed one says so and keeps what
+// was typed. A new preset after a thank-you brings the form back.
 
 const ERRORS = {
   name: 'Въведете име.',
@@ -35,6 +37,11 @@ const ERRORS = {
 const CONSENT = 'Съгласен съм КСМ Строй да използва данните ми, за да отговори на запитването.'
 // The phone in a sentence, kept on one line.
 const PHONE = PRIMARY_PHONE.label.split(' ').join(String.fromCharCode(0xa0))
+// The action's label while an inquiry is on its way: the legacy Contact
+// form's own (src/pages/Contact.jsx).
+const SENDING = 'Изпращане...'
+// The thank-you's id, which the glide to the inquiry brings into view.
+const THANKS = 'f-thanks'
 
 // The fields that can be wrong, in the order the focus looks for the first.
 const IDS = { name: 'f-name', phone: 'f-tel', email: 'f-email', consent: 'f-consent' }
@@ -105,7 +112,9 @@ export default function InquiryForm({ page = 'home' }) {
   }, [])
 
   // The thank-you takes the focus, once, and comes into view if the form's
-  // end was all that showed; with motion it rises into place.
+  // end was all that showed: the glide to the inquiry goes on as far as the
+  // thank-you, which on a short phone screen sits a whole contact half below
+  // the section's top (ruling C5.3). With motion it rises into place.
   useLayoutEffect(() => {
     if (status !== 'sent') {
       thanked.current = false
@@ -116,7 +125,7 @@ export default function InquiryForm({ page = 'home' }) {
     const box = thanks.current
     box.focus({ preventScroll: true })
     const { top, bottom } = box.getBoundingClientRect()
-    if (top < 0 || bottom > window.innerHeight) scrollToId('zapitvane')
+    if (top < 0 || bottom > window.innerHeight) scrollToId('zapitvane', { reveal: THANKS })
     const motion = motionNow()
     if (!motion) return undefined
     const rise = motion.gsap.from(box.children, { opacity: 0, y: 18, duration: 0.8, ease: 'expo.out', stagger: 0.08, clearProps: 'opacity,transform' })
@@ -169,9 +178,19 @@ export default function InquiryForm({ page = 'home' }) {
     }
   }
 
+  const sending = status === 'sending'
+
   return (
     <>
-      <form ref={form} className="form" noValidate onSubmit={onSubmit} hidden={status === 'sent'} data-fade="">
+      <form
+        ref={form}
+        className="form"
+        noValidate
+        onSubmit={onSubmit}
+        hidden={status === 'sent'}
+        aria-busy={sending ? 'true' : undefined}
+        data-fade=""
+      >
         <div className="form__row">
           <TextField id="f-name" label="Име" name="name" autoComplete="name" required value={values.name} onChange={set('name')} error={errors.name} />
           <TextField id="f-tel" label="Телефон" name="phone" type="tel" inputMode="tel" autoComplete="tel" required value={values.phone} onChange={set('phone')} error={errors.phone} />
@@ -229,8 +248,8 @@ export default function InquiryForm({ page = 'home' }) {
           <FieldError id="f-consent" message={errors.consent} />
         </div>
         <div>
-          <Button type="submit" variant="solid" arrow>
-            Изпратете запитване
+          <Button type="submit" variant="solid" arrow={!sending} aria-disabled={sending ? 'true' : undefined}>
+            {sending ? SENDING : 'Изпратете запитване'}
           </Button>
         </div>
         {status === 'failed' ? (
@@ -240,7 +259,7 @@ export default function InquiryForm({ page = 'home' }) {
         ) : null}
       </form>
       {status === 'sent' ? (
-        <div ref={thanks} className="form__ok" role="status" tabIndex={-1}>
+        <div ref={thanks} id={THANKS} className="form__ok" role="status" tabIndex={-1}>
           <p>Благодарим ви.</p>
           <p className="lead">
             Ще се свържем с&nbsp;вас в&nbsp;работно време. За бърз отговор: {PHONE}.

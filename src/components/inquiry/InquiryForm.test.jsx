@@ -2,15 +2,20 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import InquiryForm from './InquiryForm'
+import InquirySection from './InquirySection'
 import { presetInquiry, resetInquiry } from './inquiryStore'
 
 // The inquiry form (spec §10): name, phone, email, what the visitor asks
 // about, an optional message and the consent, checked here before anything
 // is sent, so the lead proxy never drops a lead without a trace. Sending is
-// src/services/inquiry.js's (its own tests); here it is a stub.
+// src/services/inquiry.js's (its own tests); here it is a stub. So is the
+// glide to a section (src/utils/scroll.js's own tests), which the form asks
+// for after a send.
 
 const send = vi.hoisted(() => vi.fn())
 vi.mock('../../services/inquiry', async (importOriginal) => ({ ...(await importOriginal()), sendInquiry: send }))
+const glide = vi.hoisted(() => vi.fn())
+vi.mock('../../utils/scroll', async (importOriginal) => ({ ...(await importOriginal()), scrollToId: glide }))
 
 const CONSENT = 'Съгласен съм КСМ Строй да използва данните ми, за да отговори на запитването.'
 const ERRORS = {
@@ -35,10 +40,12 @@ let user
 beforeEach(() => {
   send.mockReset()
   send.mockResolvedValue({ ok: true })
+  glide.mockReset()
   user = userEvent.setup({ delay: null })
 })
 afterEach(() => {
   resetInquiry()
+  vi.restoreAllMocks()
 })
 
 it('labels every field, the consent and the action', () => {
@@ -163,6 +170,80 @@ describe('sending', () => {
     await user.click(submit())
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Golden Residence, гараж или паркомясто', picks: ['А 301'] }))
   })
+
+  // Ruling C5.2: while the inquiry is on its way (the EmailJS chunk, the
+  // round trip), the form says so: it is busy, and its action reads as the
+  // legacy Contact form's does while it sends, and takes no second send.
+  it('says it is sending while the inquiry is on its way, and takes no second send', async () => {
+    let finish
+    send.mockReturnValue(new Promise((resolve) => { finish = resolve }))
+    render(<InquiryForm page="home" />)
+    await fill(user)
+    await user.click(submit())
+
+    const form = document.querySelector('form')
+    expect(form).toHaveAttribute('aria-busy', 'true')
+    const sending = screen.getByRole('button', { name: 'Изпращане...' })
+    expect(sending).toHaveAttribute('aria-disabled', 'true')
+    expect(sending).toHaveAttribute('type', 'submit')
+    await user.click(sending)
+    expect(send).toHaveBeenCalledTimes(1)
+
+    await act(async () => finish({ ok: true }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Благодарим ви.')
+    expect(form).not.toHaveAttribute('aria-busy')
+  })
+
+  it('is no longer busy once a send has failed, and can send again', async () => {
+    send.mockResolvedValue({ ok: false })
+    render(<InquiryForm page="home" />)
+    await fill(user)
+    await user.click(submit())
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+    expect(document.querySelector('form')).not.toHaveAttribute('aria-busy')
+    expect(submit()).not.toHaveAttribute('aria-disabled')
+    await user.click(submit())
+    expect(send).toHaveBeenCalledTimes(2)
+  })
+
+  // Ruling C5.3: on a short screen the thank-you can end below the fold, a
+  // whole contact half under the section's top. The glide to the inquiry
+  // then goes as far as the thank-you, which has an id for it.
+  it('brings a thank-you that ends below the fold into view', async () => {
+    render(<InquiryForm page="home" />)
+    await fill(user)
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ top: 2000, bottom: 2160, left: 0, right: 0, width: 0, height: 160, x: 0, y: 2000 })
+    await user.click(submit())
+
+    expect(await screen.findByRole('status')).toHaveAttribute('id', 'f-thanks')
+    expect(glide).toHaveBeenCalledWith('zapitvane', { reveal: 'f-thanks' })
+  })
+
+  it('leaves the page where it is when the thank-you is on screen', async () => {
+    render(<InquiryForm page="home" />)
+    await fill(user)
+    await user.click(submit())
+
+    await screen.findByRole('status')
+    expect(glide).not.toHaveBeenCalled()
+  })
+})
+
+// Ruling C5.1: the store outlives the page, so the section clears the option
+// it leaves, and each page's form starts on its own subject: an option Home
+// preset (Многофамилна) never files a Golden Residence inquiry. The picks
+// stay, for the explorer pages hand them on.
+it('clears the option when its section leaves the page, and keeps the picks', () => {
+  const { unmount } = render(<InquirySection page="home" />)
+  act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+  expect(field('Интересувам се от')).toHaveValue('mnogofamilna')
+
+  unmount()
+  render(<InquirySection page="golden-residence" />)
+  expect(field('Интересувам се от')).toHaveValue('golden-residence')
+  expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
 })
 
 describe('presets from the page', () => {
