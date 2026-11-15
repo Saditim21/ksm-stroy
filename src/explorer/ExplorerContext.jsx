@@ -82,7 +82,10 @@ export function ExplorerProvider({ routeBlock = null, children }) {
   })
   useLayoutEffect(() => () => holdEuRow(false), [])
 
-  // The dialogs' chunk, once the address asks for a dialog.
+  // The dialogs' chunk, once the address asks for a dialog, and again at each
+  // new ask while it is not in: a failed load may be tried again
+  // (loadSurfaces.js), so the next floor or unit opened after one failed
+  // still opens; one in flight is shared.
   const [surfaces, setSurfaces] = useState(loadedSurfaces)
   const wanted = arrived && Boolean(stage || unitId)
   useEffect(() => {
@@ -100,7 +103,7 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     return () => {
       live = false
     }
-  }, [wanted, surfaces])
+  }, [wanted, surfaces, stage, unitId])
 
   // The opening: where the stage grows from and what opened it; and what
   // opened the unit panel.
