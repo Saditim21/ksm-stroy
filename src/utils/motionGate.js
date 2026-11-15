@@ -11,8 +11,15 @@
 //   The session flag `ksm-intro` is set at once, so no later load in the
 //   session plays the intro; where sessionStorage cannot keep it (blocked
 //   storage throws), the intro never plays rather than on every load. The
-//   class stays for the document's life; src/styles/motion.css keeps the
-//   intro to the first page the app renders.
+//   class stays for the document's life, so two rules keep the intro to the
+//   first page the app renders (spec §5.5):
+//   - src/styles/motion.css gives only that page the intro's .95s entrance
+//     delay (`:root.intro { --arrive: .95s; }`): a page that arrived by a
+//     link or by Back sets its own --arrive through its data-arrive;
+//   - Home's stylesheet never shows the intro's doors inside a page that
+//     arrived (`:root.js.intro [data-arrive] .intro-doors`,
+//     src/pages/home/home.css), so a return to Home never replays them.
+//   And once it has played, SeamIntro leaves the page (ruling C4.5).
 //
 // This class is the one attribute a script writes on <html>. root.jsx renders
 // <html> with no className and with suppressHydrationWarning, so hydration
