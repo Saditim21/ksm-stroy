@@ -126,5 +126,29 @@
       600,
       900
     ]
+  },
+  {
+    "id": "gr-dusk",
+    "group": "golden-residence",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-dusk-2400.webp",
+    "widths": [
+      800,
+      1400,
+      1600,
+      1920,
+      2400
+    ]
+  },
+  {
+    "id": "mn-dusk",
+    "group": "home",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/mn-dusk-2400.webp",
+    "widths": [
+      800,
+      1400,
+      1600,
+      1920,
+      2400
+    ]
   }
 ]

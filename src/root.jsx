@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, ViewTransition } from 'react'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation, useNavigationType } from 'react-router'
-import { ApartmentProvider } from './context/ApartmentContext'
 import LenisScrollSync from './motion/LenisScrollSync'
 import SmoothScroll from './motion/SmoothScroll'
 import { organizationJsonLd } from './seo/jsonLd'
@@ -205,11 +204,16 @@ function PageFrame({ arrive: arrival }) {
 // screen from the moment the app has hydrated (trackScreenHeight(),
 // src/utils/screenHeight.js). Not where there is no matchMedia to ask about
 // the pointer: jsdom, in the tests.
+//
+// Live availability is the platform store's (src/data/availability), which
+// needs no provider. The legacy ApartmentProvider wraps only the legacy page
+// that still reads it, the Golden Residence block page
+// (src/routes/golden-residence-block.jsx).
 export default function App() {
   const { header, legacy } = useRouteHandle()
   useEffect(() => (typeof window.matchMedia === 'function' ? trackScreenHeight() : undefined), [])
   return (
-    <ApartmentProvider>
+    <>
       <SmoothScroll>
         <div className="flex min-h-[var(--screen-h)] flex-col overscroll-none">
           <SiteHeader />
@@ -225,7 +229,7 @@ export default function App() {
         </div>
       </SmoothScroll>
       <ConditionalAnalytics />
-    </ApartmentProvider>
+    </>
   )
 }
 

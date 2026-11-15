@@ -20,18 +20,25 @@
 //     without scrolling: a box of its own inside the viewport, opacity 1 up
 //     its ancestors, visibility visible. On / the poster PDF links, scrolled
 //     to, must be visible too. jsdom cannot see CSS hide anything; this can.
-// And a path fails when its HTML, loaded with JavaScript off, has no H1.
+// And a path fails when its HTML, loaded with JavaScript off, has anything
+// but exactly one H1 (spec §11).
 //
 // One more check, the scroll lock: on a phone with reduced motion (so without
 // Lenis), the page scrolled to y=1500, the menu opens and Esc closes it; the
 // page must stay at y=1500 throughout.
 //
-// And the focus ring on the legacy home page, a light ground inside the dark
-// site (.on-light, src/index.css): on / at 1440×900, Tab from the top of the
-// page reaches the hero's „Свържи се с нас“, on a dark region of it (.on-dusk),
-// whose ring must be ivory; the next Tab reaches the white availability card's
-// „Виж проектите в продажба“, whose ring is onyx. jsdom cannot compute a
-// ring's colour; Chrome can.
+// Then the focus ring (spec §11), in its ground's text colour: at 1440×900,
+// Tab from the top of each page in FOCUS_RING reaches each of its stops in
+// turn, and each shows a solid 2 px ring of its colour. On /, the EU row's
+// „За проекта“, the header's „Запитване“ and the Golden Residence half, whose
+// ring rides on an inset overlay (its ::after), all ivory on the dark site;
+// on /contact, the legacy form's „Изпрати съобщение“, onyx on production's
+// light ground (.on-light, src/index.css). jsdom cannot compute a ring's
+// colour; Chrome can.
+//
+// And the phone opening (spec §6.7): on / at real phone screens under the EU
+// row (PHONE_HERO), once its entrance has settled, the H1 and the Golden
+// Residence info never overlap.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
 // Chrome's warning about a preload that went unused is heard: it came about
@@ -42,10 +49,11 @@
 // <os tmpdir>/ksmstroy-smoke). Chrome is $CHROME_PATH, else its usual place
 // on Windows and macOS, else `google-chrome` on the PATH.
 //
-// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock] [--focus-ring]
+// usage: node scripts/smoke/smoke.mjs [path …] [--scroll-lock] [--focus-ring] [--phone-hero]
 //   with arguments, only the paths given (a path not listed below is
-//   expected to answer 200), the scroll lock only with --scroll-lock and the
-//   focus ring only with --focus-ring.
+//   expected to answer 200), the scroll lock only with --scroll-lock, the
+//   focus ring only with --focus-ring and the phone opening only with
+//   --phone-hero.
 
 import fs from 'node:fs'
 import os from 'node:os'
@@ -94,26 +102,53 @@ const VISITS = [
   { path: '/index.html', redirect: { status: 308, to: '/' } },
   { path: '/About', status: 404, text: NOT_FOUND_TEXT },
 ]
+const CHECKS = ['--scroll-lock', '--focus-ring', '--phone-hero']
 const ARGS = process.argv.slice(2)
 const FULL_RUN = ARGS.length === 0
-const ONLY = ARGS.filter((arg) => arg !== '--scroll-lock' && arg !== '--focus-ring')
+const ONLY = ARGS.filter((arg) => !CHECKS.includes(arg))
 const RUN = FULL_RUN ? VISITS : ONLY.map((only) => VISITS.find((v) => v.path === only) ?? { path: only })
 const RUN_SCROLL_LOCK = FULL_RUN || ARGS.includes('--scroll-lock')
 const RUN_FOCUS_RING = FULL_RUN || ARGS.includes('--focus-ring')
+const RUN_PHONE_HERO = FULL_RUN || ARGS.includes('--phone-hero')
 
 // The scroll lock check: where the page is scrolled to when the menu opens.
 const SCROLL_LOCK = { path: '/about', y: 1500 }
 
-// The focus ring check: the controls Tab reaches on the page, in order, and
-// the ring each must show, solid, 2 px, in its ground's text colour.
-const FOCUS_RING = {
+// The focus ring check: on each page, the controls Tab reaches, in order, and
+// the ring each must show, solid, 2 px, in its ground's text colour. A stop
+// is the focused element whose text is `text`, or, with `prefix`, starts with
+// it (the Golden Residence half's text carries a live count). With `pseudo`,
+// the ring is read from that pseudo-element: the hero halves draw theirs on an
+// inset overlay (spec §11).
+const FOCUS_RING = [
+  {
+    path: '/',
+    stops: [
+      { text: 'За проекта', ring: 'rgb(239, 233, 221)', ground: 'the EU row over the opening: ivory' },
+      { text: 'Запитване', ring: 'rgb(239, 233, 221)', ground: 'the see-through header: ivory' },
+      { text: 'Golden Residence', prefix: true, pseudo: '::after', ring: 'rgb(239, 233, 221)', ground: 'the Golden Residence half, on its overlay: ivory' },
+    ],
+  },
+  {
+    path: '/contact',
+    stops: [
+      { text: 'Изпрати съобщение', ring: 'rgb(14, 13, 11)', ground: 'the legacy form on production’s light ground: onyx' },
+    ],
+  },
+]
+const MAX_TABS = 60
+
+// The phone opening check (spec §6.7): real phone screens under the EU row,
+// where the H1 and the Golden Residence info must not overlap.
+const PHONE_HERO = {
   path: '/',
-  stops: [
-    { text: 'Свържи се с нас', ring: 'rgb(239, 233, 221)', ground: 'the hero, a dark region of the light ground: ivory' },
-    { text: 'Виж проектите в продажба', ring: 'rgb(14, 13, 11)', ground: 'the white availability card on the light ground: onyx' },
+  sizes: [
+    { width: 390, height: 664 },
+    { width: 375, height: 667 },
+    { width: 360, height: 640 },
+    { width: 320, height: 560 },
   ],
 }
-const MAX_TABS = 60
 
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH
@@ -303,7 +338,7 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
 }
 
 // The H1s of a path's HTML, loaded with JavaScript off: the table's cell, and
-// the problem when there are none.
+// the problem unless there is exactly one.
 async function headingWithoutJs(browser, pathname) {
   const context = await browser.createBrowserContext()
   try {
@@ -313,12 +348,16 @@ async function headingWithoutJs(browser, pathname) {
     await page.goto(`${ORIGIN}${pathname}`, { waitUntil: 'load', timeout: 30000 })
     // innerText reads a <br> as the space it shows.
     const headings = await page.evaluate(() =>
-      [...document.querySelectorAll('h1')]
-        .map((h1) => (h1.innerText || h1.textContent).replace(/\s+/g, ' ').trim())
-        .filter(Boolean))
+      [...document.querySelectorAll('h1')].map((h1) => (h1.innerText || h1.textContent).replace(/\s+/g, ' ').trim()))
     if (headings.length === 0) return { cell: 'FAIL: none', problems: ['its HTML has no H1 with JavaScript off'] }
-    const more = headings.length > 1 ? ` (+${headings.length - 1})` : ''
-    return { cell: clip(headings[0], COLUMNS[2] - 5) + more, problems: [] }
+    if (headings.length > 1) {
+      return {
+        cell: `FAIL: ${headings.length}`,
+        problems: [`its HTML has ${headings.length} H1s with JavaScript off, not one: ${headings.map((text) => `„${text}“`).join(', ')}`],
+      }
+    }
+    if (!headings[0]) return { cell: 'FAIL: empty', problems: ['its H1 is empty with JavaScript off'] }
+    return { cell: clip(headings[0], COLUMNS[2]), problems: [] }
   } catch (error) {
     return { cell: 'FAIL', problems: [`with JavaScript off: ${error.message}`] }
   } finally {
@@ -380,13 +419,14 @@ function focusedText() {
   return document.activeElement.textContent.replace(/\s+/g, ' ').trim()
 }
 
-// In the page: the focused element's text and ring, once the ring has settled.
-// A legacy control's transition-all eases the ring in over 300 ms, from its
-// text colour and the initial 3 px; until then it is neither colour.
-async function focusedRing() {
+// In the page: the focused element's text and ring, read from `pseudo` when
+// given (the element's own box otherwise), once the ring has settled. A legacy
+// control's transition-all eases the ring in over 300 ms, from its text colour
+// and the initial 3 px; until then it is neither colour.
+async function focusedRing(pseudo) {
   const element = document.activeElement
   await Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => {})))
-  const style = getComputedStyle(element)
+  const style = getComputedStyle(element, pseudo ?? null)
   return {
     text: element.textContent.replace(/\s+/g, ' ').trim(),
     visible: element.matches(':focus-visible'),
@@ -394,10 +434,14 @@ async function focusedRing() {
   }
 }
 
-// The focus ring on the legacy home page (FOCUS_RING): the keyboard tabs from
-// the top of the page to each stop in turn, and each must show its ring. The
-// hero's first slide stays 5 s; the stops are a dozen Tabs from the top.
-async function focusRing(browser, userAgents) {
+// Whether the focused element's text is the stop's: the whole text, or its
+// start for a `prefix` stop.
+const isStop = ({ text, prefix }, reached) => (prefix ? reached?.startsWith(text) : reached === text)
+
+// The focus ring on one page of FOCUS_RING: the keyboard tabs from the top of
+// the page to each stop in turn, and each must show its ring. The stops are a
+// few dozen Tabs from the top at most.
+async function focusRingOn(browser, userAgents, { path: pathname, stops }) {
   const problems = []
   const context = await browser.createBrowserContext()
   try {
@@ -405,34 +449,81 @@ async function focusRing(browser, userAgents) {
     page.on('pageerror', (error) => problems.push(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
     await page.setViewport(VIEWPORTS[0].viewport)
     await page.setUserAgent(userAgents.desktop)
-    await page.goto(`${ORIGIN}${FOCUS_RING.path}`, { waitUntil: 'load', timeout: 30000 })
+    await page.goto(`${ORIGIN}${pathname}`, { waitUntil: 'load', timeout: 30000 })
     await page.waitForFunction(() => {
       const main = document.getElementById('main')
       return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
     }, { timeout: HYDRATION_TIMEOUT_MS })
 
-    for (const { text, ring, ground } of FOCUS_RING.stops) {
+    for (const stop of stops) {
+      const { text, pseudo, ring, ground } = stop
       let reached
-      for (let tabs = 0; tabs < MAX_TABS && reached !== text; tabs += 1) {
+      for (let tabs = 0; tabs < MAX_TABS && !isStop(stop, reached); tabs += 1) {
         await page.keyboard.press('Tab')
         reached = await page.evaluate(focusedText)
       }
-      if (reached !== text) {
+      if (!isStop(stop, reached)) {
         problems.push(`${MAX_TABS} Tabs never reached „${text}“ (focus on „${reached}“)`)
         break
       }
-      const focused = await page.evaluate(focusedRing)
+      const focused = await page.evaluate(focusedRing, pseudo)
       const expected = `solid 2px ${ring}`
-      if (focused.text !== text || !focused.visible) {
+      const where = pseudo ? `its ${pseudo}` : 'it'
+      if (!isStop(stop, focused.text) || !focused.visible) {
         problems.push(`„${text}“ lost its focus or :focus-visible (now „${focused.text}“)`)
       } else if (focused.ring !== expected) {
-        problems.push(`„${text}“ shows a ${focused.ring} ring, not ${expected} (${ground})`)
+        problems.push(`„${text}“ shows a ${focused.ring} ring on ${where}, not ${expected} (${ground})`)
       }
     }
   } catch (error) {
     problems.push(`the check stopped: ${error.message.split('\n')[0]}`)
   } finally {
     await context.close()
+  }
+  return problems
+}
+
+// In the page: the boxes of the H1 and of the Golden Residence info, once the
+// fonts have loaded and the opening's entrance has settled.
+async function openingBoxes() {
+  await document.fonts.ready
+  await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => {})))
+  const box = (selector) => {
+    const element = document.querySelector(selector)
+    if (!element) return null
+    const { top, right, bottom, left } = element.getBoundingClientRect()
+    return { top, right, bottom, left }
+  }
+  return { title: box('h1'), info: box('.half--gr .half__info') }
+}
+
+// The phone opening (PHONE_HERO): at each real phone screen, in a fresh
+// profile, the H1's box and the Golden Residence info's box must not overlap.
+async function phoneHero(browser, userAgents) {
+  const problems = []
+  for (const { width, height } of PHONE_HERO.sizes) {
+    const context = await browser.createBrowserContext()
+    try {
+      const page = await context.newPage()
+      await page.setViewport({ width, height, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
+      await page.setUserAgent(userAgents.mobile)
+      await page.goto(`${ORIGIN}${PHONE_HERO.path}`, { waitUntil: 'load', timeout: 30000 })
+      await page.waitForFunction(() => {
+        const main = document.getElementById('main')
+        return Boolean(main) && Object.keys(main).some((key) => key.startsWith('__reactFiber$'))
+      }, { timeout: HYDRATION_TIMEOUT_MS })
+      const { title, info } = await page.evaluate(openingBoxes)
+      const size = `${width}×${height}`
+      if (!title || !info) {
+        problems.push(`${size}: no ${title ? 'Golden Residence info' : 'H1'} in the opening`)
+      } else if (title.bottom > info.top && info.bottom > title.top && title.right > info.left && info.right > title.left) {
+        problems.push(`${size}: the H1 (${Math.round(title.top)}–${Math.round(title.bottom)}) overlaps the Golden Residence info (${Math.round(info.top)}–${Math.round(info.bottom)})`)
+      }
+    } catch (error) {
+      problems.push(`${width}×${height}: the check stopped: ${error.message.split('\n')[0]}`)
+    } finally {
+      await context.close()
+    }
   }
   return problems
 }
@@ -508,8 +599,17 @@ async function main() {
     }
 
     if (RUN_FOCUS_RING) {
-      const label = `focus ring: ${FOCUS_RING.path} at ${VIEWPORTS[0].label}, Tab to ${FOCUS_RING.stops.map(({ text }) => `„${text}“`).join(', then ')}`
-      const problems = await focusRing(browser, userAgents)
+      for (const page of FOCUS_RING) {
+        const label = `focus ring: ${page.path} at ${VIEWPORTS[0].label}, Tab to ${page.stops.map(({ text }) => `„${text}“`).join(', then ')}`
+        const problems = await focusRingOn(browser, userAgents, page)
+        for (const problem of problems) failures.push(`${label}: ${problem}`)
+        console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
+      }
+    }
+
+    if (RUN_PHONE_HERO) {
+      const label = `phone opening: ${PHONE_HERO.path} at ${PHONE_HERO.sizes.map(({ width, height }) => `${width}×${height}`).join(', ')}, the H1 clear of the Golden Residence info`
+      const problems = await phoneHero(browser, userAgents)
       for (const problem of problems) failures.push(`${label}: ${problem}`)
       console.log(`  ${label}: ${problems.length === 0 ? 'ok' : `FAIL (${problems.length})`}`)
     }
@@ -525,7 +625,7 @@ async function main() {
     for (const failure of failures) console.error(`  ${failure}`)
     return 1
   }
-  const checks = [RUN_SCROLL_LOCK && 'the scroll lock', RUN_FOCUS_RING && 'the focus ring'].filter(Boolean)
+  const checks = [RUN_SCROLL_LOCK && 'the scroll lock', RUN_FOCUS_RING && 'the focus ring', RUN_PHONE_HERO && 'the phone opening'].filter(Boolean)
   console.log(`smoke: PASS, ${RUN.length} URLs at ${VIEWPORTS.length} sizes${checks.map((check) => ` and ${check}`).join('')} (${seconds} s)`)
   return 0
 }

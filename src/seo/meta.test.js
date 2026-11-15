@@ -9,6 +9,13 @@ it('builds a canonical on the live domain', () => {
   expect(m).toContainEqual({ property: 'og:url', content: 'https://www.ksmstroy.com/about' })
 })
 
+// A real 1200 × 630 share image (v2 spec §6.7), cut from the Golden Residence
+// dusk render: public/og/ksm-stroy-1200x630.jpg.
+it('shares the 1200 × 630 dusk image by default', () => {
+  const m = pageMeta({ title: 'КСМ Строй', description: 'd', path: '/' })
+  expect(m).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/og/ksm-stroy-1200x630.jpg' })
+})
+
 it('never appends the brand twice', () => {
   const m = pageMeta({ title: 'КСМ Строй', description: 'd', path: '/' })
   expect(m.find((x) => x.title).title).toBe('КСМ Строй')

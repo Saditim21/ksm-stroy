@@ -12,8 +12,10 @@ export function robotsMeta(production = IS_PRODUCTION_BUILD) {
   return { name: 'robots', content: production ? 'index, follow' : 'noindex, nofollow' }
 }
 
-// Production's fallback share image (src/components/common/SEO.jsx on main).
-const DEFAULT_IMAGE = '/assets/images/slider01.jpg'
+// The share image of every page that names none (v2 spec §6.7): 1200 × 630,
+// cut once from the Golden Residence dusk render (scripts/images/sources.json,
+// gr-dusk) as the hero frames it, 50 % across and 62 % down.
+const DEFAULT_IMAGE = '/og/ksm-stroy-1200x630.jpg'
 
 // The head of one page, for its route module's `meta` export. root.jsx renders
 // it with <Meta/> into the prerendered HTML and swaps it on every client

@@ -1,0 +1,680 @@
+/* Home (spec docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md
+   §5.5, §6.7, §6.8, §6.13): the seam intro, the split opening, the company
+   and the EU poster, ported from the concept's css/diptych.css (:135-153 the
+   doors, :275-319 and :747-771 the hero, :321-335 and :773-776 the company)
+   with the tokens of src/index.css, --screen-h for vh, and the spec's fixes:
+   the seam is the registered number --s, widening is CSS, the phone seam
+   drops to --sy, the triad is scoped so it renders at its size.
+
+   Home's own stylesheet (src/pages/Home.jsx), after the site's: plain CSS,
+   in no Tailwind layer.
+
+   The first viewport moves by CSS from first paint (spec §5.5), and only
+   under the motion gate (`:root.js`, src/utils/motionGate.js) inside
+   @media (prefers-reduced-motion: no-preference). The markup is the final
+   state: each entrance's starting state lives in its keyframes, held by a
+   `both` fill, so reduced motion switched on mid-page leaves nothing hidden,
+   moved or covered. Every entrance waits --arrive (src/styles/motion.css):
+   .95s under the intro, .52s behind the doors, 0s otherwise. */
+
+/* The seam's place, from 0 (left) to 1 (right): registered, so widening
+   animates it. Each half's clip, the seam, the slogan and the pictures'
+   framing follow it. */
+@property --s {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: .5;
+}
+
+/* A section of the page (extract §1.3). */
+.sec {
+  position: relative;
+  padding: clamp(96px, calc(var(--screen-h) * .16), 180px) 0;
+}
+
+/* ---------- the seam intro (spec §5.5) ---------- */
+/* Shown only on the first page the app renders, under the gate's
+   `:root.js.intro` (below), over the page and the header. Two onyx doors
+   with a faint brass glow at their inner edge; the mark, the emblem split
+   down its axis, half in each door; the seam over both. */
+.intro-doors {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+.door {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  overflow: hidden;
+  background: var(--onyx);
+  pointer-events: auto;
+}
+.door--l { left: 0; }
+.door--r { right: 0; }
+.door::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 70% at 100% 50%, rgba(184, 149, 74, .06), transparent 60%);
+}
+.door--r::after {
+  background: radial-gradient(120% 70% at 0% 50%, rgba(184, 149, 74, .06), transparent 60%);
+}
+.door__mark {
+  position: absolute;
+  top: 50%;
+  width: 92px;
+  height: 105px;
+  margin-top: -52px;
+  color: var(--brass);
+}
+.door--l .door__mark { right: -46px; }
+.door--r .door__mark { left: -46px; }
+.door__mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* Each stroke is one dash of the path's length (pathLength 1), which the
+   intro moves in from its gap. Path i of each door's 26 waits
+   (i mod 13) × 6 ms. */
+.door__mark path { --i: 0; stroke-dasharray: 1 1; }
+.door__mark path:nth-child(13n + 2) { --i: 1; }
+.door__mark path:nth-child(13n + 3) { --i: 2; }
+.door__mark path:nth-child(13n + 4) { --i: 3; }
+.door__mark path:nth-child(13n + 5) { --i: 4; }
+.door__mark path:nth-child(13n + 6) { --i: 5; }
+.door__mark path:nth-child(13n + 7) { --i: 6; }
+.door__mark path:nth-child(13n + 8) { --i: 7; }
+.door__mark path:nth-child(13n + 9) { --i: 8; }
+.door__mark path:nth-child(13n + 10) { --i: 9; }
+.door__mark path:nth-child(13n + 11) { --i: 10; }
+.door__mark path:nth-child(13n + 12) { --i: 11; }
+.door__mark path:nth-child(13n + 13) { --i: 12; }
+.doors__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  margin-left: -.5px;
+  background: var(--brass);
+  transform-origin: 50% 0;
+}
+
+/* ---------- the split hero (spec §6.7) ---------- */
+/* One screen, 640 px at least, shared with the Golden Residence hero so the
+   hero move lands exactly. --s is 0.5 here too, for a browser that cannot
+   register it (it then jumps rather than glides). --xg and --xm keep each
+   building centred in its half: the tall tower (68 % across the render) and
+   the right pair of towers (73 %). */
+.hero {
+  --s: .5;
+  --xg: min(0px, max(calc((var(--s) - 1) * 100cqw), calc(var(--s) * 50cqw - 68cqw)));
+  --xm: min(calc(var(--s) * 100cqw), max(0px, calc((1 + var(--s)) * 50cqw - 73cqw)));
+  position: relative;
+  height: max(640px, var(--screen-h));
+  overflow: hidden;
+  background: var(--onyx);
+  container-type: inline-size;
+}
+
+/* Each half is a link across the whole hero, clipped at the seam. */
+.half {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  color: var(--ivory);
+}
+.half--gr { clip-path: inset(0 calc((1 - var(--s)) * 100%) 0 0); }
+.half--mn { clip-path: inset(0 0 0 calc(var(--s) * 100%)); }
+
+.half__media {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.half--gr .half__media { transform: translateX(var(--xg)); }
+.half--mn .half__media { transform: translateX(var(--xm)); }
+.half__media picture,
+.half__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.half__media img {
+  max-width: none;
+  object-fit: cover;
+}
+.half--gr .half__media img { object-position: 50% 62%; }
+.half--mn .half__media img { object-position: 70% 58%; }
+
+/* The overlay that keeps the slogan and the infos legible (extract §1.2),
+   over the picture and under the info. */
+.half::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(14, 13, 11, .74) 0%, rgba(14, 13, 11, .34) 24%, rgba(14, 13, 11, 0) 44%, rgba(14, 13, 11, 0) 58%, rgba(14, 13, 11, .86) 100%);
+}
+
+/* The focus ring (spec §11): the half's own outline would fall outside its
+   clip, so the ring rides on an overlay of what shows of the half below the
+   header, 4 px inside its edges, ivory as on any dark ground. */
+.half::after {
+  content: '';
+  position: absolute;
+  top: var(--header-h);
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  width: calc(var(--s) * 100%);
+  pointer-events: none;
+}
+.half--mn::after {
+  left: auto;
+  right: 0;
+  width: calc((1 - var(--s)) * 100%);
+}
+.half:focus-visible { outline: none; }
+.half:focus-visible::after {
+  outline: 2px solid var(--ivory);
+  outline-offset: -4px;
+  border-radius: 1px;
+}
+@media (forced-colors: active) {
+  .half:focus-visible::after { outline-color: Highlight; }
+}
+
+/* The name, the count, the place, the action: Golden Residence at the left
+   gutter, Многофамилна mirrored at the right. */
+.half__info {
+  position: absolute;
+  bottom: clamp(32px, calc(var(--screen-h) * .07), 72px);
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  max-width: min(40vw, 520px);
+}
+.half--gr .half__info { left: var(--gut); }
+.half--mn .half__info {
+  right: var(--gut);
+  justify-items: end;
+  text-align: right;
+}
+.half__name {
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.2vw, 54px);
+  font-weight: 500;
+  line-height: 1;
+}
+.half__count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.half--mn .half__count { justify-content: flex-end; }
+.half__count .num {
+  min-width: 1.1ch;
+  color: var(--ivory);
+  font-size: clamp(40px, 3.6vw, 60px);
+  font-weight: 600;
+  line-height: .9;
+}
+.half__place {
+  color: var(--stone);
+  font-size: 14px;
+}
+.half__cta {
+  justify-self: start;
+  margin-top: 14px;
+}
+.half--mn .half__cta { justify-self: end; }
+
+/* The seam, 1 px of brass at --s, down from under the header's EU row: it
+   runs behind the see-through bar, as in the concept, and never through the
+   project's line above it. */
+.hero__seam {
+  position: absolute;
+  top: var(--eu-h);
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  width: 1px;
+  margin-left: -.5px;
+  background: var(--brass);
+  transform: translateX(calc(var(--s) * 100cqw));
+  pointer-events: none;
+}
+
+/* Slogan A (spec §1.2): the title sits on the seam and travels with it.
+   Each row reads across the seam, its left part ending .2 em before it, its
+   right part starting .2 em after it; the gap stays smaller than the space
+   between rows, so the rows read as lines, not columns. A vignette behind it
+   holds it against a bright render. */
+.hero__title {
+  --gap: .2em;
+  position: absolute;
+  top: calc(var(--header-h) + clamp(28px, calc(var(--screen-h) * .045), 64px));
+  left: 0;
+  z-index: 4;
+  width: 0;
+  transform: translateX(calc(var(--s) * 100cqw));
+  pointer-events: none;
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -.01em;
+  text-shadow: 0 2px 30px rgba(14, 13, 11, .45);
+}
+.hero__title em { color: var(--brass-l); }
+.hero__title::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--screen-h) * -.14);
+  left: -38vw;
+  z-index: -1;
+  width: 76vw;
+  height: calc(var(--screen-h) * .52);
+  background: radial-gradient(closest-side, rgba(14, 13, 11, .7), rgba(14, 13, 11, .35) 55%, rgba(14, 13, 11, 0));
+  pointer-events: none;
+}
+.sl__row {
+  position: relative;
+  display: block;
+  height: 1.06em;
+}
+.sl__l,
+.sl__r {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+.sl__l {
+  right: var(--gap);
+  text-align: right;
+}
+.sl__r { left: var(--gap); }
+.hero__title .split-line { display: block; }
+@media (min-width: 901px) {
+  .sl__br { display: none; }
+}
+
+/* The order the parts rise in: row 1 left, row 1 right, row 2 left, row 2
+   right, so the entrance walks the eye across the seam; then the two infos. */
+.hero__title .sl__r { --n: 1; }
+.hero__title .sl__row ~ .sl__row .sl__l { --n: 2; }
+.hero__title .sl__row ~ .sl__row .sl__r { --n: 3; }
+.half--mn .half__info { --n: 1; }
+
+/* ---------- the company (spec §6.8; extract §4.10) ---------- */
+.bros { background: var(--onyx); }
+.bros__motto {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 clamp(28px, 4vw, 80px) 0 var(--gut);
+}
+.bros__motto blockquote {
+  max-width: 9.5em;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: var(--fs-motto);
+  font-style: italic;
+  font-weight: 500;
+  line-height: .98;
+  text-align: right;
+}
+.bros__motto blockquote em { color: var(--brass-l); }
+.bros__motto .q { color: var(--brass); }
+.bros__story {
+  display: grid;
+  align-content: center;
+  gap: 22px;
+  padding: 0 var(--gut) 0 clamp(28px, 4vw, 80px);
+}
+.bros__story .h3 { margin-bottom: 4px; }
+.bros__story p {
+  max-width: 33em;
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+/* The triad, at its role size: scoped, so `.bros__story p` never beats it
+   (extract §8.3.2). Three italic words, a brass dash between each. */
+.bros__story .triad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 0;
+  margin-top: 10px;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(28px, 2.4vw, 38px);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1;
+}
+.bros__story .triad span + span::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin: 0 18px 6px;
+  background: var(--brass);
+  vertical-align: middle;
+}
+.facts-row {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 18px 44px;
+  margin-top: 18px;
+  padding-top: 26px;
+  border-top: 1px solid var(--hair-2);
+}
+.facts-row dt {
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(36px, 3vw, 48px);
+  font-weight: 600;
+  line-height: 1;
+}
+.facts-row dd {
+  max-width: 13em;
+  margin-top: 6px;
+  color: var(--stone);
+  font-size: 13px;
+}
+
+/* ---------- the EU poster (spec §6.13) ---------- */
+/* The poster on its white plate, against the seam; beside it the project. */
+.poster__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 clamp(28px, 4vw, 80px) 0 var(--gut);
+}
+.poster__plate {
+  display: block;
+  width: min(100%, 380px);
+  padding: 14px;
+  background: #fff;
+}
+.poster__plate img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.poster__text {
+  display: grid;
+  align-content: center;
+  gap: 22px;
+  padding: 0 var(--gut) 0 clamp(28px, 4vw, 80px);
+}
+.poster__body {
+  max-width: 33em;
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.poster__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 22px 56px;
+  margin-top: 4px;
+  padding-top: 26px;
+  border-top: 1px solid var(--hair-2);
+}
+.poster__facts dt {
+  color: var(--stone);
+  font-size: 13px;
+  letter-spacing: .02em;
+}
+.poster__facts dd {
+  margin-top: 6px;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(24px, 2vw, 30px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.poster__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 32px;
+  margin-top: 6px;
+}
+.poster__note { max-width: 46em; }
+
+/* ---------- phones: the halves stack (spec §4, §6.7) ---------- */
+@media (max-width: 900px) {
+  .sec { padding: 88px 0; }
+
+  /* The seam turns horizontal and drops for the EU row: at --sy, 50 % on a
+     hero 780 px tall or more, never above the header plus 290 px nor within
+     190 px of the bottom. The clips, the pictures, the overlays, the ring,
+     the seam and the Golden Residence info follow it. Nothing widens. */
+  .hero {
+    --xg: 0px;
+    --xm: 0px;
+    --sy: clamp(50%, calc(var(--header-h) + 290px), calc(100% - 190px));
+    height: max(560px, var(--screen-h));
+  }
+  .half--gr { clip-path: inset(0 0 calc(100% - var(--sy)) 0); }
+  .half--mn { clip-path: inset(var(--sy) 0 0 0); }
+  .half--gr .half__media {
+    top: 0;
+    bottom: calc(100% - var(--sy));
+  }
+  .half--mn .half__media {
+    top: var(--sy);
+    bottom: 0;
+  }
+  .half--gr .half__media img { object-position: 70% 62%; }
+  .half--mn .half__media img { object-position: 72% 60%; }
+  .half--gr::before { background: linear-gradient(180deg, rgba(14, 13, 11, .78) 0%, rgba(14, 13, 11, .42) 16%, rgba(14, 13, 11, .46) 24%, rgba(14, 13, 11, .9) 49%); }
+  .half--mn::before { background: linear-gradient(180deg, rgba(14, 13, 11, .35) 50%, rgba(14, 13, 11, 0) 64%, rgba(14, 13, 11, 0) 70%, rgba(14, 13, 11, .85) 100%); }
+  .half::after {
+    right: 0;
+    width: auto;
+  }
+  .half--gr::after { bottom: calc(100% - var(--sy)); }
+  .half--mn::after {
+    top: var(--sy);
+    bottom: 0;
+    left: 0;
+  }
+  .hero__seam {
+    top: var(--sy);
+    bottom: auto;
+    right: 0;
+    width: auto;
+    height: 1px;
+    margin: -.5px 0 0;
+    transform: none;
+  }
+  .half__info {
+    gap: 4px;
+    max-width: none;
+  }
+  .half--gr .half__info {
+    right: var(--gut);
+    bottom: calc(100% - var(--sy) + 18px);
+  }
+  .half--mn .half__info {
+    bottom: 22px;
+    left: var(--gut);
+    justify-items: start;
+    text-align: left;
+  }
+  .half--mn .half__count { justify-content: flex-start; }
+  .half--mn .half__cta { justify-self: start; }
+  .half__cta { margin-top: 6px; }
+  /* 32 px from a 390 px phone up; on a narrower one it scales down to keep
+     „Многофамилна сграда“ on one line, so its info stays below the seam on
+     the shortest screens (320 × 560). */
+  .half__name { font-size: clamp(28px, 8.2vw, 32px); }
+  .half__count .num { font-size: 40px; }
+  .half__place { font-size: 13px; }
+
+  /* Two lines, broken after „пространства“; a part never breaks inside. */
+  .hero__title {
+    top: calc(var(--header-h) + 14px);
+    right: 0;
+    width: auto;
+    padding: 0 var(--gut);
+    transform: none;
+    font-size: clamp(28px, 8.4vw, 46px);
+    line-height: 1.08;
+  }
+  .hero__title::before { display: none; }
+  .sl__row {
+    position: static;
+    display: inline;
+    height: auto;
+  }
+  .sl__l,
+  .sl__r {
+    position: static;
+    display: inline-block;
+  }
+
+  .bros__motto {
+    justify-content: flex-start;
+    padding: 0 var(--gut) 40px;
+  }
+  .bros__motto blockquote { text-align: left; }
+  .bros__story {
+    margin: 0 var(--gut);
+    padding: 40px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .facts-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .poster__figure {
+    align-items: flex-start;
+    padding: 0 var(--gut) 40px;
+  }
+  .poster__plate { width: min(100%, 300px); }
+  .poster__text {
+    margin: 0 var(--gut);
+    padding: 40px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+}
+
+@media (max-width: 560px) {
+  /* At its 28 px the triad's row is wider than a small phone: the words
+     stack, a brass dash leading the second and the third. */
+  .bros__story .triad {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .bros__story .triad span + span::before { margin: 0 16px 6px 0; }
+  .facts-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .poster__facts { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- motion (spec §5.5, §6.7) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The entrance: the pictures settle from 1.12 (never faded: the Golden
+     Residence one is the page's LCP); the four parts of the slogan rise from
+     their masks, 0.1 s apart from --arrive + .25s; the infos fade up 22 px
+     from --arrive + .45s. A mask clips only while its part rises: then it is
+     gone, and nothing cuts a glyph or the title's shadow (spec §3.3). */
+  :root.js .half__media img {
+    animation: hero-settle 1.4s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .hero__title .line-mask {
+    animation: hero-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + .25s + var(--n, 0) * .1s);
+  }
+  :root.js .hero__title .split-line {
+    animation: hero-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .25s + var(--n, 0) * .1s);
+  }
+  :root.js .half__info {
+    animation: hero-info 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .45s + var(--n, 0) * .1s);
+  }
+
+  /* The intro, 1.8 s: the seam draws down the centre (0–0.6 s), the mark
+     draws (from 0.2 s, 0.55 s a path), the doors part onto the opening
+     (0.9–1.7 s), the seam fades (1.55–1.8 s), then all of it is hidden. */
+  :root.js.intro .intro-doors {
+    display: block;
+    animation: intro-doors 1.8s linear both;
+  }
+  :root.js.intro .door--l { animation: intro-door-l .8s var(--e-io) .9s both; }
+  :root.js.intro .door--r { animation: intro-door-r .8s var(--e-io) .9s both; }
+  :root.js.intro .doors__seam { animation: intro-seam-draw .6s var(--e-out) both, intro-seam-fade .25s var(--e-soft) 1.55s both; }
+  :root.js.intro .door__mark path {
+    animation: intro-mark .55s var(--e-out) both;
+    animation-delay: calc(.2s + var(--i) * 6ms);
+  }
+
+  /* Widening (spec §6.7): pointing at a half, or focusing it, moves the seam
+     to 62 % or 38 % over 0.9 s, the slogan and the pictures with it, and
+     shades the other half to 60 %. Only where a pointer hovers and the
+     halves sit side by side: a tap, a pen, a phone never widen, nor does
+     reduced motion (outside this query the halves are 50/50). */
+  @media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+    :root.js .hero { transition: --s .9s var(--e-out); }
+    :root.js .hero:has(.half--gr:hover, .half--gr:focus-visible) { --s: .62; }
+    :root.js .hero:has(.half--mn:hover, .half--mn:focus-visible) { --s: .38; }
+    :root.js .half__shade {
+      position: absolute;
+      inset: 0;
+      background: var(--onyx);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .9s var(--e-out);
+    }
+    :root.js .hero:has(.half--gr:hover, .half--gr:focus-visible) .half--mn .half__shade { opacity: .4; }
+    :root.js .hero:has(.half--mn:hover, .half--mn:focus-visible) .half--gr .half__shade { opacity: .4; }
+  }
+}
+
+/* Only the first page the app renders shows the intro: a page that arrived
+   by a link or by Back carries data-arrive (src/root.jsx), and the gate's
+   `intro` stays on <html> for the document's life, so a return to Home
+   never replays it (spec §5.5). */
+:root.js.intro [data-arrive] .intro-doors { display: none; }
+
+@keyframes hero-settle { from { transform: scale(1.12); } }
+@keyframes hero-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its part rises: 1.2 em below the line's top, under
+   the landed line's descenders, and above the ascender tips of Bulgarian
+   д, в and б while the line waits 112 % down. */
+@keyframes hero-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes hero-info { from { opacity: 0; transform: translateY(22px); } }
+
+@keyframes intro-doors { from { visibility: visible; } to { visibility: hidden; } }
+@keyframes intro-door-l { from { transform: none; } to { transform: translateX(-101%); } }
+@keyframes intro-door-r { from { transform: none; } to { transform: translateX(101%); } }
+@keyframes intro-seam-draw { from { transform: scaleY(0); } }
+@keyframes intro-seam-fade { to { opacity: 0; } }
+@keyframes intro-mark { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }

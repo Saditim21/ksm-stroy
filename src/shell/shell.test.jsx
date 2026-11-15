@@ -174,14 +174,15 @@ describe('the header as the page scrolls', () => {
 })
 
 // How each page of src/routes.js frames the shell: its module's `handle`
-// (src/shell/handle.js), read from the real modules. Home runs under the
-// see-through header. The two project pages open on production's light
-// ground, so they are solid, as are the explorers and every other page. The
-// pages M2 has not yet rebuilt are legacy: they keep production's light look.
+// (src/shell/handle.js), read from the real modules. Home, rebuilt in Diptych,
+// runs under the see-through header. The two project pages open on
+// production's light ground, so they are solid, as are the explorers and every
+// other page. The pages M2 has not yet rebuilt are legacy: they keep
+// production's light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
-  '/': { header: 'overlay', legacy: true },
+  '/': { header: 'overlay' },
   '/about': { header: 'solid', legacy: true },
   '/projects': { header: 'solid', legacy: true },
   '/projects/golden-residence': { header: 'solid', ...GOLDEN_RESIDENCE, legacy: true },

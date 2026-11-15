@@ -36,6 +36,19 @@
     ],
     "color": "#72756F"
   },
+  "gr-dusk": {
+    "path": "/img/gr-dusk",
+    "w": 2400,
+    "h": 1380,
+    "widths": [
+      800,
+      1400,
+      1600,
+      1920,
+      2400
+    ],
+    "color": "#433C30"
+  },
   "gr-endTowers": {
     "path": "/img/gr-endTowers",
     "w": 2452,

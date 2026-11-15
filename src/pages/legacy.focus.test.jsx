@@ -5,7 +5,6 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../tests/contracts/site'
 import GoldenResidenceBlockSelection from '../components/GoldenResidenceBlockSelection'
 import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
-import HeroCarousel from '../components/ui/HeroCarousel'
 import { ApartmentProvider } from '../context/ApartmentContext'
 import Blog from './Blog'
 import Contact from './Contact'
@@ -36,18 +35,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
-})
-
-it('Home: the hero’s text column, arrows and dots are on dusk; its white availability card is not', () => {
-  renderPage(HeroCarousel)
-
-  for (const name of ['Разгледай проектите', 'Свържи се с нас']) {
-    expect(onDusk(screen.getByRole('link', { name })), name).toBe(true)
-  }
-  for (const name of ['Предишен слайд', 'Следващ слайд', 'Слайд 1', 'Слайд 2']) {
-    expect(onDusk(screen.getByRole('button', { name })), name).toBe(true)
-  }
-  expect(onDusk(screen.getByRole('link', { name: 'Виж проектите в продажба' }))).toBe(false)
 })
 
 it('/projects: the closing call to action is on dusk; the filters on the light ground are not', () => {

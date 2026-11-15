@@ -1,6 +1,7 @@
 import { useMatches } from 'react-router'
 import GoldenResidenceSingleBlock from '../components/GoldenResidenceSingleBlock'
 import { matchedBlock } from '../config/blocks'
+import { ApartmentProvider } from '../context/ApartmentContext'
 import { pageMeta } from '../seo/meta'
 import NotFound, { meta as notFoundMeta } from './not-found'
 
@@ -25,7 +26,14 @@ export const meta = ({ matches }) => {
   })
 }
 
+// The legacy block page reads the sheets through ApartmentContext, which only
+// it still needs (src/root.jsx): the provider is its own.
 export default function GoldenResidenceBlockPage() {
   const block = matchedBlock(PROJECT, useMatches())
-  return block ? <GoldenResidenceSingleBlock block={block.id} /> : <NotFound />
+  if (!block) return <NotFound />
+  return (
+    <ApartmentProvider>
+      <GoldenResidenceSingleBlock block={block.id} />
+    </ApartmentProvider>
+  )
 }
