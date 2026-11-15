@@ -150,6 +150,16 @@ describe('the blocks (spec §6.16; extract §4.27)', () => {
     expect(declaredFor('.blk__grid button:hover', [FINE])).toMatchObject({ transform: 'scale(1.18)', 'z-index': '1' })
   })
 
+  // WCAG 2.4.7: the squares' entrance holds them at opacity 0 until the
+  // block reaches 75 % of the screen, and the focus can arrive before that
+  // with no scroll. While it is inside the grid every square shows, its ring
+  // with it: important, over the entrance's inline opacity.
+  it('shows every square while the focus is in its grid, over the entrance', () => {
+    const [rule] = rulesFor(rules, '.blk__grid:focus-within button')
+    expect(rule.atRules).toEqual([])
+    expect(rule.declarations).toEqual([{ prop: 'opacity', value: '1', important: true }])
+  })
+
   it('sets the stats: the types in 14 px, the exposures four across in the serif, two on a small phone', () => {
     expect(declaredFor('.blk__types')).toMatchObject({ 'font-size': '14px', color: 'var(--ivory-2)' })
     expect(declaredFor('.blk__expo')).toMatchObject({ display: 'grid', 'grid-template-columns': 'repeat(4, auto)', gap: '10px 22px' })

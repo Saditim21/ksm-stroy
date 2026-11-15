@@ -303,6 +303,15 @@
   height: 10px;
   color: var(--c);
 }
+/* The intro (Facade.jsx) holds the picture and the rails at opacity 0, the
+   rails 10 px low, until the facade reaches 70 % of the screen. Focus that
+   arrives before, with no scroll, shows them, a rail's ring with it (WCAG
+   2.4.7): important, over the intro's inline values. */
+.fx:focus-within .fx__cnt,
+.fx:focus-within .fx__pic {
+  opacity: 1 !important;
+  transform: none !important;
+}
 .fx__cnt.is-zero .n { color: rgba(155, 148, 136, .65); }
 .fx__cnt.is-hot .n { color: var(--brass-l); }
 .fx.is-hot .fx__cnt:not(.is-hot) > span { opacity: .32; }
@@ -559,12 +568,15 @@
 
 /* ---------- the plan stage (spec §7.6; extract §4.23) ---------- */
 /* Over the page and its header (z 50), umber: the bar over the body. Its
-   motion is PlanStage.jsx's. */
+   motion is PlanStage.jsx's. One column, the screen's width: an `auto`
+   column would take the table's widest row, past a small phone's edge
+   (spec §11). */
 .ps {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   background: var(--umber);
   color: var(--ivory);
@@ -1173,6 +1185,7 @@
     left: 0;
     z-index: 45;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--brass);
@@ -1190,6 +1203,7 @@
   .sheet__title { font: 500 30px/1 var(--serif); }
   .sheet__x {
     display: grid;
+    flex: none;
     place-items: center;
     width: 44px;
     height: 44px;
@@ -1216,7 +1230,7 @@
   }
   .sheet__act {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
     gap: 10px;
   }
@@ -1240,15 +1254,19 @@
    The unit panel in one column, its plan over its details. */
 @media (max-width: 900px) {
   .ps__bar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
     padding: 12px 16px;
   }
+  /* The block switch and the stepper wrap rather than run past the screen
+     (a reader's text spacing). */
   .ps__mid {
     grid-column: 1 / -1;
     grid-row: 2;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 10px;
+    row-gap: 8px;
   }
   .ps__close {
     justify-content: center;
@@ -1263,7 +1281,7 @@
     white-space: nowrap;
   }
   .ps__body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(250px, calc(var(--screen-h) * .44)) minmax(0, 1fr);
   }
   .ps__plan { padding: 10px 12px; }
@@ -1327,4 +1345,49 @@
   }
   .lv .utable td:first-child,
   .lv .utable th:first-child { padding-left: 5px; }
+}
+
+/* Under 390 px the list's four columns take less room, so they read without
+   sideways scrolling from 360 px (spec §7.8): 13 px, 5 px apart, the last
+   none at its end; the first keeps its 5 px (ruling C8.12). */
+@media (max-width: 389px) {
+  .lv .utable { font-size: 13px; }
+  .lv .utable td,
+  .lv .utable th {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  .lv .utable td:last-child,
+  .lv .utable th:last-child { padding-right: 0; }
+}
+
+/* Under 375 px the stage's table takes its cells closer, 12 px at its edges,
+   so its four columns fit a 320 or a 360 px screen (spec §11). */
+@media (max-width: 374px) {
+  .ps .utable td,
+  .ps .utable th {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  .ps .utable td:first-child,
+  .ps .utable th:first-child { padding-left: 12px; }
+  .ps .utable td:last-child,
+  .ps .utable th:last-child { padding-right: 12px; }
+}
+
+/* Under 360 px (spec §11: 320 px holds): the stage's bar keeps its block
+   switch and its stepper on one row; the sheet's „Отворете плана“ takes its
+   label on two lines beside the stepper; and the two ways in take a smaller
+   step, as the opening's names do (ruling C4.1), so with a reader's text
+   spacing neither they nor the lead run past the section's clip. */
+@media (max-width: 359px) {
+  .ps__bar {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+  .ps__mid { gap: 8px; }
+  .ps__step output { min-width: 56px; }
+  .sheet__open { padding-inline: 12px; }
+  .toggle { column-gap: 24px; }
+  .toggle button { font-size: 24px; }
 }

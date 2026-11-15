@@ -370,6 +370,11 @@
   background: transparent;
   transition: transform .2s var(--e-out);
 }
+/* The entrance (BlockGrid.jsx) holds the squares at opacity 0 until the
+   block reaches 75 % of the screen. Focus that arrives before, with no
+   scroll, shows them, a square's ring with it (WCAG 2.4.7): important, over
+   the entrance's inline opacity. */
+.blk__grid:focus-within button { opacity: 1 !important; }
 .blk__grid .s-none { --c: var(--hair); }
 .blk__grid .s-free {
   --c: var(--status-free);

@@ -78,7 +78,15 @@
 //     the sheet, titled „Блок А · Етаж 3“, and only that; a second tap
 //     opens the dialog of that name;
 //   - deep link, /projects/golden-residence/block-a?floor=3 at 1440×900:
-//     the dialog „Блок А · Етаж 3“ once the page has hydrated.
+//     the dialog „Блок А · Етаж 3“ once the page has hydrated;
+//   - text spacing, the Golden Residence page at 320×568 with TEXT_SPACING:
+//     no visible text in #explorer runs past the screen's edge, where the
+//     section's clip would cut it (the page's width cannot tell: the clip
+//     keeps it at the screen's), outside a box that scrolls sideways;
+//   - deep link at 320×568 and at 390×844, as it lands and then with
+//     TEXT_SPACING: the plan stage, its close and its stepper's ▲ and ▼
+//     wholly within the screen (spec §11, WCAG 1.4.10 and 1.4.12: the stage
+//     is fixed and the page locked, so nothing past the edge can be reached).
 // No step may log a console error or warning, or a page error.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
@@ -105,7 +113,7 @@ import config from '../../react-router.config.js'
 import { BUILD_DIR, DEFAULT_PORT, createStaticServer } from './static-server.mjs'
 
 // The functions handed to page.evaluate() run in the page, with its globals.
-/* global document, getComputedStyle, innerHeight, innerWidth, scrollY, window */
+/* global document, getComputedStyle, innerHeight, innerWidth, NodeFilter, scrollY, window */
 
 const ORIGIN = `http://127.0.0.1:${DEFAULT_PORT}`
 const SHOTS = path.resolve(process.env.SMOKE_SHOTS || path.join(os.tmpdir(), 'ksmstroy-smoke'))
@@ -126,6 +134,9 @@ const VIEWPORTS = [
     viewport: { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
   },
 ]
+// The narrowest phone the layout holds at (spec §11), for the explorer's
+// narrow steps.
+const NARROW = { label: '320×568', slug: 'narrow', viewport: { width: 320, height: 568, deviceScaleFactor: 2, isMobile: true, hasTouch: true } }
 
 // What a visit expects: by default a 200 at the path it asked for.
 const VISITS = [
@@ -995,11 +1006,86 @@ async function explorerDeepLink(page, problems) {
   await delay(1000)
 }
 
+// In the page: the visible text inside `selector` that runs past the
+// screen's left or right edge, outside a box that scrolls sideways (a
+// table's) and a visually hidden one.
+function textPastScreen(selector) {
+  const root = document.querySelector(selector)
+  if (!root) return [`no ${selector} in the page`]
+  const screen = document.documentElement.clientWidth
+  const past = []
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const element = node.parentElement
+    if (!node.textContent.trim() || !element?.checkVisibility({ visibilityProperty: true })) continue
+    let exempt = false
+    for (let box = element; box && box !== root.parentElement && !exempt; box = box.parentElement) {
+      const style = getComputedStyle(box)
+      const scrolls = ['auto', 'scroll'].includes(style.overflowX) && box.scrollWidth > box.clientWidth + 1
+      exempt = scrolls || (box.clientWidth <= 1 && box.clientHeight <= 1 && style.overflow === 'hidden')
+    }
+    if (exempt) continue
+    const range = document.createRange()
+    range.selectNodeContents(node)
+    for (const { left, right, width } of range.getClientRects()) {
+      if (width > 0 && (right > screen + 0.5 || left < -0.5)) past.push(`„${node.textContent.trim().slice(0, 40)}“ at ${Math.round(left)}–${Math.round(right)}`)
+    }
+  }
+  return past
+}
+
+// In the page: what of the plan stage lies past the screen's edges: the
+// stage itself, its close, its stepper's ▲ and ▼.
+function stagePastScreen() {
+  const stage = document.querySelector('.ps')
+  if (!stage) return ['no plan stage in the page']
+  const screen = document.documentElement.clientWidth
+  const [up, down] = stage.querySelectorAll('.ps__step button')
+  const past = []
+  for (const [name, element] of [['the stage', stage], ['its close', stage.querySelector('.ps__close')], ['its ▲', up], ['its ▼', down]]) {
+    if (!element) {
+      past.push(`no ${name} in the stage`)
+      continue
+    }
+    const { left, right } = element.getBoundingClientRect()
+    if (left < -0.5 || right > screen + 0.5) past.push(`${name} spans ${Math.round(left)}–${Math.round(right)} on a ${screen} px screen`)
+  }
+  return past
+}
+
+// Text spacing at 320 px: #explorer in view, none of its text past the
+// screen's edge.
+async function explorerSpaced(page, problems) {
+  await page.addStyleTag({ content: TEXT_SPACING })
+  await page.evaluate(() => document.getElementById('explorer').scrollIntoView({ block: 'start' }))
+  await settled(page)
+  for (const text of await page.evaluate(textPastScreen, '#explorer')) problems.push(`with text spacing, ${text} runs past the screen's edge`)
+}
+
+// A deep link on a phone: the stage as it lands, then with text spacing,
+// within the screen.
+async function explorerStageNarrow(page, problems) {
+  const dialog = titleOf(EXPLORER.deepLink.floor)
+  if (!(await dialogOpens(page, dialog, 10000))) {
+    problems.push(`no dialog „${dialog}“ after hydration (open: ${await openNames(page)})`)
+    return
+  }
+  // The stage's opening.
+  await delay(1200)
+  for (const problem of await page.evaluate(stagePastScreen)) problems.push(problem)
+  await page.addStyleTag({ content: TEXT_SPACING })
+  await delay(300)
+  for (const problem of await page.evaluate(stagePastScreen)) problems.push(`with text spacing, ${problem}`)
+}
+
 const EXPLORER_STEPS = [
   { name: 'desktop mouse', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerMouse },
   { name: 'keyboard', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerKeyboard },
   { name: 'phone', size: VIEWPORTS[1], path: EXPLORER.path, run: explorerPhone },
   { name: 'deep link', size: VIEWPORTS[0], path: EXPLORER.deepLink.path, run: explorerDeepLink },
+  { name: 'text spacing', size: NARROW, path: EXPLORER.path, run: explorerSpaced },
+  { name: 'deep link on a phone, with and without text spacing', size: NARROW, path: EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], path: EXPLORER.deepLink.path, run: explorerStageNarrow },
 ]
 
 // One step of the explorer's, in a fresh profile: its problems.

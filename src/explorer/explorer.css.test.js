@@ -181,10 +181,40 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
   })
 
   it('stacks both on a phone: the stage’s bar on two rows, its plan over the side column; the unit panel in one column', () => {
-    expect(declaredFor('.ps__bar', [PHONE])['grid-template-columns']).toBe('1fr auto')
-    expect(declaredFor('.ps__body', [PHONE])['grid-template-columns']).toBe('1fr')
+    expect(declaredFor('.ps__bar', [PHONE])['grid-template-columns']).toBe('minmax(0, 1fr) auto')
+    expect(declaredFor('.ps__body', [PHONE])['grid-template-columns']).toBe('minmax(0, 1fr)')
     expect(declaredFor('.ps__inspect', [PHONE]).display).toBe('none')
     expect(declaredFor('.up__box', [PHONE])['grid-template-columns']).toBe('1fr')
+  })
+
+  // Spec §11, WCAG 1.4.10 and 1.4.12: down to 320 px, and with a reader's
+  // text spacing, the stage and the sheet stay within the screen, their
+  // close and stepper whole. An `auto` column takes its content's widest
+  // line: the table's nowrap cells, the sheet's action row. Columns of
+  // minmax(0, 1fr) take the screen's width instead; the block switch and the
+  // stepper wrap rather than run past it, and the ×'s 44 px never shrink.
+  it('keeps the stage and the sheet within the screen, their columns no wider than it', () => {
+    expect(declaredFor('.ps')['grid-template-columns']).toBe('minmax(0, 1fr)')
+    expect(declaredFor('.ps__mid', [PHONE])).toMatchObject({ 'flex-wrap': 'wrap', 'row-gap': '8px' })
+    expect(declaredFor('.sheet', [PHONE])['grid-template-columns']).toBe('minmax(0, 1fr)')
+    expect(declaredFor('.sheet__act', [PHONE])['grid-template-columns']).toBe('minmax(0, 1fr) auto')
+    expect(declaredFor('.sheet__x', [PHONE]).flex).toBe('none')
+  })
+
+  // Under 375 px the stage's table takes its cells closer, so its four
+  // columns fit a 320 or a 360 px screen (12 px at its edges); under 360 px
+  // the bar keeps its block switch and its stepper on one row, and the
+  // sheet's „Отворете плана“ takes its label on two lines beside the stepper.
+  it('sets the stage’s table and bar closer on a small phone, and the sheet’s button', () => {
+    const SMALL = '@media (max-width: 374px)'
+    const NARROW = '@media (max-width: 359px)'
+    expect(declaredFor('.ps .utable td', [SMALL])).toEqual({ 'padding-right': '5px', 'padding-left': '5px' })
+    expect(declaredFor('.ps .utable td:first-child', [SMALL])).toEqual({ 'padding-left': '12px' })
+    expect(declaredFor('.ps .utable th:last-child', [SMALL])).toEqual({ 'padding-right': '12px' })
+    expect(declaredFor('.ps__bar', [NARROW])).toEqual({ 'padding-right': '12px', 'padding-left': '12px' })
+    expect(declaredFor('.ps__mid', [NARROW])).toEqual({ gap: '8px' })
+    expect(declaredFor('.ps__step output', [NARROW])).toEqual({ 'min-width': '56px' })
+    expect(declaredFor('.sheet__open', [NARROW])).toEqual({ 'padding-inline': '12px' })
   })
 })
 
@@ -223,6 +253,16 @@ describe('„Визуално“ and „По критерии“ (spec §7.8; ex
   it('stacks the tabs over the lead in the head’s second half, 18 px apart', () => {
     expect(declaredFor('.explorer__head > div:nth-of-type(2)')).toMatchObject({ display: 'grid', gap: '18px', 'justify-items': 'start' })
     expect(declaredFor('.views').position).toBe('relative')
+  })
+
+  // Spec §11, WCAG 1.4.12: under 360 px the two tabs at 28 px need more than
+  // the head's column, so with a reader's text spacing „По критерии“ and the
+  // lead's line ends ran past the section's clip. A smaller step there, as
+  // the opening's names take (ruling C4.1); from 360 px the extract's size.
+  it('sets the tabs smaller and closer under 360 px', () => {
+    const NARROW = '@media (max-width: 359px)'
+    expect(declaredFor('.toggle', [NARROW])).toEqual({ 'column-gap': '24px' })
+    expect(declaredFor('.toggle button', [NARROW])).toEqual({ 'font-size': '24px' })
   })
 })
 
@@ -293,6 +333,29 @@ describe('the list (spec §7.8; extract §4.26)', () => {
     expect(declaredFor('.lv .utable td:first-child', SMALL)['padding-left']).toBe(`${first}px`)
     expect(rules.filter((rule) => /th\b[^,]*button/.test(rule.selector) && rule.declarations.some(({ prop }) => prop.startsWith('outline')))).toEqual([])
   })
+})
+
+// WCAG 2.4.7: the facade's intro holds the picture and the rails at opacity
+// 0, the rails 10 px low, until the facade reaches 70 % of the screen, and the
+// focus can arrive before that with no scroll (a click on a tab, then Tab).
+// While it is inside the facade they show, a rail's ring with it: important,
+// over the intro's inline values.
+it('shows the facade’s picture and rails while the focus is inside it, over the intro', () => {
+  for (const selector of ['.fx:focus-within .fx__cnt', '.fx:focus-within .fx__pic']) {
+    expect(important(selector, [], 'opacity', '1'), selector).toBe(true)
+    expect(important(selector, [], 'transform', 'none'), selector).toBe(true)
+  }
+})
+
+// Spec §7.8: on a phone the list's four columns read without sideways
+// scrolling. Under 390 px the cells take less room: 13 px, 5 px apart, the
+// last none at its end; the first keeps its 5 px (ruling C8.12).
+it('fits the list’s table in its box on a small phone', () => {
+  const SMALL = '@media (max-width: 389px)'
+  expect(declaredFor('.lv .utable', [SMALL])).toEqual({ 'font-size': '13px' })
+  expect(declaredFor('.lv .utable td', [SMALL])).toEqual({ 'padding-right': '5px', 'padding-left': '5px' })
+  expect(declaredFor('.lv .utable th:last-child', [SMALL])).toEqual({ 'padding-right': '0' })
+  expect(declaredFor('.lv .utable td:first-child', ['@media (max-width: 560px)'])).toEqual({ 'padding-left': '5px' })
 })
 
 // Spec §2.1: a control's border is hair-ctl.
