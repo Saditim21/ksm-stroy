@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { recordingMotion } from '../../test/gsap'
 import InquiryForm from './InquiryForm'
 import InquirySection from './InquirySection'
 import { presetInquiry, resetInquiry } from './inquiryStore'
@@ -16,6 +17,10 @@ const send = vi.hoisted(() => vi.fn())
 vi.mock('../../services/inquiry', async (importOriginal) => ({ ...(await importOriginal()), sendInquiry: send }))
 const glide = vi.hoisted(() => vi.fn())
 vi.mock('../../utils/scroll', async (importOriginal) => ({ ...(await importOriginal()), scrollToId: glide }))
+// The engine useMotionNow() hands over: none, as in jsdom, unless a case puts
+// in a recording stand-in (src/test/gsap.js).
+let motion = null
+vi.mock('../../motion/useMotionNow', () => ({ default: () => () => motion }))
 
 const CONSENT = 'Съгласен съм КСМ Строй да използва данните ми, за да отговори на запитването.'
 const ERRORS = {
@@ -228,6 +233,33 @@ describe('sending', () => {
 
     await screen.findByRole('status')
     expect(glide).not.toHaveBeenCalled()
+  })
+
+  // Spec §5.7 (ruling C9.5): with motion the thank-you's lines rise into
+  // place, 18 px over 0.8 s, 0.08 s apart, and take off what they set; the
+  // rise goes with the form.
+  it('raises the thank-you into place with motion: 18 px, 0.8 s, 0.08 s apart', async () => {
+    const recorder = recordingMotion()
+    motion = recorder.motion
+    try {
+      const { unmount } = render(<InquiryForm page="home" />)
+      await fill(user)
+      await user.click(submit())
+      const status = await screen.findByRole('status')
+
+      expect(recorder.tweens).toHaveLength(1)
+      const [rise] = recorder.tweens
+      expect(rise.method).toBe('from')
+      expect([...rise.targets]).toEqual([...status.children])
+      expect(rise.targets.length).toBeGreaterThan(1)
+      expect(rise.vars).toEqual({ opacity: 0, y: 18, duration: 0.8, ease: 'expo.out', stagger: 0.08, clearProps: 'opacity,transform' })
+      expect(status).toHaveFocus()
+
+      unmount()
+      expect(rise.revert).toHaveBeenCalled()
+    } finally {
+      motion = null
+    }
   })
 })
 
