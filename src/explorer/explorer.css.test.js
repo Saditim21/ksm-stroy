@@ -188,6 +188,99 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
   })
 })
 
+// Ruling C8.4: on a phone the counts, the key and the table scroll together,
+// and the hint stays under them in view; the side column itself never
+// scrolls. From 901 px the table scrolls alone, as before.
+it('scrolls the stage’s counts, key and table together on a phone, the hint pinned under them', () => {
+  expect(declaredFor('.ps__scroll')).toMatchObject({ display: 'flex', 'flex-direction': 'column', flex: '1', 'min-height': '0' })
+  expect(declaredFor('.ps__list')).toMatchObject({ flex: '1', overflow: 'auto' })
+  expect(declaredFor('.ps__scroll', [PHONE])).toMatchObject({ overflow: 'auto', 'overscroll-behavior': 'contain' })
+  expect(declaredFor('.ps__list', [PHONE])).toMatchObject({ flex: 'none', overflow: 'visible' })
+  expect(declaredFor('.ps__side', [PHONE]).overflow).toBeUndefined()
+  expect(declaredFor('.ps__hint').flex).toBe('none')
+})
+
+describe('„Визуално“ and „По критерии“ (spec §7.8; extract §4.19)', () => {
+  it('sets the tabs in the serif, stone, the selected one ivory, 34 px apart', () => {
+    expect(declaredFor('.toggle')).toMatchObject({ display: 'inline-grid', 'grid-template-columns': 'auto auto', 'column-gap': '34px' })
+    expect(declaredFor('.toggle button')).toMatchObject({ padding: '8px 0 12px', font: '500 clamp(28px, 2.2vw, 36px)/1 var(--serif)', color: 'var(--stone)' })
+    expect(declaredFor('.toggle button[aria-selected="true"]').color).toBe('var(--ivory)')
+    expect(declaredFor('.toggle button:hover', [FINE]).color).toBe('var(--ivory)')
+  })
+
+  // The underline lies in the selected tab's column by CSS alone, so the
+  // prerendered HTML shows it in place; Flip moves it on a switch
+  // (ExplorerSection.jsx).
+  it('lays the 1 px brass-l underline under the selected tab, by the tablist’s data-view', () => {
+    expect(declaredFor('.toggle__bar')).toMatchObject({ 'grid-row': '1', 'grid-column': '1', 'align-self': 'end', height: '1px', background: 'var(--brass-l)' })
+    expect(declaredFor('.toggle[data-view="list"] .toggle__bar')['grid-column']).toBe('2')
+    // Both tabs placed by hand: an auto-placed first tab would go past the
+    // cells the underline and the second tab hold, into a third column.
+    expect(declaredFor('.toggle [role="tab"]:nth-of-type(1)')['grid-column']).toBe('1')
+    expect(declaredFor('.toggle [role="tab"]:nth-of-type(2)')['grid-column']).toBe('2')
+  })
+
+  it('stacks the tabs over the lead in the head’s second half, 18 px apart', () => {
+    expect(declaredFor('.explorer__head > div:nth-of-type(2)')).toMatchObject({ display: 'grid', gap: '18px', 'justify-items': 'start' })
+    expect(declaredFor('.views').position).toBe('relative')
+  })
+})
+
+describe('the list (spec §7.8; extract §4.26)', () => {
+  // The concept's diptych.css:723-725: up to 1100 px the meta starts its own
+  // line, on the left.
+  it('sets the filters in a ruled bar, the meta at its end, and at its line’s start up to 1100 px', () => {
+    expect(declaredFor('.lv').padding).toBe('0 var(--gut)')
+    expect(declaredFor('.lv__bar')).toMatchObject({ display: 'flex', 'flex-wrap': 'wrap', gap: '18px 30px', padding: '22px 0', 'border-top': '1px solid var(--hair-2)', 'border-bottom': '1px solid var(--hair-2)' })
+    expect(declaredFor('.lv__meta')).toMatchObject({ 'margin-left': 'auto', 'align-self': 'flex-end', 'white-space': 'nowrap', 'text-align': 'right' })
+    expect(declaredFor('.lv__meta', ['@media (max-width: 1100px)'])).toMatchObject({ 'margin-left': '0', 'text-align': 'left' })
+    expect(declaredFor('.lv__meta b')).toMatchObject({ font: '600 30px/1 var(--serif)', color: 'var(--ivory)' })
+  })
+
+  // The concept's rows are 65 px, set there by its save button (not built).
+  it('sets each row 65 px tall', () => {
+    expect(declaredFor('.lv .utable td')).toMatchObject({ height: '65px', 'padding-top': '14px', 'padding-bottom': '14px' })
+  })
+
+  // Spec §2.1: a control's border is hair-ctl, where the concept's hair gave
+  // 1.6:1. The hover leaves a pressed pill alone: it comes later in the file
+  // than the pressed rule, with the same weight, and would set ivory words on
+  // the ivory pill.
+  it('sets the pills 36 px tall in hair-ctl, a pressed one ivory with onyx words', () => {
+    expect(declaredFor('.pills button')).toMatchObject({ height: '36px', padding: '0 13px', border: '1px solid var(--hair-ctl)', 'font-size': '13px', 'white-space': 'nowrap' })
+    expect(declaredFor('.pills button[aria-pressed="true"]')).toMatchObject({ 'border-color': 'var(--ivory)', background: 'var(--ivory)', color: 'var(--onyx)' })
+    expect(declaredFor('.pills button:not([aria-pressed="true"]):hover', [FINE])).toMatchObject({ 'border-color': 'var(--brass)', color: 'var(--ivory)' })
+    expect(rulesFor(rules, '.pills button:hover')).toEqual([])
+    expect(declaredFor('.lv__bar .pills')['flex-wrap']).toBe('nowrap')
+    expect(declaredFor('.lv__bar .pills', [PHONE])['flex-wrap']).toBe('wrap')
+  })
+
+  it('sets the selects 36 px tall, 132 px wide at least, in hair-ctl with a brass chevron', () => {
+    const select = declaredFor('.lv__sel')
+    expect(select).toMatchObject({ height: '36px', 'min-width': '132px', border: '1px solid var(--hair-ctl)', appearance: 'none' })
+    expect(select.background).toMatch(/%23B8954A/)
+  })
+
+  // Spec §2.2: sizes from the screen use --screen-h: min(70vh, 720px), and
+  // 64svh on a phone.
+  it('scrolls the table in a box of the screen’s .7, at most 720 px, and .64 on a phone', () => {
+    expect(declaredFor('.lv__table')).toMatchObject({ 'max-height': 'min(calc(var(--screen-h) * .7), 720px)', overflow: 'auto', 'overscroll-behavior': 'contain' })
+    expect(declaredFor('.lv__table', [PHONE])['max-height']).toBe('calc(var(--screen-h) * .64)')
+    expect(declaredFor('.lv .utable th').background).toBe('var(--onyx)')
+  })
+
+  it('hides Етаж and Изложение on a phone', () => {
+    expect(declaredFor('.lv .utable .c-floor', [PHONE]).display).toBe('none')
+    expect(declaredFor('.lv .utable .c-expo', [PHONE]).display).toBe('none')
+  })
+
+  // The sort's indicator: a brass triangle, turned up for ascending.
+  it('marks the sorted column with a brass triangle', () => {
+    expect(declaredFor('.lv .utable th button[data-dir]::after')).toMatchObject({ 'border-top': '5px solid var(--brass)' })
+    expect(declaredFor('.lv .utable th button[data-dir="asc"]::after').transform).toBe('rotate(180deg)')
+  })
+})
+
 // Spec §2.1: a control's border is hair-ctl.
 it('borders the segmented control and the stepper in hair-ctl', () => {
   expect(declaredFor('.seg').border).toBe('1px solid var(--hair-ctl)')

@@ -334,41 +334,46 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
             <Inspector unit={inspected} on={Boolean(hotUnit)} />
           </div>
           <div className="ps__side">
-            <FloorCounts counts={data.counts} className="ps__counts" />
-            <StatusLegend className="ps__legend" />
-            <div className="ps__list" data-lenis-prevent="">
-              <table className="utable">
-                <thead>
-                  <tr>
-                    <th scope="col">Имот</th>
-                    <th scope="col">Вид</th>
-                    <th scope="col">Обща площ</th>
-                    <th scope="col">Статус</th>
-                  </tr>
-                </thead>
-                <tbody onPointerLeave={(event) => pointing(event) && setHot(null)}>
-                  {data.units.map((unit) => (
-                    <tr
-                      key={unit.suffix}
-                      className={['row', unit.status === 'sold' && 'is-sold', hot === unit.suffix && 'is-hot'].filter(Boolean).join(' ')}
-                      tabIndex={0}
-                      data-suffix={unit.suffix}
-                      onClick={() => onUnit(unit.label)}
-                      onKeyDown={rowKeys(unit)}
-                      onPointerOver={(event) => pointing(event) && setHot(unit.suffix)}
-                      onFocus={() => setHot(unit.suffix)}
-                      onBlur={() => setHot(null)}
-                    >
-                      <td className="uid">{unit.label}</td>
-                      <td>{unit.type}</td>
-                      <td>{formatArea(unit.totalArea)}</td>
-                      <td className="cst">
-                        <StatusChip status={unit.status} text={unit.statusText} />
-                      </td>
+            {/* What scrolls on a phone, together: the counts, the key and the
+                table; the hint stays under it, in view (ruling C8.4). From
+                901 px the table scrolls alone. */}
+            <div className="ps__scroll">
+              <FloorCounts counts={data.counts} className="ps__counts" />
+              <StatusLegend className="ps__legend" />
+              <div className="ps__list" data-lenis-prevent="">
+                <table className="utable">
+                  <thead>
+                    <tr>
+                      <th scope="col">Имот</th>
+                      <th scope="col">Вид</th>
+                      <th scope="col">Обща площ</th>
+                      <th scope="col">Статус</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody onPointerLeave={(event) => pointing(event) && setHot(null)}>
+                    {data.units.map((unit) => (
+                      <tr
+                        key={unit.suffix}
+                        className={['row', unit.status === 'sold' && 'is-sold', hot === unit.suffix && 'is-hot'].filter(Boolean).join(' ')}
+                        tabIndex={0}
+                        data-suffix={unit.suffix}
+                        onClick={() => onUnit(unit.label)}
+                        onKeyDown={rowKeys(unit)}
+                        onPointerOver={(event) => pointing(event) && setHot(unit.suffix)}
+                        onFocus={() => setHot(unit.suffix)}
+                        onBlur={() => setHot(null)}
+                      >
+                        <td className="uid">{unit.label}</td>
+                        <td>{unit.type}</td>
+                        <td>{formatArea(unit.totalArea)}</td>
+                        <td className="cst">
+                          <StatusChip status={unit.status} text={unit.statusText} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
             <p className="ps__hint">
               Посочете апартамент на плана или в&nbsp;списъка. {TRIANGLE_UP}

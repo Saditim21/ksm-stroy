@@ -58,13 +58,6 @@ export function grFree(snapshot) {
   return apartmentUnits(snapshot.data).filter((unit) => unit.status === 'available').length
 }
 
-/** The free apartments of one block (`block` its letter, 'А' or 'Б') among
- * `units` (apartmentUnits()): a number, which is 0 for no units. A page asks
- * only once grFree() has a count, so it never shows a fake zero. */
-export function blockFree(units, block) {
-  return units.filter((unit) => unit.block === block && unit.status === 'available').length
-}
-
 // One spot row (src/services/sheetsCore.js: { number, type, area: { built,
 // ideal, total }, status }), or null for a row that names no place.
 function toSpot(row) {

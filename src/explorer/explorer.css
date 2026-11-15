@@ -4,9 +4,10 @@
    phone's sheet, the plan stage, the unit panel and a block page's head,
    ported from the concept's css/diptych.css (:453-543 the section, the
    facade, the panel and the plans, :545-591 the stage, :593-623 the unit
-   panel, :553-563 the segmented control and the stepper, :816-828,
-   :850-863 and :869-889 their phone rules) with the tokens of
-   src/index.css, --screen-h for vh, and the spec's fixes:
+   panel, :553-563 the segmented control and the stepper, :625-651 the
+   list, :723-725, :816-833, :850-863, :869-889 and :901-902 their narrower
+   screens' rules) with the tokens of src/index.css, --screen-h for vh, and
+   the spec's fixes:
    - the layout is CSS only (§7.2): a wrapper is the container, and the
      facade's root inside it evaluates --pw, --sw, --sh and --pitch, because
      container units never resolve against the element that declares the
@@ -26,13 +27,16 @@
    - a control's border is hair-ctl; hover effects need a fine pointer;
      nothing takes the focus ring away (ruling F9): a floor shows its focus
      as the dashed highlight and the ring on its rail, a plan's unit as its
-     hot outline (spec §11's exceptions), and a row of the stage's table
-     takes the ground's ring 2 px inside itself.
+     hot outline (spec §11's exceptions), and a row of a table takes the
+     ground's ring 2 px inside itself;
+   - the tabs' underline lies under the selected tab by CSS alone, so it is
+     in place in the prerendered HTML; the concept places it from JS.
 
    The explorer's own stylesheet (Facade.jsx, PlanSvg.jsx): plain CSS, in no
    Tailwind layer, loaded with the page that shows the explorer, so the
-   dialogs' chunk (surfaces.js) brings no stylesheet of its own. The status
-   chips are src/components/ui/status.css's. */
+   dialogs' chunk (surfaces.js) and the list's (loadUnitList.js) bring no
+   stylesheet of their own. The status chips are
+   src/components/ui/status.css's. */
 
 /* ---------- the section (extract §4.19) ---------- */
 /* Its own padding, not a .sec's; clipped across, so a panel sliding in from
@@ -47,6 +51,12 @@
    the head. */
 .hinge.explorer__head { margin-bottom: 34px; }
 .hinge.explorer__head .seam { top: 0; bottom: 0; }
+/* The head's second half: the two ways in over the lead. */
+.explorer__head > div:nth-of-type(2) {
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
 .explorer__head .lead { font-size: 15px; }
 .explorer__legend {
   display: flex;
@@ -54,6 +64,40 @@
   margin: 0 var(--gut) 18px;
 }
 .explorer__legend .legend { justify-content: center; }
+
+/* ---------- the two ways in (spec §7.8; extract §4.19) ---------- */
+/* Two tabs in the serif, the selected one ivory (ViewTabs.jsx). The 1 px
+   brass-l underline lies in the selected tab's column by the tablist's
+   data-view, so the prerendered HTML has it in place; Flip moves it on a
+   switch (ExplorerSection.jsx). */
+.toggle {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  column-gap: 34px;
+}
+.toggle button {
+  grid-row: 1;
+  padding: 8px 0 12px;
+  font: 500 clamp(28px, 2.2vw, 36px)/1 var(--serif);
+  color: var(--stone);
+  transition: color .25s;
+}
+/* Each tab in its own column: placed by hand, as the underline is, or the
+   grid would put the first tab past the cells the others hold. */
+.toggle [role="tab"]:nth-of-type(1) { grid-column: 1; }
+.toggle [role="tab"]:nth-of-type(2) { grid-column: 2; }
+.toggle button[aria-selected="true"] { color: var(--ivory); }
+.toggle__bar {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: end;
+  height: 1px;
+  background: var(--brass-l);
+  pointer-events: none;
+}
+.toggle[data-view="list"] .toggle__bar { grid-column: 2; }
+/* The views: the facade's panel and the list's, one on show. */
+.views { position: relative; }
 
 /* The stale-data notice (spec §9; StaleNotice.jsx). */
 .stale {
@@ -666,6 +710,14 @@
   color: var(--stone);
   font-size: 12px;
 }
+/* The counts, the key and the table: the table scrolls alone from 901 px,
+   the three together on a phone, the hint under them (ruling C8.4). */
+.ps__scroll {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 .ps__list {
   flex: 1;
   overflow: auto;
@@ -712,6 +764,7 @@
 }
 .utable tr.is-sold td:not(.cst) { color: var(--ivory-3); }
 .ps__hint {
+  flex: none;
   padding: 12px 22px;
   border-top: 1px solid var(--hair-2);
   color: var(--stone);
@@ -723,6 +776,118 @@
   height: .56em;
   vertical-align: .02em;
 }
+/* ---------- the list (spec §7.8; extract §4.26) ---------- */
+/* The filters in a ruled bar, the meta at its end; the table in a box of its
+   own that scrolls, its head sticking on onyx; the footnote under it
+   (UnitList.jsx). A control's border is hair-ctl (spec §2.1). */
+.lv { padding: 0 var(--gut); }
+.lv__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 18px 30px;
+  padding: 22px 0;
+  border-top: 1px solid var(--hair-2);
+  border-bottom: 1px solid var(--hair-2);
+}
+.lv__bar .pills { flex-wrap: nowrap; }
+.lv__f {
+  display: grid;
+  gap: 8px;
+}
+.lv__f > span,
+.lv__f > label {
+  color: var(--stone);
+  font-size: 12px;
+  letter-spacing: .02em;
+}
+.pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pills button {
+  height: 36px;
+  padding: 0 13px;
+  border: 1px solid var(--hair-ctl);
+  color: var(--ivory-2);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color .2s, color .2s, background-color .2s;
+}
+.pills button[aria-pressed="true"] {
+  border-color: var(--ivory);
+  background: var(--ivory);
+  color: var(--onyx);
+}
+.lv__sel {
+  height: 36px;
+  min-width: 132px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--hair-ctl);
+  border-radius: 0;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23B8954A'/%3E%3C/svg%3E") no-repeat right 10px center;
+  font-size: 13px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lv__sel option { background: var(--umber); }
+.lv__meta {
+  align-self: flex-end;
+  margin-left: auto;
+  color: var(--stone);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+.lv__meta b {
+  margin-right: 4px;
+  font: 600 30px/1 var(--serif);
+  color: var(--ivory);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.lv__table {
+  max-height: min(calc(var(--screen-h) * .7), 720px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid var(--hair-2);
+}
+.lv .utable th {
+  background: var(--onyx);
+  cursor: default;
+}
+.lv .utable th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  font: inherit;
+}
+/* The sorted column's mark: a brass triangle, turned up for ascending. */
+.lv .utable th button[data-dir]::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-top: 5px solid var(--brass);
+}
+.lv .utable th button[data-dir="asc"]::after { transform: rotate(180deg); }
+/* A row 65 px tall, as the concept's: there the 36 px of its save button,
+   which is not built (extract §8.1), set the height. */
+.lv .utable td {
+  height: 65px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.lv__empty {
+  padding: 48px 0;
+  color: var(--stone);
+  text-align: center;
+}
+.lv__note { margin-top: 14px; }
+
 /* The morph's mini plan, over the stage (z 51), without its labels. */
 .ps__ghost {
   position: fixed;
@@ -903,12 +1068,28 @@
 .bp + .explorer { padding-top: clamp(56px, calc(var(--screen-h) * .09), 104px); }
 
 @media (hover: hover) and (pointer: fine) {
+  .toggle button:hover { color: var(--ivory); }
+  .pills button:not([aria-pressed="true"]):hover {
+    border-color: var(--brass);
+    color: var(--ivory);
+  }
+  .lv .utable th button:hover { color: var(--ivory); }
+  .lv .utable tr.row:hover { background: rgba(184, 149, 74, .08); }
   .seg button:not([aria-pressed="true"]):hover { color: var(--ivory); }
   .step button:hover:not(:disabled) { background: rgba(184, 149, 74, .12); }
   .ps__close:hover,
   .up__close:hover,
   .up__nav button:hover { color: var(--brass-l); }
   .bp__back:hover .arr { transform: translateX(-4px); }
+}
+
+/* Up to 1100 px the filters wrap onto a second line, and the meta starts
+   its line, left-aligned (diptych.css:723-725). */
+@media (max-width: 1100px) {
+  .lv__meta {
+    margin-left: 0;
+    text-align: left;
+  }
 }
 
 /* ---------- phones: one block at a time, and the sheet (spec §7.5) ---------- */
@@ -973,6 +1154,14 @@
   .cap-desk { display: none; }
   .cap-phone { display: inline; }
   .fxp { display: none !important; }
+
+  /* The list: the pills wrap, the table shows .64 of the screen, without
+     Етаж and Изложение. */
+  .lv__bar { gap: 16px; }
+  .lv__bar .pills { flex-wrap: wrap; }
+  .lv__table { max-height: calc(var(--screen-h) * .64); }
+  .lv .utable .c-floor,
+  .lv .utable .c-expo { display: none; }
 
   /* The sheet: over the page at the bottom of the screen, above the header
      (z 45, spec §2.2); hidden until it opens. Its motion is
@@ -1084,14 +1273,17 @@
     height: calc(100% - 20px);
   }
   .ps__inspect { display: none; }
-  /* The side column scrolls as one under the plan, its table's head
-     sticking to its top: the counts, the key and the hint leave a phone
-     too little room for a table that scrolls on its own. */
+  /* Under the plan, the counts, the key and the table scroll as one, the
+     table's head sticking to their top, and the hint stays under them in
+     view (ruling C8.4): the counts and the key leave a phone too little
+     room for a table that scrolls on its own. */
   .ps__side {
-    overflow: auto;
-    overscroll-behavior: contain;
     border-top: 1px solid var(--brass);
     border-left: 0;
+  }
+  .ps__scroll {
+    overflow: auto;
+    overscroll-behavior: contain;
   }
   .ps__list {
     flex: none;
@@ -1121,4 +1313,15 @@
   }
   .bp.hinge { margin-top: 40px; }
   .bp__id { justify-items: start; }
+}
+
+/* Small phones: the list's cells closer. */
+@media (max-width: 560px) {
+  .lv .utable td,
+  .lv .utable th {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+  .lv .utable td:first-child,
+  .lv .utable th:first-child { padding-left: 4px; }
 }

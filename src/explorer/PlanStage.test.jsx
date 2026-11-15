@@ -119,6 +119,21 @@ describe('the plan and the table', () => {
     expect(text(stage().querySelector('.ps__hint'))).toBe('Посочете апартамент на плана или в списъка. ▲ ▼ сменят етажа, без да се връщате.')
   })
 
+  // Ruling C8.4: the counts, the key and the table scroll together (on a
+  // phone, explorer.css), the hint stays under them, outside the scroller,
+  // always in view.
+  it('keeps the hint out of what scrolls: the counts, the key and the table', () => {
+    renderStage()
+    const side = stage().querySelector('.ps__side')
+    const scroller = side.querySelector('.ps__scroll')
+    expect([...side.children].map((child) => child.className)).toEqual(['ps__scroll', 'ps__hint'])
+    const [counts, legend, list] = scroller.children
+    expect(scroller.children).toHaveLength(3)
+    expect(counts).toHaveClass('ps__counts')
+    expect(legend).toHaveClass('ps__legend')
+    expect(list).toHaveClass('ps__list')
+  })
+
   // Spec §7.4: the stage's plan is interactive, its units buttons named as
   // every unit list names them, and its drawing under them.
   it('draws the plan over its drawing, each unit a button that opens it', () => {

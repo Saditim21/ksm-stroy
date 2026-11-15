@@ -1,11 +1,13 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { resetInquiry } from '../components/inquiry/inquiryStore'
 import { mockMatchMedia } from '../test/media'
 import { tap } from '../test/pointer'
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
 import { loadSurfaces } from './loadSurfaces'
+import { loadUnitList } from './loadUnitList'
 import { LOADING, named, snapshotAvailability } from './testing'
 
 // The explorer's section on the Golden Residence page, #explorer (spec §8.2
@@ -28,17 +30,28 @@ function Where() {
   return <output data-testid="where">{decodeURIComponent(`${pathname}${search}`)}</output>
 }
 
+// An address the page is sent to without the explorer's own calls, as a
+// link or a hand-edited address would.
+function Go() {
+  const navigate = useNavigate()
+  return (
+    <button type="button" onClick={() => navigate('/projects/golden-residence?floor=А-3', { replace: true })}>
+      go
+    </button>
+  )
+}
+
 function renderSection(props = {}, url = '/projects/golden-residence') {
   return render(
     <MemoryRouter initialEntries={[url]}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection {...props} /><Where /></ExplorerProvider>} />
+        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection {...props} /><Where /><Go /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
-beforeAll(() => loadSurfaces())
+beforeAll(() => Promise.all([loadSurfaces(), loadUnitList()]))
 
 beforeEach(() => {
   availability = snapshotAvailability()
@@ -46,6 +59,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+  resetInquiry()
 })
 
 describe('ExplorerSection', () => {
@@ -207,4 +221,99 @@ describe('the focus after the stage', () => {
       expect(document.activeElement).toBe(screen.getByRole('button', { name: /^Блок\sБ$/ }))
     })
   })
+})
+
+// Spec §7.8, §7.10: the two ways in. The tabs switch the address's ?view;
+// the list loads on the first switch (ruling C8.5, loaded already here), and
+// the facade's panel waits hidden, keeping its state.
+describe('„Визуално“ and „По критерии“', () => {
+  const tab = (name) => screen.getByRole('tab', { name })
+  const panels = () => [...document.querySelectorAll('section#explorer [role="tabpanel"]')]
+
+  it('puts the tabs in the head, above the lead, „Визуално“ selected', () => {
+    renderSection()
+    const head = document.querySelector('section#explorer .explorer__head')
+    const tabs = within(head).getByRole('tablist', { name: 'Как да търсите' })
+    expect(tabs.compareDocumentPosition(head.querySelector('.lead')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(tab('Визуално')).toHaveAttribute('aria-selected', 'true')
+    expect(panels().map((panel) => panel.hidden)).toEqual([false, true])
+    expect(panels()[0]).toContainElement(document.querySelector('.fx'))
+    expect(panels()[1]).toBeEmptyDOMElement()
+  })
+
+  it('shows the list for „По критерии“, ?view=list in the address, and the facade back for „Визуално“', async () => {
+    renderSection()
+    fireEvent.click(tab('По критерии'))
+
+    await waitFor(() => expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true'))
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?view=list$/)
+    expect(panels().map((panel) => panel.hidden)).toEqual([true, false])
+    expect(within(panels()[1]).getByRole('group', { name: 'Статус' })).toBeInTheDocument()
+    expect(panels()[1]).toHaveAttribute('aria-labelledby', tab('По критерии').id)
+
+    fireEvent.click(tab('Визуално'))
+    await waitFor(() => expect(tab('Визуално')).toHaveAttribute('aria-selected', 'true'))
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence$/)
+    expect(panels().map((panel) => panel.hidden)).toEqual([false, true])
+  })
+
+  it('opens the list at once from ?view=list', async () => {
+    renderSection({}, '/projects/golden-residence?view=list')
+    await waitFor(() => expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true'))
+    expect(within(panels()[1]).getByText((_, element) => element?.classList.contains('lv__meta') && text(element) === '192 от 192 · 69 свободни')).toBeInTheDocument()
+  })
+
+  // Ruling F10, spec §7.8: a row opens its unit in the unit panel, through
+  // the address, with no stage under it; closing it gives the row the focus
+  // back.
+  it('opens a row’s unit in the unit panel', async () => {
+    renderSection({}, '/projects/golden-residence?view=list')
+    const row = await screen.findByRole('row', { name: /^А 502\b/ })
+    row.focus()
+    fireEvent.click(row)
+
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?view=list&unit=А\+502$/)
+    expect(screen.getByRole('dialog', { name: 'А 502' })).toBeInTheDocument()
+    expect(document.querySelector('.ps')).toBeNull()
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(row)
+  })
+
+  // The sheet is a portal at the foot of the screen: the floor a phone
+  // previewed clears as its facade's panel hides.
+  it('closes the phone’s sheet as the list comes in', async () => {
+    const restore = mockMatchMedia({ coarse: true })
+    window.matchMedia('(max-width: 900px)').matches = true
+    try {
+      renderSection()
+      tap(rail('А', 4))
+      expect(document.querySelector('.sheet')).toHaveAttribute('data-open')
+
+      fireEvent.click(tab('По критерии'))
+      await waitFor(() => expect(tab('По критерии')).toHaveAttribute('aria-selected', 'true'))
+      await waitFor(() => expect(document.querySelector('.sheet')).not.toHaveAttribute('data-open'))
+    } finally {
+      restore()
+    }
+  })
+})
+
+// Ruling C8.3: an inquiry's close gives the focus to nothing, and leaves no
+// opening behind it: a stage the address opens later grows from nowhere and,
+// as it closes, gives the focus to its own floor's rail, never to the rail
+// that opened the stage before the inquiry.
+it('forgets the opening once an inquiry has closed the dialogs', async () => {
+  renderSection()
+  fireEvent.click(rail('А', 5))
+  const stage = screen.getByRole('dialog', { name: named('Блок А · Етаж 5') })
+  fireEvent.click(within(stage).getByRole('row', { name: /^А 502\b/ }))
+  fireEvent.click(within(screen.getByRole('dialog', { name: 'А 502' })).getByRole('button', { name: 'Изпратете запитване' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+
+  fireEvent.click(screen.getByRole('button', { name: 'go' }))
+  const later = await screen.findByRole('dialog', { name: named('Блок А · Етаж 3') })
+  fireEvent.click(within(later).getByRole('button', { name: 'Към сградата' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  expect(document.activeElement).toBe(rail('А', 3))
 })

@@ -140,6 +140,19 @@ describe('a deep link', () => {
     expect(document.activeElement).toBe(rail('А', 3))
   }, 30000)
 
+  // Ruling C8.1, spec §11: a unit panel the address opened alone (?unit with
+  // no ?floor) has no opener and no stage under it; as it closes, the focus
+  // goes to its unit's floor's rail, never to the page's body.
+  it('gives the focus to the unit’s floor’s rail as a unit panel with no stage closes', async () => {
+    renderSiteAt('/projects/golden-residence/block-a?unit=%D0%90%20301')
+    await screen.findByRole('dialog', { name: 'А 301' }, { timeout: 15000 })
+    expect(document.querySelector('.ps')).toBeNull()
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(rail('А', 3))
+  }, 30000)
+
   // Spec §1.9, §14.1: the EU line is in view on landing. The jump slides the
   // header's EU row away (§6.2), and the dialogs then cover the page, so the
   // page holds the row in view (data-eu-hold on <html>: the header keeps it,

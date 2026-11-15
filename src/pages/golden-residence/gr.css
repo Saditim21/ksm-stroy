@@ -3,7 +3,7 @@
    §6.14–6.18, §8.2): the hero, the story, the two blocks, the gallery and
    the garages and parking places, ported from the concept's css/diptych.css
    (:417-430 and :799-807 the hero, :432-451, :808-814 and :906-914 the
-   story, :653-676 and :834-839 the blocks, :678-691 and :840-844 the
+   story, :653-676, :834-839 and :898 the blocks, :678-691 and :840-844 the
    gallery, :693-715 and :845-848 the parking) with the tokens of
    src/index.css, --screen-h for vh, and the
    spec's fixes: the hero's entrance is CSS from the first paint and names no
@@ -330,25 +330,91 @@
   color: var(--ivory-2);
   font-size: 15px;
 }
-/* The block's free apartments, a count as the hero's facts are. */
-.blk__free {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+/* The squares (BlockGrid.jsx): 12 across, 4 px apart, each its status's
+   pattern (spec §7.9); a neutral hair outline until the data arrives. The
+   floor numbers stand beside them on the seam's side. */
+.blk__floors {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: stretch;
+  gap: 8px;
+  width: min(100%, 500px);
+}
+.blk--a .blk__floors { grid-template-columns: 1fr auto; }
+.blk__fl {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  align-items: center;
+  height: 100%;
+  color: var(--stone);
+  font-size: 10px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.blk__grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+.blk__grid button {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--c);
+  background: transparent;
+  transition: transform .2s var(--e-out);
+}
+.blk__grid .s-none { --c: var(--hair); }
+.blk__grid .s-free {
+  --c: var(--status-free);
+  background: rgba(79, 191, 133, .55);
+}
+.blk__grid .s-reserved {
+  --c: var(--status-reserved);
+  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
+}
+.blk__grid .s-sold {
+  --c: rgba(212, 87, 78, .7);
+  background-image: radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+.blk__grid .s-blocked {
+  --c: var(--status-blocked);
+  border-style: dashed;
+}
+/* The block's counts by status and its room types; its exposures, four
+   across, or the note. */
+.blk__stats {
+  display: grid;
+  gap: 10px;
+}
+.blk--a .blk__stats .legend { justify-content: flex-end; }
+.blk__types {
   color: var(--ivory-2);
-  font-size: 15px;
+  font-size: 14px;
 }
-.blk--a .blk__free { justify-content: flex-end; }
-.blk__free .num {
-  margin-block: -.05em;
+.blk__types b {
   color: var(--ivory);
-  font-size: clamp(40px, 3.6vw, 60px);
   font-weight: 600;
-  line-height: .9;
 }
-/* A link's underline is its words' (as it is against the seam): in the
-   second half it would otherwise stretch across the column. */
-.blk--b > .link { justify-self: start; }
+.blk__expo {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 10px 22px;
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.blk__expo b {
+  display: block;
+  font: 600 26px/1 var(--serif);
+  color: var(--ivory);
+  font-variant-numeric: lining-nums;
+}
+.blk__note {
+  max-width: 30em;
+  color: var(--stone);
+  font-size: 13px;
+}
 
 /* ---------- the gallery (spec §6.17; extract §4.28) ---------- */
 /* Two halves on the seam, each a stack of renders: hidden but for the
@@ -554,6 +620,10 @@
 .park__list li > span:last-child { color: var(--stone); }
 
 @media (hover: hover) and (pointer: fine) {
+  .blk__grid button:hover {
+    z-index: 1;
+    transform: scale(1.18);
+  }
   .gal__ctl button:hover {
     border-color: var(--brass);
     background: rgba(184, 149, 74, .08);
@@ -629,8 +699,9 @@
     padding: 56px 0 0;
     border-top: 1px solid var(--brass);
   }
-  .blk--a .blk__free { justify-content: flex-start; }
-  .blk__free .num { font-size: 40px; }
+  .blk--a .blk__floors { grid-template-columns: auto 1fr; }
+  .blk--a .blk__floors .blk__fl { order: -1; }
+  .blk--a .blk__stats .legend { justify-content: flex-start; }
 
   /* The gallery: the halves stacked at 4:3 under a brass rule, no seams. */
   .gal__stage {
@@ -668,6 +739,7 @@
 
 @media (max-width: 560px) {
   .park__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .blk__expo { grid-template-columns: repeat(2, auto); }
 }
 
 /* ---------- the hero's entrance (spec §5.5) ---------- */

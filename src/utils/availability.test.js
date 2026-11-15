@@ -1,5 +1,4 @@
-import { STATUS, statusOf, summarizeFloor, matchesFilter } from './availability'
-import { toApartment } from './units'
+import { STATUS, statusOf, summarizeFloor } from './availability'
 
 // Production's status rules (src/utils/propertyStatus.js, main @7a741d5):
 // sold > reserved > blocked > available, an empty cell is available, and text
@@ -75,48 +74,5 @@ describe('summarizeFloor', () => {
     // The same rows the production pages count (src/services/googleSheets.js calculateStats).
     const s = summarizeFloor(['Свободен', '', 'Резервиран', 'Продаден', 'Продадени', 'Блокиран', 'Свободен - блокиран'].map(apt))
     expect(s).toMatchObject({ total: 7, available: 2, reserved: 1, sold: 2, blocked: 2 })
-  })
-})
-
-describe('matchesFilter', () => {
-  const apt = { apartment: 'А 101', вид: '2-стаен', total: '65.68', status: 'Свободен' }
-  test('no filter matches', () => expect(matchesFilter(apt, {})).toBe(true))
-  test('missing apartment never matches', () => expect(matchesFilter(undefined, {})).toBe(false))
-  test('onlyAvailable rejects sold, reserved, blocked and unknown', () => {
-    expect(matchesFilter({ ...apt, status: 'Продаден' }, { onlyAvailable: true })).toBe(false)
-    expect(matchesFilter({ ...apt, status: 'Резервиран' }, { onlyAvailable: true })).toBe(false)
-    expect(matchesFilter({ ...apt, status: 'Блокиран' }, { onlyAvailable: true })).toBe(false)
-    expect(matchesFilter({ ...apt, status: 'Скоро' }, { onlyAvailable: true })).toBe(false)
-  })
-  test('onlyAvailable keeps available units, an empty status cell included', () => {
-    expect(matchesFilter(apt, { onlyAvailable: true })).toBe(true)
-    expect(matchesFilter({ ...apt, status: '' }, { onlyAvailable: true })).toBe(true)
-  })
-  // The explorer's units keep the sheet's text beside the key (units.js): a
-  // „Скоро" unit shows „Скоро", but it is still not free.
-  test('onlyAvailable rejects an unknown unit that keeps its text', () => {
-    const unit = (status) => toApartment({ 'Етаж': '3', 'Апартамент': 'А 303', 'Статус': status }, 'A')
-    expect(unit('Скоро')).toMatchObject({ status: 'unknown', statusText: 'Скоро' })
-    expect(matchesFilter(unit('Скоро'), { onlyAvailable: true })).toBe(false)
-    expect(matchesFilter(unit(''), { onlyAvailable: true })).toBe(true)
-  })
-  test('type filter is substring, case-insensitive', () => {
-    expect(matchesFilter(apt, { type: '2-стаен' })).toBe(true)
-    expect(matchesFilter(apt, { type: 'ателие' })).toBe(false)
-  })
-  test('area range', () => {
-    expect(matchesFilter(apt, { minArea: 60, maxArea: 70 })).toBe(true)
-    expect(matchesFilter(apt, { minArea: 70 })).toBe(false)
-    expect(matchesFilter(apt, { maxArea: 65 })).toBe(false)
-  })
-  test('an area the sheet does not give never matches a bound', () => {
-    expect(matchesFilter({ ...apt, total: '' }, { minArea: 1 })).toBe(false)
-    expect(matchesFilter({ ...apt, total: '' }, { maxArea: 100 })).toBe(false)
-    expect(matchesFilter({ ...apt, total: '' }, { minArea: 0 })).toBe(false)
-    expect(matchesFilter({ ...apt, total: '' }, {})).toBe(true)
-  })
-  test('an area typed with a decimal comma reads in full', () => {
-    expect(matchesFilter({ ...apt, total: '65,68' }, { minArea: 65.5 })).toBe(true)
-    expect(matchesFilter({ ...apt, total: '65,68' }, { maxArea: 65.5 })).toBe(false)
   })
 })

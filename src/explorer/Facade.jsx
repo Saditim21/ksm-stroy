@@ -49,6 +49,10 @@ import './explorer.css'
 // are off screen, so the facade turns to that floor's block first. A rail
 // that still takes no focus leaves it on the block switch, never on the
 // page's body. onRailFocused() says it is done.
+//
+// `active` is false while the facade's panel is hidden (the list on show,
+// ExplorerSection.jsx): no floor stays hot then, so neither its edge panel
+// nor the phone's sheet, a portal at the foot of the screen, stays open.
 
 const SHAPES = floorShapes(building)
 const SHAPE = new Map(SHAPES.map((shape) => [shape.key, shape]))
@@ -79,7 +83,7 @@ const floorOf = (model, key) => model?.floors.get(key) ?? PLACEHOLDERS.get(key)
 // A no-break space after the one-letter „и“ (spec §3.3).
 const IDLE_CAPTION = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
 
-export default function Facade({ model, mode = 'full', initialBlock = 'А', focusRail = null, onOpenFloor, onRailFocused }) {
+export default function Facade({ model, mode = 'full', initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
   const compact = mode === 'compact'
   const rootRef = useRef(null)
   const stageRef = useRef(null)
@@ -91,6 +95,11 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', focu
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
   const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = useHotFloor({ compact, isFloor })
+
+  // Hidden, the facade lets its hot floor go.
+  useEffect(() => {
+    if (!active) clearHot()
+  }, [active, clearHot])
 
   // A rail asked to take the focus back: its block on show, in this render,
   // so the rail is on screen by the time the focus moves.

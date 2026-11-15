@@ -1,8 +1,10 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, mainText, renderSiteAt } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
 import { mapsUrl } from '../../config/site'
+import { loadSurfaces } from '../../explorer/loadSurfaces'
+import { snapshotAvailability } from '../../explorer/testing'
 import * as grModule from '../../routes/golden-residence'
 import { setLenis } from '../../utils/lenis'
 import { EXPO_IN_OUT } from '../../utils/motion'
@@ -12,6 +14,22 @@ import { EXPO_IN_OUT } from '../../utils/motion'
 // inquiry, opened as a visitor opens it (tests/contracts/site.jsx), offline,
 // so the counts come from the data built into the site. The explorer's own
 // cases are src/explorer/ExplorerSection.test.jsx's, on the sheets snapshot.
+//
+// Ruling F6: the blocks' cases see the sheets snapshot (snapshotAvailability,
+// src/explorer/testing.js) instead, as ExplorerSection.test does: their room
+// types, exposures and block А's note hold for it alone. The store still
+// loads (offline) beneath it; only what the page reads is the snapshot.
+let snapshot = null
+vi.mock('../../data/availability/useAvailability', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useAvailability: function useAvailabilityOrSnapshot() {
+      const live = actual.useAvailability()
+      return snapshot ?? live
+    },
+  }
+})
 
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const section = (id) => document.getElementById(id)
@@ -114,23 +132,80 @@ describe('the story (spec §6.15)', () => {
   })
 })
 
+// Spec §6.16, §8.2 #4: each block's 96 apartments as a grid of squares that
+// open the unit panel, then its counts by status, its room types, and its
+// exposures, or block А's note. On the sheets snapshot (ruling F6).
 describe('the blocks (spec §6.16)', () => {
-  it('names both blocks, each with its facts and the way to its apartments', () => {
+  beforeAll(async () => {
+    snapshot = snapshotAvailability()
+    await loadSurfaces()
+  })
+  afterAll(() => {
+    snapshot = null
+  })
+
+  it('still names both blocks, „Блок А“ and „Блок Б“, each with its facts', () => {
     expect(mainText()).toMatch(BLOCK_A)
     expect(mainText()).toMatch(BLOCK_B)
     const blocks = within(section('blokove'))
     expect(blocks.getAllByText('96 апартамента · 8 етажа · 12 на етаж')).toHaveLength(2)
     expect(within(section('blk-a')).getByRole('heading', { level: 3 })).toHaveTextContent(/^Блок\sА$/)
     expect(within(section('blk-b')).getByRole('heading', { level: 3 })).toHaveTextContent(/^Блок\sБ$/)
-    expect(blocks.getByRole('link', { name: /^Изберете апартамент в\sблок\sА$/ })).toHaveAttribute('href', '/projects/golden-residence/block-a')
-    expect(blocks.getByRole('link', { name: /^Изберете апартамент в\sблок\sБ$/ })).toHaveAttribute('href', '/projects/golden-residence/block-b')
   })
 
-  it('counts each block’s free apartments once the data is in', async () => {
-    await waitFor(() => expect(text(section('blk-a').querySelector('.blk__free'))).toMatch(/^\d+ свободни от 96$/))
-    expect(text(section('blk-b').querySelector('.blk__free'))).toMatch(/^\d+ свободни от 96$/)
+  it('draws each block’s 96 apartments as squares, the way to each block’s page gone', () => {
+    for (const [id, block] of [['blk-a', 'А'], ['blk-b', 'Б']]) {
+      const grid = within(section(id)).getByRole('group', { name: (name) => name.replace(/\s+/g, ' ') === `Апартаментите на блок ${block}` })
+      expect(within(grid).getAllByRole('button')).toHaveLength(96)
+    }
+    expect(within(section('blokove')).queryByRole('link')).toBeNull()
+    expect(section('blokove').querySelector('.blk__free')).toBeNull()
   })
+
+  it('counts each block’s apartments by status', () => {
+    const counts = (id) => [...section(id).querySelectorAll('.blk__stats .legend > li')].map(text)
+    expect(counts('blk-a')).toEqual(['42 свободни', '6 резервирани', '48 продадени', '0 блокирани'])
+    expect(counts('blk-b')).toEqual(['27 свободни', '2 резервирани', '67 продадени', '0 блокирани'])
+  })
+
+  it('reads „56 двустайни · 32 тристайни · 8 ателиета“ in both halves', () => {
+    expect(text(section('blk-a').querySelector('.blk__types'))).toBe('56 двустайни · 32 тристайни · 8 ателиета')
+    expect(text(section('blk-b').querySelector('.blk__types'))).toBe('56 двустайни · 32 тристайни · 8 ателиета')
+  })
+
+  it('counts block Б’s exposures, the largest first', () => {
+    const exposures = [...section('blk-b').querySelectorAll('.blk__expo > li')].map(text)
+    expect(exposures).toEqual(['24 юг', '24 запад', '16 изток', '8 юг/изток', '8 север', '8 север/запад', '8 запад/юг'])
+    const counts = exposures.map((each) => Number(each.split(' ')[0]))
+    expect(counts).toEqual([...counts].sort((a, b) => b - a))
+    expect(section('blk-b').querySelector('.blk__note')).toBeNull()
+  })
+
+  it('says „Изложението на блок А не е попълнено в таблицата.“ for block А, whose sheet has none', () => {
+    expect(text(section('blk-a').querySelector('.blk__note'))).toBe('Изложението на блок А не е попълнено в таблицата.')
+    expect(section('blk-a').querySelector('.blk__expo')).toBeNull()
+  })
+
+  // Spec §6.16: a click opens the unit panel, through the address (?unit),
+  // with no stage under it.
+  it('opens a square’s unit in the unit panel', async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'А 501, Продаден' }))
+    expect(await screen.findByRole('dialog', { name: 'А 501' }, { timeout: 15000 })).toBeInTheDocument()
+    expect(new URLSearchParams(window.location.search).get('unit')).toBe('А 501')
+    expect(document.querySelector('.ps')).toBeNull()
+  }, 30000)
 })
+
+// Spec §7.10: ?view=list opens „По критерии“, read once the page has
+// hydrated (the prerendered HTML is „Визуално“'s, gr.hydration.test.jsx).
+it('/projects/golden-residence?view=list selects „По критерии“ after hydration, and shows the list', async () => {
+  cleanup()
+  renderSiteAt('/projects/golden-residence?view=list')
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'По критерии' })).toHaveAttribute('aria-selected', 'true'))
+  expect(screen.getByRole('tab', { name: 'Визуално' })).toHaveAttribute('aria-selected', 'false')
+  expect(await screen.findByRole('group', { name: 'Статус' }, { timeout: 15000 })).toBeInTheDocument()
+  expect(document.querySelector('#explorer .fx').closest('[role="tabpanel"]')).toHaveAttribute('hidden')
+}, 30000)
 
 describe('the gallery (spec §6.17)', () => {
   it('turns its spreads with the buttons and the arrow keys, the caption and the counter following', () => {

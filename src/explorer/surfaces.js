@@ -6,7 +6,15 @@
 // nears the screen or is first touched, the explorer's provider when the
 // address opens a dialog, and Home's compact facade, which has neither panels
 // nor dialogs, never loads it at all.
+//
+// It also loads the list, „По критерии“ (listChunk.js, a chunk of its own;
+// loadUnitList.js), whose rows open their units in the unit panel here. Its
+// import lives in this chunk so that the list of the chunks it preloads
+// beside it stays out of the route's first-load JS (ruling C8.5).
 export { default as FloorPanel } from './FloorPanel'
 export { default as FloorSheet } from './FloorSheet'
 export { default as ExplorerDialogs } from './ExplorerDialogs'
 export { PLANS } from './plans'
+
+/** Loads the list's own chunk. */
+export const loadList = () => import('./listChunk')

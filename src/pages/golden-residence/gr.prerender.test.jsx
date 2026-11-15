@@ -51,7 +51,9 @@ it('prerenders the free counts as —', () => {
   const doc = parse(prerender())
 
   expect(textOf(doc.querySelector('#top .fact--r'))).toMatch(/^— свободни в момента$/)
-  expect(textOf(doc.querySelector('#blk-a .blk__free'))).toMatch(/^— свободни от 96$/)
+  for (const id of ['blk-a', 'blk-b']) {
+    expect([...doc.querySelectorAll(`#${id} .blk__stats .legend li`)].map(textOf)).toEqual(['— свободни', '— резервирани', '— продадени', '— блокирани'])
+  }
   expect(textOf(doc.querySelector('#park-g .park__big'))).toMatch(/^— свободни от 113$/)
   expect(textOf(doc.querySelector('#park-g summary'))).toBe('Свободните гаражи (—)')
   expect(textOf(doc.querySelector('#explorer .lead'))).toMatch(/: — от 192\.$/)
@@ -72,6 +74,40 @@ it('prerenders the explorer at rest', () => {
   expect(explorer.querySelector('.fx').getAttribute('data-block')).toBe('А')
   expect(doc.querySelectorAll('.fxp, .sheet')).toHaveLength(0)
   expect(explorer.textContent).not.toMatch(/Наличността не се зареди/)
+})
+
+// The two ways in (spec §7.8): the prerendered page is „Визуално“'s, its
+// underline under it by CSS alone; the list's panel is there for the tabs
+// to name, hidden and empty, for ?view=list is read once the page has
+// hydrated (gr.hydration.test.jsx) and the list loads only then (ruling
+// C8.5). The list's „етаж 3“ thus comes after the facade's rails, whose own
+// „етаж 3“ the availability contract finds first.
+it('prerenders the ways in at „Визуално“, the list’s panel hidden and empty', () => {
+  const doc = parse(prerender())
+  const tabs = doc.querySelector('#explorer [role="tablist"]')
+
+  expect(tabs.getAttribute('aria-label')).toBe('Как да търсите')
+  expect(tabs.getAttribute('data-view')).toBe('visual')
+  expect([...tabs.querySelectorAll('[role="tab"]')].map((tab) => [textOf(tab), tab.getAttribute('aria-selected')]))
+    .toEqual([['Визуално', 'true'], ['По критерии', 'false']])
+  const [visual, list] = doc.querySelectorAll('#explorer [role="tabpanel"]')
+  expect(visual.hasAttribute('hidden')).toBe(false)
+  expect(visual.querySelector('.fx')).not.toBeNull()
+  expect(list.hasAttribute('hidden')).toBe(true)
+  expect(list.children).toHaveLength(0)
+  expect(doc.getElementById(tabs.querySelector('[role="tab"]').getAttribute('aria-controls'))).toBe(visual)
+})
+
+// Each block's squares are in the HTML before the data, in a neutral outline
+// and named by their unit alone, so nothing moves when the statuses arrive.
+it('prerenders each block’s 96 squares before the data', () => {
+  const doc = parse(prerender())
+  for (const id of ['blk-a', 'blk-b']) {
+    const cells = doc.querySelectorAll(`#${id} .blk__grid button`)
+    expect(cells).toHaveLength(96)
+    expect([...cells].every((cell) => cell.className === 's-none')).toBe(true)
+  }
+  expect(doc.querySelector('#blk-a .blk__grid button').getAttribute('aria-label')).toBe('А 801')
 })
 
 // What an entrance's first frame would write, kept out of the hero: an

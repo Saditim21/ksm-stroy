@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apartmentUnits, blockFree, grFree, spotUnits } from './select'
+import { apartmentUnits, grFree, spotUnits } from './select'
 
 // The pages read availability as units (spec §9): M1's unit model
 // (src/utils/units.js) built from the API's rows, which useAvailability()
@@ -115,21 +115,6 @@ describe('spotUnits', () => {
   it('gives no places for no data, and none for a slot without rows', () => {
     expect(spotUnits(null, 'garages')).toEqual([])
     expect(spotUnits(spots(null), 'garages')).toEqual([])
-  })
-})
-
-// A block's free apartments (spec §6.16): the units of that block whose
-// status is free, and no other.
-describe('blockFree', () => {
-  it('counts the free units of one block', () => {
-    const units = apartmentUnits(projects({
-      a: [row('А 101', '1', 'Свободен'), row('А 102', '1', ''), row('А 103', '1', 'Резервиран'), row('А 104', '1', 'Скоро')],
-      b: [row('Б 101', '1', 'Свободен'), row('Б 102', '1', 'Продадени'), row('Б 103', '1', 'Блокиран')],
-    }))
-
-    expect(blockFree(units, 'А')).toBe(2)
-    expect(blockFree(units, 'Б')).toBe(1)
-    expect(blockFree([], 'А')).toBe(0)
   })
 })
 

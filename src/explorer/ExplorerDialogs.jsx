@@ -14,20 +14,23 @@ import UnitPanel from './UnitPanel'
 //   names a unit the model has (an unknown unit opens its floor only). The
 //   stage under the panel is covered: inert and hidden.
 // - The focus once a dialog has gone: the unit panel's to the element that
-//   opened it, else into the stage under it; the stage's to its opener, else
-//   (a deep link, or an opener gone inert, such as the sheet's button) to its
-//   floor's rail. A rail off screen, of the block a phone's facade does not
-//   show, takes no focus: the facade shows that block first, then focuses it
-//   (focusRail, the provider's; Facade.jsx). An inquiry's close gives the
-//   focus to nothing: the inquiry focuses the form's first field once its
-//   glide ends (spec §7.7).
+//   opened it, else into the stage under it, else (a panel the address or a
+//   block's square opened alone, ruling C8.1) to its unit's floor's rail; the
+//   stage's to its opener, else (a deep link, or an opener gone inert, such
+//   as the sheet's button) to its floor's rail. A rail off screen, of the
+//   block a phone's facade does not show, takes no focus: the facade shows
+//   that block first, then focuses it (focusRail, the provider's;
+//   Facade.jsx). An inquiry's close gives the focus to nothing: the inquiry
+//   focuses the form's first field once its glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
 //   and ?unit), then presets the form (presetInquiry), whose glide waits for
 //   the first frame with no scroll lock held: after this close's commit.
 //
 // `state` is useExplorerState()'s; `opening` the stage's { fromRect, opener }
 // (ruling F5), which setOpening(null) spends; `unitOpener` the element that
-// opened the unit panel; openUnit, closeStage and focusRail the provider's.
+// opened the unit panel; openUnit, closeStage, setFloor, setBlock and
+// focusRail the provider's (its setFloor and setBlock call off a unit still
+// to open, ruling C8.2).
 
 // Gives `element` the focus if it can take it: in the page, not inert, and
 // focusable. Whether it did.
@@ -39,30 +42,48 @@ function focusInto(element) {
 
 const railOf = ({ block, floor }) => document.querySelector(`#explorer .fx__cnt[data-k="${floorKey(block, floor)}"]`)
 
-export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage, focusRail }) {
+// Gives the focus to a floor's rail, or has the facade show it first.
+function focusRailOf(at, focusRail) {
+  if (!focusInto(railOf(at))) focusRail(at)
+}
+
+export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage, setFloor, setBlock, focusRail }) {
   const { stage, unitId } = state
   const unit = findUnit(model, unitId)
   const showStage = Boolean(stage)
   const showUnit = Boolean(unit)
   const quiet = useRef(false)
 
-  const shown = useRef({ stage: false, unit: false, at: null })
+  // What was on show: the dialogs, the stage's floor and the unit's.
+  const shown = useRef({ stage: false, unit: false, at: null, unitAt: null })
   useLayoutEffect(() => {
     const was = shown.current
-    shown.current = { stage: showStage, unit: showUnit, at: stage ?? was.at }
+    shown.current = {
+      stage: showStage,
+      unit: showUnit,
+      at: stage ?? was.at,
+      unitAt: unit ? { block: unit.block, floor: unit.floor } : was.unitAt,
+    }
+    // An inquiry's close: the focus goes nowhere, and the opening goes with
+    // the dialogs, so a stage the address opens later has none (ruling C8.3).
     if (quiet.current) {
-      if (!showStage && !showUnit) quiet.current = false
+      if (!showStage && !showUnit) {
+        quiet.current = false
+        setOpening(null)
+        unitOpener.current = null
+      }
       return
     }
-    if (was.unit && !showUnit) {
-      if (!focusInto(unitOpener.current) && showStage) focusInto(document.querySelector('.ps__close'))
-      unitOpener.current = null
+    if (was.unit && !showUnit && !focusInto(unitOpener.current)) {
+      if (showStage) focusInto(document.querySelector('.ps__close'))
+      else if (was.unitAt) focusRailOf(was.unitAt, focusRail)
     }
+    if (was.unit && !showUnit) unitOpener.current = null
     if (was.stage && !showStage) {
-      if (!focusInto(opening?.opener) && was.at && !focusInto(railOf(was.at))) focusRail(was.at)
+      if (!focusInto(opening?.opener) && was.at) focusRailOf(was.at, focusRail)
       setOpening(null)
     }
-  }, [showStage, showUnit, stage, opening, setOpening, unitOpener, focusRail])
+  }, [showStage, showUnit, stage, unit, opening, setOpening, unitOpener, focusRail])
 
   const inquire = (target) => {
     quiet.current = true
@@ -80,8 +101,8 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
           fromRect={opening?.fromRect ?? null}
           covered={showUnit}
           onClose={closeStage}
-          onFloor={state.setFloor}
-          onBlock={state.setBlock}
+          onFloor={setFloor}
+          onBlock={setBlock}
           onUnit={openUnit}
         />
       ) : null}

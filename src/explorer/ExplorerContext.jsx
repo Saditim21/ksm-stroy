@@ -20,7 +20,12 @@ import useExplorerState from './useExplorerState'
 //   address: the stage grows from fromRect, and closing gives the focus back
 //   to the opener. A floor opened from a mini plan's unit opens the unit panel
 //   once the plan has grown (820 ms, at once without motion; extract §4.23).
-//   openUnit keeps the element that opened the unit panel, for its close.
+//   Any other change of the floor, the block, the unit or the stage calls
+//   that unit off (ruling C8.2), so the stage's ▲▼, PageUp and PageDown and
+//   its block switch get the provider's setFloor and setBlock.
+// - openUnit keeps the element that opened the unit panel, for its close:
+//   the one it is given (a block's square, BlockGrid.jsx: Safari and Firefox
+//   on a Mac do not focus a button they click), else the focused element.
 // - A deep link: when the address opens a dialog as the page arrives, the
 //   page first jumps to #explorer, with no glide (jumpToId), so closing the
 //   stage leaves the reader at the facade; the dialogs mount after the jump.
@@ -116,15 +121,26 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     }
   }, [motionNow])
 
-  const openUnit = useCallback((label) => {
+  const openUnit = useCallback((label, opener) => {
     clearTimeout(unitTimer.current)
-    unitOpener.current = document.activeElement === document.body ? null : document.activeElement
+    const focused = document.activeElement === document.body ? null : document.activeElement
+    unitOpener.current = opener ?? focused
     latest.current.openUnit(label)
   }, [])
 
   const closeStage = useCallback(() => {
     clearTimeout(unitTimer.current)
     latest.current.closeStage()
+  }, [])
+
+  const setFloor = useCallback((floor) => {
+    clearTimeout(unitTimer.current)
+    latest.current.setFloor(floor)
+  }, [])
+
+  const setBlock = useCallback((block) => {
+    clearTimeout(unitTimer.current)
+    latest.current.setBlock(block)
   }, [])
 
   // The floor whose rail is to take the focus back, when a stage has closed
@@ -136,8 +152,8 @@ export function ExplorerProvider({ routeBlock = null, children }) {
   const railFocused = useCallback(() => setRailFocus(null), [])
 
   const value = useMemo(
-    () => ({ ...state, model, snapshot, openFloor, openUnit, closeStage, railFocus, railFocused }),
-    [state, model, snapshot, openFloor, openUnit, closeStage, railFocus, railFocused],
+    () => ({ ...state, model, snapshot, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused }),
+    [state, model, snapshot, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused],
   )
 
   return (
@@ -152,6 +168,8 @@ export function ExplorerProvider({ routeBlock = null, children }) {
           unitOpener={unitOpener}
           openUnit={openUnit}
           closeStage={closeStage}
+          setFloor={setFloor}
+          setBlock={setBlock}
           focusRail={focusRail}
         />
       ) : null}

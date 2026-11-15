@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import useHydrated from '../hooks/useHydrated'
 import { formatFloorParam, parseFloorParam } from './floorParam'
 
@@ -14,6 +14,9 @@ import { formatFloorParam, parseFloorParam } from './floorParam'
 // - Every change is one navigation that replaces the entry and keeps the
 //   scroll where it is ({ replace: true, preventScrollReset: true }): the
 //   explorer never adds to the history, and the router never scrolls for it.
+//   It is React Router's useSearchParams written out (useLocation, and
+//   navigate('?…') as that hook's setter does it), which keeps that hook's
+//   code out of the page's first-load JS (ruling C8.5).
 // - `routeBlock` is the block route's letter, or null on the Golden
 //   Residence page: a block route writes its own floors bare („5“), and the
 //   Golden Residence page always writes the letter („А-5“) (floorParam.js).
@@ -25,7 +28,9 @@ import { formatFloorParam, parseFloorParam } from './floorParam'
 // 'list'.
 export default function useExplorerState({ routeBlock = null }) {
   const hydrated = useHydrated()
-  const [params, setParams] = useSearchParams()
+  const { search } = useLocation()
+  const navigate = useNavigate()
+  const params = useMemo(() => new URLSearchParams(search), [search])
   const floorValue = hydrated ? params.get('floor') : null
   const unitValue = hydrated ? params.get('unit') : null
   const viewValue = hydrated ? params.get('view') : null
@@ -37,15 +42,13 @@ export default function useExplorerState({ routeBlock = null }) {
   // One replace for every change: each parameter given is set, or deleted
   // for null.
   const write = useCallback((changes) => {
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      for (const [name, value] of Object.entries(changes)) {
-        if (value == null) next.delete(name)
-        else next.set(name, value)
-      }
-      return next
-    }, { replace: true, preventScrollReset: true })
-  }, [setParams])
+    const next = new URLSearchParams(params)
+    for (const [name, value] of Object.entries(changes)) {
+      if (value == null) next.delete(name)
+      else next.set(name, value)
+    }
+    navigate(`?${next}`, { replace: true, preventScrollReset: true })
+  }, [navigate, params])
 
   const floorParam = useCallback((block, floor) => formatFloorParam({ block, floor }, routeBlock), [routeBlock])
 

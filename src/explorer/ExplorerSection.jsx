@@ -1,39 +1,153 @@
-import { useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import RollingNumber from '../components/ui/RollingNumber'
 import Seam from '../components/ui/Seam'
 import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
 import { GR_FACTS } from '../config/facts'
+import { loadFlip } from '../motion/flip'
+import useMotionNow from '../motion/useMotionNow'
 import useReveals from '../motion/useReveals'
 import Facade from './Facade'
+import { loadedUnitList, loadUnitList } from './loadUnitList'
 import StaleNotice from './StaleNotice'
 import useExplorer from './useExplorer'
+import ViewTabs from './ViewTabs'
 
 // The explorer's section, #explorer (spec §7, §8.2 #3; extract §4.19): the
-// hinged head, „Изберете *апартамент*“ against the seam and the free
-// apartments now beside it, the counts of the four statuses, the stale-data
-// notice where spec §9 calls for it, then the facade in full mode. Every
-// count is `—` until the data arrives (the free count rolls in once, through
-// RollingNumber), never a zero. The heading rises line by line as the
-// section comes into view (useReveals); the markup is the final state.
+// hinged head, „Изберете *апартамент*“ against the seam and, beside it, the
+// two ways in, „Визуално“ and „По критерии“ (ViewTabs), over the free
+// apartments now; the counts of the four statuses, the stale-data notice
+// where spec §9 calls for it, then the views: the facade in full mode, or the
+// list (UnitList). Every count is `—` until the data arrives (the free count
+// rolls in once, through RollingNumber), never a zero. The heading rises line
+// by line as the section comes into view (useReveals); the markup is the
+// final state.
 //
 // It sits inside the page's ExplorerProvider (ExplorerContext.jsx), whose
-// model it shows and whose openFloor opens a floor's plan stage in place; the
-// facade also takes the floor whose rail the provider asks to focus as a
-// stage closes (railFocus).
+// model it shows: the facade's floors open their plan stage in place
+// (openFloor), the list's rows their unit (openUnit), and the facade takes
+// the floor whose rail the provider asks to focus as a stage closes
+// (railFocus).
+//
+// - The view is the address's ?view (useExplorerState), read once the page
+//   has hydrated: the prerendered HTML is „Визуално“'s.
+// - Both panels are in the page, the facade's first, so the list's „етаж 3“
+//   comes after the rails' own (the availability contract clicks the first).
+//   The panel not on show is hidden; the facade keeps its state there, with
+//   no floor hot.
+// - The list is a lazy chunk (loadUnitList.js, ruling C8.5): it loads on the
+//   first switch to it, or on a ?view=list landing. It stays once shown.
+// - The switch (spec §5.7, §7.8; the concept's gr.js:79-93): Flip (a lazy
+//   chunk of its own, loadFlip) records the views and the tabs' underline
+//   before it, then plays them from there (playSwitch, viewMotion.js, in the
+//   list's chunk): 0.7 s expo.inOut for the views and the underline's own
+//   0.25 s, while the panel coming in rises 26 px over 0.7 s expo.out, 0.12 s
+//   late; ScrollTrigger measures the page again once the views have settled.
+//   Without motion it switches at once.
+
+// The tabs' and the panels' ids (ViewTabs.jsx): a page has one explorer, as
+// it has one #explorer.
+const ID = 'ex'
 
 export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' }) {
   const ref = useRef(null)
+  const viewsRef = useRef(null)
   useReveals(ref)
-  const { model, openFloor, railFocus, railFocused } = useExplorer()
+  const { model, view, setView, openFloor, openUnit, railFocus, railFocused } = useExplorer()
+  const motionNow = useMotionNow()
   const Heading = `h${headingLevel}`
+
+  // The list's module once it is in, and whether the list has been on show:
+  // from then on it stays in its panel, filters and all.
+  const [list, setList] = useState(loadedUnitList)
+  const [listShown, setListShown] = useState(false)
+  if (view === 'list' && !listShown) setListShown(true)
+  const listWanted = view === 'list'
+  useEffect(() => {
+    if (!listWanted || list) return undefined
+    let live = true
+    loadUnitList().then(
+      (module) => {
+        if (live) setList(module)
+      },
+      (error) => console.error('[explorer] the list did not load:', error),
+    )
+    return () => {
+      live = false
+    }
+  }, [listWanted, list])
+
+  // What the views showed at the last commit, and a switch's Flip, recorded
+  // before its commit and played after it.
+  const layout = useRef({ view, list: Boolean(list) })
+  const flip = useRef(null)
+
+  // A switch waits for what it shows (the list, and Flip where motion plays),
+  // then records the views and the underline and changes the address. A
+  // later switch overtakes one still waiting.
+  const waiting = useRef(null)
+  const switchTo = (next) => {
+    if (next === view && !waiting.current) return
+    waiting.current = next
+    const motion = motionNow()
+    Promise.all([
+      motion ? loadFlip().catch(() => null) : null,
+      next === 'list' ? loadUnitList() : null,
+    ]).then(
+      ([Flip, module]) => {
+        if (waiting.current !== next) return
+        waiting.current = null
+        if (module) setList(module)
+        if (next === layout.current.view) return
+        const views = viewsRef.current
+        if (Flip && motionNow() && views && loadedUnitList()) {
+          flip.current = { Flip, state: Flip.getState([views, ref.current.querySelector('.toggle__bar')]) }
+        }
+        setView(next)
+      },
+      (error) => {
+        if (waiting.current === next) waiting.current = null
+        console.error('[explorer] the list did not load:', error)
+      },
+    )
+  }
+
+  // After a commit that changed what the views show: the switch's Flip, or
+  // (no Flip recorded, or the list arriving after its view) ScrollTrigger
+  // measuring the page again. Nothing without motion.
+  useLayoutEffect(() => {
+    const was = layout.current
+    const now = { view, list: Boolean(list) }
+    layout.current = now
+    const switched = was.view !== now.view
+    if (!switched && (was.list === now.list || now.view !== 'list')) return
+    const recorded = switched ? flip.current : null
+    if (switched) flip.current = null
+    const motion = motionNow()
+    if (!motion) return
+    const refresh = () => motion.ScrollTrigger.refresh()
+    if (!recorded) {
+      refresh()
+      return
+    }
+    const views = viewsRef.current
+    loadedUnitList().playSwitch({
+      ...recorded,
+      gsap: motion.gsap,
+      views,
+      bar: ref.current.querySelector('.toggle__bar'),
+      panel: views.querySelector(`[data-view="${view}"]`),
+      onDone: refresh,
+    })
+  }, [view, list, motionNow])
+
+  const UnitList = listShown ? list?.default : null
 
   return (
     <section ref={ref} className="explorer" id="explorer" aria-labelledby="ex-h">
       {/* The hinge's halves are boxes of their own, as the concept's are
           (golden-residence.html:131-144): the lead keeps its measure inside
-          the half's padding, and the right half has room for the two ways
-          in, „Визуално“ and „По критерии“, which come with the list. */}
+          the half's padding, under the two ways in. */}
       <div className="hinge explorer__head">
         <div>
           <Heading className="h2" id="ex-h" data-split="">
@@ -41,6 +155,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
           </Heading>
         </div>
         <div>
+          <ViewTabs value={view} onChange={switchTo} idBase={ID} />
           <p className="lead">
             Свободните апартаменти в&nbsp;момента, по данни от таблиците на КСМ Строй:{' '}
             <b>
@@ -61,7 +176,22 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock = 'А' 
         </ul>
       </div>
       <StaleNotice className="explorer__notice" />
-      <Facade model={model} mode="full" initialBlock={initialBlock} focusRail={railFocus} onOpenFloor={openFloor} onRailFocused={railFocused} />
+      <div ref={viewsRef} className="views">
+        <div id={`${ID}-visual`} role="tabpanel" aria-labelledby={`${ID}-tab-visual`} data-view="visual" hidden={view !== 'visual'}>
+          <Facade
+            model={model}
+            mode="full"
+            initialBlock={initialBlock}
+            active={view === 'visual'}
+            focusRail={railFocus}
+            onOpenFloor={openFloor}
+            onRailFocused={railFocused}
+          />
+        </div>
+        <div id={`${ID}-list`} role="tabpanel" aria-labelledby={`${ID}-tab-list`} data-view="list" hidden={view !== 'list'}>
+          {UnitList ? <UnitList model={model} onUnit={openUnit} /> : null}
+        </div>
+      </div>
     </section>
   )
 }

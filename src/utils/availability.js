@@ -1,5 +1,4 @@
 import { STATUS_KEY, statusKey, summarizeStatuses } from './propertyStatus'
-import { parseArea } from './units'
 
 // The explorer's availability helpers. Statuses follow production's rules in
 // propertyStatus.js: sold beats reserved beats blocked beats available, an
@@ -21,20 +20,4 @@ export function summarizeFloor(apartments = []) {
   else if (counts.reserved > 0) color = STATUS.RESERVED
   else if (counts.total > 0 && counts.sold + counts.blocked === counts.total) color = STATUS.SOLD
   return { ...counts, color }
-}
-
-// „Само свободни" (onlyAvailable) keeps available units only. It reads the
-// status key, never the text a unit keeps beside it (units.js `statusText`):
-// a „Скоро" unit is shown with its own text, but it is not free.
-export function matchesFilter(apartment, filter = {}) {
-  if (!apartment) return false
-  if (filter.onlyAvailable && statusOf(apartment.status ?? apartment.статус) !== STATUS.AVAILABLE) return false
-  if (filter.type && !(apartment.вид || '').toLowerCase().includes(filter.type.toLowerCase())) return false
-  const area = parseArea(apartment.total)
-  const bounded = filter.minArea != null || filter.maxArea != null
-  // An area the sheet does not give never matches a bound.
-  if (bounded && area === null) return false
-  if (filter.minArea != null && area < filter.minArea) return false
-  if (filter.maxArea != null && area > filter.maxArea) return false
-  return true
 }
