@@ -40,7 +40,7 @@ import sharp from 'sharp'
 sharp.cache(false) // no file handles held on Windows
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(here, '..', '..')
-export const TWIN = path.join(repoRoot, 'src', 'assets', 'mnogofamilna', 'mn-dusk-off-2400.webp')
+const TWIN = path.join(repoRoot, 'src', 'assets', 'mnogofamilna', 'mn-dusk-off-2400.webp')
 const MAP = path.join(repoRoot, 'src', 'data', 'maps', 'mnogofamilna.building.json')
 
 // The building map's grid, and where the render without its margins sits in
@@ -416,7 +416,7 @@ export async function makeTwin(src, out) {
 }
 
 // The mask over the lit render, darkened: brass where a pixel was repainted.
-export async function writePreview(dir, { width, height, lit, mask }) {
+async function writePreview(dir, { width, height, lit, mask }) {
   fs.mkdirSync(dir, { recursive: true })
   const px = Buffer.alloc(width * height * 3)
   for (let p = 0; p < mask.length; p++) {
@@ -435,7 +435,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const sources = JSON.parse(fs.readFileSync(path.join(here, 'sources.json'), 'utf8'))
   const src = path.resolve(repoRoot, sources.find((entry) => entry.id === 'mn-dusk').src)
   const at = process.argv.indexOf('--preview')
-  const preview = at > 0 ? path.resolve(process.argv[at + 1]) : path.join(os.tmpdir(), 'ksm-mn-lights-off')
+  const preview = at > 0 && process.argv[at + 1] ? path.resolve(process.argv[at + 1]) : path.join(os.tmpdir(), 'ksm-mn-lights-off')
   const result = await makeTwin(src, TWIN)
   // Changed as the test counts it: the luminance moved by more than 8/255.
   let changed = 0

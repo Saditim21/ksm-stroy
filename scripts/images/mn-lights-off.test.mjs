@@ -1,9 +1,10 @@
 // @vitest-environment node
 // Многофамилна's lights-off twin (mn-lights-off.mjs, spec M3 §6.3), made from
 // the lit render's own file (sources.json's mn-dusk): the same picture with
-// every lit window of the two towers turned to dark glass, and nothing else
-// changed, so that the page can show the lit render through a floor's band
-// without a seam. A pixel "changes" when its luminance moves by more than
+// every lit window of the two towers turned to dark glass, and nothing changed
+// outside the towers, so that the page can show the lit render through a
+// floor's band without a seam. A pixel "changes" when its luminance moves by
+// more than
 // 8/255, read from the raw pixels makeTwin returns, so the encoder's noise
 // never counts (ruling PF19).
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
