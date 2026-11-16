@@ -7,7 +7,7 @@ import { mapsUrl } from '../../config/site'
 import grImages from '../../data/images/golden-residence.json'
 import useMotion from '../../motion/useMotion'
 import useReveals from '../../motion/useReveals'
-import { formatArea } from '../../utils/format'
+import { formatArea, formatDecimal } from '../../utils/format'
 
 // The building, #sgradata (spec §6.15, §8.2; extract §4.18): four blocks of
 // text, each with its picture. The paragraphs are the client's own text, the
@@ -30,8 +30,6 @@ const ADDRESS = 'ул. Ген. Климент Бояджиев, жк Левск�
 const PIN_SIZES = '50vw'
 const INLINE_SIZES = '(max-width: 900px) 100vw, 820px'
 const pad = (n) => String(n).padStart(2, '0')
-// An area's number as the sheets give it, with its decimal comma: „43,98“.
-const number = (n) => n.toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 // Each block's text after its paragraph.
 function Metro() {
@@ -74,7 +72,7 @@ function Figures() {
       <div>
         <dt>{perFloor}</dt>
         <dd>
-          апартамента на етаж, от {number(minArea)} до {formatArea(maxArea)}
+          апартамента на етаж, от {formatDecimal(minArea)} до {formatArea(maxArea)}
         </dd>
       </div>
     </dl>

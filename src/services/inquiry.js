@@ -11,11 +11,15 @@
 //
 // Every build but production marks the subject „[ТЕСТ]“, in the CRM and in
 // the email (spec §14.3).
+//
+// The form loads this module only once it is used (spec §10), so it never
+// travels with a page's first-load JS.
 
 /* global IS_PRODUCTION_BUILD */
 
-// The proxy's own pattern (api/odoo-lead.js), for the form's email check.
-export const EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+// The proxy's own pattern, for the form's email check: emailPattern.js's,
+// which the form has from its first render.
+export { EMAIL_PATTERN } from './emailPattern'
 // The proxy's shortest message.
 const MIN_MESSAGE = 10
 

@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import floors from '../data/maps/golden-residence.floors.json'
-import { planBox, planFor } from './geometry'
+import { planBox, planFor } from './planGeometry'
 import { buildModel } from './model'
 import { sizePlan } from './planModes'
 import PlanSvg from './PlanSvg'

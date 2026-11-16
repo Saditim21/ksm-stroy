@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { EMAIL_PATTERN as OWN_PATTERN } from './emailPattern'
 import { buildLead, EMAIL_PATTERN, sendInquiry } from './inquiry'
 
 // The inquiry the new forms send (spec §10): one lead, in exactly the six
@@ -47,6 +48,11 @@ describe('buildLead', () => {
     const proxy = readFileSync(join(cwd(), 'api/odoo-lead.js'), 'utf8')
     expect(proxy).toContain(`const EMAIL_PATTERN = ${EMAIL_PATTERN}`)
   })
+
+  // The form checks an email before the send path has loaded (InquiryForm.jsx
+  // loads this module on its first use), so the pattern is a module of its
+  // own, which this one hands on to its importers.
+  it("EMAIL_PATTERN is the proxy's pattern, from emailPattern.js", () => expect(EMAIL_PATTERN).toBe(OWN_PATTERN))
 })
 
 // sendInquiry: EmailJS and the CRM in parallel, as the Contact page sends

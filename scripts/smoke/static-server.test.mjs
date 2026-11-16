@@ -1,9 +1,10 @@
 // @vitest-environment node
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import fs from 'node:fs'
+import http2 from 'node:http2'
 import os from 'node:os'
 import path from 'node:path'
-import { createStaticServer } from './static-server.mjs'
+import { createStaticServer, findOpenssl } from './static-server.mjs'
 
 // The smoke run and Lighthouse see the build through this server, so it must
 // answer as Vercel does with our vercel.json: redirects first, then the file,
@@ -205,6 +206,40 @@ describe('the availability API, over the fixture sheets', () => {
     const response = await get('/api/availability', { method: 'POST' })
     expect(response.status).toBe(405)
     expect(response.headers.get('allow')).toBe('GET, HEAD')
+  })
+})
+
+// Lighthouse measures the build as Vercel's edge serves it, over HTTP/2 (spec
+// §10): --h2 gives the same answers through node:http2, over TLS with a
+// throwaway certificate that openssl makes as the server starts.
+describe('HTTP/2', () => {
+  // The headers of the answer to `pathname` over HTTP/2.
+  function getH2(origin, pathname) {
+    const client = http2.connect(origin, { rejectUnauthorized: false })
+    return new Promise((resolve, reject) => {
+      client.on('error', reject)
+      const request = client.request({ ':path': pathname })
+      request.on('response', (headers) => {
+        request.resume()
+        request.on('end', () => resolve(headers))
+      })
+      request.on('error', reject)
+      request.end()
+    }).finally(() => client.close())
+  }
+
+  it('h2 mode answers / with 200 over HTTP/2', async ({ skip }) => {
+    skip(!findOpenssl(), 'openssl is on neither PATH nor Git for Windows’s usr/bin: the h2 mode cannot make its certificate')
+    const h2 = createStaticServer({ root, h2: true })
+    await new Promise((resolve) => h2.listen(0, '127.0.0.1', resolve))
+    try {
+      const headers = await getH2(`https://127.0.0.1:${h2.address().port}`, '/')
+      expect(headers[':status']).toBe(200)
+      expect(headers['content-type']).toMatch(/^text\/html/)
+    } finally {
+      h2.closeAllConnections()
+      await new Promise((resolve) => h2.close(resolve))
+    }
   })
 })
 

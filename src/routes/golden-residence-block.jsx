@@ -2,7 +2,7 @@ import { matchedBlock } from '../config/blocks'
 import BlockPage from '../explorer/BlockPage'
 import { pageMeta } from '../seo/meta'
 import BlockRoute from './BlockRoute'
-import { meta as notFoundMeta } from './not-found'
+import { notFoundMeta } from './notFoundMeta'
 
 // The page of one Golden Residence block, the explorer on that block (spec
 // §7.11, §8.3; src/explorer/BlockPage.jsx). src/routes.js routes each block's

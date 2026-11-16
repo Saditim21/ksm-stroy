@@ -2,7 +2,7 @@ import MnogofamilnaSingleBlock from '../components/MnogofamilnaSingleBlock'
 import { matchedBlock } from '../config/blocks'
 import { pageMeta } from '../seo/meta'
 import BlockRoute from './BlockRoute'
-import { meta as notFoundMeta } from './not-found'
+import { notFoundMeta } from './notFoundMeta'
 
 // The page of one block of the Многофамилна жилищна сграда, the legacy page
 // until M3 rebuilds it. src/routes.js routes each block's own path here (no

@@ -2,15 +2,22 @@
 // Lighthouse on a phone (its default: mobile, simulated throttling), three
 // runs per URL, and the median of each figure (spec §10, §12): LCP, CLS, TBT,
 // the bytes requested before the LCP and the score of each category it runs,
-// the performance category's alone unless --categories names others. It
-// measures what answers at the URLs: serve the build first, as Vercel would,
-// with `node scripts/smoke/static-server.mjs` (port 4190).
+// the performance category's alone unless --categories names others.
+//
+// It measures the site as Vercel serves it (spec §10). A page given as a path
+// (/, /projects/golden-residence) is the build's, build/client/, which the
+// script serves itself through scripts/smoke/static-server.mjs on a free port
+// and stops afterwards: over HTTP/2 with TLS, as Vercel's edge serves the
+// site, or over HTTP/1.1 with --h1. Over HTTP/2 the server's certificate is
+// self-signed, and Chrome is told to accept it. A page given as a full URL is
+// measured where it is.
 //
 // "Bytes before LCP" adds up the transfer size of every request the page made
 // before the LCP was painted in the run's own (unthrottled) trace: what the
 // page needs before its largest paint.
 //
-// Lighthouse 13 comes through npx, and finds Chrome itself ($CHROME_PATH
+// Lighthouse is pinned at 13.6.0, so the figures stay comparable from run to
+// run (spec §10). It comes through npx, and finds Chrome itself ($CHROME_PATH
 // overrides). Each run's JSON report goes to $PERF_REPORTS (default:
 // <os tmpdir>/ksmstroy-lighthouse).
 //
@@ -18,7 +25,8 @@
 // but a production-stage one (VITE_SITE_STAGE=production) carries noindex,
 // which costs the SEO score its points.
 //
-// usage: node scripts/perf/lighthouse.mjs [--categories=<list>] <url> [url …]
+// usage: node scripts/perf/lighthouse.mjs [--h1] [--categories=<list>] <path or url> […]
+//   --h1: serve the build over HTTP/1.1 (default: HTTP/2 over TLS).
 //   --categories: Lighthouse categories, comma-separated, of performance,
 //   accessibility, best-practices and seo (default: performance).
 
@@ -29,14 +37,20 @@ import https from 'node:https'
 import os from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { BUILD_DIR, createStaticServer } from '../smoke/static-server.mjs'
 
 const RUNS = 3
 const KIB = 1024
+const LIGHTHOUSE = 'lighthouse@13.6.0'
 // Lighthouse 13's categories.
 const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo']
 const DEFAULT_CATEGORIES = ['performance']
-const USAGE = 'usage: node scripts/perf/lighthouse.mjs [--categories=<list>] <url> [url …]'
+const USAGE = 'usage: node scripts/perf/lighthouse.mjs [--h1] [--categories=<list>] <path or url> […]'
 const REPORTS = path.resolve(process.env.PERF_REPORTS || path.join(os.tmpdir(), 'ksmstroy-lighthouse'))
+
+// A page on the build, which the script serves (/eu-proekt), or a full URL.
+const isPath = (page) => page.startsWith('/')
+const isUrl = (page) => /^https?:\/\//i.test(page)
 
 export function median(values) {
   const sorted = [...values].sort((a, b) => a - b)
@@ -44,25 +58,35 @@ export function median(values) {
   return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
 }
 
-// The URLs, and the categories --categories=<list> names (default:
-// performance), from the command line's arguments.
+// The pages (paths on the build, or full URLs), the categories
+// --categories=<list> names (default: performance), and whether --h1 asks
+// for the HTTP/1.1 server, from the command line's arguments.
 export function parseArgs(args) {
-  const urls = []
+  const pages = []
   let categories = DEFAULT_CATEGORIES
+  let h1 = false
   for (const arg of args) {
-    if (arg.startsWith('--categories=')) {
+    if (arg === '--h1') {
+      h1 = true
+    } else if (arg.startsWith('--categories=')) {
       categories = arg.slice('--categories='.length).split(',').map((id) => id.trim()).filter(Boolean)
       if (categories.length === 0) throw new Error(`--categories names no category (${CATEGORIES.join(', ')})`)
       const unknown = categories.filter((id) => !CATEGORIES.includes(id))
       if (unknown.length > 0) throw new Error(`--categories: Lighthouse 13 has no ${unknown.join(', ')} category (${CATEGORIES.join(', ')})`)
     } else if (arg.startsWith('-')) {
       throw new Error(`unknown flag ${arg}; ${USAGE}`)
+    } else if (isPath(arg) || isUrl(arg)) {
+      pages.push(arg)
     } else {
-      urls.push(arg)
+      throw new Error(`${arg} is neither a path (/…) nor an http(s) URL; ${USAGE}`)
     }
   }
-  return { urls, categories }
+  return { pages, categories, h1 }
 }
+
+/** The URL Lighthouse opens for a page: a path on the build's server at
+ * `origin`, a full URL as it is. */
+export const urlOf = (page, origin) => (isPath(page) ? `${origin}${page}` : page)
 
 // The figures of one Lighthouse report (its JSON, parsed), with the score of
 // each category in `categories`, out of 100. A category the report lacks, or
@@ -127,14 +151,22 @@ export const summary = ({ lcp, cls, tbt, bytesBeforeLcp, scores }) => [
 // argument is quoted for that shell.
 const quote = (arg) => (process.platform === 'win32' ? `"${arg.replace(/"/g, '""')}"` : `'${arg.replace(/'/g, "'\\''")}'`)
 
-function lighthouse(url, output, categories) {
-  const args = [
-    '--yes', 'lighthouse@13', url,
+/** npx's arguments for one Lighthouse run on `url`, its JSON report to
+ * `output`: Lighthouse 13.6.0, with Chrome told to accept the build server's
+ * self-signed certificate unless the run is over HTTP/1.1 (`h1`). */
+export function lighthouseArgs(url, output, categories, { h1 }) {
+  const chrome = ['--headless=new', '--no-first-run', '--no-default-browser-check', ...(h1 ? [] : ['--ignore-certificate-errors'])]
+  return [
+    '--yes', LIGHTHOUSE, url,
     '--output=json', `--output-path=${output}`,
     `--only-categories=${categories.join(',')}`,
-    '--chrome-flags=--headless=new --no-first-run --no-default-browser-check',
+    `--chrome-flags=${chrome.join(' ')}`,
     '--quiet',
   ]
+}
+
+function lighthouse(url, output, categories, options) {
+  const args = lighthouseArgs(url, output, categories, options)
   return new Promise((resolve, reject) => {
     let stderr = ''
     const child = spawn(`npx ${args.map(quote).join(' ')}`, { shell: true, stdio: ['ignore', 'ignore', 'pipe'] })
@@ -149,11 +181,13 @@ function lighthouse(url, output, categories) {
   })
 }
 
-// Whether anything answers at `url`. Not fetch(): it refuses port 4190, the
-// smoke server's, which the Fetch standard lists as a bad port (Chrome loads it).
+// Whether anything answers at `url`, whatever its certificate. Not fetch():
+// it refuses port 4190, the smoke server's, which the Fetch standard lists as
+// a bad port (Chrome loads it).
 function answers(url) {
   return new Promise((resolve) => {
-    const request = (url.startsWith('https:') ? https : http).request(url, { method: 'HEAD', timeout: 5000 }, (response) => {
+    const options = { method: 'HEAD', timeout: 5000, rejectUnauthorized: false }
+    const request = (url.startsWith('https:') ? https : http).request(url, options, (response) => {
       response.resume()
       resolve(true)
     })
@@ -163,49 +197,76 @@ function answers(url) {
   })
 }
 
+// The build, served as Vercel serves it, on a free port: its server and its
+// origin.
+async function serveBuild({ h1 }) {
+  const server = createStaticServer({ h2: !h1 })
+  await new Promise((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+  return { server, origin: `${h1 ? 'http' : 'https'}://127.0.0.1:${server.address().port}` }
+}
+
 async function main(args) {
-  let urls
+  let pages
   let categories
+  let h1
   try {
-    ({ urls, categories } = parseArgs(args))
+    ({ pages, categories, h1 } = parseArgs(args))
   } catch (error) {
     console.error(`perf: ${error.message}`)
     return 1
   }
-  if (urls.length === 0) {
+  if (pages.length === 0) {
     console.error(USAGE)
     return 1
   }
-  for (const url of urls) {
+  for (const url of pages.filter(isUrl)) {
     if (!(await answers(url))) {
-      console.error(`perf: ${url} does not answer. Serve the build first: node scripts/smoke/static-server.mjs`)
+      console.error(`perf: ${url} does not answer. Serve it first, or give the page's path (/…) to measure the build.`)
       return 1
     }
   }
-  fs.mkdirSync(REPORTS, { recursive: true })
-  console.log(`perf: Lighthouse 13, mobile, ${RUNS} runs per URL, categories ${categories.join(', ')}; reports in ${REPORTS}`)
-
-  const rows = []
-  let version
-  for (const url of urls) {
-    const slug = new URL(url).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'
-    const runs = []
-    for (let run = 1; run <= RUNS; run += 1) {
-      const output = path.join(REPORTS, `${slug}-${run}.json`)
-      fs.rmSync(output, { force: true })
-      await lighthouse(url, output, categories)
-      const report = JSON.parse(fs.readFileSync(output, 'utf8'))
-      version = report.lighthouseVersion
-      const metrics = metricsOf(report, categories)
-      console.log(`  ${url} run ${run}: ${summary(metrics)}`)
-      runs.push(metrics)
-    }
-    rows.push({ url, middle: medians(runs) })
+  if (pages.some(isPath) && !fs.existsSync(path.join(BUILD_DIR, 'index.html'))) {
+    console.error(`perf: there is no build in ${BUILD_DIR} to serve. Run npm run build first.`)
+    return 1
   }
 
-  console.log(`perf: median of ${RUNS} runs (Lighthouse ${version}):`)
-  for (const { url, middle } of rows) console.log(`  ${url}: ${summary(middle)}`)
-  return 0
+  const served = pages.some(isPath) ? await serveBuild({ h1 }) : null
+  try {
+    fs.mkdirSync(REPORTS, { recursive: true })
+    const over = served ? `; the build on ${served.origin}, over ${h1 ? 'HTTP/1.1' : 'HTTP/2'}` : ''
+    console.log(`perf: ${LIGHTHOUSE}, mobile, ${RUNS} runs per URL, categories ${categories.join(', ')}${over}; reports in ${REPORTS}`)
+
+    const rows = []
+    let version
+    for (const page of pages) {
+      const url = urlOf(page, served?.origin)
+      const slug = new URL(url).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'
+      const runs = []
+      for (let run = 1; run <= RUNS; run += 1) {
+        const output = path.join(REPORTS, `${slug}-${run}.json`)
+        fs.rmSync(output, { force: true })
+        await lighthouse(url, output, categories, { h1 })
+        const report = JSON.parse(fs.readFileSync(output, 'utf8'))
+        version = report.lighthouseVersion
+        const metrics = metricsOf(report, categories)
+        console.log(`  ${page} run ${run}: ${summary(metrics)}`)
+        runs.push(metrics)
+      }
+      rows.push({ page, middle: medians(runs) })
+    }
+
+    console.log(`perf: median of ${RUNS} runs (Lighthouse ${version}):`)
+    for (const { page, middle } of rows) console.log(`  ${page}: ${summary(middle)}`)
+    return 0
+  } finally {
+    if (served) {
+      served.server.closeAllConnections()
+      await new Promise((resolve) => served.server.close(resolve))
+    }
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

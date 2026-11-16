@@ -3,7 +3,7 @@ import { statusKeyOf } from '../components/ui/status'
 import grImages from '../data/images/golden-residence.json'
 import { PALETTE } from '../styles/palette'
 import { unitButtonLabel } from '../utils/units'
-import { planBox, planShapes } from './geometry'
+import { planBox, planShapes } from './planGeometry'
 import { PLAN_MODES, sizePlan } from './planModes'
 import './explorer.css'
 

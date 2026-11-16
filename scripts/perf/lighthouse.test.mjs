@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { median, medians, metricsOf, parseArgs, summary } from './lighthouse.mjs'
+import { lighthouseArgs, median, medians, metricsOf, parseArgs, summary, urlOf } from './lighthouse.mjs'
 
 // A recorded report, cut down to what metricsOf reads: Lighthouse 13.6.0 on
 // / (the preview-stage build of the M2 results, run 1, served on
@@ -85,25 +85,72 @@ describe('metricsOf', () => {
 })
 
 describe('parseArgs', () => {
-  it('takes the URLs, and the performance category unless told otherwise', () => {
-    expect(parseArgs(['http://127.0.0.1:4190/', 'http://127.0.0.1:4190/eu-proekt'])).toEqual({
-      urls: ['http://127.0.0.1:4190/', 'http://127.0.0.1:4190/eu-proekt'],
+  it('takes the pages, over HTTP/2 and in the performance category unless told otherwise', () => {
+    expect(parseArgs(['/', '/projects/golden-residence'])).toEqual({
+      pages: ['/', '/projects/golden-residence'],
       categories: ['performance'],
+      h1: false,
     })
   })
 
-  it('takes --categories=<list>, comma-separated, anywhere among the URLs', () => {
-    expect(parseArgs(['http://127.0.0.1:4190/', '--categories=performance,accessibility,best-practices,seo'])).toEqual({
-      urls: ['http://127.0.0.1:4190/'],
+  // A full URL is measured where it is, as before.
+  it('takes full URLs too, and paths and URLs together', () => {
+    expect(parseArgs(['http://127.0.0.1:4190/', 'https://example.vercel.app/eu-proekt', '/404']).pages).toEqual([
+      'http://127.0.0.1:4190/',
+      'https://example.vercel.app/eu-proekt',
+      '/404',
+    ])
+  })
+
+  it('takes --h1 for the HTTP/1.1 server, anywhere among the pages', () => {
+    expect(parseArgs(['/', '--h1']).h1).toBe(true)
+    expect(parseArgs(['--h1', '/']).h1).toBe(true)
+  })
+
+  it('takes --categories=<list>, comma-separated, anywhere among the pages', () => {
+    expect(parseArgs(['/', '--categories=performance,accessibility,best-practices,seo'])).toEqual({
+      pages: ['/'],
       categories: ALL,
+      h1: false,
     })
     expect(parseArgs(['--categories=seo', 'http://127.0.0.1:4190/']).categories).toEqual(['seo'])
   })
 
   it('refuses a category Lighthouse 13 does not have, an empty list and any other flag', () => {
-    expect(() => parseArgs(['--categories=performance,pwa', 'http://127.0.0.1:4190/'])).toThrow(/pwa/)
-    expect(() => parseArgs(['--categories=', 'http://127.0.0.1:4190/'])).toThrow(/--categories/)
-    expect(() => parseArgs(['--only-categories=seo', 'http://127.0.0.1:4190/'])).toThrow(/--only-categories/)
+    expect(() => parseArgs(['--categories=performance,pwa', '/'])).toThrow(/pwa/)
+    expect(() => parseArgs(['--categories=', '/'])).toThrow(/--categories/)
+    expect(() => parseArgs(['--only-categories=seo', '/'])).toThrow(/--only-categories/)
+  })
+
+  it('refuses a page that is neither a path nor an http(s) URL', () => {
+    expect(() => parseArgs(['projects/golden-residence'])).toThrow(/projects\/golden-residence/)
+    expect(() => parseArgs(['ftp://127.0.0.1/'])).toThrow(/ftp:/)
+  })
+})
+
+it('urlOf: a path on the served build, a full URL as it is', () => {
+  expect(urlOf('/projects/golden-residence/block-a', 'https://127.0.0.1:61234')).toBe('https://127.0.0.1:61234/projects/golden-residence/block-a')
+  expect(urlOf('http://127.0.0.1:4190/eu-proekt', 'https://127.0.0.1:61234')).toBe('http://127.0.0.1:4190/eu-proekt')
+})
+
+// The figures stay comparable from run to run only with one Lighthouse
+// (spec §10). Over HTTP/2 the build's server has a self-signed certificate,
+// which Chrome is told to accept.
+describe('lighthouseArgs', () => {
+  const url = 'https://127.0.0.1:61234/'
+  const chromeFlags = (args) => args.find((arg) => arg.startsWith('--chrome-flags='))
+
+  it('runs Lighthouse 13.6.0, pinned, on the page, into the report, in the categories asked for', () => {
+    const args = lighthouseArgs(url, 'C:/reports/home-1.json', ['performance', 'seo'], { h1: false })
+    expect(args).toContain('lighthouse@13.6.0')
+    expect(args).toContain(url)
+    expect(args).toContain('--output-path=C:/reports/home-1.json')
+    expect(args).toContain('--only-categories=performance,seo')
+  })
+
+  it('starts Chrome with --ignore-certificate-errors over HTTP/2 only', () => {
+    expect(chromeFlags(lighthouseArgs(url, 'r.json', ['performance'], { h1: false }))).toContain('--ignore-certificate-errors')
+    expect(chromeFlags(lighthouseArgs('http://127.0.0.1:61234/', 'r.json', ['performance'], { h1: true }))).not.toContain('--ignore-certificate-errors')
   })
 })
 

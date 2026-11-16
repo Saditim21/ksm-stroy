@@ -3,6 +3,6 @@
 // unit panel draw. Only the surfaces' chunk imports it (surfaces.js), so the
 // plans never travel with a route's first-load JS.
 import floorsMap from '../data/maps/golden-residence.floors.json'
-import { planFor } from './geometry'
+import { planFor } from './planGeometry'
 
 export const PLANS = Object.freeze({ 'А': planFor(floorsMap, 'А'), 'Б': planFor(floorsMap, 'Б') })

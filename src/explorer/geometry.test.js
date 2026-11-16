@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import building from '../data/maps/golden-residence.building.json'
 import floors from '../data/maps/golden-residence.floors.json'
-import { FACADE, bbox, cropFor, floorShapes, labelPoint, planBox, planFor, planShapes } from './geometry'
+import { FACADE, bbox, floorShapes } from './geometry'
+import { cropFor, labelPoint, planBox, planFor, planShapes } from './planGeometry'
 
 // The explorer's geometry (spec §7.2, §7.4, §7.7; extract §4.20, §4.22, §5.3):
 // the facade's grid and crops, the floors on it, the plan of a block, where a

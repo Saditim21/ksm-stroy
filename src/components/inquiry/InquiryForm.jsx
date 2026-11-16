@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { PRIMARY_PHONE } from '../../config/site'
 import useMotionNow from '../../motion/useMotionNow'
-import { EMAIL_PATTERN, sendInquiry } from '../../services/inquiry'
+import { EMAIL_PATTERN } from '../../services/emailPattern'
 import { scrollToId } from '../../utils/scroll'
 import Button from '../ui/Button'
 import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInquiryState } from './inquiryStore'
@@ -25,12 +25,18 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInqu
 // show nor go with the lead, and they stay in the store, so choosing Golden
 // Residence again brings them back.
 //
-// While an inquiry is on its way (the EmailJS chunk, the round trip) the form
-// is busy and its action reads as the legacy Contact form's does then,
-// „Изпращане...“, and takes no second send. A sent inquiry turns into the
-// thank-you, a status that takes the focus, rising into place with motion
-// (spec §5.7); a failed one says so and keeps what was typed. A new preset
-// after a thank-you brings the form back.
+// The send path (src/services/inquiry.js, with EmailJS behind it) is a chunk
+// of its own, out of the page's first-load JS (spec §10): it starts loading
+// as the visitor first steps into the form, and a send waits for it. A load
+// that fails fails the send it held up, as a refused email does, and is not
+// kept: the next send loads it again.
+//
+// While an inquiry is on its way (the send path, the EmailJS chunk, the round
+// trip) the form is busy and its action reads as the legacy Contact form's
+// does then, „Изпращане...“, and takes no second send. A sent inquiry turns
+// into the thank-you, a status that takes the focus, rising into place with
+// motion (spec §5.7); a failed one says so and keeps what was typed. A new
+// preset after a thank-you brings the form back.
 
 const ERRORS = {
   name: 'Въведете име.',
@@ -55,6 +61,21 @@ const ORDER = ['name', 'phone', 'email', 'consent']
 const NOT_LATIN = /\p{Script=Cyrillic}|(^|[@.])xn--/iu
 const MIN_NAME = 2
 const MIN_PHONE_DIGITS = 6
+
+// The send path's module, loading or loaded, for every form on the page and
+// every later visit to it. A load that failed is dropped, to be tried again.
+let sendPath = null
+function loadSendPath() {
+  sendPath ??= import('../../services/inquiry').catch((error) => {
+    sendPath = null
+    throw error
+  })
+  return sendPath
+}
+// The form's focus starts the load; if it fails, the send says so.
+const preloadSendPath = () => {
+  loadSendPath().catch(() => {})
+}
 
 function validate({ name, phone, email, consent }) {
   const errors = {}
@@ -165,14 +186,20 @@ export default function InquiryForm({ page = 'home' }) {
     }
     setStatus('sending')
     const subject = options.find(({ value }) => value === chosen).subject
-    const { ok } = await sendInquiry({
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      subject,
-      picks: [...shown],
-      message: values.message,
-    })
+    const { ok } = await loadSendPath().then(
+      ({ sendInquiry }) => sendInquiry({
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        subject,
+        picks: [...shown],
+        message: values.message,
+      }),
+      (error) => {
+        console.error('[inquiry] the send did not load:', error)
+        return { ok: false }
+      },
+    )
     if (!mounted.current) return
     if (ok) {
       resetInquiry()
@@ -193,6 +220,7 @@ export default function InquiryForm({ page = 'home' }) {
         className="form"
         noValidate
         onSubmit={onSubmit}
+        onFocus={preloadSendPath}
         hidden={status === 'sent'}
         aria-busy={sending ? 'true' : undefined}
         data-fade=""

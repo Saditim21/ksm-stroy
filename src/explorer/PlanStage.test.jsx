@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { recordingMotion } from '../test/gsap'
-import { planBox } from './geometry'
+import { planBox } from './planGeometry'
 import { buildModel } from './model'
 import { PLANS } from './plans'
 import PlanStage from './PlanStage'

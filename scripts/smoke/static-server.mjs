@@ -26,11 +26,22 @@
 // key that changes routing and is not emulated here, throws rather than be
 // ignored.
 //
-// usage: node scripts/smoke/static-server.mjs [root] [port] [--latency=ms]
-//   root defaults to build/client, port to 4190; --latency delays each answer.
+// It speaks HTTP/1.1, or in its h2 mode HTTP/2 over TLS, as Vercel's edge
+// serves the site, for Lighthouse (spec §10): the same answers through
+// node:http2's compatibility API, HTTP/1.1 still taken on the same port. The
+// h2 mode makes a throwaway self-signed certificate for 127.0.0.1 with
+// openssl as it starts, in a temp directory it removes at once: no key
+// outlives the start on disk, and none is ever in the repo.
+//
+// usage: node scripts/smoke/static-server.mjs [root] [port] [--latency=ms] [--h2]
+//   root defaults to build/client, port to 4190; --latency delays each answer;
+//   --h2 serves HTTP/2 over TLS (https://).
 
+import { execFileSync } from 'node:child_process'
 import http from 'node:http'
+import http2 from 'node:http2'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import zlib from 'node:zlib'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -52,6 +63,43 @@ const COMPRESSIBLE = /^(text\/|application\/(json|xml|manifest\+json)|image\/svg
 const DEFAULT_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
 // The vercel.json keys that change routing and that this server does not emulate.
 const NOT_EMULATED = ['routes', 'cleanUrls']
+
+// Git for Windows ships openssl in usr/bin, which a shell outside Git Bash
+// may not have on its PATH.
+const GIT_OPENSSL = path.join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git', 'usr', 'bin', 'openssl.exe')
+
+/** The openssl that makes the h2 mode's certificate: the one on PATH, else
+ * Git for Windows's own; null when there is none. */
+export function findOpenssl() {
+  const candidates = process.platform === 'win32' ? ['openssl', GIT_OPENSSL] : ['openssl']
+  return candidates.find((command) => {
+    try {
+      execFileSync(command, ['version'], { stdio: 'ignore' })
+      return true
+    } catch {
+      return false
+    }
+  }) ?? null
+}
+
+// The h2 mode's certificate and key: self-signed, for 127.0.0.1, valid for a
+// day.
+function selfSignedCertificate() {
+  const openssl = findOpenssl()
+  if (!openssl) throw new Error('static-server: the h2 mode needs openssl, on PATH or from Git for Windows, to make its certificate')
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ksm-static-server-h2-'))
+  try {
+    const key = path.join(dir, 'key.pem')
+    const cert = path.join(dir, 'cert.pem')
+    execFileSync(openssl, [
+      'req', '-x509', '-newkey', 'ec', '-pkeyopt', 'ec_paramgen_curve:prime256v1', '-nodes', '-days', '1',
+      '-subj', '/CN=127.0.0.1', '-addext', 'subjectAltName=IP:127.0.0.1', '-keyout', key, '-out', cert,
+    ], { stdio: ['ignore', 'ignore', 'pipe'] })
+    return { key: fs.readFileSync(key), cert: fs.readFileSync(cert) }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
+}
 
 function readVercelConfig() {
   return JSON.parse(fs.readFileSync(path.join(REPO, 'vercel.json'), 'utf8'))
@@ -234,7 +282,10 @@ function resolveFile(root, pathname) {
   return null
 }
 
-export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig(), latency = 0 } = {}) {
+/** The server, not yet listening: an http.Server, or with `h2` an
+ * Http2SecureServer, which also takes HTTP/1.1 over TLS. Either has
+ * closeAllConnections(). */
+export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig(), latency = 0, h2 = false } = {}) {
   const ROOT = path.resolve(root)
   for (const key of NOT_EMULATED) {
     if (config[key] !== undefined) throw new Error(`static-server: vercel.json "${key}" is not emulated`)
@@ -324,21 +375,37 @@ export function createStaticServer({ root = BUILD_DIR, config = readVercelConfig
     send(req, res, status, headers, fs.readFileSync(file))
   }
 
-  return http.createServer((req, res) => {
+  const respond = (req, res) => {
     if (latency > 0) setTimeout(() => answer(req, res), latency)
     else answer(req, res)
+  }
+  if (!h2) return http.createServer(respond)
+
+  const server = http2.createSecureServer({ ...selfSignedCertificate(), allowHTTP1: true }, respond)
+  // http.Server's closeAllConnections(), which an HTTP/2 server lacks: an
+  // open session would keep close() waiting.
+  const sockets = new Set()
+  server.on('connection', (socket) => {
+    sockets.add(socket)
+    socket.on('close', () => sockets.delete(socket))
   })
+  server.closeAllConnections = () => {
+    for (const socket of sockets) socket.destroy()
+  }
+  return server
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [root = BUILD_DIR, port = DEFAULT_PORT] = process.argv.slice(2).filter((arg) => !arg.startsWith('--'))
   const latency = Number(process.argv.find((arg) => arg.startsWith('--latency='))?.split('=')[1] ?? 0)
-  const server = createStaticServer({ root, latency })
+  const h2 = process.argv.includes('--h2')
+  const server = createStaticServer({ root, latency, h2 })
   server.on('error', (error) => {
     console.error(`static-server: ${error.message}`)
     process.exit(1)
   })
   server.listen(Number(port), '127.0.0.1', () => {
-    console.log(`static-server: ${path.resolve(root)} on http://127.0.0.1:${port}`)
+    const served = h2 ? `https://127.0.0.1:${port} (HTTP/2, a self-signed certificate)` : `http://127.0.0.1:${port}`
+    console.log(`static-server: ${path.resolve(root)} on ${served}`)
   })
 }
