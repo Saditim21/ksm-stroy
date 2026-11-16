@@ -126,6 +126,12 @@ describe('parseArgs', () => {
     expect(() => parseArgs(['projects/golden-residence'])).toThrow(/projects\/golden-residence/)
     expect(() => parseArgs(['ftp://127.0.0.1/'])).toThrow(/ftp:/)
   })
+
+  // Git Bash turns an argument that starts with "/" into a Windows path
+  // („/“ arrives as „C:/Program Files/Git/“).
+  it('says how to keep Git Bash from turning a path into a Windows one', () => {
+    expect(() => parseArgs(['C:/Program Files/Git/projects/golden-residence'])).toThrow(/MSYS_NO_PATHCONV=1/)
+  })
 })
 
 it('urlOf: a path on the served build, a full URL as it is', () => {

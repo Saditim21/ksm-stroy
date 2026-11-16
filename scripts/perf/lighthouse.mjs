@@ -29,6 +29,8 @@
 //   --h1: serve the build over HTTP/1.1 (default: HTTP/2 over TLS).
 //   --categories: Lighthouse categories, comma-separated, of performance,
 //   accessibility, best-practices and seo (default: performance).
+//   From Git Bash, run it with MSYS_NO_PATHCONV=1, or Git Bash turns each
+//   path into a Windows one („/“ into „C:/Program Files/Git/“).
 
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
@@ -78,7 +80,8 @@ export function parseArgs(args) {
     } else if (isPath(arg) || isUrl(arg)) {
       pages.push(arg)
     } else {
-      throw new Error(`${arg} is neither a path (/…) nor an http(s) URL; ${USAGE}`)
+      const fromGitBash = /^[a-z]:[\\/]/i.test(arg) ? ' (Git Bash turned a path into a Windows one: run with MSYS_NO_PATHCONV=1)' : ''
+      throw new Error(`${arg} is neither a path (/…) nor an http(s) URL${fromGitBash}; ${USAGE}`)
     }
   }
   return { pages, categories, h1 }
