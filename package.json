@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "check:dist": "node scripts/check-dist.mjs",
     "images": "node scripts/images/build-images.mjs",
+    "mn-snapshot": "node scripts/mnogofamilna/build-snapshot.mjs",
     "smoke": "node scripts/smoke/smoke.mjs",
     "perf": "node scripts/perf/lighthouse.mjs",
     "verify": "npm test && npm run build && npm run check:dist && npm run smoke"

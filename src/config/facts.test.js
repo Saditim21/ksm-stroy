@@ -6,6 +6,8 @@ import {
   getParkingFallbackData,
 } from '../constants/apartmentFallbackData'
 import { getMnogoAFallbackData, getMnogoBFallbackData } from '../constants/mnogofamilnaFallbackData'
+import { apartmentUnits } from '../data/availability/select'
+import { MN_SNAPSHOT_DATA, MN_SNAPSHOT_DATE } from '../data/mnogofamilna/snapshot'
 import { summarizeStatuses } from '../utils/propertyStatus'
 import { GR_FACTS, MNOGO_DATED } from './facts'
 
@@ -22,6 +24,18 @@ describe('MNOGO_DATED', () => {
     const s = summarizeStatuses(statuses)
     expect(MNOGO_DATED).toEqual({ free: s.available, total: s.total, date: '01.12.2025' })
     expect(MNOGO_DATED).toMatchObject({ free: 16, total: 144 })
+  })
+
+  // Home's dated count and the Многофамилна pages' snapshot state one fact.
+  it('MNOGO_DATED agrees with the snapshot', () => {
+    const units = apartmentUnits(MN_SNAPSHOT_DATA, 'mnogofamilna-sgrada')
+
+    expect(MNOGO_DATED).toEqual({
+      free: units.filter((unit) => unit.status === 'available').length,
+      total: units.length,
+      date: MN_SNAPSHOT_DATE,
+    })
+    expect(MNOGO_DATED).toEqual({ free: 16, total: 144, date: '01.12.2025' })
   })
 
   it('cannot be changed by a page', () => {
