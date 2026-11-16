@@ -27,7 +27,11 @@ import UnitPanel from './UnitPanel'
 //   its rails and block switch with it (ExplorerSection.jsx): the unit's row
 //   in the list takes the focus then, its table scrolled to it and the page
 //   to it where it is still off the screen (showRow), else (a stage's floor,
-//   or a row the filters leave out) the selected tab. An
+//   or a row the filters leave out) the selected tab. A page whose list is a
+//   section of its own (#spisak, Многофамилна's, M3 §6.2 #3) shows its rails
+//   and its list at once; there, while the address shows the list
+//   (?view=list, which lands the page on it), a unit's row takes the focus
+//   before its rail, far up the page (ruling PF11, M3 §6.4). An
 //   inquiry's close gives the focus to nothing: the inquiry focuses the
 //   form's first field once its glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
@@ -53,9 +57,9 @@ function focusInto(element) {
 }
 
 const railOf = ({ block, floor }) => document.querySelector(`#explorer .fx__cnt[data-k="${floorKey(block, floor)}"]`)
-// A unit's row in the list (UnitList.jsx): the row whose first cell reads its
-// label.
-const rowOf = (label) => [...document.querySelectorAll('#explorer .lv tr.row')].find((row) => row.querySelector('.uid')?.textContent === label)
+// A unit's row in the list (UnitList.jsx), in the explorer's own panel or in
+// a section of its own (#spisak): the row whose first cell reads its label.
+const rowOf = (label) => [...document.querySelectorAll('#explorer .lv tr.row, #spisak .lv tr.row')].find((row) => row.querySelector('.uid')?.textContent === label)
 const selectedTab = () => document.querySelector('#explorer [role="tab"][aria-selected="true"]')
 
 // Brings a row into view: first in the list's table, which scrolls in a box
@@ -93,8 +97,14 @@ function showRow(row) {
 // under [hidden] is in the facade's panel while the list is on show: the
 // focus goes to the unit's row then (`at.label`, a unit panel's), brought
 // into the table's view, else to the selected tab, and the facade is not
-// asked.
-function focusRailOf(at, focusRail) {
+// asked. With `list`, the address showing the list, a unit's row in a list
+// of its own section (#spisak) comes first, brought into view.
+function focusRailOf(at, focusRail, list) {
+  const listed = list && at.label ? rowOf(at.label) : null
+  if (listed?.closest('#spisak') && focusInto(listed)) {
+    showRow(listed)
+    return
+  }
   const rail = railOf(at)
   if (focusInto(rail)) return
   if (!rail?.closest('[hidden]')) {
@@ -109,6 +119,7 @@ function focusRailOf(at, focusRail) {
 export default function ExplorerDialogs({ project, dated, model, state, opening, setOpening, unitOpener, openUnit, closeStage, setFloor, setBlock, focusRail }) {
   const plans = plansOf(project)
   const { stage, unitId } = state
+  const list = state.view === 'list'
   const unit = findUnit(model, unitId)
   const showStage = Boolean(stage)
   const showUnit = Boolean(unit)
@@ -137,14 +148,14 @@ export default function ExplorerDialogs({ project, dated, model, state, opening,
     }
     if (was.unit && !showUnit && !focusInto(unitOpener.current)) {
       if (showStage) focusInto(document.querySelector('.ps__close'))
-      else if (was.unitAt) focusRailOf(was.unitAt, focusRail)
+      else if (was.unitAt) focusRailOf(was.unitAt, focusRail, list)
     }
     if (was.unit && !showUnit) unitOpener.current = null
     if (was.stage && !showStage) {
-      if (!focusInto(opening?.opener) && was.at) focusRailOf(was.at, focusRail)
+      if (!focusInto(opening?.opener) && was.at) focusRailOf(was.at, focusRail, list)
       setOpening(null)
     }
-  }, [showStage, showUnit, stage, unit, opening, setOpening, unitOpener, focusRail])
+  }, [showStage, showUnit, stage, unit, opening, setOpening, unitOpener, focusRail, list])
 
   const inquire = (target) => {
     quiet.current = true

@@ -20,15 +20,19 @@ import './explorer.css'
 // 320 ms. A mouse click, Enter or Space opens the floor (`onOpenFloor(block,
 // floor, unitLabel?, { fromRect, opener })`); a touch or pen tap on a floor
 // that is not hot only previews it, and the second tap opens it. Compact
-// mode (Home) has no panel and no sheet: its caption, a live region, is the
-// page's own (`caption(floor)`, of the hot floor or null; Home's teaser), so
-// its words stay out of the code the explorer's pages load.
+// mode (Home) has no panel and no sheet. The caption under the facade is its
+// page's (`caption(floor)`, of the hot floor or null): the explorer's
+// (ExplorerSection.jsx), Многофамилна's opening's, or Home's teaser's, a
+// live region in compact mode; so each page's words stay out of the code the
+// others load.
 //
 // `project` is the building's (projects/gr.js, projects/mn.js; useExplorer.js
 // gives its shape), a prop because Home's teaser has no explorer around its
-// facade: its building map's floors, its picture, its name, its seam, its
-// floors' range for the keys and the steppers, and the class its geometry
-// hangs on.
+// facade: its building map's floors, its picture (its page's first, fetched
+// first, where `priority` says so), its name, its seam, its floors' range
+// for the keys and the steppers, the class its geometry hangs on, and its
+// `Lights`, a layer over the picture (Многофамилна's lit floors,
+// FacadeLights.jsx), where it has one.
 //
 // The layout is CSS only (explorer.css, and a project's own stylesheet under
 // its facade's class): a wrapper is the container the root's sizes measure,
@@ -77,7 +81,7 @@ const floorOf = (model, facade, key) => model?.floors.get(key) ?? facade.placeho
 
 export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
   const compact = mode === 'compact'
-  const { map, picture, sizes, alt, className, seam } = project.facade
+  const { map, picture, priority, sizes, alt, className, seam, Lights } = project.facade
   const { min, max } = project.floors
   const facade = facadeOf(map)
   const rootRef = useRef(null)
@@ -349,11 +353,13 @@ export default function Facade({ project, model, mode = 'full', caption, initial
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
         >
-          <p className="fx__bname fx__bname--a">Блок&nbsp;А</p>
+          {/* The two names read as two, apart in the page's text too. */}
+          <p className="fx__bname fx__bname--a">Блок&nbsp;А</p>{' '}
           <p className="fx__bname fx__bname--b">Блок&nbsp;Б</p>
           <div className="fx__clip" aria-hidden="true">
             <div className="fx__frame">
-              <ResponsivePicture image={picture} alt="" sizes={sizes} className="fx__pic" />
+              <ResponsivePicture image={picture} alt="" sizes={sizes} className="fx__pic" priority={priority} />
+              {Lights && <Lights model={model} project={project} />}
               <svg className="fx__svg" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" focusable="false">
                 <defs>
                   <mask id={maskId} maskUnits="userSpaceOnUse" x="-10" y="-10" width={width + 20} height={height + 20}>
@@ -375,20 +381,10 @@ export default function Facade({ project, model, mode = 'full', caption, initial
           </div>
           <FacadeRails rails={facade.rails} model={model} hotKey={hot?.key ?? null} railRefs={railRefs} />
         </div>
-        {compact ? (
-          <p className="fx__cap" aria-live="polite">
-            {caption(hotFloor)}
-          </p>
-        ) : (
-          <>
-            <p className="fx__cap">
-              Цифрите отстрани са <b>свободните апартаменти</b> на всеки етаж.{' '}
-              <span className="cap-desk">Посочете етаж, кликнете, за да отворите плана му.</span>
-              <span className="cap-phone">Докоснете етаж, за да видите плана му; второ докосване го отваря.</span>
-            </p>
-            {fx ? <surfaces.FacadePanels fx={fx} /> : null}
-          </>
-        )}
+        <p className="fx__cap" aria-live={compact ? 'polite' : undefined}>
+          {caption?.(hotFloor)}
+        </p>
+        {fx ? <surfaces.FacadePanels fx={fx} /> : null}
       </div>
       {fx ? <surfaces.FacadeSheet fx={fx} /> : null}
     </div>

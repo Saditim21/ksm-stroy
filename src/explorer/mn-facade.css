@@ -1,0 +1,262 @@
+/* Многофамилна's facade (spec M3 §6.3; the concept's css/mnogofamilna.css:117-141
+   and js/mnogofamilna.js:257-266, :403-458, :636-665), under its facade's
+   class (projects/mn.js: fx--mn), over explorer.css's facade: its geometry on
+   the building map's grid of 1200 × 848, its crops, the fades at their
+   edges, its lights (FacadeLights.jsx) and its entrance; then what its
+   dialogs add: its quieter drawing and its apartments' own plans.
+
+   Imported with its lights, which only Многофамилна's project brings, so
+   none of it reaches another project's routes (M3 §10). Plain CSS, in no
+   Tailwind layer, as explorer.css is; each rule outweighs the facade's own
+   by a class, wherever the two load in the page. The concept's values with
+   the tokens of src/index.css, --screen-h for vh, and the system's focus
+   ring: no outline of its own. */
+
+/* ---------- the geometry (spec M3 §6.3) ---------- */
+/* The stage's width, on the grid of 1200: block А's outer edge (x 78) 18 px
+   clear of an open panel, never under 860 px (Diptych §7.2), the screen's
+   height less 300 px over the crop's aspect, 1500 px at most; its height,
+   the crop's 480; the smallest gap between two floors' centres on screen
+   (31, Б-9 to Б-10), so no two rails overlap; the desktop crop
+   0 / 150 / 1200 × 480; and the fades' sides (--fl, --fr: the share of the
+   crop each side fades over). */
+.fx.fx--mn {
+  --sw: max(860px, min(calc((50cqw - var(--pw) - 18px) * 2.25776), calc((var(--screen-h) - 300px) * 2.5), 1500px));
+  --sh: calc(var(--sw) * 480 / 1200);
+  --pitch: calc(var(--sw) * 31 / 1200);
+  --vbx: 0;
+  --vby: 150;
+  --vbw: 1200;
+  --vbh: 480;
+  --fl: .063;
+  --fr: .052;
+  height: calc(var(--sh) + 58px);
+}
+/* The courtyard, grid x 609.5, the seam, on the page's centre. */
+.fx--mn .fx__stage {
+  top: 0;
+  left: calc(50% - var(--sw) * .507917);
+}
+/* The grid's frame: the whole map, 848 tall. */
+.fx--mn .fx__frame {
+  height: calc(848 / var(--vbh) * 100%);
+  transform-origin: 50% 58.5%;
+}
+/* The render without its margins lies at y 56.2, 1200 × 732.5 on the grid;
+   its lights over it, the same box. Both fade into the onyx at the crop's
+   edges: above the roofs and below the street, over a fifth and a sixth of
+   the crop, and at each side, where the outer half of each side's fade is
+   wholly clear, so the street lamps at the picture's edges stay out from
+   under the rails (the concept's :438-452). The seam, the lens and the
+   floors, in the SVG above, never fade. */
+.fx--mn .fx__pic,
+.fx--mn .fx__lights {
+  position: absolute;
+  top: calc(56.2 / 848 * 100%);
+  left: 0;
+  width: 100%;
+  height: calc(732.5 / 848 * 100%);
+  mask-image:
+    linear-gradient(to bottom,
+      transparent calc((var(--vby) - 56.2) / 7.325 * 1%),
+      #000 calc((var(--vby) + var(--vbh) * .2 - 56.2) / 7.325 * 1%),
+      #000 calc((var(--vby) + var(--vbh) * .84 - 56.2) / 7.325 * 1%),
+      transparent calc((var(--vby) + var(--vbh) - 56.2) / 7.325 * 1%)),
+    linear-gradient(to right,
+      transparent calc((var(--vbx) + var(--vbw) * var(--fl) * .5) / 12 * 1%),
+      #000 calc((var(--vbx) + var(--vbw) * var(--fl)) / 12 * 1%),
+      #000 calc((var(--vbx) + var(--vbw) * (1 - var(--fr))) / 12 * 1%),
+      transparent calc((var(--vbx) + var(--vbw) * (1 - var(--fr) * .5)) / 12 * 1%));
+  mask-composite: intersect;
+}
+/* The night render is the page's first picture: it is never faded, so the
+   facade's own intro, for a facade that comes up from below (Facade.jsx, a
+   landscape phone's), leaves it as it is. Important, over that intro's
+   inline value. */
+.fx--mn .fx__pic { opacity: 1 !important; }
+/* A lit floor: its band (--x, --w on the grid's 1200, --y, --h on the
+   render's 732.5 from 56.2), holding the lit render where the whole one lies. */
+.fx__lit {
+  position: absolute;
+  top: calc((var(--y) - 56.2) / 732.5 * 100%);
+  left: calc(var(--x) / 1200 * 100%);
+  width: calc(var(--w) / 1200 * 100%);
+  height: calc(var(--h) / 732.5 * 100%);
+  overflow: hidden;
+}
+.fx__lit picture {
+  position: absolute;
+  top: calc((var(--y) - 56.2) / var(--h) * -100%);
+  left: calc(var(--x) / var(--w) * -100%);
+  width: calc(1200 / var(--w) * 100%);
+  height: calc(732.5 / var(--h) * 100%);
+}
+.fx__lit img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+/* The rails at x 72 and 1142. */
+.fx--mn .fx__rail--a { left: calc((72 - var(--vbx)) / var(--vbw) * 100%); }
+.fx--mn .fx__rail--b { left: calc((1142 - var(--vbx)) / var(--vbw) * 100%); }
+/* The blocks' names over the render's top, either side of the courtyard,
+   above the picture's clip. */
+.fx--mn .fx__bname {
+  z-index: 2;
+  top: calc(var(--sh) * .07);
+  text-shadow: 0 2px 18px rgba(14, 13, 11, .7);
+}
+.fx--mn .fx__bname--a { right: calc(49.208% + 22px); }
+.fx--mn .fx__bname--b { left: calc(50.792% + 22px); }
+/* The building dims a little deeper around a hot floor, its lights with it. */
+.fx--mn.is-hot .fx__dim { opacity: .62; }
+/* The panels: the facade's height; „Блок А · Етаж 10“ keeps one line in the
+   panel's 284 px. */
+.fx--mn .fxp { min-height: 0; }
+.fx--mn .fxp__title {
+  font-size: clamp(27px, 2.1vw, 34px);
+  white-space: nowrap;
+}
+.fx--mn .fxp__plan { min-height: 96px; }
+@media (min-width: 901px) {
+  .fx--mn .fx__cap { padding: 0 var(--gut); }
+}
+
+/* ---------- phones: one block, its own crop (spec M3 §6.3) ---------- */
+/* А −36 / 208 / 652 × 412, its seam at its inner edge; Б from 600. The
+   pitch on the crop, the fades for each side. */
+@media (max-width: 900px) {
+  .fx.fx--mn {
+    --vbx: -36;
+    --vby: 208;
+    --vbw: 652;
+    --vbh: 412;
+    --pitch: calc((100cqw - 2 * var(--gut)) * 31 / 652);
+    --fl: .172;
+    --fr: .109;
+    height: auto;
+  }
+  .fx.fx--mn[data-block="Б"] {
+    --vbx: 600;
+    --fl: .117;
+    --fr: .175;
+  }
+  .fx--mn .fx__stage {
+    left: auto;
+    aspect-ratio: 652 / 412;
+  }
+}
+
+/* ---------- the entrance (spec M3 §6.3; Diptych §5.5) ---------- */
+/* CSS from the first paint, under the motion gate inside no-preference, the
+   starting states in the keyframes alone. The frame settles from 1.05 over
+   1.6 s (the render is never faded), the seam draws down the courtyard, the
+   rails come up floor by floor from the bottom (by their centre, --cy), the
+   blocks' names and the caption fade in; then the lights: the lit floors
+   switch on once, bottom to top, both blocks of a floor together, 0.55 s
+   each, 0.11 s apart (their step, --i), the page's one signature moment.
+   Without motion they are simply lit. */
+@media (prefers-reduced-motion: no-preference) {
+  :root.js .fx--mn .fx__frame {
+    animation: mn-settle 1.6s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .2s);
+  }
+  :root.js .fx--mn .fx__seam {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: mn-draw 1.2s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .45s);
+  }
+  :root.js .fx--mn .fx__cnt {
+    animation: mn-up .6s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .6s + (600 - var(--cy)) * .0008s);
+  }
+  :root.js .fx--mn .fx__bname,
+  :root.js .fx--mn .fx__cap {
+    animation: mn-fade .8s var(--e-soft) both;
+    animation-delay: calc(var(--arrive) + .7s);
+  }
+  :root.js .fx--mn .fx__cap { animation-delay: calc(var(--arrive) + 1.2s); }
+  :root.js .fx__lit {
+    animation: mn-light .55s var(--e-soft) both;
+    animation-delay: calc(var(--arrive) + .95s + var(--i) * .11s);
+  }
+}
+
+@keyframes mn-settle { from { transform: scale(1.05); } }
+@keyframes mn-draw { from { transform: scaleY(0); } }
+@keyframes mn-up { from { opacity: 0; transform: translateY(10px); } }
+@keyframes mn-fade { from { opacity: 0; } }
+@keyframes mn-light { from { opacity: 0; } }
+
+/* ---------- the dialogs (spec M3 §6.4) ---------- */
+/* Its drawing, the walls of a furnished plan, heavier than Golden
+   Residence's line drawing: quieter, .42 in the plan stage and .55 in the
+   unit panel's crop (ruling PF5), under its plans' class (mn.plans.js). The
+   stage's opening reads --drawing for the opacity its drawing comes to
+   (PlanStage.jsx). */
+.plan.plan--mn { --drawing: .42; }
+.plan--mn.plan--crop { --drawing: .55; }
+.plan.plan--mn .drawing[data-loaded] { opacity: var(--drawing); }
+/* An apartment's own plan, where production has one (UnitPanel.jsx): the
+   switch over the left half, the plan whole on a light plate, and the
+   floor's plan below the switch. */
+.up__views {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 3;
+}
+.up__l.up__l--own > svg {
+  top: 72px;
+  height: calc(100% - 118px);
+}
+.up__own {
+  position: absolute;
+  inset: 72px 28px 46px;
+  z-index: 2;
+  overflow: hidden;
+  background: var(--ivory);
+}
+.up__own picture,
+.up__own img {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  max-width: none;
+  object-fit: contain;
+}
+.up__own img { inset: 0; width: 100%; height: 100%; }
+@media (max-width: 900px) {
+  .up__views {
+    top: 10px;
+    left: 10px;
+  }
+  .up__l.up__l--own > svg {
+    top: 54px;
+    height: calc(100% - 64px);
+  }
+  .up__own { inset: 54px 10px 10px; }
+}
+/* The switch's two words keep inside a phone's panel, and on the narrowest,
+   clear of its close, each on two lines if it must (a reader's text spacing
+   too). */
+@media (max-width: 560px) {
+  .seg.up__views button {
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+}
+@media (max-width: 374px) {
+  .seg.up__views { max-width: calc(100% - 74px); }
+  .seg.up__views button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: auto;
+    min-height: 40px;
+    padding: 4px 8px;
+    line-height: 1.2;
+  }
+}

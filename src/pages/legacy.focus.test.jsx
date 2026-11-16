@@ -3,7 +3,6 @@ import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../tests/contracts/site'
-import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 import Blog from './Blog'
 import Contact from './Contact'
 import Projects from './Projects'
@@ -70,26 +69,6 @@ it('/contact: the closing band is on dusk; the form is not', () => {
   expect(onDusk(screen.getByRole('button', { name: /Изпрати съобщение/ }))).toBe(false)
 })
 
-// A project page's photo gallery and its full-screen viewer: dark throughout.
-// (The Golden Residence page, rebuilt in Diptych, is dark throughout.)
-it.each([
-  { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
-])('$path: the photo gallery and its full-screen viewer are on dusk', async ({ Page }) => {
-  renderPage(Page)
-
-  fireEvent.click(screen.getByRole('button', { name: /Снимки/ }))
-  const gallery = (await screen.findByText('Галерия със снимки')).closest('.fixed')
-  const galleryControls = within(gallery).getAllByRole('button')
-  expect(galleryControls.length).toBeGreaterThan(0)
-  for (const control of galleryControls) expect(onDusk(control)).toBe(true)
-
-  fireEvent.click(within(gallery).getAllByRole('img')[0])
-  const viewer = (await screen.findByText('Кликнете навсякъде за затваряне')).closest('.fixed')
-  const viewerControls = within(viewer).getAllByRole('button')
-  expect(viewerControls.length).toBeGreaterThan(0)
-  for (const control of viewerControls) expect(onDusk(control)).toBe(true)
-})
-
 // A Многофамилна block page's full-screen floor plan, opened from a free
 // apartment: its bar and zoom controls sit on black; the gold card of the
 // chosen apartment does not, and its „Контакт“ keeps the onyx ring. (The
@@ -108,19 +87,3 @@ it.each([
   }
   expect(onDusk(within(viewer).getByRole('button', { name: 'Контакт' }))).toBe(false)
 }, 30000)
-
-// A project page's block cards: each card sits on the light page, so its own
-// ring stays onyx; „Преглед на блока“ inside it sits on the photo's dark
-// overlay. (framer-motion makes both focusable: they respond to a tap.)
-it.each([
-  { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection },
-])('$path: „Преглед на блока“ on each card’s photo is on dusk; the cards are not', ({ Page }) => {
-  renderPage(Page)
-
-  const pills = screen.getAllByText('Преглед на блока').map((label) => label.parentElement)
-  expect(pills).toHaveLength(2)
-  for (const pill of pills) expect(onDusk(pill)).toBe(true)
-  for (const name of ['БЛОК А', 'БЛОК Б']) {
-    expect(onDusk(screen.getByRole('heading', { name }).closest('.cursor-pointer')), name).toBe(false)
-  }
-})

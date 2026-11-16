@@ -93,6 +93,9 @@ function fitted(rect, box) {
 // corrected"): it lands with the stage's 1 px outline, which is thinner
 // while it is small and never thickens as it grows. Its PlanSvg leaves them
 // to this (fit={false}).
+//
+// The drawing comes up to the opacity its project gives it (--drawing on the
+// plan: Многофамилна's .42, mn-facade.css), else Golden Residence's .6.
 function morph(gsap, { root, svg, ghost, plan, fromRect, onDone }) {
   const mini = planBox(plan, MINI_PAD)
   const full = planBox(plan, STAGE_PAD)
@@ -125,7 +128,8 @@ function morph(gsap, { root, svg, ghost, plan, fromRect, onDone }) {
     .to(ghost, { opacity: 0, duration: 0.25, ease: 'power1.inOut' }, 0.55)
     .to(rest, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.06 }, 0.55)
     .set(svg, { pointerEvents: 'auto' }, 0.8)
-  if (drawing) timeline.to(drawing, { opacity: 0.6, duration: 0.4, ease: 'power2.out' }, 0.6)
+  const shade = Number.parseFloat(getComputedStyle(svg).getPropertyValue('--drawing')) || 0.6
+  if (drawing) timeline.to(drawing, { opacity: shade, duration: 0.4, ease: 'power2.out' }, 0.6)
   return timeline
 }
 

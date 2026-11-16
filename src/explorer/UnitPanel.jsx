@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Button from '../components/ui/Button'
+import ResponsivePicture from '../components/ui/ResponsivePicture'
 import Seam from '../components/ui/Seam'
 import StatusChip from '../components/ui/StatusChip'
 import { statusKeyOf } from '../components/ui/status'
@@ -26,6 +27,13 @@ import { stepUnit } from './surfaceModel'
 // numbers that are not live, what it offers by its status, and the previous
 // and next units on the floor, round from either end. Идеални части shows
 // while the project's sheets give any: Многофамилна's give none (M3 §2).
+//
+// Where production has a plan of the apartment itself (its plans' `own`,
+// plans.js: Многофамилна's, M3 §2, §6.4), a switch over the left half,
+// „План на етажа / План на апартамента“, shows that plan whole on a light
+// plate instead of the floor's, and the caption says which plan it is
+// (mn-facade.css). It starts on the floor's; a step to an apartment with no
+// plan of its own goes back to it.
 //
 // - available: solid „Изпратете запитване“; reserved, and a status the rules
 //   do not know: „Попитайте за апартамента“. Either hands the unit to
@@ -120,22 +128,41 @@ function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire })
   useScrollLock(PALETTE.umber)
   const plan = plans[unit.block]
   const shape = planShapes(plan).find(({ suffix }) => suffix === unit.suffix)
-  // The crop matches the left half's box, measured (cropFor).
+  // The crop matches the plan's box in the left half, measured (cropFor):
+  // the half's, less the switch where the apartment has a plan of its own.
   const [aspect, setAspect] = useState(1)
   const crop = useMemo(() => (shape ? cropFor(shape.bbox, aspect) : undefined), [shape, aspect])
+  // Production's plan of the apartment itself, and which plan the left half
+  // shows.
+  const own = plan.own?.[unit.label] ?? null
+  const [view, setView] = useState('floor')
+  if (!own && view !== 'floor') setView('floor')
+  const showOwn = Boolean(own) && view === 'own'
 
   useLayoutEffect(() => {
     const half = leftRef.current
     if (!half) return undefined
+    const drawn = half.querySelector('svg')
     const measure = () => {
-      const { width, height } = (half.querySelector('svg') ?? half).getBoundingClientRect()
+      const { width, height } = (drawn ?? half).getBoundingClientRect()
       if (width && height) setAspect(width / height)
     }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(half)
+    if (drawn) observer.observe(drawn)
     return () => observer.disconnect()
   }, [])
+
+  // A switch between the floor's plan and the apartment's: the plan it
+  // turns to fades in (the concept's mnogofamilna.js:881).
+  const shownView = useRef(view)
+  useLayoutEffect(() => {
+    if (shownView.current === view) return
+    shownView.current = view
+    const target = leftRef.current?.querySelector(view === 'own' ? '.up__own' : 'svg')
+    if (target) motionNow()?.gsap.fromTo(target, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out', clearProps: 'opacity' })
+  }, [view, motionNow])
 
   // The way in, before the first paint.
   useLayoutEffect(() => {
@@ -238,10 +265,36 @@ function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire })
     >
       <div className="up__box">
         <Seam />
-        <div ref={leftRef} className="up__l">
+        <div ref={leftRef} className={own ? 'up__l up__l--own' : 'up__l'}>
+          {own ? (
+            <div className="seg up__views" role="group" aria-label="План">
+              <button type="button" aria-pressed={!showOwn} onClick={() => setView('floor')}>
+                План на етажа
+              </button>
+              <button type="button" aria-pressed={showOwn} onClick={() => setView('own')}>
+                План на апартамента
+              </button>
+            </div>
+          ) : null}
           <PlanSvg plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
+          {showOwn ? (
+            <div className="up__own">
+              <ResponsivePicture
+                image={{ ...own, color: 'transparent' }}
+                alt={`План на апартамент ${unit.label}: стаите и площите им`}
+                sizes="(max-width: 900px) 100vw, 560px"
+                eager
+              />
+            </div>
+          ) : null}
           <p className="up__cap">
-            План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е{NBSP}очертан.
+            {showOwn ? (
+              <>План на апартамент {unit.label}.</>
+            ) : (
+              <>
+                План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е{NBSP}очертан.
+              </>
+            )}
           </p>
         </div>
         <div ref={rightRef} className="up__r">

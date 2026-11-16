@@ -6,15 +6,16 @@ import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
 import Contact from './Contact'
-import MnogofamilnaBlockSelection from '../components/MnogofamilnaBlockSelection'
 
 // The build pre-renders the legacy pages in Node, and a visitor sees that HTML
 // until the JS runs. It is their final visual state (plan, global rules): no
 // element starts faded out, collapsed or moved away for an entrance animation
 // to bring it in later. (Home, the Golden Residence page and its block
-// pages, rebuilt, are src/pages/home/home.prerender.test.jsx's,
-// src/pages/golden-residence/gr.prerender.test.jsx's and
-// src/explorer/BlockPage.prerender.test.jsx's.) No page the site serves is
+// pages, and the Многофамилна page, rebuilt, are
+// src/pages/home/home.prerender.test.jsx's,
+// src/pages/golden-residence/gr.prerender.test.jsx's,
+// src/explorer/BlockPage.prerender.test.jsx's and
+// src/pages/mnogofamilna/mn.prerender.test.jsx's.) No page the site serves is
 // wrapped in the legacy ApartmentProvider any more, so neither are these.
 
 const prerender = (Page) => renderToString(
@@ -36,7 +37,6 @@ const hiddenElements = (html) =>
 
 test.each([
   { path: '/about', Page: About, text: 'Мисия и визия' },
-  { path: '/projects/mnogofamilna-sgrada', Page: MnogofamilnaBlockSelection, text: 'Многофамилна жилищна сграда' },
 ])('$path pre-renders every element in its final place', ({ Page, text }) => {
   const html = prerender(Page)
   expect(html).toContain(text)

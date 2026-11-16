@@ -30,7 +30,7 @@ export default [
   page('projects', 'pages/Projects.jsx'),
   page('projects/golden-residence', 'routes/golden-residence.jsx'),
   ...blockPages('golden-residence', 'routes/golden-residence-block.jsx'),
-  page('projects/mnogofamilna-sgrada', 'components/MnogofamilnaBlockSelection.jsx'),
+  page('projects/mnogofamilna-sgrada', 'routes/mnogofamilna.jsx'),
   ...blockPages('mnogofamilna-sgrada', 'routes/mnogofamilna-block.jsx'),
   // /projects/1 to /projects/12 were placeholder projects that never existed.
   // Their old URLs land on /projects. Static segments outrank params, so the

@@ -33,6 +33,9 @@ import useExplorerState from './useExplorerState'
 // - A deep link: when the address opens a dialog as the page arrives, the
 //   page first jumps to #explorer, with no glide (jumpToId), so closing the
 //   stage leaves the reader at the facade; the dialogs mount after the jump.
+//   On a page whose list is a section of its own (#spisak, Многофамилна's,
+//   M3 §6.2 #3), an address that shows the list (?view=list) lands on the
+//   list instead, its dialogs, if any, over it.
 // - Its landing keeps the EU line in view (spec §1.9, §14.1): the jump would
 //   slide the header's EU row away (§6.2), and the dialogs cover the page.
 //   From just before the jump until the landing's dialogs have gone, <html>
@@ -55,7 +58,7 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   const model = useMemo(() => buildModel(data, project), [data, project])
   const dated = project.dated(snapshot)
   const state = useExplorerState({ routeBlock, floors: project.floors })
-  const { stage, unitId } = state
+  const { stage, unitId, view } = state
   const hydrated = useHydrated()
   const motionNow = useMotionNow()
   // The address's state at its latest, for what runs after a delay.
@@ -70,13 +73,14 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   const [landing, setLanding] = useState(false)
   useEffect(() => {
     if (!hydrated || arrived) return
+    const at = view === 'list' && document.getElementById('spisak') ? 'spisak' : 'explorer'
     if (stage || unitId) {
       holdEuRow(true)
       setLanding(true)
-      jumpToId('explorer')
-    }
+      jumpToId(at)
+    } else if (at === 'spisak') jumpToId(at)
     setArrived(true)
-  }, [hydrated, arrived, stage, unitId])
+  }, [hydrated, arrived, stage, unitId, view])
 
   // The landing lasts while the address asks for a dialog the page can show:
   // the stage, or a unit the model has (or may have, until the data is in).

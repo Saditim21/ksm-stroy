@@ -1,9 +1,11 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { MN_SNAPSHOT_DATA } from '../data/mnogofamilna/snapshot'
 import { recordingMotion } from '../test/gsap'
 import { buildModel } from './model'
 import { loadPlans } from './plans'
 import { GR_PROJECT } from './projects/gr'
+import { MN_PROJECT } from './projects/mn'
 import { snapshotData } from './testing'
 import UnitPanel from './UnitPanel'
 
@@ -310,4 +312,67 @@ it('opens with the halves parting from the seam over 0.7 s, the panel fading in 
   } finally {
     motion = null
   }
+})
+
+// Spec M3 §6.4: on Многофамилна, an apartment production has a plan of its
+// own (src/constants/apartmentImages.js, less А-858 and А-864) offers it
+// beside the floor's: „План на етажа / План на апартамента“, the own plan
+// whole on a light plate, the caption changing with it. An apartment with
+// none offers no switch.
+describe('the own-plan switch only for mapped ids', () => {
+  const MN_MODEL = buildModel(MN_SNAPSHOT_DATA, MN_PROJECT)
+  let MN_PLANS
+  beforeAll(async () => {
+    MN_PLANS = await loadPlans(MN_PROJECT)
+  })
+  const renderMn = (unitId) => render(<UnitPanel plans={MN_PLANS} dated="01.12.2025" model={MN_MODEL} unitId={unitId} onClose={vi.fn()} onStep={vi.fn()} onInquire={vi.fn()} />)
+
+  it('switches А-802 between the floor’s plan and its own, the caption with it', () => {
+    renderMn('А-802')
+    const dialog = panel('А-802')
+    const views = within(dialog).getByRole('group', { name: 'План' })
+    const floorView = within(views).getByRole('button', { name: 'План на етажа' })
+    const ownView = within(views).getByRole('button', { name: 'План на апартамента' })
+
+    expect(floorView).toHaveAttribute('aria-pressed', 'true')
+    expect(ownView).toHaveAttribute('aria-pressed', 'false')
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-802 е очертан.')
+    expect(dialog.querySelector('.up__own')).toBeNull()
+
+    fireEvent.click(ownView)
+    expect(ownView).toHaveAttribute('aria-pressed', 'true')
+    expect(floorView).toHaveAttribute('aria-pressed', 'false')
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на апартамент А-802.')
+    const own = dialog.querySelector('.up__own img')
+    expect(own).toHaveAttribute('alt', 'План на апартамент А-802: стаите и площите им')
+    expect(own.getAttribute('src')).toMatch(/^\/img\/mn-apt-a802-\d+\.webp$/)
+
+    fireEvent.click(floorView)
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-802 е очертан.')
+    expect(dialog.querySelector('.up__own')).toBeNull()
+  })
+
+  // Ruling PF14: Б-202 and Б-206 show Б-102's and Б-106's plans.
+  it('shows Б-202 the plan of Б-102', () => {
+    renderMn('Б-202')
+    fireEvent.click(within(panel('Б-202')).getByRole('button', { name: 'План на апартамента' }))
+    expect(panel('Б-202').querySelector('.up__own img').getAttribute('src')).toMatch(/^\/img\/mn-apt-b102-\d+\.webp$/)
+  })
+
+  it('offers А-101, which has none, no switch', () => {
+    renderMn('А-101')
+    const dialog = panel('А-101')
+
+    expect(within(dialog).queryByRole('group', { name: 'План' })).toBeNull()
+    expect(within(dialog).queryByRole('button', { name: 'План на апартамента' })).toBeNull()
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 2, блок А. А-101 е очертан.')
+  })
+
+  // The project's drawing under the crop: Многофамилна's dark line art.
+  it('crops the floor over Многофамилна’s own drawing', () => {
+    renderMn('А-802')
+    const plan = panel('А-802').querySelector('svg.plan')
+    expect(plan).toHaveClass('plan--mn')
+    expect(plan.querySelector('image.drawing')).toHaveAttribute('href', '/img/mn-plan-line-2400.webp')
+  })
 })

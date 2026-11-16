@@ -143,6 +143,10 @@ const VISITS = [
   ...config.prerender.map((pathname) => ({ path: pathname })),
   { path: '/projects/golden-residence/block-a?floor=3', dialog: 'Блок А · Етаж 3' },
   { path: '/projects/golden-residence/block-b?floor=2&unit=%D0%91%20201', dialog: 'Б 201' },
+  // Многофамилна's deep links (spec M3 §12): a floor's plan stage, and a
+  // unit's panel, each landing with the EU row in view.
+  { path: '/projects/mnogofamilna-sgrada?floor=%D0%91-5', dialog: 'Блок Б · Етаж 5' },
+  { path: '/projects/mnogofamilna-sgrada?unit=%D0%90-802', dialog: 'А-802' },
   { path: '/contact?apartment=%D0%90%20301' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },

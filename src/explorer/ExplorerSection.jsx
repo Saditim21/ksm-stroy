@@ -57,6 +57,20 @@ import ViewTabs from './ViewTabs'
 // it has one #explorer.
 const ID = 'ex'
 
+/** The facade's caption (Facade.jsx): what its rails count, and how to open
+ * a floor, in a desktop's words and a phone's (explorer.css shows one).
+ * Многофамилна's opening says it too, after its lights (MnHero.jsx). */
+export function FacadeCaption() {
+  return (
+    <>
+      Цифрите отстрани са <b>свободните апартаменти</b> на всеки етаж.{' '}
+      <span className="cap-desk">Посочете етаж, кликнете, за да отворите плана му.</span>
+      <span className="cap-phone">Докоснете етаж, за да видите плана му; второ докосване го отваря.</span>
+    </>
+  )
+}
+const caption = () => <FacadeCaption />
+
 export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)
   useReveals(ref)
@@ -185,6 +199,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
             focusRail={railFocus}
             onOpenFloor={openFloor}
             onRailFocused={railFocused}
+            caption={caption}
           />
         </div>
         <div id={`${ID}-list`} role="tabpanel" aria-labelledby={`${ID}-tab-list`} data-view="list" hidden={view !== 'list'}>

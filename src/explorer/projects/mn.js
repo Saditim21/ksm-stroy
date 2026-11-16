@@ -1,22 +1,27 @@
 // Многофамилна жилищна сграда, as the one explorer reads a project (spec M3
-// §2, §5, §6.4; the shape is useExplorer.js's): two blocks of apartments on
-// floors 2–10, eight a floor, numbered by the data (А-101 is on floor 2), the
-// top floor the attic. Its numbers are the dated snapshot of 01.12.2025
-// (src/data/mnogofamilna/snapshot.js) until the store holds live rows of
-// both its blocks, which its sheets would give once they are published: the
-// date goes with them. Its plans are data, there at once (ruling PF3: the
-// block pages prerender mini plans of its one typical floor).
+// §2, §5, §6.3, §6.4; the shape is useExplorer.js's): two blocks of
+// apartments on floors 2–10, eight a floor, numbered by the data (А-101 is on
+// floor 2), the top floor the attic. Its numbers are the dated snapshot of
+// 01.12.2025 (src/data/mnogofamilna/snapshot.js) until the store holds live
+// rows of both its blocks, which its sheets would give once they are
+// published: the date goes with them.
 //
-// Its facade is a placeholder until Task 4 brings the night render's lights:
-// the building map, the alt text, the class its stylesheet's geometry hangs
-// on and the seam are its own; the picture is the night render with its
-// lights off (mn-night's mn-dusk-off), the same crop of the 3308 px master
-// as the daylight one it replaces.
+// Its facade is the night render (spec M3 §6.3): the twin with every window
+// dark (mn-night's mn-dusk-off), the page's first picture, and over it the
+// lit render (mn-dusk, of the same crop of the 3308 px master) through the
+// band of every floor with a free apartment (FacadeLights.jsx). Its geometry
+// on the building map's grid of 1200 × 848, its crops and its fades are its
+// stylesheet's (src/explorer/mn-facade.css), under the facade's class.
+//
+// Its plans' data are there at once (ruling PF3: the block pages prerender
+// mini plans of its one typical floor); its drawing and its apartments' own
+// plans are a chunk of their own (mn.plans.js), which the dialogs load.
 import mnNight from '../../data/images/mn-night.json'
 import building from '../../data/maps/mnogofamilna.building.json'
 import floors from '../../data/maps/mnogofamilna.floors.json'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
 import { MN_SNAPSHOT_DATA, MN_SNAPSHOT_DATE } from '../../data/mnogofamilna/snapshot'
+import FacadeLights from '../FacadeLights'
 
 const ID = 'mnogofamilna-sgrada'
 
@@ -24,6 +29,24 @@ const ID = 'mnogofamilna-sgrada'
 // store.js gives Многофамилна rows only from its own sheets, or built in
 // when every read failed).
 const live = (snapshot) => ['block-a', 'block-b'].every((slot) => snapshot.origin?.[ID]?.[slot] === 'live')
+
+// Each block's band on the grid, as wide as its towers (the concept's
+// mnogofamilna.js:262): the lit render shows a floor through its band.
+const BANDS = Object.freeze({ 'А': Object.freeze([70, 516]), 'Б': Object.freeze([700, 1146]) })
+
+// The facade's floors are its bands, 6 inside them, at each floor's height
+// on the building map (the concept's :455-458): the lens covers the block's
+// band, as the lit floor does, and so does the pointer's target.
+const map = Object.freeze({
+  ...building,
+  shapes: building.shapes.map((shape) => {
+    if (shape.type !== 'floor') return shape
+    const ys = shape.polygons[0].map(([, y]) => y)
+    const [top, bottom] = [Math.min(...ys), Math.max(...ys)]
+    const [left, right] = [BANDS[shape.block][0] + 6, BANDS[shape.block][1] - 6]
+    return { ...shape, polygons: [[[left, top], [right, top], [right, bottom], [left, bottom]]] }
+  }),
+})
 
 export const MN_PROJECT = Object.freeze({
   id: ID,
@@ -38,13 +61,23 @@ export const MN_PROJECT = Object.freeze({
   types: Object.freeze(Object.keys(MN_FACTS.types).sort()),
   exposureNote: null,
   facade: Object.freeze({
-    map: building,
+    map,
+    // The twin, the page's first picture (its LCP): fetched first and at
+    // once. Its sky is the render's own, so it waits on the page's ground.
     picture: Object.freeze({ ...mnNight['mn-dusk-off'], color: 'transparent' }),
-    sizes: '100vw',
+    priority: true,
+    // The lit render, which the lit floors show (FacadeLights.jsx).
+    lit: Object.freeze({ ...mnNight['mn-dusk'], color: 'transparent' }),
+    // The picture's width, the grid's: the stage's on a desktop (860 px up
+    // to a 1365 px screen, then about .66 of it), 1200 / 652 of the stage on
+    // a phone, which shows one block's crop (mn-facade.css).
+    sizes: '(max-width: 900px) 170vw, (max-width: 1365px) 860px, 66vw',
     alt: 'Фасада на Многофамилна жилищна сграда',
     className: 'fx--mn',
     // The courtyard between the blocks (the concept's mnogofamilna.js:258).
     seam: Object.freeze({ x: 609.5, top: 150, bottom: 598 }),
+    bands: BANDS,
+    Lights: FacadeLights,
   }),
   plans: Object.freeze({
     floors,
@@ -53,4 +86,5 @@ export const MN_PROJECT = Object.freeze({
     // The top floor is the one production calls „Тавански етаж“ (spec §2).
     floorMeta: ({ floor }) => (floor === MN_FACTS.floors.max ? 'тавански етаж' : null),
   }),
+  loadPlans: () => import('./mn.plans'),
 })

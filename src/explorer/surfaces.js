@@ -26,7 +26,7 @@ import { loadFlip } from '../motion/flip'
 // fails here is tried again by the switch, which says so.
 export { FacadePanels, FacadeSheet } from './FacadeSurfaces'
 export { default as ExplorerDialogs } from './ExplorerDialogs'
-export { loadPlans, plansOf } from './plans'
+export { hasPlans, loadPlans, plansOf } from './plans'
 export { loadFlip }
 
 /** Loads the list's own chunk. */

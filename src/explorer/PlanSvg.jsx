@@ -31,8 +31,10 @@ import './explorer.css'
 // - crop, the unit panel's: `viewBox` frames one unit (cropFor), over the
 //   drawing at 0.78; hidden from assistive technology.
 // The drawing is the plan's own (plan.drawing), where its project has one.
-// It fades in once it has loaded (explorer.css). Its area is the plan's
-// box's: whatever holds the plan clips it (extract §8.3.4).
+// It fades in once it has loaded (explorer.css), to the opacity its
+// project's look gives it, under the plan's own class where it has one
+// (plan.className: Многофамилна's quieter line art, mn-facade.css). Its area
+// is the plan's box's: whatever holds the plan clips it (extract §8.3.4).
 //
 // `hot` (a suffix) is the unit a pointer, the keyboard or the stage's table
 // is on: a brass-l outline, the other fills dropping back. `focus` (a suffix)
@@ -122,7 +124,7 @@ export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = nul
   return (
     <svg
       ref={ref}
-      className={`plan plan--${mode}`}
+      className={plan.className ? `plan plan--${mode} ${plan.className}` : `plan plan--${mode}`}
       viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
       preserveAspectRatio="xMidYMid meet"
       role={interactive ? 'group' : undefined}

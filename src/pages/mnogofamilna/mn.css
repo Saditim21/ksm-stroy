@@ -1,0 +1,256 @@
+/* The Многофамилна page (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §6.2; Diptych §5.5): its opening, the explorer itself, and the list's
+   section, ported from the concept's css/mnogofamilna.css (:98-115 the
+   opening, :158-159 the list, :201-233 their phones) with the tokens of
+   src/index.css, --screen-h for vh, and the system's type: the name reads
+   across the seam at Home's slogan size (M3 §4.1).
+
+   The page's own stylesheet (src/routes/mnogofamilna.jsx), after the
+   site's: plain CSS, in no Tailwind layer. A section's padding, the seam,
+   the split and the hinge are the site's (src/styles/diptych.css); the
+   facade, its lights, its crops and its dialogs are the explorer's
+   (src/explorer/explorer.css) and Многофамилна's own
+   (src/explorer/mn-facade.css); the inquiry's styles its component's.
+
+   The opening moves by CSS from first paint (Diptych §5.5), only under the
+   motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes, held by a `both`
+   fill. Every entrance waits --arrive (src/styles/motion.css). */
+
+/* ---------- the opening (spec M3 §6.2 #1) ---------- */
+/* Under the solid header, on onyx, clipped across, so an edge panel sliding
+   in from past the page's edge never widens the page. */
+.mnx {
+  position: relative;
+  overflow-x: clip;
+  padding: clamp(18px, calc(var(--screen-h) * .032), 44px) 0 clamp(40px, calc(var(--screen-h) * .06), 76px);
+  background: var(--onyx);
+}
+/* Two halves on the seam, which runs from the name down into the facade,
+   the courtyard's own. */
+.mnx__head {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.mnx__head > .seam {
+  top: 4px;
+  bottom: -36px;
+  z-index: 1;
+}
+/* The name reads across the seam, as the building does: „Многофамилна“ over
+   block А, „жилищна сграда“ over block Б, each part .2 em from the seam
+   (its mask's own .14 em of room, given back, and .2 em more). */
+.mnx__h1 {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.01em;
+}
+.mnx__h1 em { color: var(--brass-l); }
+.mnx__h1 .split-line { display: block; }
+.mnx__l,
+.mnx__r { white-space: nowrap; }
+.mnx__h1 .mnx__l {
+  padding-right: .34em;
+  text-align: right;
+}
+.mnx__h1 .mnx__r {
+  --n: 1;
+  padding-left: .34em;
+}
+.mnx__addr {
+  grid-column: 2;
+  margin-top: 12px;
+  padding-left: clamp(22px, 2.4vw, 40px);
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+/* The facts either side of the seam: the 144 apartments against it, the
+   free ones after it. */
+.mnx__facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: clamp(18px, calc(var(--screen-h) * .03), 30px);
+}
+.mnx__fact {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 clamp(22px, 2.4vw, 40px);
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.mnx__fact--l { justify-content: flex-end; }
+.mnx__fact--r { --n: 1; }
+.mnx__fact .num {
+  color: var(--ivory);
+  font-size: clamp(40px, 3.4vw, 56px);
+  font-weight: 600;
+  line-height: .9;
+}
+/* The two ways on, either side of the seam. */
+.mnx__actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: clamp(18px, calc(var(--screen-h) * .028), 28px);
+}
+.mnx__actions > :first-child {
+  justify-self: end;
+  margin-right: clamp(22px, 2.4vw, 40px);
+}
+.mnx__actions > :last-child {
+  --n: 1;
+  justify-self: start;
+  margin-left: clamp(22px, 2.4vw, 40px);
+}
+.mnx__facade { margin-top: clamp(12px, calc(var(--screen-h) * .02), 24px); }
+
+/* ---------- the list (spec M3 §6.2 #3) ---------- */
+/* After a section, no padding of its own above its hinge. The list keeps
+   its room before it loads, so nothing visible moves when it lands: its
+   filters' bar, as tall as it wraps at the screen's width (measured: 190 px
+   from 1024 px, two rows of filters), over its table's box, .68 of the
+   screen or 720 px at most (--list-table), .64 of it on a phone
+   (explorer.css). Once in, the table's box fills what its bar leaves of the
+   room, so a bar on fewer rows leaves no gap under the list. */
+.mnl {
+  --list-table: min(calc(var(--screen-h) * .68), 720px);
+  background: var(--onyx);
+}
+.sec + .mnl { padding-top: 0; }
+.mnl__list {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(var(--list-table) + 190px);
+}
+.mnl .lv {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+.mnl .lv__table {
+  flex: 1 0 auto;
+  height: var(--list-table);
+  max-height: none;
+}
+@media (max-width: 1023px) {
+  .mnl__list { min-height: calc(var(--list-table) + 238px); }
+}
+
+/* ---------- phones (spec M3 §4.1: the halves stack) ---------- */
+@media (max-width: 900px) {
+  .mnx { padding-top: 22px; }
+  .mnx__head {
+    grid-template-columns: 1fr;
+    padding: 0 var(--gut);
+  }
+  .mnx__head > .seam { display: none; }
+  .mnx__h1 {
+    grid-template-columns: 1fr;
+    font-size: clamp(36px, 10.6vw, 56px);
+    line-height: 1.02;
+  }
+  .mnx__h1 .mnx__l,
+  .mnx__h1 .mnx__r {
+    padding-right: .14em;
+    padding-left: .14em;
+    text-align: left;
+  }
+  .mnx__addr {
+    grid-column: 1;
+    margin-top: 14px;
+    padding: 0;
+    font-size: 14px;
+  }
+  .mnx__facts {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--brass);
+  }
+  .mnx__fact,
+  .mnx__fact--l {
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .mnx__fact .num {
+    min-width: 2.1ch;
+    font-size: 40px;
+  }
+  .mnx__actions {
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .mnx__actions > :first-child,
+  .mnx__actions > :last-child {
+    justify-self: stretch;
+    margin: 0;
+    padding: 0 12px;
+  }
+  .mnx__facade { margin-top: 26px; }
+  /* The list's bar wraps onto more rows as the screen narrows (measured:
+     268 px at 768, 393 px at 600, 435 px from 360 to 480, 556 px at 320). */
+  .mnl { --list-table: calc(var(--screen-h) * .64); }
+  .mnl__list { min-height: calc(var(--list-table) + 268px); }
+}
+@media (max-width: 600px) {
+  .mnl__list { min-height: calc(var(--list-table) + 393px); }
+}
+@media (max-width: 480px) {
+  .mnl__list { min-height: calc(var(--list-table) + 435px); }
+}
+/* The two ways on stack below 360 px, where two labels side by side would
+   wrap in a reader's text spacing. */
+@media (max-width: 359px) {
+  .mnx__actions { grid-template-columns: 1fr; }
+  .mnl__list { min-height: calc(var(--list-table) + 556px); }
+}
+
+/* ---------- the opening's entrance (Diptych §5.5) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The seam draws down; the name's two parts rise from their masks, 0.1 s
+     apart, the left one first (a mask clips only while its part rises, so
+     nothing cuts a glyph once it lands); then the address comes up 14 px,
+     the facts and the actions 16 px, 0.08 s apart. */
+  :root.js .mnx__head > .seam {
+    animation: mn-draw-down 1.1s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .mnx__h1 .line-mask {
+    animation: mn-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + .15s + var(--n, 0) * .1s);
+  }
+  :root.js .mnx__h1 .split-line {
+    animation: mn-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .15s + var(--n, 0) * .1s);
+  }
+  :root.js .mnx__addr {
+    animation: mn-up-short .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .4s);
+  }
+  :root.js .mnx__fact {
+    animation: mn-up-long .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .5s + var(--n, 0) * .08s);
+  }
+  :root.js .mnx__actions > * {
+    animation: mn-up-long .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .6s + var(--n, 0) * .08s);
+  }
+}
+
+@keyframes mn-draw-down { from { transform: scaleY(0); } }
+@keyframes mn-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its part rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes mn-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes mn-up-short { from { opacity: 0; transform: translateY(14px); } }
+@keyframes mn-up-long { from { opacity: 0; transform: translateY(16px); } }
