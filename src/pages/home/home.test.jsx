@@ -69,11 +69,11 @@ it('sends the header’s „Запитване“ to the inquiry on the page, gl
 it('tells the company story in production words', () => {
   const s = within(document.getElementById('za-nas'))
   expect(document.querySelector('#za-nas blockquote')).toHaveTextContent('„Добрата работа – реклама за майстора“')
-  expect(s.getByRole('heading', { name: 'Традиция и иновации от 2008' })).toBeInTheDocument()
+  expect(s.getByRole('heading', { name: 'Традиция и\u00a0иновации от 2008' })).toBeInTheDocument()
   expect(s.getByText(/КСМ СТРОЙ ООД е\s+основана през септември 2008\s+г\. от двама братя – Кадри и\s+Сухат/)).toBeInTheDocument()
   for (const w of ['коректност', 'бързина', 'точност']) expect(s.getByText(w)).toBeInTheDocument()
   // Spec §3.3: each one-letter word bound to the word after it.
-  expect(document.getElementById('za-nas').textContent).toContain('ООД е основана')
+  expect(document.getElementById('za-nas').textContent).toContain('ООД е\u00a0основана')
 })
 
 // Spec §6.12, §8.1: production's contact heading and lead (Contact:506–509),
@@ -83,7 +83,7 @@ it('closes with the inquiry: production’s heading, the phones, the hours and t
   const s = within(section)
   expect(section).toHaveAccessibleName('Готови сте да започнете своя проект?')
   expect(s.getByText('Нашият екип е готов да ви помогне да реализирате мечтания проект с качество и професионализъм.')).toBeInTheDocument()
-  expect(section.textContent).toContain('екип е готов')
+  expect(section.textContent).toContain('екип е\u00a0готов')
   expect(s.getByRole('link', { name: '+359 887 886 166' })).toHaveAttribute('href', 'tel:+359887886166')
   expect(s.getByRole('link', { name: '+359 885 762 224' })).toHaveAttribute('href', 'tel:+359885762224')
   expect(s.getByText('Пн–Пт 8:00–18:00, Сб 9:00–14:00, Нд почивен ден')).toBeInTheDocument()

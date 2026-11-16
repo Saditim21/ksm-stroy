@@ -95,7 +95,7 @@ describe('ExplorerSection', () => {
 
     expect(text(section.querySelector('.lead'))).toBe('Свободните апартаменти в момента, по данни от таблиците на КСМ Строй: 69 от 192.')
     // Final review F9: the client's name never breaks across lines.
-    expect(section.querySelector('.lead').textContent).toContain('КСМ Строй:')
+    expect(section.querySelector('.lead').textContent).toContain('КСМ\u00a0Строй:')
     const legend = within(section).getByRole('list', { name: 'Всички апартаменти по статус' })
     expect(within(legend).getAllByRole('listitem').map(text)).toEqual(['69 свободни', '8 резервирани', '115 продадени', '0 блокирани'])
   })

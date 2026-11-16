@@ -486,7 +486,7 @@ describe('the footer', () => {
     expect(inFooter.getByRole('link', { name: 'КСМ Строй, начална страница' })).toHaveAttribute('href', '/')
     for (const { label, tel } of SITE.phones) expect(inFooter.getByRole('link', { name: label })).toHaveAttribute('href', `tel:${tel}`)
     expect(inFooter.getByRole('link', { name: SITE.email })).toHaveAttribute('href', `mailto:${SITE.email}`)
-    expect(inFooter.getAllByRole('link', { name: 'Отвори в Google Maps' }).map((link) => link.getAttribute('href')))
+    expect(inFooter.getAllByRole('link', { name: 'Отвори в\u00a0Google Maps' }).map((link) => link.getAttribute('href')))
       .toEqual(SITE.offices.map((office) => mapsUrl(office)))
     const quickLinks = within(inFooter.getByRole('navigation', { name: 'Бързи връзки' })).getAllByRole('link')
     expect(quickLinks.map((link) => [link.textContent, link.getAttribute('href')])).toEqual(NAV.map(({ label, href }) => [label, href]))

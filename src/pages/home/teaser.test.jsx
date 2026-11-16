@@ -51,10 +51,10 @@ it('heads #etazhi „Golden Residence, етаж по етаж“, its italic wor
   expect(section).toHaveAccessibleName('Golden Residence, етаж по етаж')
   expect(text(section.querySelector('.hinge .lead'))).toBe('Цифрите са свободните апартаменти в момента: блок А вляво, блок Б вдясно. Посочете етаж, кликнете, за да видите плана му.')
   // Spec §3.3: a block's letter stays with „блок“ and with the word after it.
-  expect(section.querySelector('.hinge .lead').textContent).toContain('блок А вляво, блок Б вдясно')
+  expect(section.querySelector('.hinge .lead').textContent).toContain('блок\u00a0А\u00a0вляво, блок\u00a0Б\u00a0вдясно')
   // Final review F9: the lead never ends on one word alone, „му.“, in a
   // browser without text-wrap: pretty.
-  expect(section.querySelector('.hinge .lead').textContent).toMatch(/плана му\.\s*$/)
+  expect(section.querySelector('.hinge .lead').textContent).toMatch(/плана\u00a0му\.\s*$/)
 })
 
 it('shows the facade in compact mode, its floors with their counts', () => {

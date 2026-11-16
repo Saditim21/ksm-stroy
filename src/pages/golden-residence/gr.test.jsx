@@ -92,7 +92,7 @@ describe('the story (spec §6.15)', () => {
     const story = within(section('sgradata'))
     expect(story.getByText('500 м')).toBeInTheDocument()
     expect(story.getByText('до метростанция')).toBeInTheDocument()
-    expect(story.getByRole('link', { name: 'Отвори в Google Maps' }))
+    expect(story.getByRole('link', { name: 'Отвори в\u00a0Google Maps' }))
       .toHaveAttribute('href', mapsUrl('ул. Ген. Климент Бояджиев, жк Левски Г, София'))
   })
 
@@ -100,7 +100,7 @@ describe('the story (spec §6.15)', () => {
   // it to the word after it (final review F8).
   it('binds each one-letter word to the word after it, in the story and the blocks’ lead', () => {
     const copy = `${section('sgradata').textContent} ${section('blokove').querySelector('.hinge').textContent}`
-    for (const bound of ['е новострояща', 'в Google Maps', 'А и Б', 'входът и градината', 'е апартамент']) {
+    for (const bound of ['е\u00a0новострояща', 'в\u00a0Google Maps', 'А\u00a0и\u00a0Б', 'входът и\u00a0градината', 'е\u00a0апартамент']) {
       expect(copy).toContain(bound)
     }
   })
@@ -110,8 +110,8 @@ describe('the story (spec §6.15)', () => {
   // and Safari only, and not for a long last word on a phone): its last two
   // words are bound, and „КСМ Строй“ is.
   it('binds the blocks’ and the parking’s leads at their ends, the client’s name whole', () => {
-    expect(section('blokove').querySelector('.hinge .lead').textContent).toMatch(/отворите апартамента\.\s*$/)
-    expect(section('garazhi').querySelector('.hinge .lead').textContent).toMatch(/КСМ Строй\.\s*$/)
+    expect(section('blokove').querySelector('.hinge .lead').textContent).toMatch(/отворите\u00a0апартамента\.\s*$/)
+    expect(section('garazhi').querySelector('.hinge .lead').textContent).toMatch(/КСМ\u00a0Строй\.\s*$/)
   })
 
   it('gives the building’s figures, 2, 8, 192 and 12, from 43,98 to 114,58 m², and the index 01 / 04', () => {

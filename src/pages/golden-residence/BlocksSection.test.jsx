@@ -36,7 +36,7 @@ describe('the blocks before the data', () => {
     for (const id of ['blk-a', 'blk-b']) expect(text(half(id).querySelector('.blk__types'))).toBe('— двустайни · — тристайни · — ателиета')
     expect(text(half('blk-a').querySelector('.blk__note'))).toBe('Изложението на блок А не е попълнено в таблицата.')
     // Spec §3.3: each one-letter word bound to the word after it.
-    expect(half('blk-a').querySelector('.blk__note').textContent).toContain('не е попълнено в таблицата')
+    expect(half('blk-a').querySelector('.blk__note').textContent).toContain('не е\u00a0попълнено в\u00a0таблицата')
     expect(half('blk-a').querySelector('.blk__expo')).toBeNull()
     expect(half('blk-b').querySelector('.blk__expo')).toBeEmptyDOMElement()
     expect(half('blk-b').querySelector('.blk__note')).toBeNull()

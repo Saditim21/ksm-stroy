@@ -62,8 +62,8 @@ describe('what a unit offers (spec §7.7)', () => {
 
     expect(within(dialog).getByText('Този апартамент е продаден. Свободните на етажа са оцветени в зелено.')).toBeInTheDocument()
     // Spec §3.3: each one-letter word bound to the word after it.
-    expect(dialog.textContent).toContain('апартамент е продаден')
-    expect(dialog.textContent).toContain('оцветени в зелено')
+    expect(dialog.textContent).toContain('апартамент е\u00a0продаден')
+    expect(dialog.textContent).toContain('оцветени в\u00a0зелено')
     expect(inquiry(dialog)).toHaveLength(0)
     expect(within(dialog).queryByRole('button', { name: 'Попитайте за апартамента' })).toBeNull()
   })
@@ -73,7 +73,7 @@ describe('what a unit offers (spec §7.7)', () => {
     const dialog = panel('А 305')
 
     expect(within(dialog).getByText('Този апартамент не се предлага в момента.')).toBeInTheDocument()
-    expect(dialog.textContent).toContain('предлага в момента')
+    expect(dialog.textContent).toContain('предлага в\u00a0момента')
     expect(inquiry(dialog)).toHaveLength(0)
     expect(within(dialog).queryByRole('button', { name: 'Попитайте за апартамента' })).toBeNull()
     expect(dialog.querySelector('.up__actions')).toBeNull()
@@ -129,7 +129,7 @@ describe('the unit (spec §7.7)', () => {
 
     renderPanel('А 302')
     expect(text(fact(panel('А 302'), 'Изложение').querySelector('dd'))).toBe('няма данни в таблицата')
-    expect(fact(panel('А 302'), 'Изложение').querySelector('dd').textContent).toBe('няма данни в таблицата')
+    expect(fact(panel('А 302'), 'Изложение').querySelector('dd').textContent).toBe('няма данни в\u00a0таблицата')
   })
 
   it('gives the price where the sheet has one', () => {
@@ -150,7 +150,7 @@ describe('the unit (spec §7.7)', () => {
     expect(plan.querySelectorAll('g[data-focus]')).toHaveLength(1)
     expect(plan.querySelector('image.drawing')).toHaveAttribute('href', '/img/plan-a-1200.webp')
     expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 3, блок А. А 302 е очертан.')
-    expect(dialog.querySelector('.up__cap').textContent).toContain('А 302 е очертан')
+    expect(dialog.querySelector('.up__cap').textContent).toContain('А 302 е\u00a0очертан')
   })
 
   it('steps to the previous and the next unit on the floor, round from either end', () => {
