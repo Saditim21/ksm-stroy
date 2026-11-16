@@ -1,8 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PRIMARY_PHONE } from '../../config/site'
-import useMotionNow from '../../motion/useMotionNow'
 import { EMAIL_PATTERN } from '../../services/emailPattern'
-import { scrollToId } from '../../utils/scroll'
 import Button from '../ui/Button'
 import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
@@ -18,24 +16,26 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, reset
 // and the phone needs 6 digits. A short message is the lead's to top up
 // (src/services/inquiry.js).
 //
-// What the visitor asks about comes from the page's options
-// (inquiryStore.js), and the page can preset it, with apartments picked in
-// the explorer as chips. A pick goes only with its own project's subject
+// What the visitor asks about comes from the page's options (`page`'s in
+// inquiryStore.js, or the `options` a page hands over, InquirySection.jsx),
+// and the page can preset it, with apartments picked in the explorer as
+// chips. A pick goes only with its own project's subject
 // (ruling FR4, extended by M3 §8): Golden Residence's with its apartments or
 // its garages, Многофамилна's with Многофамилна (OPTION_PROJECT). Under
 // another subject a pick neither shows nor goes with the lead, and it stays
 // in the store, so choosing its project again brings it back.
 //
-// The send path (src/services/inquiry.js, with EmailJS behind it) is a chunk
-// of its own, out of the page's first-load JS (spec §10): it starts loading
-// as the visitor first steps into the form, and a send waits for it. A load
-// that fails fails the send it held up, as a refused email does, and is not
-// kept: the next send loads it again.
+// The send path (sendPath.js: src/services/inquiry.js, with EmailJS behind
+// it, and the thank-you) is a chunk of its own, out of the page's first-load
+// JS (spec §10): it starts loading as the visitor first steps into the form,
+// and a send waits for it. A load that fails fails the send it held up, as a
+// refused email does, and is not kept: the next send loads it again.
 //
 // While an inquiry is on its way (the send path, the EmailJS chunk, the round
 // trip) the form is busy and its action reads as the legacy Contact form's
 // does then, „Изпращане...“, and takes no second send. A sent inquiry turns
-// into the thank-you, a status that takes the focus, rising into place with
+// into the thank-you (InquiryThanks.jsx, from the send path, which a sent
+// inquiry has loaded), a status that takes the focus, rising into place with
 // motion (spec §5.7); a failed one says so and keeps what was typed. A new
 // preset after a thank-you brings the form back.
 
@@ -52,8 +52,6 @@ const PHONE = PRIMARY_PHONE.label.split(' ').join(String.fromCharCode(0xa0))
 // The action's label while an inquiry is on its way: the legacy Contact
 // form's own (src/pages/Contact.jsx).
 const SENDING = 'Изпращане...'
-// The thank-you's id, which the glide to the inquiry brings into view.
-const THANKS = 'f-thanks'
 
 // The fields that can be wrong, in the order the focus looks for the first.
 const IDS = { name: 'f-name', phone: 'f-tel', email: 'f-email', consent: 'f-consent' }
@@ -64,13 +62,22 @@ const MIN_NAME = 2
 const MIN_PHONE_DIGITS = 6
 
 // The send path's module, loading or loaded, for every form on the page and
-// every later visit to it. A load that failed is dropped, to be tried again.
+// every later visit to it, and the module itself once it is in (`sent`): a
+// sent inquiry has loaded it, so its thank-you is there to show. A load that
+// failed is dropped, to be tried again.
 let sendPath = null
+let sent = null
 function loadSendPath() {
-  sendPath ??= import('../../services/inquiry').catch((error) => {
-    sendPath = null
-    throw error
-  })
+  sendPath ??= import('./sendPath').then(
+    (module) => {
+      sent = module
+      return module
+    },
+    (error) => {
+      sendPath = null
+      throw error
+    },
+  )
   return sendPath
 }
 // The form's focus starts the load; if it fails, the send says so.
@@ -110,8 +117,7 @@ function TextField({ id, label, error, ...input }) {
 
 const BLANK = { name: '', phone: '', email: '', message: '', consent: false }
 
-export default function InquiryForm({ page = 'home' }) {
-  const options = INQUIRY_OPTIONS[page] ?? INQUIRY_OPTIONS.home
+export default function InquiryForm({ page = 'home', options = INQUIRY_OPTIONS[page] ?? INQUIRY_OPTIONS.home }) {
   const { option, picks } = useInquiryState()
   const chosen = options.some(({ value }) => value === option) ? option : options[0].value
   const shown = picks.filter((pick) => pick.project === OPTION_PROJECT[chosen])
@@ -122,10 +128,7 @@ export default function InquiryForm({ page = 'home' }) {
   // 'idle', 'sending', 'sent' or 'failed'.
   const [status, setStatus] = useState('idle')
   const form = useRef(null)
-  const thanks = useRef(null)
-  const thanked = useRef(false)
   const mounted = useRef(true)
-  const motionNow = useMotionNow()
   const errors = tried ? validate(values) : {}
 
   // A preset after the thank-you (the store is cleared on a send) is a new
@@ -138,27 +141,6 @@ export default function InquiryForm({ page = 'home' }) {
       mounted.current = false
     }
   }, [])
-
-  // The thank-you takes the focus, once, and comes into view if the form's
-  // end was all that showed: the glide to the inquiry goes on as far as the
-  // thank-you, which on a short phone screen sits a whole contact half below
-  // the section's top (ruling C5.3). With motion it rises into place.
-  useLayoutEffect(() => {
-    if (status !== 'sent') {
-      thanked.current = false
-      return undefined
-    }
-    if (thanked.current) return undefined
-    thanked.current = true
-    const box = thanks.current
-    box.focus({ preventScroll: true })
-    const { top, bottom } = box.getBoundingClientRect()
-    if (top < 0 || bottom > window.innerHeight) scrollToId('zapitvane', { reveal: THANKS })
-    const motion = motionNow()
-    if (!motion) return undefined
-    const rise = motion.gsap.from(box.children, { opacity: 0, y: 18, duration: 0.8, ease: 'expo.out', stagger: 0.08, clearProps: 'opacity,transform' })
-    return () => rise.revert()
-  }, [status, motionNow])
 
   const set = (key) => (event) => {
     const { value, checked, type } = event.target
@@ -213,6 +195,8 @@ export default function InquiryForm({ page = 'home' }) {
   }
 
   const sending = status === 'sending'
+  // The thank-you, from the send path a sent inquiry has loaded.
+  const Thanks = status === 'sent' ? sent.InquiryThanks : null
 
   return (
     <>
@@ -293,14 +277,7 @@ export default function InquiryForm({ page = 'home' }) {
           </p>
         ) : null}
       </form>
-      {status === 'sent' ? (
-        <div ref={thanks} id={THANKS} className="form__ok" role="status" tabIndex={-1}>
-          <p>Благодарим ви.</p>
-          <p className="lead">
-            Ще се свържем с&nbsp;вас в&nbsp;работно време. За бърз отговор: {PHONE}.
-          </p>
-        </div>
-      ) : null}
+      {Thanks ? <Thanks phone={PHONE} /> : null}
     </>
   )
 }

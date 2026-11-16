@@ -96,7 +96,7 @@ export default function FloorSheet({ project, floor, plan, onClose, onStep, onOp
         </button>
       </div>
       <div className="sheet__plan">
-        <PlanSvg project={project} plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
+        <PlanSvg plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
       </div>
       <FloorCounts counts={shown.counts} className="sheet__counts" />
       <FloorRange floor={shown} className="sheet__range" />

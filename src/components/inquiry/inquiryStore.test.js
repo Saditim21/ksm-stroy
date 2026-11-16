@@ -1,7 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { MN_INQUIRY } from '../../pages/mnogofamilna/inquiry'
 import { acquireScrollLock, releaseScrollLock, setLenis } from '../../utils/lenis'
-import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
+import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, MNOGOFAMILNA, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry's shared state (spec §10, §5.3): the option the form's select
 // shows and the apartments sent to it, which any action on the page can
@@ -19,7 +20,8 @@ afterEach(() => {
 })
 
 it('offers each page its four subjects', () => {
-  const rows = (page) => INQUIRY_OPTIONS[page].map(({ value, label, subject }) => [value, label.replace(/\s/g, ' '), subject])
+  const rowsOf = (options) => options.map(({ value, label, subject }) => [value, label.replace(/\s/g, ' '), subject])
+  const rows = (page) => rowsOf(INQUIRY_OPTIONS[page])
   expect(rows('home')).toEqual([
     ['golden-residence', 'Golden Residence, жк Левски Г', 'Golden Residence'],
     ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
@@ -32,14 +34,25 @@ it('offers each page its four subjects', () => {
     ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
     ['other', 'Друго', 'Друго'],
   ])
-  // Spec M3 §6.2 #6, §8: Многофамилна's page puts its building first.
-  expect(rows('mnogofamilna')).toEqual([
+  // Spec M3 §6.2 #6, §8: Многофамилна's page puts its building first. Its
+  // options are its routes' own (src/pages/mnogofamilna/inquiry.jsx), the
+  // same subjects as Home's.
+  expect(rowsOf(MN_INQUIRY.options)).toEqual([
     ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
     ['golden-residence', 'Golden Residence, жк Левски Г', 'Golden Residence'],
     ['build', 'Строителство или ремонт', 'Строителство или ремонт'],
     ['other', 'Друго', 'Друго'],
   ])
-  expect(INQUIRY_OPTIONS.mnogofamilna[1].label).toBe('Golden Residence, жк\u00a0Левски\u00a0Г')
+  expect(MN_INQUIRY.options[1].label).toBe('Golden Residence, жк\u00a0Левски\u00a0Г')
+  expect(MN_INQUIRY.options[0]).toBe(MNOGOFAMILNA)
+  expect(new Set(MN_INQUIRY.options)).toEqual(new Set(INQUIRY_OPTIONS.home))
+})
+
+// M3 §10: per-project code only on its own routes. The options every page
+// with the form loads are Home's and Golden Residence's; Многофамилна's
+// travel with its routes (InquirySection's `options`).
+it('keeps no project page’s own options in the shared store', () => {
+  expect(Object.keys(INQUIRY_OPTIONS)).toEqual(['home', 'golden-residence'])
 })
 
 // Spec M3 §8: the project whose apartments go with each subject; the others

@@ -1,13 +1,14 @@
 import { loadFlip } from '../motion/flip'
 
 // What only a floor that is hot or open needs (spec §7.3, §7.5–7.7, §12): the
-// edge panels, the phone's sheet, the explorer's dialogs (ExplorerDialogs.jsx:
-// the plan stage and the unit panel), and the reading of a project's plans
-// they draw (plans.js; the plans themselves are the project's, M3 §6.4). A
-// chunk of their own, which only loadSurfaces.js imports, so none of it
-// travels with a route's first-load JS (ruling C7.7): the full facade loads it
-// as it nears the screen or is first touched, the explorer's provider when
-// the address opens a dialog, and Home's compact facade, which has neither
+// edge panels and the phone's sheet, wired to the facade's hot floor
+// (FacadeSurfaces.jsx), the explorer's dialogs (ExplorerDialogs.jsx: the plan
+// stage and the unit panel), and the reading of a project's plans they draw
+// (plans.js; the plans themselves are the project's, M3 §6.4). A chunk of
+// their own, which only loadSurfaces.js imports, so none of it travels with a
+// route's first-load JS (ruling C7.7, M3 §10): the full facade loads it as it
+// nears the screen or is first touched, the explorer's provider when the
+// address opens a dialog, and Home's compact facade, which has neither
 // panels nor dialogs, never loads it at all.
 //
 // It also loads what the views' switch shows (ExplorerSection.jsx): the
@@ -23,8 +24,7 @@ import { loadFlip } from '../motion/flip'
 // may play (the motion gate's `js` on <html>, spec §5.2), so the first switch
 // to „По критерии“ need not wait for either. Each loads once; a load that
 // fails here is tried again by the switch, which says so.
-export { default as FloorPanel } from './FloorPanel'
-export { default as FloorSheet } from './FloorSheet'
+export { FacadePanels, FacadeSheet } from './FacadeSurfaces'
 export { default as ExplorerDialogs } from './ExplorerDialogs'
 export { loadPlans, plansOf } from './plans'
 export { loadFlip }

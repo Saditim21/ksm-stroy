@@ -119,7 +119,7 @@ describe('MN model uses the snapshot until MN rows are live', () => {
 // is on floor 2.
 it('plan labels show the apartment number', async () => {
   const plans = await loadPlans(MN_PROJECT)
-  const { container } = render(<PlanSvg project={MN_PROJECT} plan={plans['А']} units={MODEL.floors.get('А-2').units} mode="mini" />)
+  const { container } = render(<PlanSvg plan={plans['А']} units={MODEL.floors.get('А-2').units} mode="mini" />)
   const labels = [...container.querySelectorAll('.u-label')].map((label) => label.textContent)
 
   expect(labels).toEqual(['101', '102', '103', '104', '105', '106', '107', '108'])

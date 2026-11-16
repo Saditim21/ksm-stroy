@@ -4,8 +4,8 @@
 // top floor the attic. Its numbers are the dated snapshot of 01.12.2025
 // (src/data/mnogofamilna/snapshot.js) until the store holds live rows of
 // both its blocks, which its sheets would give once they are published: the
-// date goes with them. Its one typical floor plan is static (ruling PF3: the
-// block pages prerender mini plans of it).
+// date goes with them. Its plans are data, there at once (ruling PF3: the
+// block pages prerender mini plans of its one typical floor).
 //
 // Its facade is a placeholder until Task 4 brings the night render and its
 // lights: the building map, the alt text, the class its stylesheet's
@@ -26,18 +26,12 @@ const live = (snapshot) => ['block-a', 'block-b'].every((slot) => snapshot.origi
 
 export const MN_PROJECT = Object.freeze({
   id: ID,
-  name: 'Многофамилна жилищна сграда',
   option: 'mnogofamilna',
   floors: MN_FACTS.floors,
   perFloor: MN_FACTS.perFloor,
-  perBlock: MN_FACTS.perBlock,
   total: MN_FACTS.apartments,
-  // „101“ on floor 2: the data numbers the apartments by residential level;
-  // „А-101“ with its block.
-  unitNumber: (unit) => `${unit.floor - 1}${unit.suffix}`,
+  // „А-101“ on floor 2: the data numbers the apartments by residential level.
   unitLabel: (unit) => `${unit.block}-${unit.floor - 1}${unit.suffix}`,
-  // The top floor is the one production calls „Тавански етаж“ (spec §2).
-  floorMeta: ({ floor }) => (floor === MN_FACTS.floors.max ? 'тавански етаж' : null),
   modelData: (snapshot) => (live(snapshot) ? snapshot.data : MN_SNAPSHOT_DATA),
   dated: (snapshot) => (live(snapshot) ? null : MN_SNAPSHOT_DATE),
   types: Object.freeze(Object.keys(MN_FACTS.types).sort()),
@@ -51,5 +45,11 @@ export const MN_PROJECT = Object.freeze({
     // The courtyard between the blocks (the concept's mnogofamilna.js:258).
     seam: Object.freeze({ x: 609.5, top: 150, bottom: 598 }),
   }),
-  plans: Object.freeze({ floors }),
+  plans: Object.freeze({
+    floors,
+    // „101“ on floor 2, as its label has it.
+    unitNumber: (unit) => `${unit.floor - 1}${unit.suffix}`,
+    // The top floor is the one production calls „Тавански етаж“ (spec §2).
+    floorMeta: ({ floor }) => (floor === MN_FACTS.floors.max ? 'тавански етаж' : null),
+  }),
 })

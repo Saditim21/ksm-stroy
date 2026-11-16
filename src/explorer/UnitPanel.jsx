@@ -32,9 +32,9 @@ import { stepUnit } from './surfaceModel'
 //   onInquire. Sold and blocked units say why they offer nothing.
 // - `unitId` is a label („А 501“), looked up through normalizeUnitId; the
 //   parent (ExplorerDialogs.jsx) shows the panel only for a unit the model
-//   has. onStep(-1 | 1) asks for the previous or the next. `project` and its
-//   `plans` (plans.js) give the plan to crop and its numbers; `dated` is the
-//   provider's.
+//   has. onStep(-1 | 1) asks for the previous or the next. `plans`, the
+//   project's (plans.js), give the plan to crop and its numbers; `dated` is
+//   the provider's.
 // - Escape closes it, anywhere, and goes no further: the stage under it stays
 //   (its own keys wait while it is covered). Tab stays inside; a click on the
 //   backdrop closes it too. The focus moves to its action after 500 ms (20 ms
@@ -111,7 +111,7 @@ export default function UnitPanel({ model, unitId, ...handlers }) {
   return unit ? <Panel model={model} unit={unit} {...handlers} /> : null
 }
 
-function Panel({ project, plans, dated = null, model, unit, onClose, onStep, onInquire }) {
+function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire }) {
   const rootRef = useRef(null)
   const leftRef = useRef(null)
   const rightRef = useRef(null)
@@ -239,7 +239,7 @@ function Panel({ project, plans, dated = null, model, unit, onClose, onStep, onI
       <div className="up__box">
         <Seam />
         <div ref={leftRef} className="up__l">
-          <PlanSvg project={project} plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
+          <PlanSvg plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
           <p className="up__cap">
             План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е{NBSP}очертан.
           </p>

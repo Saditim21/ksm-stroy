@@ -6,15 +6,19 @@ import InquiryForm from './InquiryForm'
 import { clearInquiryOption } from './inquiryStore'
 import './inquiry.css'
 
-// The closing inquiry (spec §6.12, §8.1, §8.2; M3 §6.2 #6; extract §4.14), a
-// split on the seam: on the left, #zapitvane, the heading, the lead, the
-// phones, the email on the projects' pages and the hours; on the right, the
-// form (InquiryForm). `page` picks the copy and the form's options: Home's
-// from production's contact page (Contact:506–509), Golden Residence's from
-// decision A1, its inquiries going to КСМ Строй, and Многофамилна's
-// production's „Свържете се с нас“ with Golden Residence's call to call or
-// write (the concept notes). Non-breaking spaces after the one-letter words
-// (spec §3.3).
+// The closing inquiry (spec §6.12, §8.1, §8.2; M3 §6.2 #6, §8; extract
+// §4.14), a split on the seam: on the left, #zapitvane, the heading, the
+// lead, the phones, the email on the projects' pages and the hours; on the
+// right, the form (InquiryForm). `page` picks the copy and the form's
+// options: Home's from production's contact page (Contact:506–509), Golden
+// Residence's from decision A1, its inquiries going to КСМ Строй.
+// Non-breaking spaces after the one-letter words (spec §3.3).
+//
+// A page whose copy and options no other page shares hands them over
+// instead, `copy` ({ title, lead, email }) and `options` (inquiryStore.js's
+// shape), so they travel with its own routes and in no other page's
+// first-load JS (M3 §10): Многофамилна's routes pass MN_INQUIRY
+// (src/pages/mnogofamilna/inquiry.jsx), `<InquirySection {...MN_INQUIRY} />`.
 //
 // The headings rise line by line, the copy fades in and the seam draws as the
 // section comes into view (useReveals); the markup is the final state.
@@ -47,22 +51,12 @@ const COPY = {
     ),
     email: true,
   },
-  mnogofamilna: {
-    title: (
-      <>
-        Свържете се с&nbsp;<em>нас</em>
-      </>
-    ),
-    lead: <>Обадете се или изпратете запитване и&nbsp;ще се свържем с&nbsp;вас.</>,
-    email: true,
-  },
 }
 
-export default function InquirySection({ page = 'home' }) {
+export default function InquirySection({ page = 'home', copy = COPY[page] ?? COPY.home, options }) {
   const ref = useRef(null)
   useReveals(ref)
   useEffect(() => clearInquiryOption, [])
-  const copy = COPY[page] ?? COPY.home
   const [primary, second] = SITE.phones
 
   return (
@@ -91,7 +85,7 @@ export default function InquirySection({ page = 'home' }) {
         </p>
       </div>
       <div className="contact__r">
-        <InquiryForm page={page} />
+        <InquiryForm page={page} options={options} />
       </div>
     </section>
   )

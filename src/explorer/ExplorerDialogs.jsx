@@ -172,7 +172,6 @@ export default function ExplorerDialogs({ project, dated, model, state, opening,
       ) : null}
       {showUnit ? (
         <UnitPanel
-          project={project}
           plans={plans}
           dated={dated}
           model={model}

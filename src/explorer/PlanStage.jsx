@@ -325,7 +325,6 @@ export default function PlanStage({ project, plans, dated = null, model, block, 
         <div className="ps__body">
           <div className="ps__plan">
             <PlanSvg
-              project={project}
               plan={plans[block]}
               units={data.units}
               mode="stage"
@@ -388,7 +387,7 @@ export default function PlanStage({ project, plans, dated = null, model, block, 
       </div>
       {ghost ? (
         <div ref={ghostRef} className="ps__ghost" aria-hidden="true">
-          <PlanSvg project={project} plan={plans[block]} units={data.units} mode="mini" fit={false} />
+          <PlanSvg plan={plans[block]} units={data.units} mode="mini" fit={false} />
         </div>
       ) : null}
     </>,

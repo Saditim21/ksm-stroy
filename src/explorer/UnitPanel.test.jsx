@@ -53,7 +53,7 @@ const fact = (dialog, term) => [...dialog.querySelectorAll('.up__dl > div')].fin
 
 function renderPanel(unitId, props = {}) {
   const handlers = { onClose: vi.fn(), onStep: vi.fn(), onInquire: vi.fn() }
-  const view = render(<UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId={unitId} {...handlers} {...props} />)
+  const view = render(<UnitPanel plans={PLANS} model={MODEL} unitId={unitId} {...handlers} {...props} />)
   return { ...handlers, ...view }
 }
 
@@ -187,7 +187,7 @@ describe('as a dialog', () => {
     const handlers = { onClose: vi.fn(), onStep: vi.fn(), onInquire: vi.fn() }
     render(
       <div onKeyDown={parent}>
-        <UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId="А 302" {...handlers} />
+        <UnitPanel plans={PLANS} model={MODEL} unitId="А 302" {...handlers} />
       </div>,
     )
 
@@ -301,7 +301,7 @@ it('opens with the halves parting from the seam over 0.7 s, the panel fading in 
     expect(recorder.tweens[0].vars).toEqual({ clearProps: 'opacity,clipPath,transform' })
 
     recorder.reset()
-    rerender(<UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId="А 302" onClose={onClose} onStep={onStep} onInquire={onInquire} />)
+    rerender(<UnitPanel plans={PLANS} model={MODEL} unitId="А 302" onClose={onClose} onStep={onStep} onInquire={onInquire} />)
     expect(recorder.timelines).toHaveLength(0)
     expect(recorder.tweens).toHaveLength(1)
     expect(recorder.tweens[0].targets).toBe(panel('А 302').querySelector('.up__r'))

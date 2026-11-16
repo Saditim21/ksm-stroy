@@ -46,11 +46,12 @@ import ViewTabs from './ViewTabs'
 // - The switch (spec §5.7, §7.8; the concept's gr.js:79-93): Flip (a lazy
 //   chunk of its own, whose loader the surfaces' chunk hands over, with the
 //   list's, surfaces.js) records the views and the tabs' underline before
-//   it, then plays them from there (playSwitch, viewMotion.js, in the list's
-//   chunk): 0.7 s expo.inOut for the views and the underline's own 0.25 s,
-//   while the panel coming in rises 26 px over 0.7 s expo.out, 0.12 s late;
-//   ScrollTrigger measures the page again once the views have settled.
-//   Without motion it switches at once; without Flip (its load failed) too.
+//   it, then plays them from there, both in the list's chunk (recordSwitch,
+//   viewMotion.js), out of the first-load JS: 0.7 s expo.inOut for the views
+//   and the underline's own 0.25 s, while the panel coming in rises 26 px
+//   over 0.7 s expo.out, 0.12 s late; ScrollTrigger measures the page again
+//   once the views have settled. Without motion it switches at once; without
+//   Flip (its load failed) too.
 
 // The tabs' and the panels' ids (ViewTabs.jsx): a page has one explorer, as
 // it has one #explorer.
@@ -58,7 +59,6 @@ const ID = 'ex'
 
 export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)
-  const viewsRef = useRef(null)
   useReveals(ref)
   const { project, model, view, setView, openFloor, openUnit, railFocus, railFocused } = useExplorer()
   const motionNow = useMotionNow()
@@ -87,8 +87,8 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
     }
   }, [listWanted, list, setView])
 
-  // What the views showed at the last commit, and a switch's Flip, recorded
-  // before its commit and played after it.
+  // What the views showed at the last commit, and what plays a switch's
+  // Flip, recorded before its commit (recordSwitch) and played after it.
   const layout = useRef({ view, list: Boolean(list) })
   const flip = useRef(null)
 
@@ -111,10 +111,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
         waiting.current = null
         if (module) setList(module)
         if (next === layout.current.view) return
-        const views = viewsRef.current
-        if (Flip && motionNow() && views && loadedUnitList()) {
-          flip.current = { Flip, state: Flip.getState([views, ref.current.querySelector('.toggle__bar')]) }
-        }
+        if (Flip && motionNow()) flip.current = loadedUnitList()?.recordSwitch(Flip, ref.current, next)
         setView(next)
       },
       (error) => {
@@ -133,24 +130,13 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
     layout.current = now
     const switched = was.view !== now.view
     if (!switched && (was.list === now.list || now.view !== 'list')) return
-    const recorded = switched ? flip.current : null
+    const play = switched ? flip.current : null
     if (switched) flip.current = null
     const motion = motionNow()
     if (!motion) return
     const refresh = () => motion.ScrollTrigger.refresh()
-    if (!recorded) {
-      refresh()
-      return
-    }
-    const views = viewsRef.current
-    loadedUnitList().playSwitch({
-      ...recorded,
-      gsap: motion.gsap,
-      views,
-      bar: ref.current.querySelector('.toggle__bar'),
-      panel: views.querySelector(`[data-view="${view}"]`),
-      onDone: refresh,
-    })
+    if (play) play(motion.gsap, refresh)
+    else refresh()
   }, [view, list, motionNow])
 
   const UnitList = listShown ? list?.default : null
@@ -188,7 +174,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
         </ul>
       </div>
       <StaleNotice project={project} className="explorer__notice" />
-      <div ref={viewsRef} className="views">
+      <div className="views">
         <div id={`${ID}-visual`} role="tabpanel" aria-labelledby={`${ID}-tab-visual`} data-view="visual" hidden={view !== 'visual'}>
           <Facade
             project={project}

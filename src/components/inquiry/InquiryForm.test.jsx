@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { MN_INQUIRY } from '../../pages/mnogofamilna/inquiry'
 import { buildLead } from '../../services/inquiry'
 import { recordingMotion } from '../../test/gsap'
 import InquiryForm from './InquiryForm'
@@ -207,7 +208,7 @@ describe('sending', () => {
     const lastLead = () => buildLead(send.mock.lastCall[0], { production: true }).odoo
 
     it('shows and sends a Многофамилна pick with Многофамилна', async () => {
-      render(<InquiryForm page="mnogofamilna" />)
+      render(<InquiryForm options={MN_INQUIRY.options} />)
       act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
       expect(screen.getByText('Апартамент А-802')).toBeInTheDocument()
       await fill(user)
@@ -218,7 +219,7 @@ describe('sending', () => {
 
     it('hides it while Golden Residence is chosen, and sends no pick then; Многофамилна brings it back', async () => {
       send.mockResolvedValue({ ok: false })
-      render(<InquiryForm page="mnogofamilna" />)
+      render(<InquiryForm options={MN_INQUIRY.options} />)
       act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
       await fill(user)
 
@@ -236,7 +237,7 @@ describe('sending', () => {
     })
 
     it('never sends a Golden Residence pick with Многофамилна', async () => {
-      render(<InquiryForm page="mnogofamilna" />)
+      render(<InquiryForm options={MN_INQUIRY.options} />)
       act(() => presetInquiry({ pick: GR_PICK }))
       act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
       expect(screen.queryByText('Апартамент А 301')).toBeNull()
@@ -363,9 +364,10 @@ it('clears the option when its section leaves the page, and keeps the picks', ()
 })
 
 // Spec M3 §6.2 #6: Многофамилна's inquiry, „Свържете се с *нас*“, with its
-// lead, the phones, the email and the hours, and Многофамилна chosen.
+// lead, the phones, the email and the hours, and Многофамилна chosen. Its
+// routes hand the section their own copy and options (MN_INQUIRY, M3 §10).
 it('gives Многофамилна its own heading and lead, the phones, the email and the hours, Многофамилна chosen', () => {
-  render(<InquirySection page="mnogofamilna" />)
+  render(<InquirySection {...MN_INQUIRY} />)
   const section = document.getElementById('kontakti')
   const heading = within(section).getByRole('heading', { level: 2 })
 

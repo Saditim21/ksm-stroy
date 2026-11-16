@@ -41,11 +41,13 @@ import './explorer.css'
 // rails FacadeRails'; the pointer and the keys are handled here, on the stage
 // around them.
 //
-// The edge panels and the sheet are a chunk of their own (surfaces.js),
-// which the full facade loads with the project's plans as it nears the
-// screen, or when it is first pointed at, focused or touched, if that comes
-// first; a floor that turns hot before then shows as they arrive. They are
-// not in the prerendered HTML: nothing shows them until a floor is hot.
+// The edge panels and the sheet, and their wiring to the hot floor
+// (FacadeSurfaces.jsx, which the facade hands its state and handlers, `fx`),
+// are a chunk of their own (surfaces.js), which the full facade loads with
+// the project's plans as it nears the screen, or when it is first pointed
+// at, focused or touched, if that comes first; a floor that turns hot before
+// then shows as they arrive. They are not in the prerendered HTML: nothing
+// shows them until a floor is hot.
 //
 // `focusRail` ({ block, floor }) is a floor whose rail is to take the focus
 // back: a stage that closed with no opener to give it to (spec §7.6, §7.10;
@@ -201,8 +203,6 @@ export default function Facade({ project, model, mode = 'full', caption, initial
       .from(counts, { opacity: 0, y: 10, duration: 0.6, ease: 'expo.out', stagger: 0.03, clearProps: 'opacity,transform' }, 0.3)
   })
 
-  const blockOf = (key) => facade.shape.get(key).block
-
   // Opens a floor; the sheet, if it shows it, gives way.
   const open = (key, unitLabel, meta) => {
     const { block, floor } = facade.shape.get(key)
@@ -217,12 +217,6 @@ export default function Facade({ project, model, mode = 'full', caption, initial
       ?.querySelector('svg.plan')
     open(key, undefined, { fromRect: plan?.getBoundingClientRect() ?? null, opener: railRefs.current.get(key) })
   }
-  // A floor opened from a panel or the sheet (its button, or a unit of its
-  // plan): the plan's place, and the floor's rail as the opener the stage
-  // gives the focus back to. The plan is hidden from assistive technology,
-  // and the sheet's button turns inert as the sheet gives way (ruling C7.2).
-  const openFromSurface = (key, unitLabel, meta) => open(key, unitLabel, { fromRect: meta?.fromRect ?? null, opener: railRefs.current.get(key) })
-  const openUnitFromSurface = (unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)
 
   const keyOf = (event) => event.target.closest?.('[data-k]')?.dataset.k
 
@@ -320,23 +314,14 @@ export default function Facade({ project, model, mode = 'full', caption, initial
     if (keep && isPhone()) setHot(floorKey(block, keep), 'tap')
   }
 
-  // The edge panel: entering it keeps the floor; leaving it (not a finger)
-  // clears it after 320 ms.
-  const panelEnter = () => {
-    overPanel.current = true
-    cancelClose()
-  }
-  const panelLeave = (event) => {
-    overPanel.current = false
-    if (event.pointerType !== 'touch') scheduleClose()
-  }
-
   const hotFloor = hot ? floorOf(model, facade, hot.key) : null
   const lensRect = lensOf(facade, lens)
   const lensColour = lens ? floorOf(model, facade, lens).colour : 'unknown'
   const rootClass = ['fx', className, compact && 'fx--compact', hot && 'is-hot', hot?.source === 'kbd' && 'is-kbd'].filter(Boolean).join(' ')
-  const plans = surfaces?.plansOf(project)
   const { imageWidth: width, imageHeight: height } = map
+  // What the edge panels and the sheet read, once their chunk is in
+  // (FacadeSurfaces.jsx).
+  const fx = surfaces && { project, shape: facade.shape, hot, floor: hotFloor, lens, block: phoneBlock, anchor: stageRef, rails: railRefs, open, setHot, clearHot, keep: cancelClose, leave: scheduleClose, over: overPanel }
 
   return (
     <div className="fx-wrap">
@@ -401,38 +386,11 @@ export default function Facade({ project, model, mode = 'full', caption, initial
               <span className="cap-desk">Посочете етаж, кликнете, за да отворите плана му.</span>
               <span className="cap-phone">Докоснете етаж, за да видите плана му; второ докосване го отваря.</span>
             </p>
-            {plans ? BLOCKS.map((block) => (
-              <surfaces.FloorPanel
-                key={block}
-                project={project}
-                side={block}
-                floor={hot?.on === 'panel' && blockOf(hot.key) === block ? hotFloor : null}
-                plan={plans[block]}
-                onOpenFloor={(b, f, unit, meta) => open(floorKey(b, f), unit, meta)}
-                onUnit={openUnitFromSurface}
-                onPointerEnter={panelEnter}
-                onPointerLeave={panelLeave}
-              />
-            )) : null}
+            {fx ? <surfaces.FacadePanels fx={fx} /> : null}
           </>
         )}
       </div>
-      {plans ? (
-        <surfaces.FloorSheet
-          project={project}
-          floor={hot?.on === 'sheet' ? hotFloor : null}
-          plan={plans[lens ? blockOf(lens) : phoneBlock]}
-          anchor={stageRef}
-          onClose={clearHot}
-          onStep={(step) => {
-            if (!hot) return
-            const { block, floor } = facade.shape.get(hot.key)
-            setHot(floorKey(block, Math.min(max, Math.max(min, floor + step))), 'tap')
-          }}
-          onOpen={(meta) => hot && openFromSurface(hot.key, undefined, meta)}
-          onUnit={openUnitFromSurface}
-        />
-      ) : null}
+      {fx ? <surfaces.FacadeSheet fx={fx} /> : null}
     </div>
   )
 }

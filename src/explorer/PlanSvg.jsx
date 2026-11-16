@@ -16,9 +16,9 @@ import './explorer.css'
 //   outline;
 // - a unit the sheet does not have: no fill and no label (data-status none).
 // Each has a brass outline (pathLength 1, so it can draw), its number at its
-// pole of inaccessibility, and a hit path. The number is the project's
-// (project.unitNumber): „501“ on Golden Residence's floor 5, „101“ on
-// Многофамилна's floor 2.
+// pole of inaccessibility, and a hit path. The number is the plan's
+// (plan.unitNumber, its project's, plans.js): „501“ on Golden Residence's
+// floor 5, „101“ on Многофамилна's floor 2.
 //
 // The modes:
 // - mini, the edge panel's and the sheet's: the union of the block's units,
@@ -61,7 +61,7 @@ function fillOf(status, id) {
   return [PALETTE['status-blocked'], 0.1]
 }
 
-export default function PlanSvg({ project, plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, fit = true, onUnit, onHot }) {
+export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, fit = true, onUnit, onHot }) {
   const ref = useRef(null)
   // The patterns' ids, this plan's own: two plans on a page never share one.
   const id = `pl${useId().replace(/[^\w-]/g, '')}`
@@ -177,7 +177,7 @@ export default function PlanSvg({ project, plan, units, mode = 'mini', viewBox, 
               {status === 'blocked' || status === 'unknown' ? <path className="u-blocked" d={d} /> : null}
               <path className="u-shape" d={d} fill="none" pathLength="1" />
               <text className="u-label" x={point[0]} y={point[1]}>
-                {unit ? project.unitNumber(unit) : ''}
+                {unit ? plan.unitNumber(unit) : ''}
               </text>
               <path className="u-hit" d={d} data-suffix={suffix} {...button} />
             </g>

@@ -2,11 +2,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import InquiryForm from './InquiryForm'
 
-// The send path (src/services/inquiry.js, and EmailJS behind it) is a chunk
-// of its own, out of the first-load JS of every page with the form (spec
-// §10, FR5): the form starts loading it as the visitor first steps into it,
-// and a send waits for it. These cases have a file of their own (ruling
-// PF12), so no other case has loaded the send path before them.
+// The send path (sendPath.js: src/services/inquiry.js, and EmailJS behind it,
+// with the thank-you) is a chunk of its own, out of the first-load JS of
+// every page with the form (spec §10, FR5): the form starts loading it as the
+// visitor first steps into it, and a send waits for it. These cases have a
+// file of their own (ruling PF12), so no other case has loaded the send path
+// before them.
 
 // The send path's stand-in: it counts its loads, and fails to load, as a
 // chunk that never arrives, while `failing` is set.
@@ -57,11 +58,12 @@ it('does not load the send service before the form is used', async () => {
 // loads the path again. The load that starts on focus fails quietly.
 it('says an inquiry whose send path did not load was not sent, and loads it again for the next send', async () => {
   const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
-  // A fresh form, with a stand-in of its own that never loads, so this case
-  // neither finds a send path loaded before it nor leaves one loaded.
+  // A fresh form, whose send path's chunk (sendPath.js, what the form
+  // imports) never loads, so this case neither finds a send path loaded
+  // before it nor leaves one loaded.
   let attempts = 0
   vi.resetModules()
-  vi.doMock('../../services/inquiry', () => {
+  vi.doMock('./sendPath', () => {
     attempts += 1
     throw new Error('Failed to fetch dynamically imported module')
   })
@@ -84,7 +86,7 @@ it('says an inquiry whose send path did not load was not sent, and loads it agai
     expect(await screen.findByRole('alert')).toHaveTextContent(FAILED)
     expect(screen.queryByRole('status')).toBeNull()
   } finally {
-    // The file's own stand-in again, with nothing loaded through it.
-    vi.doMock('../../services/inquiry', () => service.load())
+    // The send path itself again, with nothing loaded through it.
+    vi.doUnmock('./sendPath')
   }
 })

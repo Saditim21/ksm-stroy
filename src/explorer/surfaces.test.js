@@ -20,7 +20,7 @@ beforeEach(() => {
   Object.assign(loads, { list: 0, flip: 0, failFlip: false })
   vi.doMock('./listChunk', () => {
     loads.list += 1
-    return { default: () => null, playSwitch: () => {} }
+    return { default: () => null, recordSwitch: () => () => {} }
   })
   vi.doMock('../motion/flip', () => ({
     loadFlip: () => {

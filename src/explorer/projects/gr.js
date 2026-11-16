@@ -1,32 +1,24 @@
 // Golden Residence, as the one explorer reads a project (spec M3 §6.4; the
-// shape is useExplorer.js's): its facts (GR_FACTS), its unit numbers, the кота
-// its drawings give, the sheets' live rows, its list's types and footnote, and
-// its facade, the sky-cut picture on golden-residence.building.json's grid,
-// whose CSS geometry is explorer.css's own defaults. Its floor plans and their
-// dark drawings are a chunk of their own (gr.plans.js), loaded with an opened
-// floor's surfaces and never with a route's first-load JS, nor on another
-// project's pages (ruling PF3).
+// shape is useExplorer.js's): its facts (GR_FACTS), its unit labels, the
+// sheets' live rows, its list's types and footnote, and its facade, the
+// sky-cut picture on golden-residence.building.json's grid, whose CSS
+// geometry is explorer.css's own defaults. What only an opened floor's
+// surfaces read, its floor plans with their dark drawings, the numbers its
+// plans draw and the кота its drawings give, is a chunk of its own
+// (gr.plans.js), loaded with those surfaces and never with a route's
+// first-load JS, nor on another project's pages (ruling PF3, M3 §10).
 import { GR_FACTS } from '../../config/facts'
 import grImages from '../../data/images/golden-residence.json'
 import building from '../../data/maps/golden-residence.building.json'
-import { formatDecimal } from '../../utils/format'
 
 export const GR_PROJECT = Object.freeze({
   id: 'golden-residence',
-  name: 'Golden Residence',
   option: 'golden-residence',
   floors: Object.freeze({ min: 1, max: GR_FACTS.floors }),
   perFloor: GR_FACTS.perFloor,
-  perBlock: GR_FACTS.apartments / GR_FACTS.blocks,
   total: GR_FACTS.apartments,
-  // „501“: the floor, then the unit's number on it; „А 501“ with its block.
-  unitNumber: (unit) => `${unit.floor}${unit.suffix}`,
+  // „А 501“: the block, then the floor and the unit's number on it.
   unitLabel: (unit) => `${unit.block} ${unit.floor}${unit.suffix}`,
-  // The floor's кота, where the drawings give it (spec §9: only А1).
-  floorMeta: ({ block, floor }) => {
-    const level = GR_FACTS.elevations[`${block}-${floor}`]
-    return level == null ? null : `кота +${formatDecimal(level)}`
-  },
   // The sheets' rows, live or built in (StaleNotice.jsx says which).
   modelData: (snapshot) => snapshot.data,
   dated: () => null,
@@ -45,5 +37,5 @@ export const GR_PROJECT = Object.freeze({
     // The brass seam between the blocks, on the grid.
     seam: Object.freeze({ x: 605, top: 120, bottom: 520 }),
   }),
-  loadPlans: () => import('./gr.plans').then((module) => module.default),
+  loadPlans: () => import('./gr.plans'),
 })

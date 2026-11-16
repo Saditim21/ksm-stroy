@@ -1,9 +1,9 @@
 import { fireEvent, render } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import floors from '../data/maps/golden-residence.floors.json'
-import { planBox, planFor } from './planGeometry'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { buildModel } from './model'
+import { planBox } from './planGeometry'
 import { sizePlan } from './planModes'
+import { loadPlans } from './plans'
 import PlanSvg from './PlanSvg'
 import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
@@ -12,7 +12,12 @@ import { snapshotData } from './testing'
 // mode, the edge panel's and the sheet's: Блок А's typical plan with floor
 // 5's units from the sheets snapshot.
 
-const PLAN = planFor(floors, 'А')
+// Блок А's plan, as the surfaces have it once Golden Residence's plans are
+// in (plans.js): its floors map's entry, with the numbers it draws.
+let PLAN
+beforeAll(async () => {
+  PLAN = (await loadPlans(GR_PROJECT))['А']
+})
 const unitsOf = (key) => buildModel(snapshotData(), GR_PROJECT).floors.get(key).units
 const groups = (svg) => [...svg.querySelectorAll('g[data-suffix]')]
 const group = (svg, suffix) => svg.querySelector(`g[data-suffix="${suffix}"]`)
@@ -43,7 +48,7 @@ describe('PlanSvg, its sizes on screen', () => {
     vi.stubGlobal('ResizeObserver', Observer)
     const box = planBox(PLAN, 4)
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ width: box.w / 2, height: box.h / 2, left: 0, top: 0, right: 0, bottom: 0, x: 0, y: 0 })
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
     const svg = container.querySelector('svg')
 
     expect(sizes(svg)).toEqual(['20px', '6px', '2px', '8 6'])
@@ -55,7 +60,7 @@ describe('PlanSvg, its sizes on screen', () => {
   it('leaves them to its owner with fit={false}, who sets them for a scale with sizePlan()', () => {
     observed.length = 0
     vi.stubGlobal('ResizeObserver', Observer)
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" fit={false} />)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" fit={false} />)
     const svg = container.querySelector('svg')
 
     expect(observed).toEqual([])
@@ -69,7 +74,7 @@ describe('PlanSvg, its sizes on screen', () => {
 
 describe('PlanSvg, mini', () => {
   it('draws the 12 units, each with its status, its label and its outline', () => {
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
     const svg = container.querySelector('svg')
 
     expect(svg).toHaveClass('plan', 'plan--mini')
@@ -85,7 +90,7 @@ describe('PlanSvg, mini', () => {
 
   // The viewBox is the union of the block's 12 units, padded 4 in mini.
   it('crops to the block’s apartments, padded 4', () => {
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" />)
     const [x, y, w, h] = container.querySelector('svg').getAttribute('viewBox').split(' ').map(Number)
     const points = PLAN.shapes.flatMap((shape) => shape.polygons[0])
     expect(x).toBe(Math.min(...points.map(([px]) => px)) - 4)
@@ -97,7 +102,7 @@ describe('PlanSvg, mini', () => {
   // Spec §7.4, §7.9: blocked (and unknown) fill at 0.1 under a dashed outline.
   it('shows the dashed outline of a blocked unit, and of no other', () => {
     const units = unitsOf('А-5').map((unit) => (unit.suffix === '03' ? { ...unit, status: 'blocked', statusText: 'Блокиран' } : unit))
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={units} mode="mini" />)
+    const { container } = render(<PlanSvg plan={PLAN} units={units} mode="mini" />)
     const svg = container.querySelector('svg')
     const shown = (g) => {
       const outline = g.querySelector('path.u-blocked')
@@ -112,7 +117,7 @@ describe('PlanSvg, mini', () => {
   // Spec §7.4: a unit the sheet does not have gets no fill and no label.
   it('leaves a suffix missing from the sheet unfilled and unlabelled', () => {
     const units = unitsOf('А-5').filter((unit) => unit.suffix !== '07')
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={units} mode="mini" />)
+    const { container } = render(<PlanSvg plan={PLAN} units={units} mode="mini" />)
     const g = group(container.querySelector('svg'), '07')
 
     expect(g.dataset.status).toBe('none')
@@ -124,8 +129,8 @@ describe('PlanSvg, mini', () => {
   it('gives two plans on one page their own pattern ids', () => {
     const { container } = render(
       <>
-        <PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" />
-        <PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-6')} mode="mini" />
+        <PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" />
+        <PlanSvg plan={PLAN} units={unitsOf('А-6')} mode="mini" />
       </>,
     )
     const ids = [...container.querySelectorAll('pattern')].map((pattern) => pattern.id)
@@ -144,7 +149,7 @@ describe('PlanSvg, mini', () => {
   // A unit of the mini plan opens the stage on it (spec §7.3).
   it('hands a clicked unit to onUnit', () => {
     const onUnit = vi.fn()
-    const { container } = render(<PlanSvg project={GR_PROJECT} plan={PLAN} units={unitsOf('А-5')} mode="mini" onUnit={onUnit} />)
+    const { container } = render(<PlanSvg plan={PLAN} units={unitsOf('А-5')} mode="mini" onUnit={onUnit} />)
 
     fireEvent.click(group(container.querySelector('svg'), '02').querySelector('.u-hit'))
     expect(onUnit).toHaveBeenCalledTimes(1)
