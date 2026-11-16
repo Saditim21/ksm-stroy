@@ -45,7 +45,7 @@ export default function TeaserSection() {
         </h2>
         <p className="lead" data-fade="">
           Цифрите са свободните апартаменти в&nbsp;момента: блок&nbsp;А&nbsp;вляво, блок&nbsp;Б&nbsp;вдясно. Посочете етаж, кликнете,
-          за да видите плана му.
+          за да видите плана&nbsp;му.
         </p>
         <Seam draw />
       </div>

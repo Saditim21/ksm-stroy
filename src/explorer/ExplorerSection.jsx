@@ -170,7 +170,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
         <div>
           <ViewTabs value={view} onChange={switchTo} idBase={ID} />
           <p className="lead">
-            Свободните апартаменти в&nbsp;момента, по данни от таблиците на КСМ Строй:{' '}
+            Свободните апартаменти в&nbsp;момента, по данни от таблиците на КСМ&nbsp;Строй:{' '}
             <b>
               <RollingNumber value={model ? model.totals.available : null} />
             </b>{' '}

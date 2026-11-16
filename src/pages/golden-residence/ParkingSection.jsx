@@ -109,7 +109,7 @@ export default function ParkingSection() {
           Гаражи и&nbsp;<em>паркоместа</em>
         </h2>
         <p className="lead" data-fade="">
-          Свободните места в&nbsp;момента, по данни от таблиците на КСМ Строй.
+          Свободните места в&nbsp;момента, по данни от таблиците на КСМ&nbsp;Строй.
         </p>
         <Seam draw />
       </div>

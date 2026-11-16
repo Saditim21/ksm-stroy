@@ -105,6 +105,15 @@ describe('the story (spec §6.15)', () => {
     }
   })
 
+  // Final review F9: a hinge's lead never ends on one word alone, nor breaks
+  // the client's name, in any browser (text-wrap: pretty does it in Chrome
+  // and Safari only, and not for a long last word on a phone): its last two
+  // words are bound, and „КСМ Строй“ is.
+  it('binds the blocks’ and the parking’s leads at their ends, the client’s name whole', () => {
+    expect(section('blokove').querySelector('.hinge .lead').textContent).toMatch(/отворите апартамента\.\s*$/)
+    expect(section('garazhi').querySelector('.hinge .lead').textContent).toMatch(/КСМ Строй\.\s*$/)
+  })
+
   it('gives the building’s figures, 2, 8, 192 and 12, from 43,98 to 114,58 m², and the index 01 / 04', () => {
     const story = section('sgradata')
     const figures = story.querySelector('dl.kv')
