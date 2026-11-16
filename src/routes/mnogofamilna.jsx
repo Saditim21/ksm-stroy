@@ -3,6 +3,9 @@ import { availabilityPreload } from '../data/availability/useAvailability'
 import { ExplorerProvider } from '../explorer/ExplorerContext'
 import { MN_PROJECT } from '../explorer/projects/mn'
 import { MN_INQUIRY } from '../pages/mnogofamilna/inquiry'
+import MnBlocks from '../pages/mnogofamilna/MnBlocks'
+import MnBuilding from '../pages/mnogofamilna/MnBuilding'
+import MnGallery from '../pages/mnogofamilna/MnGallery'
 import MnHero from '../pages/mnogofamilna/MnHero'
 import MnList from '../pages/mnogofamilna/MnList'
 import { pageMeta } from '../seo/meta'
@@ -12,10 +15,13 @@ import '../pages/mnogofamilna/mn.css'
 
 // The Многофамилна page, /projects/mnogofamilna-sgrada (spec M3 §6): it opens
 // on its explorer, the night facade whose floors with free apartments are
-// lit (MnHero.jsx); then all 144 apartments in a list of their own
-// (MnList.jsx); and the inquiry, in Многофамилна's words and with its
-// subjects, Многофамилна first and chosen (MN_INQUIRY). Its numbers are the
-// dated snapshot of 01.12.2025 until its own sheets are live (projects/mn.js).
+// lit (MnHero.jsx); then both blocks, apartment by apartment, each with the
+// way to its own page (MnBlocks.jsx); all 144 apartments in a list of their
+// own (MnList.jsx); the building, its photo, words and facts
+// (MnBuilding.jsx); the gallery of its photos and drawings (MnGallery.jsx);
+// and the inquiry, in Многофамилна's words and with its subjects,
+// Многофамилна first and chosen (MN_INQUIRY). Its numbers are the dated
+// snapshot of 01.12.2025 until its own sheets are live (projects/mn.js).
 // The explorer's provider, Многофамилна's (MN_PROJECT), wraps every section:
 // it reads a deep link to a floor, a unit or the list (?floor=Б-5,
 // ?unit=А-802, ?view=list) once the page has hydrated, and renders the plan
@@ -46,7 +52,10 @@ export default function Mnogofamilna() {
   return (
     <ExplorerProvider project={MN_PROJECT} routeBlock={null}>
       <MnHero />
+      <MnBlocks />
       <MnList />
+      <MnBuilding />
+      <MnGallery />
       <InquirySection page="mnogofamilna" {...MN_INQUIRY} />
     </ExplorerProvider>
   )

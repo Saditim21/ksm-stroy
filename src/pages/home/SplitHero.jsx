@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { presetInquiry } from '../../components/inquiry/inquiryStore'
 import ResponsivePicture from '../../components/ui/ResponsivePicture'
 import RollingNumber from '../../components/ui/RollingNumber'
 import { GR_FACTS, MNOGO_DATED } from '../../config/facts'
@@ -14,13 +13,14 @@ import { cutNextTransition } from '../../utils/viewTransition'
 // Home's opening (spec §6.7; extract §4.6): the two buildings, one seam.
 // Each half is a link across the whole hero, its picture spanning the hero
 // (sizes 100vw) and clipped at the seam, which is the registered number --s
-// (home.css): Golden Residence to its page, where on a desktop it first
-// grows over the whole hero (the hero move), Многофамилна to the inquiry on
-// this page with its building chosen (until its page comes in M3). The
-// slogan (spec §1.2) comes first in the DOM and reads row by row across the
-// seam: each part is a nowrap mask, the left one ending .2 em before the
-// seam, the right one starting .2 em after it; on a phone, two lines broken
-// after „пространства“.
+// (home.css), and each takes the action „Изберете апартамент“ to its
+// building's page: Golden Residence's, where on a desktop it first grows
+// over the whole hero (the hero move), and Многофамилна's, through the
+// doors, as any page changes (spec M3 §6.6: the move is Golden Residence's
+// alone). The slogan (spec §1.2) comes first in the DOM and reads row by row
+// across the seam: each part is a nowrap mask, the left one ending .2 em
+// before the seam, the right one starting .2 em after it; on a phone, two
+// lines broken after „пространства“.
 //
 // The Golden Residence count is live: `—` in the prerendered HTML and until
 // the data arrives (RollingNumber), then the free apartments, rolling once;
@@ -42,7 +42,7 @@ function grName(free) {
   return `${place}: ${free} ${plural(free, 'свободен апартамент', 'свободни апартамента')} от ${GR_FACTS.apartments}. Изберете апартамент.`
 }
 
-const MN_NAME = `Многофамилна сграда, ж.к. Връбница-1: ${MNOGO_DATED.free} ${plural(MNOGO_DATED.free, 'свободен апартамент', 'свободни апартамента')} от ${MNOGO_DATED.total} по данни към ${MNOGO_DATED.date}. Запитване за сградата.`
+const MN_NAME = `Многофамилна сграда, ж.к. Връбница-1: ${MNOGO_DATED.free} ${plural(MNOGO_DATED.free, 'свободен апартамент', 'свободни апартамента')} от ${MNOGO_DATED.total} по данни към ${MNOGO_DATED.date}. Изберете апартамент.`
 
 // The arrow the link action draws (Button's), which moves 4 px on hover.
 function Arrow() {
@@ -51,17 +51,6 @@ function Arrow() {
       <path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.2" />
     </svg>
   )
-}
-
-// The Многофамилна half's click (spec §5.3): a plain left click presets the
-// inquiry with the building, which glides the page there
-// (inquiryStore.js), and takes the instant jump from the browser and the
-// router, so the address stays as it was. A click that opens a tab or a
-// window, and the page without its script, follow the link to #zapitvane.
-function toInquiry(event) {
-  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
-  event.preventDefault()
-  presetInquiry({ option: 'mnogofamilna' })
 }
 
 // The hero move (spec §6.7): the Golden Residence half grows over the whole
@@ -190,7 +179,7 @@ export default function SplitHero() {
         </div>
       </Link>
 
-      <a href="#zapitvane" className="half half--mn" aria-label={MN_NAME} onClick={toInquiry}>
+      <Link to="/projects/mnogofamilna-sgrada" prefetch="intent" className="half half--mn" aria-label={MN_NAME}>
         <div className="half__media">
           <ResponsivePicture image={mnNight['mn-dusk']} alt="" sizes="100vw" eager />
         </div>
@@ -205,10 +194,10 @@ export default function SplitHero() {
           </p>
           <p className="half__place">ж.к. Връбница-1, София</p>
           <span className="link half__cta">
-            Запитване за сградата <Arrow />
+            Изберете апартамент <Arrow />
           </span>
         </div>
-      </a>
+      </Link>
 
       <div className="hero__seam" aria-hidden="true" />
     </section>

@@ -10,7 +10,7 @@ import * as homeModule from '../Home'
 // (tests/contracts/site.jsx), offline, so the counts come from the data built
 // into the site. The teaser's own cases are teaser.test.jsx's.
 
-const MN_NAME = 'Многофамилна сграда, ж.к. Връбница-1: 16 свободни апартамента от 144 по данни към 01.12.2025. Запитване за сградата.'
+const MN_NAME = 'Многофамилна сграда, ж.к. Връбница-1: 16 свободни апартамента от 144 по данни към 01.12.2025. Изберете апартамент.'
 // Where the browser, which follows the router here, says the page is.
 const address = () => `${window.location.pathname}${window.location.search}${window.location.hash}`
 
@@ -38,20 +38,19 @@ it('links Golden Residence to its page, with its count', async () => {
   await waitFor(() => expect(screen.getByRole('link', { name: /^Golden Residence, жк Левски Г: \d+ свободни апартамента от 192\. Изберете апартамент\.$/ })).toHaveAttribute('href', '/projects/golden-residence'))
 })
 
-// Spec §6.7, §5.3: the Многофамилна half leads to the inquiry with the
-// building chosen, until its page comes in M3. Its click takes the jump from
-// the browser and the router; the inquiry's preset glides there instead
-// (inquiryStore.js), and the address stays as it was.
-it('takes the Многофамилна half to the inquiry, its building chosen, with no jump and no new address', async () => {
+// Spec M3 §6.6: the Многофамилна half takes the Golden Residence half's
+// action, „Изберете апартамент“, to its building's page, its dated count as
+// it was. The page changes through the doors (heroMove.test.jsx: never the
+// hero move).
+it('links the Многофамилна half to its page with „Изберете апартамент“, its dated count as it was', async () => {
   const half = screen.getByRole('link', { name: MN_NAME })
-  expect(half).toHaveAttribute('href', '#zapitvane')
-  expect(document.getElementById('zapitvane')).not.toBeNull()
+  expect(half).toHaveAttribute('href', '/projects/mnogofamilna-sgrada')
+  expect(half.querySelector('.half__cta').textContent.trim()).toBe('Изберете апартамент')
+  expect(half.querySelector('.half__count').textContent.replace(/\s+/g, ' ').trim()).toBe('свободни от 144 · по данни към 01.12.2025 16')
 
-  expect(fireEvent.click(half)).toBe(false)
-  expect(screen.getByLabelText('Интересувам се от')).toHaveValue('mnogofamilna')
-  // jsdom follows a fragment link a task after the click, as a browser does.
-  await new Promise((resolve) => { setTimeout(resolve, 0) })
-  expect(address()).toBe('/')
+  fireEvent.click(half)
+  await waitFor(() => expect(address()).toBe('/projects/mnogofamilna-sgrada'))
+  expect(await screen.findByRole('heading', { level: 1, name: 'Многофамилна жилищна сграда' })).toBeInTheDocument()
 })
 
 // Spec §6.2: on a page with an inquiry of its own, the header's „Запитване“

@@ -1,0 +1,155 @@
+/* A gallery of spreads (Spreads.jsx; Diptych spec §6.17, M3 §4.4, §6.2 #5;
+   extract §4.28), ported from the concept's css/diptych.css (:678-691 and
+   :840-844) with the tokens of src/index.css and --screen-h for vh, and its
+   drawings' plates from the Многофамилна concept's css/mnogofamilna.css
+   (:171-173). A control's border is hair-ctl; hover effects need a fine
+   pointer; nothing takes the focus ring away, and no box that holds a
+   control clips it (spec §11).
+
+   The component's own stylesheet, loaded with the pages that show a gallery
+   (Golden Residence's, Многофамилна's): plain CSS, in no Tailwind layer. A
+   section's padding, the seam and the hinge are the site's
+   (src/styles/diptych.css); how a page frames its own pictures (a spread
+   half's `photo`) is its page's stylesheet's. */
+
+/* Two halves on the seam, each a stack of pictures: hidden but for the
+   spreads on show, which Spreads.jsx stacks in the order chosen. A layer is
+   umber under its picture, so a picture that fades into its ground (a
+   page's grade) never shows the one under it through. */
+.gal { background: var(--onyx); }
+.gal__stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: min(calc(var(--screen-h) * .78), 780px);
+}
+.gal__half {
+  position: relative;
+  overflow: hidden;
+  background: var(--umber);
+}
+.gal__img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  background: var(--umber);
+}
+.gal__img[data-shown] { visibility: visible; }
+.gal__img picture,
+.gal__img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gal__img img {
+  max-width: none;
+  object-fit: cover;
+}
+/* A drawing lies whole on the umber, as a sheet on a table, never cropped,
+   under its title, the two in the middle of the plate. The drawing is as
+   tall as it is at the plate's width, or, where the plate is too short for
+   that, as tall as the plate leaves it and narrower, its left edge under its
+   title's. */
+.gal__img--whole {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: clamp(18px, 4vw, 64px);
+}
+.gal__img--whole picture {
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+}
+.gal__img--whole img {
+  object-fit: contain;
+  object-position: 0 50%;
+}
+.gal__title {
+  flex: none;
+  color: var(--ivory-2);
+  font-size: 14px;
+  line-height: 1.4;
+}
+/* Under the stage: the caption against the seam, the arrows and the counter
+   after it. */
+.gal__bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding-top: 22px;
+}
+/* The outer side keeps the gutter (extract §3.1): a long caption wraps
+   before the screen's edge, in the two lines it has room for, balanced, so
+   no word is left alone on its second line (ruling C6.2). */
+.gal__cap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 3.2em;
+  padding: 0 clamp(24px, 3vw, 52px) 0 var(--gut);
+  color: var(--ivory-2);
+  font-size: 15px;
+  text-align: right;
+  text-wrap: balance;
+}
+.gal__ctl {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-left: clamp(24px, 3vw, 52px);
+}
+.gal__ctl button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--hair-ctl);
+  color: var(--ivory);
+  transition: border-color .2s, background-color .2s;
+}
+.gal__ctl svg {
+  width: 18px;
+  height: 10px;
+}
+.gal__n {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.gal__n span {
+  color: var(--stone);
+  font-weight: 500;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gal__ctl button:hover {
+    border-color: var(--brass);
+    background: rgba(184, 149, 74, .08);
+  }
+}
+
+/* ---------- phones: the halves stack (spec §4) ---------- */
+/* The halves stacked at 4:3 under a brass rule, no seams. */
+@media (max-width: 900px) {
+  .gal__stage {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .gal__half { aspect-ratio: 4 / 3; }
+  .gal__half + .gal__half { border-top: 1px solid var(--brass); }
+  .gal__stage > .seam,
+  .gal__bar > .seam { display: none; }
+  .gal__bar { grid-template-columns: 1fr; }
+  .gal__cap {
+    justify-content: flex-start;
+    padding: 0 var(--gut) 16px;
+    text-align: left;
+  }
+  .gal__ctl { padding: 0 var(--gut); }
+}

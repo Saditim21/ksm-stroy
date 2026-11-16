@@ -1,17 +1,18 @@
 /* The Golden Residence page (spec
    docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md §5.5, §5.8,
-   §6.14–6.18, §8.2): the hero, the story, the two blocks, the gallery and
-   the garages and parking places, ported from the concept's css/diptych.css
-   (:417-430 and :799-807 the hero, :432-451, :808-814 and :906-914 the
-   story, :653-676, :834-839 and :898 the blocks, :678-691 and :840-844 the
-   gallery, :693-715 and :845-848 the parking) with the tokens of
-   src/index.css, --screen-h for vh, and the
+   §6.14–6.18, §8.2): the hero, the story, the two blocks, the framing of
+   the gallery's renders and the garages and parking places, ported from the
+   concept's css/diptych.css (:417-430 and :799-807 the hero, :432-451,
+   :808-814 and :906-914 the story, :653-676, :834-839 and :898 the blocks,
+   :693-715 and :845-848 the parking) with the tokens of src/index.css,
+   --screen-h for vh, and the
    spec's fixes: the hero's entrance is CSS from the first paint and names no
    view transition (ruling F8); without motion the story stays in one column
    with its pictures inline (spec §5.8); a control's border is hair-ctl;
    hover effects need a fine pointer; nothing takes the focus ring away, and
    no box that holds a control clips it (spec §11). The parking legend's
-   status counts are src/components/ui/status.css's, the explorer's styles
+   status counts are src/components/ui/status.css's, the gallery's
+   src/components/gallery/spreads.css's, the explorer's styles
    src/explorer/explorer.css's.
 
    The page's own stylesheet (src/routes/golden-residence.jsx), after the
@@ -435,95 +436,14 @@
 }
 
 /* ---------- the gallery (spec §6.17; extract §4.28) ---------- */
-/* Two halves on the seam, each a stack of renders: hidden but for the
-   spreads on show, which GallerySection.jsx stacks in the order chosen. */
-.gal { background: var(--onyx); }
-.gal__stage {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: min(calc(var(--screen-h) * .78), 780px);
-}
-.gal__half {
-  position: relative;
-  overflow: hidden;
-  background: var(--umber);
-}
-.gal__img {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  visibility: hidden;
-}
-.gal__img[data-shown] { visibility: visible; }
-.gal__img picture,
-.gal__img img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.gal__img img {
-  max-width: none;
-  object-fit: cover;
-}
+/* The gallery is a gallery of spreads (src/components/gallery/Spreads.jsx),
+   whose stylesheet is its own (spreads.css). Here, how this page frames its
+   renders, each a spread half's `photo` (GallerySection.jsx). */
 .gal__photo--corner { object-position: 50% 40%; }
 .gal__photo--towers { object-position: 28% 50%; }
 .gal__photo--parking { object-position: 60% 50%; }
 .gal__photo--facade { object-position: 40% 50%; }
 .gal__photo--dusk { object-position: 18% 60%; }
-/* Under the stage: the caption against the seam, the arrows and the counter
-   after it. */
-.gal__bar {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  padding-top: 22px;
-}
-/* The outer side keeps the gutter (extract §3.1): a long caption wraps
-   before the screen's edge, in the two lines it has room for, balanced, so
-   no word is left alone on its second line (ruling C6.2). */
-.gal__cap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 3.2em;
-  padding: 0 clamp(24px, 3vw, 52px) 0 var(--gut);
-  color: var(--ivory-2);
-  font-size: 15px;
-  text-align: right;
-  text-wrap: balance;
-}
-.gal__ctl {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding-left: clamp(24px, 3vw, 52px);
-}
-.gal__ctl button {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border: 1px solid var(--hair-ctl);
-  color: var(--ivory);
-  transition: border-color .2s, background-color .2s;
-}
-.gal__ctl svg {
-  width: 18px;
-  height: 10px;
-}
-.gal__n {
-  font-family: var(--serif);
-  font-size: 28px;
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.gal__n span {
-  color: var(--stone);
-  font-weight: 500;
-}
 
 /* ---------- the garages and parking places (spec §6.18; extract §4.29) ---------- */
 /* The garages against the seam, right-aligned; the parking places after it. */
@@ -642,10 +562,6 @@
     z-index: 1;
     transform: scale(1.18);
   }
-  .gal__ctl button:hover {
-    border-color: var(--brass);
-    background: rgba(184, 149, 74, .08);
-  }
 }
 
 /* ---------- phones: the halves stack (spec §4) ---------- */
@@ -724,23 +640,6 @@
   .blk--a .blk__floors { grid-template-columns: auto 1fr; }
   .blk--a .blk__floors .blk__fl { order: -1; }
   .blk--a .blk__stats .legend { justify-content: flex-start; }
-
-  /* The gallery: the halves stacked at 4:3 under a brass rule, no seams. */
-  .gal__stage {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-  .gal__half { aspect-ratio: 4 / 3; }
-  .gal__half + .gal__half { border-top: 1px solid var(--brass); }
-  .gal__stage > .seam,
-  .gal__bar > .seam { display: none; }
-  .gal__bar { grid-template-columns: 1fr; }
-  .gal__cap {
-    justify-content: flex-start;
-    padding: 0 var(--gut) 16px;
-    text-align: left;
-  }
-  .gal__ctl { padding: 0 var(--gut); }
 
   .park__half,
   .park__half--a {

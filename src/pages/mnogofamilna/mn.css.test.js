@@ -147,3 +147,95 @@ it('keeps the list’s room before it loads', () => {
   expect(declaredFor(page, '.mnl__list')['min-height']).toMatch(/^calc\(var\(--list-table\) \+ \d+px\)$/)
   expect(declaredFor(page, '.mnl .lv__table')).toMatchObject({ height: 'var(--list-table)', flex: '1 0 auto' })
 })
+
+// Spec M3 §6.2 #2 (the concept's mnogofamilna.css:147-149): Golden
+// Residence's blocks in numbers sized for this building, 8 squares a floor
+// and 9 floors, 352 px wide at most, the whole width on a small phone; under
+// the section's own class, as Golden Residence's page sizes its squares 12 ×
+// 8 under the same names (gr.css).
+describe('the blocks (spec M3 §6.2 #2)', () => {
+  it('sets each block’s squares 8 across and 9 floors down, 4 px apart, 352 px wide at most', () => {
+    expect(declaredFor(page, '.mnb .blk__grid')).toMatchObject({ display: 'grid', 'grid-template-columns': 'repeat(8, 1fr)', gap: '4px' })
+    expect(declaredFor(page, '.mnb .blk__fl')['grid-template-rows']).toBe('repeat(9, 1fr)')
+    expect(declaredFor(page, '.mnb .blk__floors')).toMatchObject({ width: 'min(100%, 352px)', 'grid-template-columns': 'auto 1fr' })
+    expect(declaredFor(page, '.mnb .blk__floors', ['@media (max-width: 560px)']).width).toBe('100%')
+    expect(declaredFor(page, '.mnb .blk__grid button')).toMatchObject({ 'aspect-ratio': '1', border: '1px solid var(--c)' })
+    // Every rule for the squares and the halves is the section's own.
+    const blocks = page.filter((rule) => rule.selectors.some((selector) => /\.blk/.test(selector)))
+    for (const rule of blocks) for (const selector of rule.selectors) expect(selector, rule.selector).toMatch(/^\.mnb /)
+  })
+
+  // Diptych §7.9: never colour alone, each square its status's pattern.
+  it('marks each square by its status’s pattern, as Golden Residence’s do', () => {
+    expect(declaredFor(page, '.mnb .blk__grid .s-free')['--c']).toBe('var(--status-free)')
+    expect(declaredFor(page, '.mnb .blk__grid .s-reserved').background).toMatch(/^repeating-linear-gradient\(-45deg/)
+    expect(declaredFor(page, '.mnb .blk__grid .s-sold')['background-image']).toMatch(/^radial-gradient\(/)
+    expect(declaredFor(page, '.mnb .blk__grid .s-blocked')['border-style']).toBe('dashed')
+    expect(declaredFor(page, '.mnb .blk__grid .s-none')['--c']).toBe('var(--hair)')
+  })
+
+  // WCAG 2.4.7: the focus can reach a grid before its squares' entrance, and
+  // shows them, important, over the entrance's inline opacity.
+  it('shows every square while the focus is in its grid', () => {
+    const [rule] = rulesFor(page, '.mnb .blk__grid:focus-within button')
+    expect(rule.declarations).toEqual([{ prop: 'opacity', value: '1', important: true }])
+  })
+
+  it('grows a square pointed at by 1.18 only where a fine pointer hovers', () => {
+    expect(declaredFor(page, '.mnb .blk__grid button:hover', ['@media (hover: hover) and (pointer: fine)'])).toMatchObject({ transform: 'scale(1.18)', 'z-index': '1' })
+  })
+
+  // The way to each block's page is as wide as its words, on the block's
+  // side; on a phone, where the halves stack left-aligned, on the left.
+  it('sets „Преглед на блока“ on its block’s side', () => {
+    expect(declaredFor(page, '.mnb .blk__go')['justify-self']).toBe('start')
+    expect(declaredFor(page, '.mnb .blk--a .blk__go')['justify-self']).toBe('end')
+    expect(declaredFor(page, '.mnb .blk--a .blk__go', [PHONE])['justify-self']).toBe('start')
+  })
+
+  // Spec M3 §4.1: halves stack on a phone; the second block under a brass
+  // rule.
+  it('stacks the blocks on a phone, block Б under a brass rule', () => {
+    expect(declaredFor(page, '.mnb .blk--b', [PHONE])['border-top']).toBe('1px solid var(--brass)')
+    expect(declaredFor(page, '.mnb .blk--a .blk__floors', [PHONE])['grid-template-columns']).toBe('auto 1fr')
+  })
+})
+
+// Spec M3 §6.2 #4: the building's picture and words side by side, the
+// picture .72 of the screen tall; on a phone the picture first, at 4:3, the
+// words under a brass rule.
+it('sets the building’s picture beside its words, stacked on a phone', () => {
+  expect(declaredFor(page, '.mns__media')['min-height']).toBe('clamp(460px, calc(var(--screen-h) * .72), 780px)')
+  expect(declaredFor(page, '.mns__media img')['object-fit']).toBe('cover')
+  expect(declaredFor(page, '.mns .kv')['grid-template-columns']).toBe('repeat(2, minmax(0, 1fr))')
+  expect(declaredFor(page, '.mns__media', [PHONE])).toMatchObject({ 'min-height': '0', 'aspect-ratio': '4 / 3' })
+  expect(declaredFor(page, '.mns__text', [PHONE])['border-top']).toBe('1px solid var(--brass)')
+})
+
+// Spec M3 §6.2 #4, #5: the daylight renders are taken to the night palette
+// by CSS, quieter, warmer and darker, their sky fading from the top into the
+// umber behind them; the drawings keep their colours.
+it('grades the photos to the night palette, their sky fading into the umber', () => {
+  const grade = declaredFor(page, '.mn-night')
+  expect(grade.filter).toMatch(/saturate\(\.\d+\).*sepia\(\.\d+\).*brightness\(\.\d+\)/)
+  expect(grade['mask-image']).toMatch(/^linear-gradient\(to bottom, /)
+  expect(declaredFor(page, '.mn-gal--block')['object-position']).toBe('50% 46%')
+  expect(declaredFor(page, '.mn-gal--persp')['object-position']).toBe('58% 50%')
+})
+
+// Spec M3 §4.1 (the critic's hinge fix): from 901 px no hinge's title or lead
+// on this page runs into the page's gutter. A margin, so a lead keeps its
+// measure where its half has the room (the lead's max-width includes its
+// padding).
+it('keeps the hinges’ titles and leads out of the gutter from 901 px', () => {
+  const WIDE = ['@media (min-width: 901px)']
+  for (const section of ['.mnb', '.mnl', '#galeriya']) {
+    expect(declaredFor(page, `${section} > .hinge > :first-child`, WIDE)['margin-left'], section).toBe('var(--gut)')
+    expect(declaredFor(page, `${section} > .hinge > :nth-child(2)`, WIDE)['margin-right'], section).toBe('var(--gut)')
+  }
+})
+
+// Ruling F9, spec §11: nothing on the page takes the site's focus ring away.
+it('keeps the site’s focus ring on every control', () => {
+  for (const rule of page) expect(valueOf(rule, 'outline'), rule.selector).not.toBe('none')
+})

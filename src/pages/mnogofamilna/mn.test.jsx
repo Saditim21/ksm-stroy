@@ -1,4 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, mainText, renderSiteAt } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
@@ -89,6 +90,40 @@ describe('the opening (spec M3 §6.2 #1)', () => {
     await new Promise((resolve) => { setTimeout(resolve, 0) })
     expect(address()).toBe(PATH)
   })
+})
+
+// Spec M3 §6.2 #2, ruling T8a: a square of #blokove opens its unit in the
+// unit panel, through the address, with no stage under it; so does Enter on
+// a square the keyboard has reached, and the panel gives the focus back to
+// that square as it closes (ruling C8.1).
+describe('#blokove', () => {
+  const grid = (letter) => within(section('blokove')).getByRole('group', { name: (name) => name.replace(/\s+/g, ' ') === `Апартаментите на блок ${letter}` })
+
+  it('opens a square’s unit in the unit panel', async () => {
+    renderSiteAt(PATH)
+    fireEvent.click(within(grid('А')).getByRole('button', { name: 'А-802, Свободен' }))
+
+    expect(await screen.findByRole('dialog', { name: 'А-802' }, { timeout: 15000 })).toBeInTheDocument()
+    expect(new URLSearchParams(window.location.search).get('unit')).toBe('А-802')
+    expect(document.querySelector('.ps')).toBeNull()
+  }, 30000)
+
+  it('opens the unit of a square the keyboard has reached with Enter, and comes back to it', async () => {
+    const user = userEvent.setup()
+    renderSiteAt(PATH)
+    const squares = within(grid('Б')).getAllByRole('button')
+    expect(squares.filter((square) => square.tabIndex === 0)).toEqual([squares[0]])
+
+    squares[0].focus()
+    await user.keyboard('{ArrowDown}{End}{Enter}')
+    const panel = await screen.findByRole('dialog', { name: 'Б-808' }, { timeout: 15000 })
+    expect(panel).toBeInTheDocument()
+    expect(new URLSearchParams(window.location.search).get('unit')).toBe('Б-808')
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(within(grid('Б')).getByRole('button', { name: /^Б-808, / }))
+  }, 30000)
 })
 
 // Spec M3 §6.2 #3: all 144 apartments, sold ones included, with the live

@@ -186,31 +186,16 @@ describe('the blocks (spec §6.16; extract §4.27)', () => {
   })
 })
 
-describe('the gallery (spec §6.17)', () => {
-  it('sets two halves on the seam, .78 of the screen tall up to 780 px, stacked 4:3 on a phone', () => {
-    expect(declaredFor('.gal__stage')).toMatchObject({ display: 'grid', 'grid-template-columns': '1fr 1fr', height: 'min(calc(var(--screen-h) * .78), 780px)' })
-    expect(declaredFor('.gal__stage', [PHONE])).toMatchObject({ 'grid-template-columns': '1fr', height: 'auto' })
-    expect(declaredFor('.gal__half', [PHONE])['aspect-ratio']).toBe('4 / 3')
-  })
-
-  // Spec §2.1: a control's border is hair-ctl.
-  it('borders its buttons in hair-ctl, 52 px square', () => {
-    expect(declaredFor('.gal__ctl button')).toMatchObject({ width: '52px', height: '52px', border: '1px solid var(--hair-ctl)' })
-  })
-
-  // Every layer but those on show is hidden; GallerySection.jsx stacks them.
-  it('shows only the pictures on show', () => {
-    expect(declaredFor('.gal__img').visibility).toBe('hidden')
-    expect(declaredFor('.gal__img[data-shown]').visibility).toBe('visible')
-  })
+// The gallery's own rules are its component's, a gallery of spreads
+// (src/components/gallery/spreads.css.test.js); here, how this page frames
+// its renders.
+it('frames the gallery’s renders, each its spread half’s photo class', () => {
+  expect(declaredFor('.gal__photo--corner')['object-position']).toBe('50% 40%')
+  expect(declaredFor('.gal__photo--dusk')['object-position']).toBe('18% 60%')
 })
 
-// Spec §4: at 900 px and under every grid stacks and the seams hide. The
-// story's seam shows only beside its picture half, with motion.
-it('hides the gallery’s seams on a phone, and the story’s wherever its halves are not side by side', () => {
-  for (const selector of ['.gal__stage > .seam', '.gal__bar > .seam']) {
-    expect(declaredFor(selector, [PHONE]).display, selector).toBe('none')
-  }
+// Spec §4: the story's seam shows only beside its picture half, with motion.
+it('hides the story’s seam wherever its halves are not side by side', () => {
   expect(declaredFor('.story > .seam').display).toBe('none')
   expect(rules.filter((rule) => rule.selectors.includes(':root.js .story > .seam')).map((rule) => [valueOf(rule, 'display'), rule.atRules]))
     .toEqual([['block', [NO_PREFERENCE, WIDE]]])

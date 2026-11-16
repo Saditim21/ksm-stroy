@@ -1,12 +1,13 @@
 import { STATUS_LABEL } from '../../utils/propertyStatus'
 import { statusKeyOf } from './status'
 
-// What the Golden Residence page's pictures of its places say to a pointer:
-// the block grids' squares (src/explorer/BlockGrid.jsx), „А 501 · 2-стаен ·
-// 62,18 м² · Продаден“, and the parking cells
+// What the pictures of a project's places say to a pointer: the block
+// grids' squares (src/explorer/BlockGrid.jsx), „А 501 · 2-стаен · 62,18 м² ·
+// Продаден“ on Golden Residence's page, „А-101 · …“ on Многофамилна's, and
+// Golden Residence's parking cells
 // (src/pages/golden-residence/ParkingSection.jsx), „Г-001 · 34,01 м² ·
-// Продаден“. Only those two import this, so it travels once, in that page's
-// own chunk.
+// Продаден“. Only those two import this, so it travels with the block grids,
+// in the chunk the two projects' pages share.
 
 // What a place's status reads, as StatusChip has it (spec §7.9, ruling R1):
 // its label, or for a status the rules do not know the place's own text

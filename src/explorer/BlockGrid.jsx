@@ -10,12 +10,12 @@ import useExplorer from './useExplorer'
 // explorer's project (useExplorer.js): a row a floor, its top floor first,
 // and a column a number on the floor (Golden Residence 12 × 8, floors 8 → 1;
 // Многофамилна 8 × 9, floors 10 → 2). Each square is a button in its status's
-// pattern (the page's stylesheet, gr.css), named „А 501, Продаден“ and titled
-// „А 501 · 2-стаен · 62,18 м² · Продаден“, by the project's unit label
-// („А-101“ on Многофамилна's floor 2). The floor numbers stand on the seam's
-// side: after block А's grid, before block Б's. A click opens the unit
-// (onUnit, with its label and the square, for the focus to come back to as
-// the unit panel closes: Safari and Firefox on a Mac do not focus a button
+// pattern (the page's stylesheet, gr.css or mn.css), named „А 501, Продаден“
+// and titled „А 501 · 2-стаен · 62,18 м² · Продаден“, by the project's unit
+// label („А-101“ on Многофамилна's floor 2). The floor numbers stand on the
+// seam's side: after block А's grid, before block Б's. A click opens the
+// unit (onUnit, with its label and the square, for the focus to come back to
+// as the unit panel closes: Safari and Firefox on a Mac do not focus a button
 // they click).
 //
 // The keyboard (ruling T8a): a grid is one tab stop, the square last

@@ -101,6 +101,21 @@ it('follows the link through the doors, with no cut, where there is no fine poin
   expect(arrival()).toBe('doors')
 })
 
+// Spec M3 §6.6: the Многофамилна half goes to its page through the doors,
+// even where the Golden Residence half would make the move: the move is
+// Golden Residence's alone.
+it('takes the Многофамилна half to its page through the doors, never the hero move', async () => {
+  restore = mockMatchMedia({ fine: true })
+  renderSiteAt('/')
+  const link = await screen.findByRole('link', { name: /^Многофамилна сграда, ж\.к\. Връбница-1/ })
+
+  fireEvent.click(link)
+  expect(document.querySelector('section.hero')?.hasAttribute('data-moving') ?? false).toBe(false)
+  await waitFor(() => expect(window.location.pathname).toBe('/projects/mnogofamilna-sgrada'))
+  expect(html()).not.toHaveClass('vt-cut')
+  expect(arrival()).toBe('doors')
+})
+
 // Each of the move's other conditions, one at a time: the link as any other.
 it.each([
   ['a window narrower than 901 px', () => setWindow('innerWidth', 900)],

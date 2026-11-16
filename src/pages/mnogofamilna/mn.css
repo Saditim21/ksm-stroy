@@ -1,16 +1,21 @@
 /* The Многофамилна page (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
-   §6.2; Diptych §5.5): its opening, the explorer itself, and the list's
-   section, ported from the concept's css/mnogofamilna.css (:98-115 the
-   opening, :158-159 the list, :201-233 their phones) with the tokens of
-   src/index.css, --screen-h for vh, and the system's type: the name reads
-   across the seam at Home's slogan size (M3 §4.1).
+   §6.2; Diptych §5.5): its opening, the explorer itself; its blocks, the
+   list's section and the building; and the night grade and framing of its
+   gallery's photos. Ported from the concept's css/mnogofamilna.css (:98-115
+   the opening, :146-169 the blocks, the list and the building, :201-233
+   their phones) with the tokens of src/index.css, --screen-h for vh, and the
+   system's type: the name reads across the seam at Home's slogan size (M3
+   §4.1). The blocks' squares and halves are Golden Residence's
+   (src/pages/golden-residence/gr.css), sized for this building.
 
    The page's own stylesheet (src/routes/mnogofamilna.jsx), after the
    site's: plain CSS, in no Tailwind layer. A section's padding, the seam,
    the split and the hinge are the site's (src/styles/diptych.css); the
    facade, its lights, its crops and its dialogs are the explorer's
    (src/explorer/explorer.css) and Многофамилна's own
-   (src/explorer/mn-facade.css); the inquiry's styles its component's.
+   (src/explorer/mn-facade.css); the gallery's its component's
+   (src/components/gallery/spreads.css), the status counts' theirs
+   (src/components/ui/status.css), the inquiry's styles its component's.
 
    The opening moves by CSS from first paint (Diptych §5.5), only under the
    motion gate (`:root.js`) inside @media (prefers-reduced-motion:
@@ -113,6 +118,114 @@
 }
 .mnx__facade { margin-top: clamp(12px, calc(var(--screen-h) * .02), 24px); }
 
+/* ---------- the blocks (spec M3 §6.2 #2) ---------- */
+/* Golden Residence's blocks in numbers (gr.css), sized for this building:
+   Блок А against the seam, right-aligned, Блок Б after it, each its name,
+   its facts, its squares, its counts and types, and the way to its page.
+   Under the section's own class, as the two pages size the same squares
+   differently. */
+.mnb { background: var(--onyx); }
+.mnb .blk {
+  display: grid;
+  align-content: start;
+  gap: 26px;
+  padding: 0 clamp(28px, 5vw, 96px);
+}
+.mnb .blk--a {
+  justify-items: end;
+  text-align: right;
+}
+.mnb .blk__name {
+  font-family: var(--serif);
+  font-size: clamp(52px, 5.2vw, 88px);
+  font-weight: 500;
+  line-height: .9;
+}
+.mnb .blk__name em { color: var(--brass-l); }
+.mnb .blk__sub {
+  margin-top: -10px;
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+/* The squares (BlockGrid.jsx): 8 across, a floor a row, 4 px apart, each
+   its status's pattern (Diptych §7.9); the floor numbers beside them on the
+   seam's side. 352 px wide at most, the concept's (:147-149). */
+.mnb .blk__floors {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: stretch;
+  gap: 8px;
+  width: min(100%, 352px);
+}
+.mnb .blk--a .blk__floors { grid-template-columns: 1fr auto; }
+.mnb .blk__fl {
+  display: grid;
+  grid-template-rows: repeat(9, 1fr);
+  align-items: center;
+  height: 100%;
+  color: var(--stone);
+  font-size: 10px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.mnb .blk__grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+.mnb .blk__grid button {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--c);
+  background: transparent;
+  transition: transform .2s var(--e-out);
+}
+/* The entrance (BlockGrid.jsx) holds the squares at opacity 0 until the
+   block reaches 75 % of the screen. Focus that arrives before, with no
+   scroll, shows them, a square's ring with it (WCAG 2.4.7): important, over
+   the entrance's inline opacity. */
+.mnb .blk__grid:focus-within button { opacity: 1 !important; }
+.mnb .blk__grid .s-none { --c: var(--hair); }
+.mnb .blk__grid .s-free {
+  --c: var(--status-free);
+  background: rgba(79, 191, 133, .55);
+}
+.mnb .blk__grid .s-reserved {
+  --c: var(--status-reserved);
+  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
+}
+.mnb .blk__grid .s-sold {
+  --c: rgba(212, 87, 78, .7);
+  background-image: radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+.mnb .blk__grid .s-blocked {
+  --c: var(--status-blocked);
+  border-style: dashed;
+}
+/* The block's counts by status, its room types with their date, and the
+   way to its page. */
+.mnb .blk__stats {
+  display: grid;
+  gap: 10px;
+}
+.mnb .blk--a .blk__stats .legend { justify-content: flex-end; }
+.mnb .blk__types {
+  color: var(--ivory-2);
+  font-size: 14px;
+}
+.mnb .blk__types b {
+  color: var(--ivory);
+  font-weight: 600;
+}
+/* The way to the block's page, as wide as its words, its underline with
+   them, on the block's own side. */
+.mnb .blk__go {
+  justify-self: start;
+  margin-top: 4px;
+}
+.mnb .blk--a .blk__go { justify-self: end; }
+
 /* ---------- the list (spec M3 §6.2 #3) ---------- */
 /* After a section, no padding of its own above its hinge. The list keeps
    its room before it loads, so nothing visible moves when it lands: its
@@ -143,6 +256,113 @@
 }
 @media (max-width: 1023px) {
   .mnl__list { min-height: calc(var(--list-table) + 238px); }
+}
+
+/* ---------- the building (spec M3 §6.2 #4) ---------- */
+/* The street perspective beside the words, on the seam: the picture fills
+   its half, .72 of the screen tall, 460–780 px; the words in the middle of
+   the other. */
+.mns {
+  align-items: stretch;
+  background: var(--onyx);
+}
+.mns__media {
+  position: relative;
+  min-height: clamp(460px, calc(var(--screen-h) * .72), 780px);
+  overflow: hidden;
+  background: var(--umber);
+}
+.mns__media picture {
+  position: absolute;
+  inset: 0;
+}
+.mns__media img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+.mns__text {
+  display: grid;
+  align-content: center;
+  gap: 22px;
+  padding: clamp(64px, calc(var(--screen-h) * .1), 120px) var(--gut) clamp(64px, calc(var(--screen-h) * .1), 120px) clamp(28px, 5vw, 104px);
+}
+.mns__desc {
+  max-width: 30em;
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+/* The building's figures, two by two under a rule (Golden Residence's,
+   gr.css). */
+.mns .kv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 34px;
+  max-width: 520px;
+  margin-top: 6px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hair-2);
+}
+.mns .kv dt {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+.mns .kv dd {
+  margin-top: 6px;
+  color: var(--stone);
+  font-size: 13px;
+}
+.mns__types {
+  color: var(--ivory-2);
+  font-size: 14px;
+}
+.mns__types b {
+  color: var(--ivory);
+  font-weight: 600;
+}
+
+/* ---------- the night grade and the gallery's photos (spec M3 §6.2 #4, #5) ---------- */
+/* The daylight renders taken to the night palette, by CSS: quieter, warmer
+   and darker, the sky fading from the top into the umber behind it. On the
+   building's picture (its <picture>, the placeholder's colour with it) and
+   on the gallery's photos (their <img>, each its spread half's `photo`;
+   spreads.css keeps umber under every layer). The drawings stay as drawn. */
+.mn-night {
+  filter: saturate(.6) sepia(.18) brightness(.82) contrast(1.08);
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / .1), rgb(0 0 0 / .5) 28%, #000 58%);
+}
+/* How the gallery frames each photo (MnGallery.jsx): the blocks on their
+   towers, the perspective on its nearer pair (the concept's
+   mnogofamilna.js:1101-1102). */
+.mn-gal--block { object-position: 50% 46%; }
+.mn-gal--persp { object-position: 58% 50%; }
+
+/* A square pointed at grows by 1.18, where a fine pointer hovers. */
+@media (hover: hover) and (pointer: fine) {
+  .mnb .blk__grid button:hover {
+    z-index: 1;
+    transform: scale(1.18);
+  }
+}
+
+/* From 901 px, where a hinge's halves stand side by side, its title and its
+   lead wrap short of the page's gutter (spec M3 §4.1, the critic's hinge
+   fix; the concept's mnogofamilna.css:67): on this page's own sections and
+   its gallery (#galeriya). A margin, not the concept's padding, so a lead
+   keeps its full measure wherever its half has the room (1440 px and up),
+   and only a narrower half (1024 px) takes the gutter from it. */
+@media (min-width: 901px) {
+  .mnb > .hinge > :first-child,
+  .mnl > .hinge > :first-child,
+  #galeriya > .hinge > :first-child { margin-left: var(--gut); }
+  .mnb > .hinge > :nth-child(2),
+  .mnl > .hinge > :nth-child(2),
+  #galeriya > .hinge > :nth-child(2) { margin-right: var(--gut); }
 }
 
 /* ---------- phones (spec M3 §4.1: the halves stack) ---------- */
@@ -197,13 +417,47 @@
     padding: 0 12px;
   }
   .mnx__facade { margin-top: 26px; }
+  /* The blocks: left-aligned, block А's floors moved to the left of its
+     squares, the second block under a brass rule. */
+  .mnb .blk,
+  .mnb .blk--a {
+    justify-items: start;
+    padding: 0 var(--gut);
+    text-align: left;
+  }
+  .mnb .blk--a { padding-bottom: 56px; }
+  .mnb .blk--b {
+    margin: 0 var(--gut);
+    padding: 56px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .mnb .blk--a .blk__floors { grid-template-columns: auto 1fr; }
+  .mnb .blk--a .blk__floors .blk__fl { order: -1; }
+  .mnb .blk--a .blk__stats .legend { justify-content: flex-start; }
+  .mnb .blk--a .blk__go { justify-self: start; }
   /* The list's bar wraps onto more rows as the screen narrows (measured:
      268 px at 768, 393 px at 600, 435 px from 360 to 480, 556 px at 320). */
   .mnl { --list-table: calc(var(--screen-h) * .64); }
   .mnl__list { min-height: calc(var(--list-table) + 268px); }
+  /* The building: the picture first, full-bleed at 4:3, the words under a
+     brass rule. */
+  .mns { padding-bottom: 88px; }
+  .mns__media {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+  .mns__text {
+    margin: 0 var(--gut);
+    padding: 40px 0 0;
+    border-top: 1px solid var(--brass);
+  }
 }
 @media (max-width: 600px) {
   .mnl__list { min-height: calc(var(--list-table) + 393px); }
+}
+/* The squares take the whole width on a small phone. */
+@media (max-width: 560px) {
+  .mnb .blk__floors { width: 100%; }
 }
 @media (max-width: 480px) {
   .mnl__list { min-height: calc(var(--list-table) + 435px); }

@@ -2,12 +2,14 @@
 import { JSDOM } from 'jsdom'
 import { renderToString } from 'react-dom/server'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline } from '../../../tests/contracts/site'
 import App from '../../root'
 import { availabilityPreload } from '../../data/availability/useAvailability'
+import { MN_FACTS } from '../../data/mnogofamilna/facts'
 import Mnogofamilna, { handle } from '../../routes/mnogofamilna'
 import { DISPLAY_FONT_PRELOADS } from '../../utils/fontLinks'
+import { formatArea } from '../../utils/format'
 
 // The build prerenders the Многофамилна page in Node, where there is no
 // window, and that HTML is the final visual state until the JS runs (plan,
@@ -112,13 +114,146 @@ it('prerenders the facade at rest, its night picture first to load', () => {
   expect(caption.querySelector('.cap-phone')).not.toBeNull()
 })
 
-// Spec M3 §6.2: the opening is the explorer, then the list, then the
-// inquiry, whose #zapitvane is inside #kontakti.
-it('runs #explorer, #spisak and #kontakti, in that order', () => {
+// Spec M3 §6.2: the opening is the explorer, then both blocks apartment by
+// apartment, the list, the building, the gallery, and the inquiry, whose
+// #zapitvane is inside #kontakti.
+it('runs #explorer, #blokove, #spisak, #sgradata, #galeriya and #kontakti, in that order', () => {
   const doc = parse(prerender())
 
-  expect([...doc.querySelectorAll('main section[id]')].map(({ id }) => id)).toEqual(['explorer', 'spisak', 'kontakti'])
+  expect([...doc.querySelectorAll('main section[id]')].map(({ id }) => id))
+    .toEqual(['explorer', 'blokove', 'spisak', 'sgradata', 'galeriya', 'kontakti'])
   expect(doc.querySelector('#kontakti #zapitvane')).not.toBeNull()
+})
+
+// Spec M3 §6.2 #2: „Два блока, по 72 апартамента“, production's „Изберете
+// блок за преглед“ in the lead; each block's 72 apartments as squares,
+// floors 10 down to 2, „А-101“ the bottom row's first; its counts by status
+// and its room types, dated, from the snapshot; and „Преглед на блока“ to
+// its page.
+describe('#blokove', () => {
+  const blocks = () => parse(prerender()).querySelector('#blokove')
+  const grid = (section, letter) => [...section.querySelectorAll('[role="group"]')]
+    .find((group) => group.getAttribute('aria-label') === `Апартаментите на блок\u00A0${letter}`)
+
+  it('heads both blocks, its lead production’s „Изберете блок за преглед“', () => {
+    const section = blocks()
+
+    expect(textOf(section.querySelector('h2'))).toBe('Два блока, по 72 апартамента')
+    expect(textOf(section.querySelector('h2 em'))).toBe('72')
+    expect(textOf(section.querySelector('.hinge .lead'))).toBe('Изберете блок за преглед. Всеки квадрат е апартамент: етажите отгоре надолу, номерата от 01 до 08. Кликнете квадрат, за да отворите апартамента.')
+    expect(section.querySelector('.hinge .lead').textContent).toContain('отворите\u00A0апартамента.')
+    expect([...section.querySelectorAll('h3')].map(textOf)).toEqual(['Блок А', 'Блок Б'])
+    expect([...section.querySelectorAll('.blk__sub')].map((sub) => sub.textContent)).toEqual(Array(2).fill('72\u00A0апартамента · 9\u00A0етажа · 8\u00A0на етаж'))
+  })
+
+  it('draws each block’s 72 apartments as squares, 8 a floor, floors 10 down to 2', () => {
+    const section = blocks()
+
+    for (const letter of ['А', 'Б']) {
+      const squares = [...grid(section, letter).querySelectorAll('button')]
+      expect(squares, letter).toHaveLength(72)
+      expect(squares[0].getAttribute('aria-label')).toBe(`${letter}-901, Продаден`)
+      expect(squares.at(-8).getAttribute('aria-label')).toMatch(new RegExp(`^${letter}-101, `))
+      // One tab stop a grid (ruling T8a).
+      expect(squares.filter((square) => square.getAttribute('tabindex') === '0')).toHaveLength(1)
+    }
+    expect(grid(section, 'А').querySelector('[aria-label="А-802, Свободен"]').getAttribute('class')).toBe('s-free')
+    expect([...section.querySelectorAll('.blk__fl')].map((floors) => [...floors.children].map(textOf).join(' '))).toEqual(Array(2).fill('10 9 8 7 6 5 4 3 2'))
+  })
+
+  it('counts each block’s apartments by status, and its room types, as of the snapshot’s date', () => {
+    const section = blocks()
+    const counts = (id) => [...section.querySelectorAll(`#${id} .blk__stats .legend > li`)].map(textOf)
+
+    expect(counts('blk-a')).toEqual(['4 свободни', '4 резервирани', '64 продадени', '0 блокирани'])
+    expect(counts('blk-b')).toEqual(['12 свободни', '2 резервирани', '58 продадени', '0 блокирани'])
+    for (const id of ['blk-a', 'blk-b']) {
+      expect(textOf(section.querySelector(`#${id} .blk__types`)), id).toBe('36 двустайни · 36 тристайни · по данни към 01.12.2025')
+    }
+    expect(section.textContent).not.toMatch(/—/)
+  })
+
+  it('takes „Преглед на блока“ to each block’s page', () => {
+    const links = [...blocks().querySelectorAll('a')].filter((link) => textOf(link) === 'Преглед на блока')
+
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/projects/mnogofamilna-sgrada/block-a', '/projects/mnogofamilna-sgrada/block-b'])
+    expect(links.map((link) => link.closest('.blk').id)).toEqual(['blk-a', 'blk-b'])
+  })
+})
+
+// Spec M3 §6.2 #4: the building, a split: the street perspective, graded to
+// the night palette, and the brochure's line, production's description cut
+// of its floors, the УПИ address and the facts, from the snapshot.
+it('#sgradata: „С магазини и подземни гаражи“, production’s description and address, and the facts', () => {
+  const doc = parse(prerender())
+  const building = doc.querySelector('#sgradata')
+
+  expect(textOf(building.querySelector('h2'))).toBe('С магазини и подземни гаражи')
+  expect(textOf(building.querySelector('h2 em'))).toBe('гаражи')
+  const description = building.querySelector('.mns__desc')
+  expect(textOf(description)).toBe('Модерна многофамилна жилищна сграда с два блока (А и Б), гаражи и луксозни апартаменти в ж.к. Връбница-1. Част от апартаментите вече са продадени.')
+  expect(description.textContent).toContain('с\u00A0два блока (А\u00A0и\u00A0Б)')
+  expect(building.textContent).not.toMatch(/10 етажа|9 етажа/)
+  expect(building.querySelector('.mns__addr').textContent).toBe('УПИ V-1344, кв.\u00A033, ж.к. Връбница-1, гр. София')
+
+  const facts = [...building.querySelectorAll('.kv > div')].map((fact) => [textOf(fact.querySelector('dt')), textOf(fact.querySelector('dd'))])
+  expect(facts).toEqual([
+    [String(MN_FACTS.blocks), 'блока, А и Б'],
+    [String(MN_FACTS.residentialFloors), 'жилищни етажа във всеки блок, от 2 до 10'],
+    [String(MN_FACTS.apartments), 'апартамента, по 72 в блок'],
+    [String(MN_FACTS.perFloor), 'апартамента на етаж, от 59,48 до 101,98 м²'],
+  ])
+  expect(facts.map(([figure]) => figure)).toEqual(['2', '9', '144', '8'])
+  expect(building.querySelector('.kv').textContent).toContain(`до ${formatArea(MN_FACTS.maxArea)}`)
+  expect(textOf(building.querySelector('.mns__types'))).toBe('72 двустайни · 72 тристайни')
+
+  const photo = building.querySelector('.mns__media img')
+  expect(photo.getAttribute('src')).toMatch(/^\/img\/mn-persp-\d+\.webp$/)
+  expect(photo.getAttribute('alt')).toBe('Многофамилната сграда откъм улицата, визуализация')
+  expect(photo.getAttribute('loading')).toBe('lazy')
+})
+
+// Spec M3 §6.2 #5: „Галерия със *снимки*“, three spreads: Блок А with Блок
+// Б, the front with the perspective, then the two drawings whole, under
+// production's titles. The first is on show.
+it('#galeriya: three spreads, the third the two drawings whole, under production’s titles', () => {
+  const doc = parse(prerender())
+  const gallery = doc.querySelector('#galeriya')
+  const layers = (spread) => [...gallery.querySelectorAll(`.gal__img[data-spread="${spread}"]`)]
+  const source = (layer) => layer.querySelector('img').getAttribute('src').replace(/-\d+\.webp$/, '')
+
+  expect(textOf(gallery.querySelector('h2'))).toBe('Галерия със снимки')
+  expect(textOf(gallery.querySelector('h2 em'))).toBe('снимки')
+  expect(gallery.querySelector('.gal__stage').getAttribute('aria-label')).toBe('Визуализации и планове')
+  expect(textOf(gallery.querySelector('.gal__n'))).toBe('01 / 03')
+  expect([0, 1, 2].map((spread) => layers(spread).map(source))).toEqual([
+    ['/img/mn-block-a', '/img/mn-block-b'],
+    ['/img/mn-front', '/img/mn-persp'],
+    ['/img/mn-plan-drawing', '/img/mn-garages'],
+  ])
+  expect(layers(3)).toEqual([])
+  // The first spread on show, its caption the live one.
+  expect([...gallery.querySelectorAll('.gal__img[data-shown]')].map((layer) => layer.getAttribute('data-spread'))).toEqual(['0', '0'])
+  expect(textOf(gallery.querySelector('.gal__cap'))).toBe('Блок А и блок Б.')
+
+  // The drawings: whole, on their plates, each under its title.
+  for (const layer of layers(2)) expect(layer.classList.contains('gal__img--whole')).toBe(true)
+  for (const layer of [...layers(0), ...layers(1)]) expect(layer.classList.contains('gal__img--whole')).toBe(false)
+  expect(layers(2).map((layer) => textOf(layer.querySelector('.gal__title')))).toEqual(['Архитектурен план на етажа', 'Блок А и Б – надземни и подземни гаражи'])
+  expect(layers(2)[1].querySelector('.gal__title').textContent).toBe('Блок\u00A0А\u00A0и\u00A0Б\u00A0– надземни и\u00A0подземни гаражи')
+})
+
+// The sections under the opening are the final state too: nothing in them
+// starts hidden, faded, moved or clipped (their reveals are motion's, from
+// the markup, mn.motion.test.jsx).
+it('starts nothing in #blokove, #sgradata or #galeriya hidden, faded, moved or clipped', () => {
+  const doc = parse(prerender())
+  for (const id of ['blokove', 'sgradata', 'galeriya']) {
+    const section = doc.getElementById(id)
+    const styles = [section, ...section.querySelectorAll('[style]')].map((element) => element.getAttribute('style') ?? '')
+    expect(styles.filter((style) => /opacity|transform|translate|scale|clip|visibility|(^|;)\s*(width|height):\s*0/.test(style)), id).toEqual([])
+    expect(section.querySelectorAll('[hidden]'), id).toHaveLength(0)
+  }
 })
 
 // Spec M3 §6.2 #3: the list's heading and lead are in the HTML; the list

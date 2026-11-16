@@ -39,6 +39,8 @@ it('renders with no window, as the build does', () => {
   expect(prerender()).toContain('Създаваме')
 })
 
+// Spec M3 §6.6: the Многофамилна half leads to its page, „Изберете
+// апартамент“, its count dated as before.
 it('prerenders the slogan, the dated Многофамилна count and the intro’s doors', () => {
   const html = prerender()
   const doc = parse(html)
@@ -46,9 +48,11 @@ it('prerenders the slogan, the dated Многофамилна count and the intr
   expect(textOf(doc.querySelector('h1'))).toBe('Създаваме пространства за мечтания живот')
   expect(doc.querySelectorAll('h1')).toHaveLength(1)
   expect(html).toContain('class="intro-doors"')
-  expect(textOf(doc.querySelector('.half--mn .half__count'))).toContain('16')
-  expect(doc.querySelector('.half--mn').getAttribute('aria-label')).toContain('16 свободни апартамента от 144')
-  expect(doc.querySelector('.half--mn').getAttribute('href')).toBe('#zapitvane')
+  expect(textOf(doc.querySelector('.half--mn .half__count'))).toBe('свободни от 144 · по данни към 01.12.2025 16')
+  expect(doc.querySelector('.half--mn').getAttribute('aria-label'))
+    .toBe('Многофамилна сграда, ж.к. Връбница-1: 16 свободни апартамента от 144 по данни към 01.12.2025. Изберете апартамент.')
+  expect(doc.querySelector('.half--mn').getAttribute('href')).toBe('/projects/mnogofamilna-sgrada')
+  expect(textOf(doc.querySelector('.half--mn .half__cta'))).toBe('Изберете апартамент')
 })
 
 // The Golden Residence count arrives at hydration (spec §9): `—` until then,
