@@ -78,13 +78,22 @@ export const MN_PROJECT = Object.freeze({
     seam: Object.freeze({ x: 609.5, top: 150, bottom: 598 }),
     bands: BANDS,
     Lights: FacadeLights,
+    // Its block names apart in the page's text, „Блок А Блок Б“, as they are
+    // on the screen, not run together: the page names its blocks on its
+    // facade (the routes contract reads „блок А“ before anything but a
+    // letter, tests/contracts/site.jsx). Golden Residence's and Home's
+    // markup stays as it was (M3 §6.4).
+    namesApart: true,
   }),
   plans: Object.freeze({
     floors,
     // „101“ on floor 2, as its label has it.
     unitNumber: (unit) => `${unit.floor - 1}${unit.suffix}`,
-    // The top floor is the one production calls „Тавански етаж“ (spec §2).
+    // The top floor is the one production calls „Тавански етаж“ (spec §2),
+    // and an apartment's line says so after the floor's number, „етаж 10,
+    // тавански“ (the unit panel; the concept's mnogofamilna.js:856).
     floorMeta: ({ floor }) => (floor === MN_FACTS.floors.max ? 'тавански етаж' : null),
+    floorWord: ({ floor }) => (floor === MN_FACTS.floors.max ? 'тавански' : null),
   }),
   loadPlans: () => import('./mn.plans'),
 })

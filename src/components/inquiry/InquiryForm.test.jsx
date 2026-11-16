@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HOME_INQUIRY } from '../../pages/home/inquiry'
 import { MN_INQUIRY } from '../../pages/mnogofamilna/inquiry'
 import { buildLead } from '../../services/inquiry'
 import { recordingMotion } from '../../test/gsap'
@@ -33,6 +34,9 @@ const ERRORS = {
   consent: 'Отбележете съгласието, за да изпратим запитването.',
 }
 
+// Home's options, which its page hands the form (src/pages/home/inquiry.jsx).
+const HOME_OPTIONS = HOME_INQUIRY.options
+
 const field = (label) => screen.getByLabelText(label)
 // A pick of Golden Residence's, as its explorer hands one to the form.
 const grPick = (label) => ({ project: 'golden-residence', label })
@@ -58,7 +62,7 @@ afterEach(() => {
 })
 
 it('labels every field, the consent and the action', () => {
-  render(<InquiryForm page="home" />)
+  render(<InquiryForm page="home" options={HOME_OPTIONS} />)
   for (const label of ['Име', 'Телефон', 'Имейл', 'Интересувам се от', 'Съобщение']) expect(field(label)).toBeInTheDocument()
   expect(screen.getByRole('checkbox', { name: CONSENT })).not.toBeChecked()
   expect(submit()).toHaveAttribute('type', 'submit')
@@ -67,7 +71,7 @@ it('labels every field, the consent and the action', () => {
 
 describe('checking the fields before anything is sent', () => {
   it('an empty form sends nothing, names each problem and focuses the name', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await user.click(submit())
 
     expect(send).not.toHaveBeenCalled()
@@ -83,7 +87,7 @@ describe('checking the fields before anything is sent', () => {
   // Review Focus 5: the proxy's pattern takes Latin letters only, so an
   // address on a Cyrillic domain would be dropped there without a trace.
   it('asks for Latin letters in an email with a Cyrillic domain', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@пример.бг' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.latin)).toBeInTheDocument()
@@ -97,7 +101,7 @@ describe('checking the fields before anything is sent', () => {
   // (ivan@пример.бг reads ivan@xn--e1afmkfd.xn--90ae), which the proxy's
   // pattern refuses as well.
   it('asks for Latin letters in an email the browser has turned into punycode', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@xn--e1afmkfd.xn--90ae' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.latin)).toBeInTheDocument()
@@ -105,7 +109,7 @@ describe('checking the fields before anything is sent', () => {
   })
 
   it('asks for a whole email', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.email)).toBeInTheDocument()
@@ -115,7 +119,7 @@ describe('checking the fields before anything is sent', () => {
   // The proxy drops a one-letter name: the name counts after trimming, as
   // buildLead sends it.
   it('counts the name after trimming it', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { name: ' И' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.name)).toBeInTheDocument()
@@ -125,7 +129,7 @@ describe('checking the fields before anything is sent', () => {
   // The digits count, whatever the spaces and the + around them: „+359 88“
   // has five, one more makes six.
   it('takes a phone number with spaces and +359', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { phone: '+359 88' })
     await user.click(submit())
     expect(screen.getByText(ERRORS.phone)).toBeInTheDocument()
@@ -139,7 +143,7 @@ describe('checking the fields before anything is sent', () => {
 
 describe('sending', () => {
   it('sends a valid form once, with its subject and picks', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.type(field('Съобщение'), 'Кога е готова сградата?')
     await user.click(submit())
@@ -155,7 +159,7 @@ describe('sending', () => {
   })
 
   it('thanks the visitor in a status that takes the focus', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.click(submit())
     const status = await screen.findByRole('status')
@@ -166,7 +170,7 @@ describe('sending', () => {
 
   it('says so when the inquiry was not sent, and keeps what was typed', async () => {
     send.mockResolvedValue({ ok: false })
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.click(submit())
     expect(await screen.findByText('Запитването не беше изпратено. Опитайте отново или се обадете на +359 887 886 166.')).toBeInTheDocument()
@@ -187,7 +191,7 @@ describe('sending', () => {
   // subject their chips hide and the lead names none; the picks stay in the
   // store, so choosing Golden Residence again brings them back.
   it('sends no apartment picked under another subject, and shows none', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
     expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
     // Home's Многофамилна half.
@@ -267,7 +271,7 @@ describe('sending', () => {
   it('says it is sending while the inquiry is on its way, and takes no second send', async () => {
     let finish
     send.mockReturnValue(new Promise((resolve) => { finish = resolve }))
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.click(submit())
 
@@ -286,7 +290,7 @@ describe('sending', () => {
 
   it('is no longer busy once a send has failed, and can send again', async () => {
     send.mockResolvedValue({ ok: false })
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.click(submit())
 
@@ -301,7 +305,7 @@ describe('sending', () => {
   // whole contact half under the section's top. The glide to the inquiry
   // then goes as far as the thank-you, which has an id for it.
   it('brings a thank-you that ends below the fold into view', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockReturnValue({ top: 2000, bottom: 2160, left: 0, right: 0, width: 0, height: 160, x: 0, y: 2000 })
@@ -312,7 +316,7 @@ describe('sending', () => {
   })
 
   it('leaves the page where it is when the thank-you is on screen', async () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user)
     await user.click(submit())
 
@@ -327,7 +331,7 @@ describe('sending', () => {
     const recorder = recordingMotion()
     motion = recorder.motion
     try {
-      const { unmount } = render(<InquiryForm page="home" />)
+      const { unmount } = render(<InquiryForm page="home" options={HOME_OPTIONS} />)
       await fill(user)
       await user.click(submit())
       const status = await screen.findByRole('status')
@@ -353,7 +357,7 @@ describe('sending', () => {
 // preset (Многофамилна) never files a Golden Residence inquiry. The picks
 // stay, for the explorer pages hand them on.
 it('clears the option when its section leaves the page, and keeps the picks', () => {
-  const { unmount } = render(<InquirySection page="home" />)
+  const { unmount } = render(<InquirySection page="home" {...HOME_INQUIRY} />)
   act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
   expect(field('Интересувам се от')).toHaveValue('mnogofamilna')
 
@@ -398,7 +402,7 @@ describe('presets from the page', () => {
   })
 
   it('sets the select to a preset option', () => {
-    render(<InquiryForm page="home" />)
+    render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     act(() => presetInquiry({ option: 'mnogofamilna' }))
     expect(field('Интересувам се от')).toHaveValue('mnogofamilna')
   })

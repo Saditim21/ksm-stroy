@@ -17,9 +17,10 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, reset
 // (src/services/inquiry.js).
 //
 // What the visitor asks about comes from the page's options (`page`'s in
-// inquiryStore.js, or the `options` a page hands over, InquirySection.jsx),
-// and the page can preset it, with apartments picked in the explorer as
-// chips. A pick goes only with its own project's subject
+// inquiryStore.js, Golden Residence's, or the `options` any other page hands
+// over, InquirySection.jsx), and the page can preset it, with apartments
+// picked in the explorer as chips. A pick goes only with its own project's
+// subject
 // (ruling FR4, extended by M3 §8): Golden Residence's with its apartments or
 // its garages, Многофамилна's with Многофамилна (OPTION_PROJECT). Under
 // another subject a pick neither shows nor goes with the lead, and it stays
@@ -117,7 +118,7 @@ function TextField({ id, label, error, ...input }) {
 
 const BLANK = { name: '', phone: '', email: '', message: '', consent: false }
 
-export default function InquiryForm({ page = 'home', options = INQUIRY_OPTIONS[page] ?? INQUIRY_OPTIONS.home }) {
+export default function InquiryForm({ page = 'golden-residence', options = INQUIRY_OPTIONS[page] }) {
   const { option, picks } = useInquiryState()
   const chosen = options.some(({ value }) => value === option) ? option : options[0].value
   const shown = picks.filter((pick) => pick.project === OPTION_PROJECT[chosen])

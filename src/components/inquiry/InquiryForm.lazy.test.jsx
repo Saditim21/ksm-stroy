@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
+import { HOME_INQUIRY } from '../../pages/home/inquiry'
 import InquiryForm from './InquiryForm'
 
 // The send path (sendPath.js: src/services/inquiry.js, and EmailJS behind it,
@@ -40,7 +41,7 @@ afterEach(() => {
 })
 
 it('does not load the send service before the form is used', async () => {
-  render(<InquiryForm page="home" />)
+  render(<InquiryForm page="home" options={HOME_INQUIRY.options} />)
   expect(service.loads).toBe(0)
 
   fireEvent.focusIn(field('Име'))
@@ -69,7 +70,7 @@ it('says an inquiry whose send path did not load was not sent, and loads it agai
   })
   try {
     const { default: FreshForm } = await import('./InquiryForm')
-    render(<FreshForm page="home" />)
+    render(<FreshForm page="home" options={HOME_INQUIRY.options} />)
 
     fireEvent.focusIn(field('Име'))
     await waitFor(() => expect(attempts).toBe(1))

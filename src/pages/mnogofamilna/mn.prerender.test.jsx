@@ -57,7 +57,7 @@ it('prerenders one H1, the building’s name, read across the seam', () => {
 it('gives the address with its no-break spaces', () => {
   const address = parse(prerender()).querySelector('#explorer .mnx__addr')
 
-  expect(address.textContent).toBe('УПИ V-1344, кв. 33, ж.к. Връбница-1, гр. София')
+  expect(address.textContent).toBe('УПИ V-1344, кв.\u00A033, ж.к. Връбница-1, гр. София')
 })
 
 // Review Focus 1: the page shows the snapshot's real numbers, dated, in its
@@ -67,7 +67,7 @@ it('mn.prerender: the facts and rails show the snapshot’s numbers', () => {
   const [all, free] = doc.querySelectorAll('#explorer .mnx__fact')
 
   expect(textOf(all)).toBe('144 апартамента в 2 блока')
-  expect(all.textContent).toContain('в 2 блока')
+  expect(all.textContent).toContain('в\u00A02\u00A0блока')
   expect(textOf(free)).toBe('16 свободни по данни към 01.12.2025')
 
   const rails = [...doc.querySelectorAll('#explorer .fx__cnt')]
@@ -130,7 +130,7 @@ it('prerenders the list’s heading and lead, and not the list', () => {
   expect(textOf(list.querySelector('h2'))).toBe('Всички 144 апартамента')
   expect(textOf(list.querySelector('h2 em'))).toBe('144')
   expect(textOf(list.querySelector('.lead'))).toBe('По данни към 01.12.2025. Продадените остават в списъка.')
-  expect(list.querySelector('.lead').textContent).toContain('в списъка')
+  expect(list.querySelector('.lead').textContent).toContain('в\u00A0списъка')
   expect(list.querySelector('.lv')).toBeNull()
 })
 

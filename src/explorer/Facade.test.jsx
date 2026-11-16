@@ -37,6 +37,24 @@ function renderFacade(props = {}) {
   return onOpenFloor
 }
 
+// The block names over the facade. Golden Residence's markup has them side
+// by side, as it always had (M3 §6.4: its output unchanged); a project that
+// asks (namesApart, Многофамилна's) has them apart in the page's text too.
+it('keeps Golden Residence’s block names side by side, and a project’s apart where it asks', () => {
+  const { unmount } = render(<Facade project={GR_PROJECT} model={MODEL} mode="full" />)
+  const names = () => [document.querySelector('.fx__bname--a'), document.querySelector('.fx__bname--b')]
+  let [a, b] = names()
+  expect(a.nextSibling).toBe(b)
+  expect(a.parentNode.textContent).toContain('Блок\u00A0АБлок\u00A0Б')
+  unmount()
+
+  render(<Facade project={{ ...GR_PROJECT, facade: { ...GR_PROJECT.facade, namesApart: true } }} model={MODEL} mode="full" />)
+  ;[a, b] = names()
+  expect(a.nextSibling.nodeType).toBe(Node.TEXT_NODE)
+  expect(a.nextSibling.nextSibling).toBe(b)
+  expect(a.parentNode.textContent).toContain('Блок\u00A0А Блок\u00A0Б')
+})
+
 describe('the rails (spec §7.2)', () => {
   it('are 16 buttons, eight a block, each named for its floor’s counts, each holding its floor as text of its own', () => {
     renderFacade()

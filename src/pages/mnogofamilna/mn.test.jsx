@@ -150,6 +150,78 @@ it('?view=list&unit=А-802 gives the focus back to А-802’s row in #spisak', a
   expect(document.activeElement).toBe(row)
 }, 30000)
 
+// Spec §1.9 (ruling T7a), M3 §6.4, §8: a landing on the list keeps the EU
+// line in view, as a deep link's does. The page holds the header's EU row
+// (data-eu-hold on <html>) from before its jump to #spisak until the visitor
+// first moves the page, by a scroll, the wheel, a touch or a key, 400 ms on:
+// the jump's own scroll comes before that, and lets nothing go.
+describe('?view=list lands on #spisak with the EU row in view', () => {
+  const held = () => document.documentElement.hasAttribute('data-eu-hold')
+  const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms) })
+  const MOVES = {
+    scroll: () => fireEvent.scroll(window),
+    wheel: () => fireEvent.wheel(window, { deltaY: 120 }),
+    'touch move': () => fireEvent.touchMove(window),
+    key: () => fireEvent.keyDown(document.body, { key: 'ArrowDown' }),
+  }
+  // #spisak 3000 px down the page, as jsdom lays nothing out; the jump there
+  // notes whether the row was held as it went.
+  const landingAt = (top) => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
+      const y = this.id === 'spisak' ? top : 0
+      return { top: y, bottom: y + 900, left: 0, right: 1440, width: 1440, height: 900, x: 0, y }
+    })
+    const jumps = []
+    vi.spyOn(window, 'scrollTo').mockImplementation((x, y) => jumps.push({ y, held: held() }))
+    return jumps
+  }
+
+  it.each(Object.keys(MOVES))('holds the row until a %s 400 ms on', async (move) => {
+    const jumps = landingAt(3000)
+    renderSiteAt(`${PATH}?view=list`)
+
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true }]))
+    expect(held()).toBe(true)
+    // The jump's scroll, and any move in the first 400 ms, keep it.
+    MOVES[move]()
+    await wait(200)
+    expect(held()).toBe(true)
+
+    await wait(300)
+    expect(held()).toBe(true)
+    MOVES[move]()
+    expect(held()).toBe(false)
+  })
+
+  // A unit opened from the list is opened in place, over the whole screen:
+  // the landing has ended.
+  it('lets the row go as a unit opens from the list', async () => {
+    renderSiteAt(`${PATH}?view=list`)
+    await waitFor(() => expect(held()).toBe(true))
+    const row = await waitFor(() => {
+      const found = [...section('spisak').querySelectorAll('tr.row')].find((each) => text(each.querySelector('.uid')) === 'А-802')
+      expect(found).toBeTruthy()
+      return found
+    }, { timeout: 15000 })
+
+    fireEvent.click(row)
+    await screen.findByRole('dialog', { name: 'А-802' }, { timeout: 15000 })
+    expect(held()).toBe(false)
+  }, 30000)
+
+  // Golden Residence's list is a tab of its explorer: ?view=list shows it
+  // where it is, and the page neither jumps nor holds anything.
+  it('holds nothing where the page has no #spisak', async () => {
+    const jumps = landingAt(3000)
+    renderSiteAt('/projects/golden-residence?view=list')
+    await screen.findByRole('tab', { name: /По критерии/, selected: true }, { timeout: 15000 })
+    await wait(50)
+
+    expect(jumps).toEqual([])
+    expect(held()).toBe(false)
+  }, 30000)
+})
+
 // Ruling PF11: the page is the project's, solid from the top, with an
 // inquiry of its own. Its preloads go out with the prerendered document only
 // (ruling C5.4, mn.prerender.test.jsx), so a render in the browser adds none.

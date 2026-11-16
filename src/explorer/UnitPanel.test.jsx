@@ -376,3 +376,31 @@ describe('the own-plan switch only for mapped ids', () => {
     expect(plan.querySelector('image.drawing')).toHaveAttribute('href', '/img/mn-plan-line-2400.webp')
   })
 })
+
+// Spec M3 §2, §6.4: Многофамилна's floor 10 is the attic, and an apartment's
+// line says so after its floor, „етаж 10, тавански“ (the concept's
+// mnogofamilna.js:856). No other floor's line does, nor Golden Residence's:
+// its А-1's кота is the floor's word on its plans (floorMeta), not the
+// apartment's.
+describe('the attic in the unit’s line', () => {
+  const lineOf = (unitId) => panel(unitId).querySelector('.up__sub > span').textContent
+  const renderUnit = (project, data, unitId, plans) => render(
+    <UnitPanel plans={plans} model={buildModel(data, project)} unitId={unitId} onClose={vi.fn()} onStep={vi.fn()} onInquire={vi.fn()} />,
+  )
+
+  it('says „етаж 10, тавански“ for Многофамилна’s А-901', async () => {
+    renderUnit(MN_PROJECT, MN_SNAPSHOT_DATA, 'А-901', await loadPlans(MN_PROJECT))
+    expect(lineOf('А-901')).toBe('Блок\u00A0А · етаж 10, тавански · 2-стаен')
+  })
+
+  it('says the floor alone for А-801, on floor 9', async () => {
+    renderUnit(MN_PROJECT, MN_SNAPSHOT_DATA, 'А-801', await loadPlans(MN_PROJECT))
+    expect(lineOf('А-801')).toBe('Блок\u00A0А · етаж 9 · 2-стаен')
+  })
+
+  it('adds nothing to Golden Residence’s А 101, whose floor has its кота', async () => {
+    renderUnit(GR_PROJECT, snapshotData(), 'А 101', PLANS)
+    expect(PLANS['А'].floorMeta({ block: 'А', floor: 1 })).toBe('кота +3,06')
+    expect(lineOf('А 101')).toMatch(/^Блок\u00A0А · етаж 1 · \d-стаен$/)
+  })
+})

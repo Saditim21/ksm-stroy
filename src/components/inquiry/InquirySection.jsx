@@ -10,15 +10,18 @@ import './inquiry.css'
 // §4.14), a split on the seam: on the left, #zapitvane, the heading, the
 // lead, the phones, the email on the projects' pages and the hours; on the
 // right, the form (InquiryForm). `page` picks the copy and the form's
-// options: Home's from production's contact page (Contact:506–509), Golden
-// Residence's from decision A1, its inquiries going to КСМ Строй.
-// Non-breaking spaces after the one-letter words (spec §3.3).
+// options built in, Golden Residence's, which its page and its block pages
+// share: decision A1, its inquiries going to КСМ Строй. Non-breaking spaces
+// after the one-letter words (spec §3.3).
 //
-// A page whose copy and options no other page shares hands them over
-// instead, `copy` ({ title, lead, email }) and `options` (inquiryStore.js's
-// shape), so they travel with its own routes and in no other page's
-// first-load JS (M3 §10): Многофамилна's routes pass MN_INQUIRY
-// (src/pages/mnogofamilna/inquiry.jsx), `<InquirySection {...MN_INQUIRY} />`.
+// Every other page hands its own over, `copy` ({ title, lead, email }) and
+// `options` (inquiryStore.js's shape), so they travel with its own route and
+// in no other page's first-load JS (M3 §10): Home's HOME_INQUIRY, from
+// production's contact page (src/pages/home/inquiry.jsx), and Многофамилна's
+// routes' MN_INQUIRY (src/pages/mnogofamilna/inquiry.jsx), as
+// `<InquirySection {...MN_INQUIRY} />`. Golden Residence's stay built in: a
+// module of their own, which its page and its block pages would share, would
+// be a chunk of its own on its first load, and cost it more than it saves.
 //
 // The headings rise line by line, the copy fades in and the seam draws as the
 // section comes into view (useReveals); the markup is the final state.
@@ -28,15 +31,6 @@ import './inquiry.css'
 // starts on its own subject.
 
 const COPY = {
-  home: {
-    title: (
-      <>
-        Готови сте да започнете своя <em>проект</em>?
-      </>
-    ),
-    lead: <>Нашият екип е&nbsp;готов да ви помогне да реализирате мечтания проект с&nbsp;качество и&nbsp;професионализъм.</>,
-    email: false,
-  },
   'golden-residence': {
     title: (
       <>
@@ -53,7 +47,7 @@ const COPY = {
   },
 }
 
-export default function InquirySection({ page = 'home', copy = COPY[page] ?? COPY.home, options }) {
+export default function InquirySection({ page = 'golden-residence', copy = COPY[page], options }) {
   const ref = useRef(null)
   useReveals(ref)
   useEffect(() => clearInquiryOption, [])

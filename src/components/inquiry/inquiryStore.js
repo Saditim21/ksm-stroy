@@ -31,21 +31,21 @@ const FOCUS_AFTER_MS = 1500
 
 // The subjects more than one page offers: the label in the select and the
 // subject the lead carries (src/services/inquiry.js). A page whose options
-// travel with its own routes builds them from these (Многофамилна's,
-// src/pages/mnogofamilna/inquiry.jsx).
+// travel with its own routes builds them from these (Home's,
+// src/pages/home/inquiry.jsx; Многофамилна's, src/pages/mnogofamilna/inquiry.jsx).
 const option = (value, label, subject = label) => Object.freeze({ value, label, subject })
 export const GOLDEN_RESIDENCE = option('golden-residence', `Golden Residence, жк${NBSP}Левски${NBSP}Г`, 'Golden Residence')
 export const MNOGOFAMILNA = option('mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1')
 export const BUILD = option('build', 'Строителство или ремонт')
 export const OTHER = option('other', 'Друго')
 
-// What Home's form and Golden Residence's offer (spec §10; M3 §8), the
-// page's own first. These travel in the first-load JS of every page with the
-// form, so a project page's own options stay out of them: Многофамилна's
-// routes hand theirs to the form (InquirySection.jsx; M3 §10: per-project
-// code only on its own routes).
+// What Golden Residence's form offers, on its page and its block pages (spec
+// §10; M3 §8), its own building first: the options built into the form
+// (InquirySection.jsx's `page`). They travel in the first-load JS of every
+// page with the form, so any other page's options stay out of them: Home and
+// Многофамилна's routes hand theirs to the form (InquirySection.jsx; M3 §10:
+// per-page code only on its own routes).
 export const INQUIRY_OPTIONS = Object.freeze({
-  home: Object.freeze([GOLDEN_RESIDENCE, MNOGOFAMILNA, BUILD, OTHER]),
   'golden-residence': Object.freeze([
     option('golden-residence', `Апартамент в${NBSP}Golden Residence`, 'Golden Residence'),
     option('garage', `Гараж или паркомясто в${NBSP}Golden Residence`, 'Golden Residence, гараж или паркомясто'),

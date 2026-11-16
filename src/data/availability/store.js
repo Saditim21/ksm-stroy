@@ -5,7 +5,8 @@
 // { status: 'idle', data: null }. The first client subscriber starts the load:
 //   1. api/availability, same origin, preloaded from the data routes' `links`;
 //   2. if that fails (any answer but a 200 with its JSON, or none), the sheets
-//      themselves, through the browser's fetchers in googleSheets.js;
+//      themselves, through the browser's fetchers in googleSheets.js, which
+//      load then (loadSheets);
 //   3. if those read nothing either, the data built into the site, as
 //      'fallback'.
 // `data` has the API's `projects` shape on every path, and `origin`, in the
@@ -27,7 +28,14 @@
 // fails, as ApartmentContext does.
 
 import { normalizeStatus } from '../../utils/propertyStatus'
-import { clearCache, fetchApartmentData, fetchGarageData, normalizeFloorData } from '../../services/googleSheets'
+
+// The browser's fetchers and the legacy floor maps' last step
+// (src/services/googleSheets.js, with sheetsCore.js's CSV reader): a chunk of
+// their own, loaded only on the paths that use them, the sheets once the API
+// has failed and the data built into the site, so neither is in a route's
+// first-load JS (spec §10, M3 §10: the bytes Многофамилна's page adds to the
+// shared chunks are freed here).
+const loadSheets = () => import('../../services/googleSheets')
 
 const AVAILABILITY_URL = '/api/availability'
 
@@ -146,17 +154,20 @@ async function fromApi() {
 
 // Each fetcher answers null for a sheet that is not configured or failed. A
 // refresh clears their cache first: after an error they answer the expired
-// rows, which would pass for new ones.
+// rows, which would pass for new ones. Fetchers that did not load read
+// nothing.
 async function fromSheets({ refresh }) {
-  if (refresh) clearCache()
+  const sheets = await loadSheets().catch(() => null)
+  if (!sheets) return null
+  if (refresh) sheets.clearCache()
   const settle = (read) => Promise.resolve().then(read).catch(() => null)
   const [blockA, blockB, garages, parking, mnogoA, mnogoB] = await Promise.all([
-    settle(() => fetchApartmentData('blockA')),
-    settle(() => fetchApartmentData('blockB')),
-    settle(() => fetchGarageData('garages')),
-    settle(() => fetchGarageData('parking')),
-    settle(() => fetchApartmentData('mnogoA')),
-    settle(() => fetchApartmentData('mnogoB')),
+    settle(() => sheets.fetchApartmentData('blockA')),
+    settle(() => sheets.fetchApartmentData('blockB')),
+    settle(() => sheets.fetchGarageData('garages')),
+    settle(() => sheets.fetchGarageData('parking')),
+    settle(() => sheets.fetchApartmentData('mnogoA')),
+    settle(() => sheets.fetchApartmentData('mnogoB')),
   ])
   if (![blockA, blockB, garages, parking, mnogoA, mnogoB].some(Boolean)) return null
   return {
@@ -171,9 +182,9 @@ async function readLive({ refresh }) {
 
 // The data built into the site, normalised like a sheet's rows (floor 0 out,
 // statuses through normalizeStatus()). Each project's is a chunk of its own,
-// loaded only when a slot needs it.
+// loaded only when a slot needs it, with the sheets' (normalizeFloorData).
 async function builtInGoldenResidence() {
-  const data = await import('../../constants/apartmentFallbackData')
+  const [{ normalizeFloorData }, data] = await Promise.all([loadSheets(), import('../../constants/apartmentFallbackData')])
   return projectsOf({
     blockA: normalizeFloorData(data.getBlockAFallbackData()),
     blockB: normalizeFloorData(data.getBlockBFallbackData()),
@@ -183,7 +194,7 @@ async function builtInGoldenResidence() {
 }
 
 async function builtInMnogofamilna() {
-  const data = await import('../../constants/mnogofamilnaFallbackData')
+  const [{ normalizeFloorData }, data] = await Promise.all([loadSheets(), import('../../constants/mnogofamilnaFallbackData')])
   return projectsOf({
     mnogoA: normalizeFloorData(data.getMnogoAFallbackData()),
     mnogoB: normalizeFloorData(data.getMnogoBFallbackData()),

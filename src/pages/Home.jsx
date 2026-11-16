@@ -11,6 +11,7 @@ import ServicesSection from './home/ServicesSection'
 import SplitHero from './home/SplitHero'
 import TeaserSection from './home/TeaserSection'
 import WorksSection from './home/WorksSection'
+import { HOME_INQUIRY } from './home/inquiry'
 import './home/home.css'
 
 // Home, `/` (spec §8.1): the seam intro, once per session; the split opening
@@ -47,7 +48,7 @@ export default function Home() {
       <ServicesSection />
       <WorksSection />
       <TeaserSection />
-      <InquirySection page="home" />
+      <InquirySection page="home" {...HOME_INQUIRY} />
       <EuPosterSection />
     </>
   )

@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HOME_INQUIRY } from '../../pages/home/inquiry'
 import { MN_INQUIRY } from '../../pages/mnogofamilna/inquiry'
 import { acquireScrollLock, releaseScrollLock, setLenis } from '../../utils/lenis'
 import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, MNOGOFAMILNA, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
@@ -22,7 +23,8 @@ afterEach(() => {
 it('offers each page its four subjects', () => {
   const rowsOf = (options) => options.map(({ value, label, subject }) => [value, label.replace(/\s/g, ' '), subject])
   const rows = (page) => rowsOf(INQUIRY_OPTIONS[page])
-  expect(rows('home')).toEqual([
+  // Home's are its page's own (src/pages/home/inquiry.jsx).
+  expect(rowsOf(HOME_INQUIRY.options)).toEqual([
     ['golden-residence', 'Golden Residence, жк Левски Г', 'Golden Residence'],
     ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
     ['build', 'Строителство или ремонт', 'Строителство или ремонт'],
@@ -45,14 +47,15 @@ it('offers each page its four subjects', () => {
   ])
   expect(MN_INQUIRY.options[1].label).toBe('Golden Residence, жк\u00a0Левски\u00a0Г')
   expect(MN_INQUIRY.options[0]).toBe(MNOGOFAMILNA)
-  expect(new Set(MN_INQUIRY.options)).toEqual(new Set(INQUIRY_OPTIONS.home))
+  expect(new Set(MN_INQUIRY.options)).toEqual(new Set(HOME_INQUIRY.options))
 })
 
-// M3 §10: per-project code only on its own routes. The options every page
-// with the form loads are Home's and Golden Residence's; Многофамилна's
-// travel with its routes (InquirySection's `options`).
-it('keeps no project page’s own options in the shared store', () => {
-  expect(Object.keys(INQUIRY_OPTIONS)).toEqual(['home', 'golden-residence'])
+// M3 §10: a page's own code only on its own routes. The options every page
+// with the form loads are Golden Residence's, which its page and its block
+// pages share; Home's and Многофамилна's travel with their routes
+// (InquirySection's `options`).
+it('keeps no other page’s own options in the shared store', () => {
+  expect(Object.keys(INQUIRY_OPTIONS)).toEqual(['golden-residence'])
 })
 
 // Spec M3 §8: the project whose apartments go with each subject; the others

@@ -44,6 +44,11 @@ import useExplorerState from './useExplorerState'
 //   landing ends once the address asks for no dialog the page can show: a
 //   close, an inquiry, a unit the sheets do not have, or dialogs whose chunk
 //   did not load. A floor opened in place is no landing.
+// - A landing on the list with no dialog over it holds the row the same way,
+//   from just before its jump until the visitor first moves the page, by a
+//   scroll, the wheel, a touch or a key, 400 ms on (M3 §8, as Контакти's
+//   landing lets go; the jump's own scroll comes before), or opens a dialog
+//   over the list, in place.
 // - The dialogs are the surfaces' chunk (surfaces.js), loaded with the
 //   project's plans when the address asks for one; the full facade has
 //   usually loaded both before, as it neared the screen. Until they are in,
@@ -51,6 +56,10 @@ import useExplorerState from './useExplorerState'
 
 const UNIT_AFTER_MS = 820
 const holdEuRow = (on) => document.documentElement.toggleAttribute('data-eu-hold', on)
+// What lets a list's landing go: the visitor's first move of the page, this
+// long after it.
+const MOVES = ['scroll', 'wheel', 'touchmove', 'keydown']
+const LIST_HOLD_MS = 400
 
 export function ExplorerProvider({ project, routeBlock = null, children }) {
   const snapshot = useAvailability()
@@ -68,30 +77,45 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   })
 
   // The page's arrival: a deep link's jump comes first, then the dialogs. The
-  // EU row is held before the jump's scroll can reach the header.
+  // EU row is held before the jump's scroll can reach the header. The
+  // landing is 'dialog', a deep link's dialogs over the page, or 'list', a
+  // list of its own section with none over it; false once it has ended.
   const [arrived, setArrived] = useState(false)
   const [landing, setLanding] = useState(false)
   useEffect(() => {
     if (!hydrated || arrived) return
-    const at = view === 'list' && document.getElementById('spisak') ? 'spisak' : 'explorer'
-    if (stage || unitId) {
+    const list = view === 'list' && Boolean(document.getElementById('spisak'))
+    if (stage || unitId || list) {
       holdEuRow(true)
-      setLanding(true)
-      jumpToId(at)
-    } else if (at === 'spisak') jumpToId(at)
+      setLanding(stage || unitId ? 'dialog' : 'list')
+      jumpToId(list ? 'spisak' : 'explorer')
+    }
     setArrived(true)
   }, [hydrated, arrived, stage, unitId, view])
 
-  // The landing lasts while the address asks for a dialog the page can show:
-  // the stage, or a unit the model has (or may have, until the data is in).
-  // The hold follows it at every commit (a link that turns out to open
-  // nothing ends it before it ever commits), and goes with the page.
+  // A dialog's landing lasts while the address asks for a dialog the page can
+  // show: the stage, or a unit the model has (or may have, until the data is
+  // in); a list's, until a dialog opens over it, in place, or the visitor
+  // first moves the page (below). The hold follows the landing at every
+  // commit (a link that turns out to open nothing ends it before it ever
+  // commits), and goes with the page.
   const asksForDialog = Boolean(stage) || (Boolean(unitId) && (!model || Boolean(findUnit(model, unitId))))
-  if (landing && !asksForDialog) setLanding(false)
+  if (landing && asksForDialog !== (landing === 'dialog')) setLanding(false)
   useLayoutEffect(() => {
-    holdEuRow(landing)
+    holdEuRow(Boolean(landing))
   })
   useLayoutEffect(() => () => holdEuRow(false), [])
+  useEffect(() => {
+    if (landing !== 'list') return undefined
+    const end = () => setLanding(false)
+    const timer = setTimeout(() => {
+      for (const type of MOVES) window.addEventListener(type, end, { passive: true })
+    }, LIST_HOLD_MS)
+    return () => {
+      clearTimeout(timer)
+      for (const type of MOVES) window.removeEventListener(type, end)
+    }
+  }, [landing])
 
   // The dialogs' chunk, once the address asks for a dialog, and again at each
   // new ask while it is not in: a failed load may be tried again

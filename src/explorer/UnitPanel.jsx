@@ -21,12 +21,14 @@ import { stepUnit } from './surfaceModel'
 // explorer.js:696-809, golden-residence.html:303-310): one apartment, a modal
 // dialog over the stage, named for the unit. Two halves on a seam: the
 // floor's plan cropped on the unit, outlined, with its caption; then „А
-// *501*“ („А-*101*“ on Многофамилна), its block, floor and type with its
-// status, its areas in м², its type, exposure („няма данни в таблицата“ when
-// the sheet has none), status and price where the sheet has one, the date of
-// numbers that are not live, what it offers by its status, and the previous
-// and next units on the floor, round from either end. Идеални части shows
-// while the project's sheets give any: Многофамилна's give none (M3 §2).
+// *501*“ („А-*101*“ on Многофамилна), its block, floor (with the project's
+// word after it, plans.js's floorWord: Многофамилна's „етаж 10, тавански“)
+// and type with its status, its areas in м², its type, exposure („няма
+// данни в таблицата“ when the sheet has none), status and price where the
+// sheet has one, the date of numbers that are not live, what it offers by
+// its status, and the previous and next units on the floor, round from
+// either end. Идеални части shows while the project's sheets give any:
+// Многофамилна's give none (M3 §2).
 //
 // Where production has a plan of the apartment itself (its plans' `own`,
 // plans.js: Многофамилна's, M3 §2, §6.4), a switch over the left half,
@@ -239,7 +241,10 @@ function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire })
   const units = model.floors.get(floorKey(unit.block, unit.floor))?.units ?? [unit]
   const [previous, next] = [stepUnit(model, unit, -1), stepUnit(model, unit, 1)]
   const [letter, number] = splitLabel(unit.label)
-  const sub = [`Блок${NBSP}${unit.block}`, `етаж ${unit.floor}`, unit.type].filter(Boolean).join(' · ')
+  // The project's word after the floor's number (plans.js: Многофамилна's
+  // attic, „етаж 10, тавански“), where it has one.
+  const word = plan.floorWord?.(unit)
+  const sub = [`Блок${NBSP}${unit.block}`, `етаж ${unit.floor}${word ? `, ${word}` : ''}`, unit.type].filter(Boolean).join(' · ')
   // Идеални части while the project's sheets give any (M3 §2, §6.4).
   const ideal = model.units.some((each) => each.idealParts != null)
 

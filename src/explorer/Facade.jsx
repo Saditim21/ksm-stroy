@@ -30,9 +30,12 @@ import './explorer.css'
 // gives its shape), a prop because Home's teaser has no explorer around its
 // facade: its building map's floors, its picture (its page's first, fetched
 // first, where `priority` says so), its name, its seam, its floors' range
-// for the keys and the steppers, the class its geometry hangs on, and its
+// for the keys and the steppers, the class its geometry hangs on, its
 // `Lights`, a layer over the picture (Многофамилна's lit floors,
-// FacadeLights.jsx), where it has one.
+// FacadeLights.jsx), where it has one, and `namesApart`, where its block
+// names are to stay apart in the page's text, not run together
+// (Многофамилна's; Golden Residence's markup has them side by side, as it
+// always had).
 //
 // The layout is CSS only (explorer.css, and a project's own stylesheet under
 // its facade's class): a wrapper is the container the root's sizes measure,
@@ -81,7 +84,7 @@ const floorOf = (model, facade, key) => model?.floors.get(key) ?? facade.placeho
 
 export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
   const compact = mode === 'compact'
-  const { map, picture, priority, sizes, alt, className, seam, Lights } = project.facade
+  const { map, picture, priority, sizes, alt, className, seam, Lights, namesApart } = project.facade
   const { min, max } = project.floors
   const facade = facadeOf(map)
   const rootRef = useRef(null)
@@ -353,8 +356,9 @@ export default function Facade({ project, model, mode = 'full', caption, initial
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
         >
-          {/* The two names read as two, apart in the page's text too. */}
-          <p className="fx__bname fx__bname--a">Блок&nbsp;А</p>{' '}
+          <p className="fx__bname fx__bname--a">Блок&nbsp;А</p>
+          {/* Apart in the page's text too, where the project asks (projects/mn.js). */}
+          {namesApart ? ' ' : null}
           <p className="fx__bname fx__bname--b">Блок&nbsp;Б</p>
           <div className="fx__clip" aria-hidden="true">
             <div className="fx__frame">

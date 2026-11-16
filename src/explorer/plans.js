@@ -8,6 +8,9 @@
 //   Residence's „501“, Многофамилна's „101“, PlanSvg.jsx);
 // - `floorMeta(floor)`, the project's word on a floor, or null (the кота its
 //   drawings give, the attic; FloorMeta, FloorPanel.jsx);
+// - `floorWord(floor)`, the word after the floor's number where one
+//   apartment is named, or null, or undefined where the project has none
+//   (Многофамилна's attic, „етаж 10, тавански“; UnitPanel.jsx);
 // - `own`, the plans of the apartments production has a plan of their own
 //   for, an image by the unit's label (Многофамилна's; the unit panel's
 //   switch, UnitPanel.jsx), or undefined;
@@ -35,13 +38,14 @@ const pending = new WeakMap()
 
 const drawingOf = (image) => (image ? `${image.path}-${image.widths[image.widths.length - 1]}.webp` : null)
 
-const plansFrom = ({ floors, drawings, unitNumber, floorMeta, own, className }) => Object.freeze(Object.fromEntries(['А', 'Б'].map((block) => [
+const plansFrom = ({ floors, drawings, unitNumber, floorMeta, floorWord, own, className }) => Object.freeze(Object.fromEntries(['А', 'Б'].map((block) => [
   block,
-  Object.freeze({ ...planFor(floors, block), drawing: drawingOf(drawings?.[block]), unitNumber, floorMeta, own, className }),
+  Object.freeze({ ...planFor(floors, block), drawing: drawingOf(drawings?.[block]), unitNumber, floorMeta, floorWord, own, className }),
 ])))
 
 /** `project`'s plans: { 'А': plan, 'Б': plan }, each a floors map's entry
- * with its `drawing`, `unitNumber`, `floorMeta`, `own` and `className`;
+ * with its `drawing`, `unitNumber`, `floorMeta`, `floorWord`, `own` and
+ * `className`;
  * whole once loaded (loadPlans), those of its data alone before (no
  * drawing, no own plans), else undefined. */
 export function plansOf(project) {

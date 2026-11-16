@@ -37,7 +37,11 @@
 //     and named, and the EU line all the same (spec §1.9, §14.1: in view on
 //     landing), which the landing keeps above its dialogs
 //     (src/explorer/ExplorerContext.jsx). There the page has scrolled, by
-//     the jump, and must have.
+//     the jump, and must have. A link that shows a list of its own section
+//     (its visit's `lands`: Многофамилна's ?view=list, M3 §6.2 #3) jumps
+//     there instead, with no dialog: the section must be at the top of the
+//     screen, under the header, and the EU line in view all the same, which
+//     the landing keeps until the visitor first moves the page (M3 §8).
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -144,9 +148,11 @@ const VISITS = [
   { path: '/projects/golden-residence/block-a?floor=3', dialog: 'Блок А · Етаж 3' },
   { path: '/projects/golden-residence/block-b?floor=2&unit=%D0%91%20201', dialog: 'Б 201' },
   // Многофамилна's deep links (spec M3 §12): a floor's plan stage, and a
-  // unit's panel, each landing with the EU row in view.
+  // unit's panel, each landing with the EU row in view; and its list, whose
+  // section the page lands on, the EU row in view all the same (M3 §6.4, §8).
   { path: '/projects/mnogofamilna-sgrada?floor=%D0%91-5', dialog: 'Блок Б · Етаж 5' },
   { path: '/projects/mnogofamilna-sgrada?unit=%D0%90-802', dialog: 'А-802' },
+  { path: '/projects/mnogofamilna-sgrada?view=list', lands: 'spisak' },
   { path: '/contact?apartment=%D0%90%20301' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },
@@ -385,7 +391,7 @@ function appTrees() {
 }
 
 // One visit at one size: every problem found, and the first viewport's shot.
-async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog }, size, shot, { liveData }) {
+async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog, lands }, size, shot, { liveData }) {
   const problems = []
   // Closing the profile aborts what is still loading; that is not the page's doing.
   let closing = false
@@ -479,7 +485,7 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         if (!shown.includes(text)) problems.push(`the page does not say „${text}“`)
       }
 
-      const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: Boolean(dialog) })
+      const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: Boolean(dialog || lands) })
       if (euLinks.length === 0) problems.push('no „За проекта“ link to /eu-proekt')
       else if (!euLinks.some(({ issues }) => issues.length === 0)) {
         problems.push(`„За проекта“ is not visible in the first viewport: ${euLinks[0].issues.join(', ')}`)
@@ -488,6 +494,15 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         const shown = await page.evaluate(openDialogs)
         if (!shown.includes(dialog)) problems.push(`the deep link shows no dialog „${dialog}“ (open: ${shown.map((name) => `„${name}“`).join(', ') || 'none'})`)
         if (await page.evaluate(() => scrollY) === 0) problems.push('the deep link did not jump to the explorer')
+      }
+      if (lands) {
+        const at = await page.evaluate((id) => ({ top: document.getElementById(id)?.getBoundingClientRect().top ?? null, screen: innerHeight, y: scrollY }), lands)
+        if (at.y === 0) problems.push(`the link did not jump to #${lands}`)
+        if (at.top === null || at.top < 0 || at.top > at.screen / 4) {
+          problems.push(`#${lands} is not at the top of the screen (its top at ${at.top === null ? 'none' : `${Math.round(at.top)} px`})`)
+        }
+        const shown = await page.evaluate(openDialogs)
+        if (shown.length > 0) problems.push(`the landing on #${lands} shows a dialog (${shown.map((name) => `„${name}“`).join(', ')})`)
       }
 
       await page.screenshot({ path: shot })

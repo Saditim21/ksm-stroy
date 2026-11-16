@@ -28,11 +28,12 @@ import { createContext, useContext } from 'react'
 //     dated(snapshot) → string | null,                the date of numbers that are not live
 //     types: string[],                                the list's Вид options
 //     exposureNote: string | null,                    the list's footnote on the exposures
-//     facade: { map, picture, sizes, alt, className?, seam: { x, top, bottom }, Lights? },
+//     facade: { map, picture, priority?, sizes, alt, className?, seam: { x, top, bottom }, Lights?, namesApart? },
 //     plans: Plans, or loadPlans() → Promise<Plans> }
 //   Plans = { floors, drawings?,
 //     unitNumber(unit) → string,                      what a plan draws: '501', '101'
-//     floorMeta({ block, floor }) → string | null }   'кота +3,06' on А-1, 'тавански етаж' on 10
+//     floorMeta({ block, floor }) → string | null,    'кота +3,06' on А-1, 'тавански етаж' on 10
+//     floorWord?({ block, floor }) → string | null }  after a unit's floor: 'тавански' on 10
 // `facade.map` is its building map; `picture` and `sizes` the facade's
 // picture; `alt` its name; `className` the class under which the project's
 // stylesheet sets its facade's geometry (explorer.css's own is Golden
