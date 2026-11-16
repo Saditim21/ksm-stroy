@@ -1,27 +1,28 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { statusKeyOf } from '../components/ui/status'
-import grImages from '../data/images/golden-residence.json'
 import { PALETTE } from '../styles/palette'
 import { unitButtonLabel } from '../utils/units'
 import { planBox, planShapes } from './planGeometry'
 import { PLAN_MODES, sizePlan } from './planModes'
 import './explorer.css'
 
-// One renderer for every plan of a block (spec §7.4; the concept's
-// explorer.js:64-201): the block's typical floor (floors.json), its units
-// matched by suffix to the floor's units from the sheets. Each unit is drawn
-// in its status (never colour alone):
+// One renderer for every plan of a block (spec §7.4; M3 §6.4; the concept's
+// explorer.js:64-201): the block's typical floor (a project's plan,
+// plans.js), its units matched by suffix to the floor's units from the
+// sheets. Each unit is drawn in its status (never colour alone):
 // - available: green at 0.46;
 // - reserved: 45° stripes; sold: dots, each a pattern of this plan's own;
 // - blocked, and a status the rules do not know: grey at 0.1 under a dashed
 //   outline;
 // - a unit the sheet does not have: no fill and no label (data-status none).
-// Each has a brass outline (pathLength 1, so it can draw), its number („501“)
-// at its pole of inaccessibility and a hit path.
+// Each has a brass outline (pathLength 1, so it can draw), its number at its
+// pole of inaccessibility, and a hit path. The number is the project's
+// (project.unitNumber): „501“ on Golden Residence's floor 5, „101“ on
+// Многофамилна's floor 2.
 //
 // The modes:
-// - mini, the edge panel's and the sheet's: the union of the block's 12
-//   units, padded 4, hidden from assistive technology; a pointer opens a unit
+// - mini, the edge panel's and the sheet's: the union of the block's units,
+//   padded 4, hidden from assistive technology; a pointer opens a unit
 //   (onUnit);
 // - stage, the plan stage's: padded 14, over the block's dark drawing at 0.6.
 //   Interactive: a group named `label`, its units buttons named as every unit
@@ -29,8 +30,9 @@ import './explorer.css'
 //   (onUnit). Pointing at a unit, or focusing it, makes it hot (onHot);
 // - crop, the unit panel's: `viewBox` frames one unit (cropFor), over the
 //   drawing at 0.78; hidden from assistive technology.
-// The drawing fades in once it has loaded (explorer.css). Its area is the
-// plan's box's: whatever holds the plan clips it (extract §8.3.4).
+// The drawing is the plan's own (plan.drawing), where its project has one.
+// It fades in once it has loaded (explorer.css). Its area is the plan's
+// box's: whatever holds the plan clips it (extract §8.3.4).
 //
 // `hot` (a suffix) is the unit a pointer, the keyboard or the stage's table
 // is on: a brass-l outline, the other fills dropping back. `focus` (a suffix)
@@ -50,14 +52,6 @@ import './explorer.css'
 const RESERVED = PALETTE['status-reserved']
 const SOLD = PALETTE['status-sold']
 
-// Each block's dark drawing (plan-a, plan-b: 1200 px, the plans' own grid),
-// by the block its plan applies to.
-const DRAWINGS = { 'А': grImages['plan-a'], 'Б': grImages['plan-b'] }
-function drawingOf(plan) {
-  const image = DRAWINGS[plan.appliesTo?.blocks?.[0]]
-  return image ? `${image.path}-${image.widths[image.widths.length - 1]}.webp` : null
-}
-
 // A unit's fill and its opacity, by its status.
 function fillOf(status, id) {
   if (status === 'available') return [PALETTE['status-free'], 0.46]
@@ -67,7 +61,7 @@ function fillOf(status, id) {
   return [PALETTE['status-blocked'], 0.1]
 }
 
-export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, fit = true, onUnit, onHot }) {
+export default function PlanSvg({ project, plan, units, mode = 'mini', viewBox, hot = null, focus = null, label, fit = true, onUnit, onHot }) {
   const ref = useRef(null)
   // The patterns' ids, this plan's own: two plans on a page never share one.
   const id = `pl${useId().replace(/[^\w-]/g, '')}`
@@ -76,7 +70,7 @@ export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = nul
   const box = useMemo(() => viewBox ?? planBox(plan, pad), [viewBox, plan, pad])
   const shapes = planShapes(plan)
   const bySuffix = new Map(units.map((unit) => [unit.suffix, unit]))
-  const href = drawing ? drawingOf(plan) : null
+  const href = drawing ? plan.drawing ?? null : null
   // The drawing that has loaded: a new block's waits for its own.
   const [loaded, setLoaded] = useState(null)
 
@@ -183,7 +177,7 @@ export default function PlanSvg({ plan, units, mode = 'mini', viewBox, hot = nul
               {status === 'blocked' || status === 'unknown' ? <path className="u-blocked" d={d} /> : null}
               <path className="u-shape" d={d} fill="none" pathLength="1" />
               <text className="u-label" x={point[0]} y={point[1]}>
-                {unit ? `${unit.floor}${suffix}` : ''}
+                {unit ? project.unitNumber(unit) : ''}
               </text>
               <path className="u-hit" d={d} data-suffix={suffix} {...button} />
             </g>

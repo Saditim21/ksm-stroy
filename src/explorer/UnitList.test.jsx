@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { buildModel } from './model'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 import UnitList from './UnitList'
 
@@ -10,7 +11,7 @@ import UnitList from './UnitList'
 // Имот, Етаж and Обща площ, and rows that open their unit. On the sheets
 // snapshot the concept shows (extract §5.4).
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const pills = (name) => within(screen.getByRole('group', { name })).getAllByRole('button')
 const pill = (group, name) => within(screen.getByRole('group', { name: group })).getByRole('button', { name })
@@ -21,7 +22,7 @@ const firstCells = () => rows().map((row) => text(row.querySelector('td')))
 
 function renderList(props = {}) {
   const onUnit = vi.fn()
-  render(<UnitList model={MODEL} onUnit={onUnit} {...props} />)
+  render(<UnitList project={GR_PROJECT} model={MODEL} onUnit={onUnit} {...props} />)
   return onUnit
 }
 

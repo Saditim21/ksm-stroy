@@ -1,47 +1,51 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import ResponsivePicture from '../components/ui/ResponsivePicture'
-import StatusCount from '../components/ui/StatusCount'
-import { STATUS_ORDER } from '../components/ui/status'
-import { GR_FACTS } from '../config/facts'
-import grImages from '../data/images/golden-residence.json'
-import building from '../data/maps/golden-residence.building.json'
 import useMotion from '../motion/useMotion'
 import useMotionNow from '../motion/useMotionNow'
 import FacadeRails from './FacadeRails'
-import { FACADE, floorShapes } from './geometry'
+import { facadeOf } from './geometry'
 import { loadedSurfaces, loadSurfaces } from './loadSurfaces'
 import { floorKey } from './model'
 import useHotFloor, { isPhone, useLastPress } from './useHotFloor'
 import './explorer.css'
 
-// The facade (spec §7.2; extract §4.20; the concept's explorer.js:215-555):
-// the building cut out of its sky, a brass seam between the blocks, and on
-// each block's outer edge the free apartments of every floor, as real
-// buttons, the rails. A floor turns hot when the mouse points at it (its
-// floor or its rail), when the keyboard focuses its rail, or on a first tap:
-// the lens moves to it, the rest of the building dims, its count turns
-// brass-l, and in full mode its block's edge panel (desktop) or the sheet
-// (phones) shows it. Leaving the facade and its panel clears it after
+// The facade (spec §7.2; M3 §6.3; extract §4.20; the concept's
+// explorer.js:215-555): the building cut out of its sky, a brass seam between
+// the blocks, and on each block's outer edge the free apartments of every
+// floor, as real buttons, the rails. A floor turns hot when the mouse points
+// at it (its floor or its rail), when the keyboard focuses its rail, or on a
+// first tap: the lens moves to it, the rest of the building dims, its count
+// turns brass-l, and in full mode its block's edge panel (desktop) or the
+// sheet (phones) shows it. Leaving the facade and its panel clears it after
 // 320 ms. A mouse click, Enter or Space opens the floor (`onOpenFloor(block,
 // floor, unitLabel?, { fromRect, opener })`); a touch or pen tap on a floor
 // that is not hot only previews it, and the second tap opens it. Compact
-// mode (Home) has no panel and no sheet: its caption names the hot floor.
+// mode (Home) has no panel and no sheet: its caption, a live region, is the
+// page's own (`caption(floor)`, of the hot floor or null; Home's teaser), so
+// its words stay out of the code the explorer's pages load.
 //
-// The layout is CSS only (explorer.css): a wrapper is the container the
-// root's sizes measure, and a phone shows one block, cropped by the root's
-// data-block. `model` is buildModel()'s, or null until the data arrives:
-// every count reads `—` then, never a zero, and the facade works all the
-// same. React renders the final state; GSAP (useMotionNow) only moves the
-// lens, and the intro (useMotion) brings the picture, the seam and the
-// counts in once, as the facade comes up from below. The hot floor's state
-// is useHotFloor's, the rails FacadeRails'; the pointer and the keys are
-// handled here, on the stage around them.
+// `project` is the building's (projects/gr.js, projects/mn.js; useExplorer.js
+// gives its shape), a prop because Home's teaser has no explorer around its
+// facade: its building map's floors, its picture, its name, its seam, its
+// floors' range for the keys and the steppers, and the class its geometry
+// hangs on.
+//
+// The layout is CSS only (explorer.css, and a project's own stylesheet under
+// its facade's class): a wrapper is the container the root's sizes measure,
+// and a phone shows one block, cropped by the root's data-block. `model` is
+// buildModel()'s, or null until the data arrives: every count reads `—`
+// then, never a zero, and the facade works all the same. React renders the
+// final state; GSAP (useMotionNow) only moves the lens, and the intro
+// (useMotion) brings the picture, the seam and the counts in once, as the
+// facade comes up from below. The hot floor's state is useHotFloor's, the
+// rails FacadeRails'; the pointer and the keys are handled here, on the stage
+// around them.
 //
 // The edge panels and the sheet are a chunk of their own (surfaces.js),
-// which the full facade loads as it nears the screen, or when it is first
-// pointed at, focused or touched, if that comes first; a floor that turns
-// hot before then shows as they arrive. They are not in the prerendered
-// HTML: nothing shows them until a floor is hot.
+// which the full facade loads with the project's plans as it nears the
+// screen, or when it is first pointed at, focused or touched, if that comes
+// first; a floor that turns hot before then shows as they arrive. They are
+// not in the prerendered HTML: nothing shows them until a floor is hot.
 //
 // `focusRail` ({ block, floor }) is a floor whose rail is to take the focus
 // back: a stage that closed with no opener to give it to (spec §7.6, §7.10;
@@ -54,39 +58,26 @@ import './explorer.css'
 // ExplorerSection.jsx): no floor stays hot then, so neither its edge panel
 // nor the phone's sheet, a portal at the foot of the screen, stays open.
 
-const SHAPES = floorShapes(building)
-const SHAPE = new Map(SHAPES.map((shape) => [shape.key, shape]))
-const isFloor = (key) => SHAPE.has(key)
 const BLOCKS = ['А', 'Б']
-// The picture is the cut-out facade: its sky is see-through, so it waits on
-// the page's ground, not on a block of its colour.
-const PICTURE = { ...grImages['facade-cut'], color: 'transparent' }
-// The picture's width: the grid's (the stage's) on a desktop, 1200/628 of
-// the stage on a phone, which shows one block.
-const PICTURE_SIZES = '(max-width: 900px) 191vw, (max-width: 1150px) 860px, 76vw'
 // How far below the screen the facade starts to load its surfaces.
 const NEAR = '0px 0px 600px 0px'
 const NO_LENS = { x: 0, y: 0, width: 0, height: 0 }
-const lensOf = (key) => {
-  const box = SHAPE.get(key)?.bbox
+const lensOf = (facade, key) => {
+  const box = facade.shape.get(key)?.bbox
   return box ? { x: box.x, y: box.y, width: box.w, height: box.h } : NO_LENS
 }
 // Where the lens is now; nothing once the facade has gone, as a lens still
 // moving then can be (the engine's ticker outlives the page).
 const readLens = (node) => node && Object.fromEntries(['x', 'y', 'width', 'height'].map((name) => [name, Number(node.getAttribute(name))]))
 
-// A floor the data has not reached: its plan without statuses, `—` counts.
-const PLACEHOLDERS = new Map(SHAPES.map(({ key, block, floor }) => [
-  key,
-  Object.freeze({ block, floor, units: [], counts: null, colour: 'unknown', minFree: null, maxFree: null }),
-]))
-const floorOf = (model, key) => model?.floors.get(key) ?? PLACEHOLDERS.get(key)
+// A floor of the model, or its placeholder until the data reaches it.
+const floorOf = (model, facade, key) => model?.floors.get(key) ?? facade.placeholders.get(key)
 
-// A no-break space after the one-letter „и“ (spec §3.3).
-const IDLE_CAPTION = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
-
-export default function Facade({ model, mode = 'full', initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
+export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
   const compact = mode === 'compact'
+  const { map, picture, sizes, alt, className, seam } = project.facade
+  const { min, max } = project.floors
+  const facade = facadeOf(map)
   const rootRef = useRef(null)
   const stageRef = useRef(null)
   const railRefs = useRef(new Map())
@@ -96,6 +87,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
   const maskId = `fx${useId().replace(/[^\w-]/g, '')}`
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
+  const isFloor = useCallback((key) => facade.shape.has(key), [facade])
   const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = useHotFloor({ compact, isFloor })
 
   // Hidden, the facade lets its hot floor go.
@@ -131,14 +123,14 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
   // is a click of its own (ruling C7.1).
   const keyed = useRef(false)
   const overPanel = useRef(false)
-  // The panels and the sheet, once their chunk is in. Never at the first
-  // render of the prerendered page: nothing has loaded them before it
-  // hydrates.
-  const [surfaces, setSurfaces] = useState(compact ? null : loadedSurfaces)
+  // The panels and the sheet, once their chunk and the project's plans are
+  // in. Never at the first render of the prerendered page: nothing has
+  // loaded them before it hydrates.
+  const [surfaces, setSurfaces] = useState(() => (compact ? null : loadedSurfaces(project)))
   const mounted = useRef(true)
   const needSurfaces = useCallback(() => {
     if (compact || surfaces) return
-    loadSurfaces().then((module) => {
+    loadSurfaces(project).then((module) => {
       if (mounted.current) setSurfaces(module)
     }, (error) => {
       // Offline, a new deploy replaced the chunk, or the chunk itself failed:
@@ -146,7 +138,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
       // and the console says why (ruling C7.6).
       console.error('[explorer] the facade’s panels did not load:', error)
     })
-  }, [compact, surfaces])
+  }, [compact, surfaces, project])
 
   useEffect(() => {
     mounted.current = true
@@ -178,8 +170,8 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
     const { gsap } = motion
     if (now.key !== was.key && was.key && was.hot) {
       const nodes = [holeRef.current, tintRef.current, hlRef.current]
-      gsap.fromTo(nodes, { attr: lensMoving.current ?? lensOf(was.key) }, {
-        attr: lensOf(now.key),
+      gsap.fromTo(nodes, { attr: lensMoving.current ?? lensOf(facade, was.key) }, {
+        attr: lensOf(facade, now.key),
         duration: 0.25,
         ease: 'power2.out',
         // Only the box: the tint's fade, on one of these, carries on.
@@ -191,7 +183,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
     if (now.hot !== was.hot) {
       gsap.fromTo(tintRef.current, { attr: { 'fill-opacity': was.hot ? 0.2 : 0 } }, { attr: { 'fill-opacity': now.hot ? 0.2 : 0 }, duration: 0.2, ease: 'power2.out', overwrite: 'auto' })
     }
-  }, [lens, hot, motionNow])
+  }, [lens, hot, motionNow, facade])
 
   // The intro, once, as the facade comes up from below (extract §4.20): the
   // picture fades in, the seam draws down, the counts rise floor by floor. A
@@ -200,20 +192,20 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
     const root = rootRef.current
     if (!root || root.getBoundingClientRect().top < window.innerHeight) return
     const counts = [...root.querySelectorAll('.fx__cnt')].sort((a, b) => {
-      const [first, second] = [SHAPE.get(a.dataset.k), SHAPE.get(b.dataset.k)]
+      const [first, second] = [facade.shape.get(a.dataset.k), facade.shape.get(b.dataset.k)]
       return first.floor - second.floor || first.block.localeCompare(second.block)
     })
     gsap.timeline({ scrollTrigger: { trigger: root, start: 'top 70%', once: true } })
       .from(root.querySelector('.fx__pic'), { opacity: 0, duration: 1.2, ease: 'power2.out', clearProps: 'opacity' }, 0)
-      .from(root.querySelector('.fx__seam'), { attr: { y2: 120 }, duration: 1.2, ease: 'expo.out' }, 0.2)
+      .from(root.querySelector('.fx__seam'), { attr: { y2: seam.top }, duration: 1.2, ease: 'expo.out' }, 0.2)
       .from(counts, { opacity: 0, y: 10, duration: 0.6, ease: 'expo.out', stagger: 0.03, clearProps: 'opacity,transform' }, 0.3)
   })
 
-  const blockOf = (key) => SHAPE.get(key).block
+  const blockOf = (key) => facade.shape.get(key).block
 
   // Opens a floor; the sheet, if it shows it, gives way.
   const open = (key, unitLabel, meta) => {
-    const { block, floor } = SHAPE.get(key)
+    const { block, floor } = facade.shape.get(key)
     giveWay()
     onOpenFloor?.(block, floor, unitLabel, meta)
   }
@@ -230,6 +222,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
   // gives the focus back to. The plan is hidden from assistive technology,
   // and the sheet's button turns inert as the sheet gives way (ruling C7.2).
   const openFromSurface = (key, unitLabel, meta) => open(key, unitLabel, { fromRect: meta?.fromRect ?? null, opener: railRefs.current.get(key) })
+  const openUnitFromSurface = (unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)
 
   const keyOf = (event) => event.target.closest?.('[data-k]')?.dataset.k
 
@@ -289,7 +282,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
   const onKeyDown = (event) => {
     const rail = event.target.closest?.('.fx__cnt')
     if (!rail) return
-    const { block, floor } = SHAPE.get(rail.dataset.k)
+    const { block, floor } = facade.shape.get(rail.dataset.k)
     let next = null
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -301,8 +294,8 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
       clearHot()
       return
     }
-    if (event.key === 'ArrowUp') next = floorKey(block, Math.min(GR_FACTS.floors, floor + 1))
-    if (event.key === 'ArrowDown') next = floorKey(block, Math.max(1, floor - 1))
+    if (event.key === 'ArrowUp') next = floorKey(block, Math.min(max, floor + 1))
+    if (event.key === 'ArrowDown') next = floorKey(block, Math.max(min, floor - 1))
     if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !isPhone()) next = floorKey(event.key === 'ArrowLeft' ? 'А' : 'Б', floor)
     if (next && next !== rail.dataset.k) {
       event.preventDefault()
@@ -320,7 +313,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
   // other block, and the stage comes back up from .4 over 0.4 s.
   const switchBlock = (block) => {
     if (block === phoneBlock) return
-    const keep = hot ? SHAPE.get(hot.key).floor : null
+    const keep = hot ? facade.shape.get(hot.key).floor : null
     setPhoneBlock(block)
     clearHot()
     motionNow()?.gsap.fromTo(stageRef.current, { opacity: 0.4 }, { opacity: 1, duration: 0.4, ease: 'power2.out', clearProps: 'opacity' })
@@ -338,10 +331,12 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
     if (event.pointerType !== 'touch') scheduleClose()
   }
 
-  const hotFloor = hot ? floorOf(model, hot.key) : null
-  const lensRect = lensOf(lens)
-  const lensColour = lens ? floorOf(model, lens).colour : 'unknown'
-  const rootClass = ['fx', compact && 'fx--compact', hot && 'is-hot', hot?.source === 'kbd' && 'is-kbd'].filter(Boolean).join(' ')
+  const hotFloor = hot ? floorOf(model, facade, hot.key) : null
+  const lensRect = lensOf(facade, lens)
+  const lensColour = lens ? floorOf(model, facade, lens).colour : 'unknown'
+  const rootClass = ['fx', className, compact && 'fx--compact', hot && 'is-hot', hot?.source === 'kbd' && 'is-kbd'].filter(Boolean).join(' ')
+  const plans = surfaces?.plansOf(project)
+  const { imageWidth: width, imageHeight: height } = map
 
   return (
     <div className="fx-wrap">
@@ -360,7 +355,7 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
           ref={stageRef}
           className="fx__stage"
           role="group"
-          aria-label="Фасада на Golden Residence. Изберете етаж."
+          aria-label={`${alt}. Изберете етаж.`}
           onPointerDown={onPointerDown}
           onPointerCancel={onPointerCancel}
           onPointerOver={onPointerOver}
@@ -373,42 +368,31 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
           <p className="fx__bname fx__bname--b">Блок&nbsp;Б</p>
           <div className="fx__clip" aria-hidden="true">
             <div className="fx__frame">
-              <ResponsivePicture image={PICTURE} alt="" sizes={PICTURE_SIZES} className="fx__pic" />
-              <svg className="fx__svg" viewBox={`0 0 ${FACADE.width} ${FACADE.height}`} preserveAspectRatio="none" focusable="false">
+              <ResponsivePicture image={picture} alt="" sizes={sizes} className="fx__pic" />
+              <svg className="fx__svg" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" focusable="false">
                 <defs>
-                  <mask id={maskId} maskUnits="userSpaceOnUse" x="-10" y="-10" width={FACADE.width + 20} height={FACADE.height + 20}>
-                    <rect x="-10" y="-10" width={FACADE.width + 20} height={FACADE.height + 20} fill="#fff" />
+                  <mask id={maskId} maskUnits="userSpaceOnUse" x="-10" y="-10" width={width + 20} height={height + 20}>
+                    <rect x="-10" y="-10" width={width + 20} height={height + 20} fill="#fff" />
                     <rect ref={holeRef} className="fx__hole" {...lensRect} fill="#000" />
                   </mask>
                 </defs>
-                <rect className="fx__dim" x="-10" y="-10" width={FACADE.width + 20} height={FACADE.height + 20} mask={`url(#${maskId})`} />
+                <rect className="fx__dim" x="-10" y="-10" width={width + 20} height={height + 20} mask={`url(#${maskId})`} />
                 <rect ref={tintRef} className="fx__tint" data-colour={lensColour} {...lensRect} fillOpacity={hot ? 0.2 : 0} />
                 <rect ref={hlRef} className="fx__hl" {...lensRect} />
-                <line className="fx__seam" x1={FACADE.seamX} y1="120" x2={FACADE.seamX} y2="520" />
+                <line className="fx__seam" x1={seam.x} y1={seam.top} x2={seam.x} y2={seam.bottom} />
                 <g className="fx__floors">
-                  {SHAPES.map(({ key, block, d }) => (
+                  {facade.shapes.map(({ key, block, d }) => (
                     <path key={key} className="fx__floor" d={d} data-k={key} data-block={block} />
                   ))}
                 </g>
               </svg>
             </div>
           </div>
-          <FacadeRails model={model} hotKey={hot?.key ?? null} railRefs={railRefs} />
+          <FacadeRails rails={facade.rails} model={model} hotKey={hot?.key ?? null} railRefs={railRefs} />
         </div>
         {compact ? (
           <p className="fx__cap" aria-live="polite">
-            {hotFloor ? (
-              <>
-                <span className="t">
-                  Блок&nbsp;{hotFloor.block} · <em>етаж {hotFloor.floor}</em>
-                </span>
-                {STATUS_ORDER.map((status) => (
-                  <StatusCount key={status} status={status} count={hotFloor.counts ? hotFloor.counts[status] : null} />
-                ))}
-              </>
-            ) : (
-              <span className="hint">{IDLE_CAPTION}</span>
-            )}
+            {caption(hotFloor)}
           </p>
         ) : (
           <>
@@ -417,14 +401,15 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
               <span className="cap-desk">Посочете етаж, кликнете, за да отворите плана му.</span>
               <span className="cap-phone">Докоснете етаж, за да видите плана му; второ докосване го отваря.</span>
             </p>
-            {surfaces ? BLOCKS.map((block) => (
+            {plans ? BLOCKS.map((block) => (
               <surfaces.FloorPanel
                 key={block}
+                project={project}
                 side={block}
                 floor={hot?.on === 'panel' && blockOf(hot.key) === block ? hotFloor : null}
-                plan={surfaces.PLANS[block]}
+                plan={plans[block]}
                 onOpenFloor={(b, f, unit, meta) => open(floorKey(b, f), unit, meta)}
-                onUnit={(unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)}
+                onUnit={openUnitFromSurface}
                 onPointerEnter={panelEnter}
                 onPointerLeave={panelLeave}
               />
@@ -432,19 +417,20 @@ export default function Facade({ model, mode = 'full', initialBlock = 'А', acti
           </>
         )}
       </div>
-      {surfaces ? (
+      {plans ? (
         <surfaces.FloorSheet
+          project={project}
           floor={hot?.on === 'sheet' ? hotFloor : null}
-          plan={surfaces.PLANS[lens ? blockOf(lens) : phoneBlock]}
+          plan={plans[lens ? blockOf(lens) : phoneBlock]}
           anchor={stageRef}
           onClose={clearHot}
           onStep={(step) => {
             if (!hot) return
-            const { block, floor } = SHAPE.get(hot.key)
-            setHot(floorKey(block, Math.min(GR_FACTS.floors, Math.max(1, floor + step))), 'tap')
+            const { block, floor } = facade.shape.get(hot.key)
+            setHot(floorKey(block, Math.min(max, Math.max(min, floor + step))), 'tap')
           }}
           onOpen={(meta) => hot && openFromSurface(hot.key, undefined, meta)}
-          onUnit={(unit, meta) => openFromSurface(floorKey(unit.block, unit.floor), unit.label, meta)}
+          onUnit={openUnitFromSurface}
         />
       ) : null}
     </div>

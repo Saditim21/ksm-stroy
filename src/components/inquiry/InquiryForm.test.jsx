@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { buildLead } from '../../services/inquiry'
 import { recordingMotion } from '../../test/gsap'
 import InquiryForm from './InquiryForm'
 import InquirySection from './InquirySection'
@@ -32,6 +33,8 @@ const ERRORS = {
 }
 
 const field = (label) => screen.getByLabelText(label)
+// A pick of Golden Residence's, as its explorer hands one to the form.
+const grPick = (label) => ({ project: 'golden-residence', label })
 const submit = () => screen.getByRole('button', { name: 'Изпратете запитване' })
 
 async function fill(user, { name = 'Иван Петров', phone = '+359 888 123 456', email = 'ivan@example.bg', consent = true } = {}) {
@@ -172,7 +175,7 @@ describe('sending', () => {
 
   it('sends the subject of the option chosen, with the apartments picked', async () => {
     render(<InquiryForm page="golden-residence" />)
-    act(() => presetInquiry({ option: 'garage', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'garage', pick: grPick('А 301') }))
     await fill(user)
     await user.click(submit())
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Golden Residence, гараж или паркомясто', picks: ['А 301'] }))
@@ -184,7 +187,7 @@ describe('sending', () => {
   // store, so choosing Golden Residence again brings them back.
   it('sends no apartment picked under another subject, and shows none', async () => {
     render(<InquiryForm page="home" />)
-    act(() => presetInquiry({ option: 'golden-residence', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
     expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
     // Home's Многофамилна half.
     act(() => presetInquiry({ option: 'mnogofamilna' }))
@@ -194,9 +197,60 @@ describe('sending', () => {
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ subject: 'Многофамилна сграда, ж.к. Връбница-1', picks: [] }))
   })
 
+  // Spec M3 §8 (FR4 extended): a pick carries its project. It shows, and goes
+  // with the lead, only while its project's subject is chosen: Многофамилна's
+  // picks with Многофамилна, Golden Residence's with its apartments or its
+  // garages. The picks stay in the store throughout.
+  describe('picks show and go only with their project', () => {
+    const MN_PICK = { project: 'mnogofamilna-sgrada', label: 'А-802' }
+    const GR_PICK = grPick('А 301')
+    const lastLead = () => buildLead(send.mock.lastCall[0], { production: true }).odoo
+
+    it('shows and sends a Многофамилна pick with Многофамилна', async () => {
+      render(<InquiryForm page="mnogofamilna" />)
+      act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
+      expect(screen.getByText('Апартамент А-802')).toBeInTheDocument()
+      await fill(user)
+      await user.click(submit())
+      expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ subject: 'Многофамилна сграда, ж.к. Връбница-1', picks: ['А-802'] }))
+      expect(lastLead().projectType).toMatch(/ – А-802$/)
+    })
+
+    it('hides it while Golden Residence is chosen, and sends no pick then; Многофамилна brings it back', async () => {
+      send.mockResolvedValue({ ok: false })
+      render(<InquiryForm page="mnogofamilna" />)
+      act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
+      await fill(user)
+
+      await user.selectOptions(field('Интересувам се от'), 'golden-residence')
+      expect(screen.queryByText('Апартамент А-802')).toBeNull()
+      expect(screen.queryByRole('list', { name: 'Избрани апартаменти' })).toBeNull()
+      await user.click(submit())
+      expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ subject: 'Golden Residence', picks: [] }))
+      expect(lastLead().projectType).toBe('Golden Residence')
+
+      await user.selectOptions(field('Интересувам се от'), 'mnogofamilna')
+      expect(screen.getByText('Апартамент А-802')).toBeInTheDocument()
+      await user.click(submit())
+      expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ picks: ['А-802'] }))
+    })
+
+    it('never sends a Golden Residence pick with Многофамилна', async () => {
+      render(<InquiryForm page="mnogofamilna" />)
+      act(() => presetInquiry({ pick: GR_PICK }))
+      act(() => presetInquiry({ option: 'mnogofamilna', pick: MN_PICK }))
+      expect(screen.queryByText('Апартамент А 301')).toBeNull()
+      expect(screen.getByText('Апартамент А-802')).toBeInTheDocument()
+      await fill(user)
+      await user.click(submit())
+      expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ picks: ['А-802'] }))
+      expect(lastLead().projectType).not.toMatch(/А 301/)
+    })
+  })
+
   it('brings the apartments picked back with Golden Residence chosen again', async () => {
     render(<InquiryForm page="golden-residence" />)
-    act(() => presetInquiry({ option: 'golden-residence', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
     await user.selectOptions(field('Интересувам се от'), 'other')
     expect(screen.queryByText('Апартамент А 301')).toBeNull()
     await user.selectOptions(field('Интересувам се от'), 'golden-residence')
@@ -299,7 +353,7 @@ describe('sending', () => {
 // stay, for the explorer pages hand them on.
 it('clears the option when its section leaves the page, and keeps the picks', () => {
   const { unmount } = render(<InquirySection page="home" />)
-  act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+  act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
   expect(field('Интересувам се от')).toHaveValue('mnogofamilna')
 
   unmount()
@@ -308,10 +362,31 @@ it('clears the option when its section leaves the page, and keeps the picks', ()
   expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
 })
 
+// Spec M3 §6.2 #6: Многофамилна's inquiry, „Свържете се с *нас*“, with its
+// lead, the phones, the email and the hours, and Многофамилна chosen.
+it('gives Многофамилна its own heading and lead, the phones, the email and the hours, Многофамилна chosen', () => {
+  render(<InquirySection page="mnogofamilna" />)
+  const section = document.getElementById('kontakti')
+  const heading = within(section).getByRole('heading', { level: 2 })
+
+  expect(heading.textContent.replace(/\s+/g, ' ')).toBe('Свържете се с нас')
+  expect(heading.textContent).toContain('с\u00a0нас')
+  expect(heading.querySelector('em')).toHaveTextContent(/^нас$/)
+  expect(section).toHaveAccessibleName(/^Свържете се с\sнас$/)
+  const lead = section.querySelector('.lead')
+  expect(lead.textContent.replace(/\s+/g, ' ')).toBe('Обадете се или изпратете запитване и ще се свържем с вас.')
+  // Spec §4.5: each one-letter word bound to the word after it.
+  expect(lead.textContent).toContain('и\u00a0ще се свържем с\u00a0вас')
+  expect(within(section).getByRole('link', { name: '+359 887 886 166' })).toHaveAttribute('href', 'tel:+359887886166')
+  expect(within(section).getByRole('link', { name: 'ksm_str@abv.bg' })).toHaveAttribute('href', 'mailto:ksm_str@abv.bg')
+  expect(within(section).getByText(/^Пн–Пт 8:00–18:00/)).toBeInTheDocument()
+  expect(field('Интересувам се от')).toHaveValue('mnogofamilna')
+})
+
 describe('presets from the page', () => {
   it('shows a picked apartment as a chip that can be removed', async () => {
     render(<InquiryForm page="golden-residence" />)
-    act(() => presetInquiry({ pick: 'А 301' }))
+    act(() => presetInquiry({ pick: grPick('А 301') }))
     const chips = screen.getByRole('list', { name: 'Избрани апартаменти' })
     expect(within(chips).getByText('Апартамент А 301')).toBeInTheDocument()
 
@@ -331,7 +406,7 @@ describe('presets from the page', () => {
     await fill(user)
     await user.click(submit())
     await screen.findByRole('status')
-    act(() => presetInquiry({ pick: 'Б 204' }))
+    act(() => presetInquiry({ pick: grPick('Б 204') }))
     await waitFor(() => expect(screen.queryByRole('status')).toBeNull())
     expect(screen.getByText('Апартамент Б 204')).toBeVisible()
     expect(field('Име')).toHaveValue('Иван Петров')

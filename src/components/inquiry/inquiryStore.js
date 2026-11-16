@@ -2,11 +2,13 @@ import { useSyncExternalStore } from 'react'
 import { scrollLocked } from '../../utils/lenis'
 import { scrollToId } from '../../utils/scroll'
 
-// The inquiry's shared state (spec §10): the option the form's select shows
-// and the apartments sent to the form. A module-scope store, so any action
-// on the page can preset the form without a provider: the Многофамилна half
-// of Home's opening, the explorer's units, the parking actions. The
-// prerender and the hydration see it empty.
+// The inquiry's shared state (spec §10; M3 §8): the option the form's select
+// shows and the apartments sent to the form, each a pick of its project's
+// ({ project, label }: „А 501“ of Golden Residence, „А-101“ of
+// Многофамилна). A module-scope store, so any action on the page can preset
+// the form without a provider: the Многофамилна half of Home's opening, the
+// explorer's units, the parking actions. The prerender and the hydration see
+// it empty.
 //
 // A preset glides the page to the form (spec §5.3): in the first animation
 // frame in which no scroll lock is held, because Lenis ignores scrollTo while
@@ -28,24 +30,33 @@ const WAIT_MS = 500
 const FOCUS_AFTER_MS = 1500
 
 const option = (value, label, subject = label) => Object.freeze({ value, label, subject })
+const GOLDEN_RESIDENCE = option('golden-residence', `Golden Residence, жк${NBSP}Левски${NBSP}Г`, 'Golden Residence')
 const MNOGOFAMILNA = option('mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1')
+const BUILD = option('build', 'Строителство или ремонт')
 const OTHER = option('other', 'Друго')
 
-// What each page's form offers (spec §10): the label in the select and the
-// subject the lead carries (src/services/inquiry.js).
+// What each page's form offers (spec §10; M3 §6.2 #6, §8): the label in the
+// select and the subject the lead carries (src/services/inquiry.js), the
+// page's own first.
 export const INQUIRY_OPTIONS = Object.freeze({
-  home: Object.freeze([
-    option('golden-residence', `Golden Residence, жк${NBSP}Левски${NBSP}Г`, 'Golden Residence'),
-    MNOGOFAMILNA,
-    option('build', 'Строителство или ремонт'),
-    OTHER,
-  ]),
+  home: Object.freeze([GOLDEN_RESIDENCE, MNOGOFAMILNA, BUILD, OTHER]),
   'golden-residence': Object.freeze([
     option('golden-residence', `Апартамент в${NBSP}Golden Residence`, 'Golden Residence'),
     option('garage', `Гараж или паркомясто в${NBSP}Golden Residence`, 'Golden Residence, гараж или паркомясто'),
     MNOGOFAMILNA,
     OTHER,
   ]),
+  mnogofamilna: Object.freeze([MNOGOFAMILNA, GOLDEN_RESIDENCE, BUILD, OTHER]),
+})
+
+// The project whose apartments go with each subject (M3 §8, extending ruling
+// FR4): Golden Residence's with its apartments and its garages, Многофамилна's
+// with Многофамилна. A pick shows, and goes with the lead, only under its
+// own project's subject; the other subjects take none.
+export const OPTION_PROJECT = Object.freeze({
+  'golden-residence': 'golden-residence',
+  garage: 'golden-residence',
+  mnogofamilna: 'mnogofamilna-sgrada',
 })
 
 const EMPTY = Object.freeze({ option: null, picks: Object.freeze([]) })
@@ -66,7 +77,7 @@ function subscribe(listener) {
 const getSnapshot = () => state
 const getServerSnapshot = () => EMPTY
 
-/** @returns {{ option: string | null, picks: string[] }} */
+/** @returns {{ option: string | null, picks: Array<{ project: string, label: string }> }} */
 export function useInquiryState() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
@@ -98,15 +109,19 @@ function glideToInquiry() {
   pending.giveUp = setTimeout(() => cancelAnimationFrame(pending.frame), WAIT_MS)
 }
 
+// Whether two picks are one: the same project, and the same label.
+const samePick = (a) => (b) => a.project === b.project && a.label === b.label
+
 /**
  * Presets the form and glides the page to it. Merges into the store: the
- * option, when given, replaces the one chosen; a pick joins the picks once.
- * @param {{ option?: string, pick?: string }} preset
+ * option, when given, replaces the one chosen; a pick joins the picks once,
+ * as its project and its label.
+ * @param {{ option?: string, pick?: { project: string, label: string } }} preset
  */
 export function presetInquiry({ option: chosen, pick } = {}) {
   let next = state
   if (chosen !== undefined && chosen !== next.option) next = { ...next, option: chosen }
-  if (pick !== undefined && !next.picks.includes(pick)) next = { ...next, picks: [...next.picks, pick] }
+  if (pick !== undefined && !next.picks.some(samePick(pick))) next = { ...next, picks: [...next.picks, pick] }
   update(next)
   glideToInquiry()
 }
@@ -116,8 +131,10 @@ export function chooseInquiryOption(chosen) {
   if (chosen !== state.option) update({ ...state, option: chosen })
 }
 
-export function removePick(id) {
-  if (state.picks.includes(id)) update({ ...state, picks: state.picks.filter((pick) => pick !== id) })
+/** Drops a pick ({ project, label }). */
+export function removePick(pick) {
+  const same = samePick(pick)
+  if (state.picks.some(same)) update({ ...state, picks: state.picks.filter((each) => !same(each)) })
 }
 
 // Clears the store, and calls off a glide on its way (after a sent inquiry).

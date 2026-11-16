@@ -2,7 +2,6 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import StatusChip from '../components/ui/StatusChip'
 import StatusLegend from '../components/ui/StatusLegend'
-import { GR_FACTS } from '../config/facts'
 import useScrollLock from '../hooks/useScrollLock'
 import useMotionNow from '../motion/useMotionNow'
 import { PALETTE } from '../styles/palette'
@@ -12,23 +11,25 @@ import { FloorCounts, FloorMeta } from './FloorPanel'
 import { planBox } from './planGeometry'
 import { floorKey } from './model'
 import { sizePlan } from './planModes'
-import { PLANS } from './plans'
 import PlanSvg from './PlanSvg'
 import { afterimage, crossfadePlan } from './planMotion'
 
-// The plan stage (spec §7.6; extract §4.23; the concept's explorer.js:560-694,
-// golden-residence.html:283-300): one floor in full over the page, a modal
-// dialog named for it. The bar: the title „Блок А · *Етаж 5*“ and the meta
-// (кота where known, the apartments, the free ones), the block switch, the
-// stepper ▲ „етаж 5“ ▼ (its output live), and „Към сградата“. The body: the
-// floor's plan over its drawing, with an inspector of the unit pointed at;
-// beside it, on umber-2, the counts, the key to the patterns, the table of
-// the floor's units and the hint. A unit on the plan or a row of the table
-// opens the unit (onUnit, with its label), and pointing at either marks both.
+// The plan stage (spec §7.6; M3 §6.4; extract §4.23; the concept's
+// explorer.js:560-694, golden-residence.html:283-300): one floor in full over
+// the page, a modal dialog named for it. The bar: the title „Блок А · *Етаж
+// 5*“ and the meta (the project's word on the floor, the apartments, the
+// free ones, and the date of numbers that are not live), the block switch,
+// the stepper ▲ „етаж 5“ ▼ through the project's floors (its output live),
+// and „Към сградата“. The body: the floor's plan over its drawing, with an
+// inspector of the unit pointed at; beside it, on umber-2, the counts, the
+// key to the patterns, the table of the floor's units and the hint. A unit on
+// the plan or a row of the table opens the unit (onUnit, with its label), and
+// pointing at either marks both.
 //
-// What it shows is the parent's (ExplorerContext.jsx, from the address):
+// What it shows is the parent's (ExplorerDialogs.jsx, from the address):
 // `block` and `floor`, the floor's units from `model` (null until the data
-// arrives: `—`, and the plan without statuses), and onFloor, onBlock and
+// arrives: `—`, and the plan without statuses), the `project` and its
+// `plans` (plans.js), `dated` (the provider's), and onFloor, onBlock and
 // onClose to change them. `covered`: the unit panel lies over it, so it is
 // inert and hidden, and its keys wait (spec §7.7).
 //
@@ -153,7 +154,8 @@ function Inspector({ unit, on }) {
   )
 }
 
-export default function PlanStage({ model, block, floor, fromRect = null, covered = false, onClose, onFloor, onBlock, onUnit }) {
+export default function PlanStage({ project, plans, dated = null, model, block, floor, fromRect = null, covered = false, onClose, onFloor, onBlock, onUnit }) {
+  const { min, max } = project.floors
   const rootRef = useRef(null)
   const ghostRef = useRef(null)
   const upRef = useRef(null)
@@ -175,7 +177,7 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
   const stepped = useRef(0)
 
   const step = (delta, byClick = false) => {
-    const next = Math.min(GR_FACTS.floors, Math.max(1, floor + delta))
+    const next = Math.min(max, Math.max(min, floor + delta))
     if (next === floor) return
     stepped.current = byClick ? delta : 0
     onFloor(next)
@@ -192,7 +194,7 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
         root,
         svg: root.querySelector('.ps__plan svg'),
         ghost: ghostRef.current,
-        plan: PLANS[block],
+        plan: plans[block],
         fromRect,
         onDone: () => setGhost(false),
       })
@@ -293,7 +295,7 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
             <h2 className="ps__title" id={titleId}>
               Блок&nbsp;{block} · <em>Етаж {floor}</em>
             </h2>
-            <FloorMeta floor={data} free className="ps__meta" />
+            <FloorMeta project={project} floor={data} free dated={dated} className="ps__meta" />
           </div>
           <div className="ps__mid">
             <div className="seg ps__blocks" role="group" aria-label="Блок">
@@ -304,13 +306,13 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
               ))}
             </div>
             <div className="step ps__step">
-              <button ref={upRef} type="button" aria-label="По-горен етаж" disabled={floor >= GR_FACTS.floors} onClick={() => step(1, true)}>
+              <button ref={upRef} type="button" aria-label="По-горен етаж" disabled={floor >= max} onClick={() => step(1, true)}>
                 {UP}
               </button>
               <output aria-live="polite">
                 етаж <b>{floor}</b>
               </output>
-              <button ref={downRef} type="button" aria-label="По-долен етаж" disabled={floor <= 1} onClick={() => step(-1, true)}>
+              <button ref={downRef} type="button" aria-label="По-долен етаж" disabled={floor <= min} onClick={() => step(-1, true)}>
                 {DOWN}
               </button>
             </div>
@@ -323,7 +325,8 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
         <div className="ps__body">
           <div className="ps__plan">
             <PlanSvg
-              plan={PLANS[block]}
+              project={project}
+              plan={plans[block]}
               units={data.units}
               mode="stage"
               hot={hot}
@@ -385,7 +388,7 @@ export default function PlanStage({ model, block, floor, fromRect = null, covere
       </div>
       {ghost ? (
         <div ref={ghostRef} className="ps__ghost" aria-hidden="true">
-          <PlanSvg plan={PLANS[block]} units={data.units} mode="mini" fit={false} />
+          <PlanSvg project={project} plan={plans[block]} units={data.units} mode="mini" fit={false} />
         </div>
       ) : null}
     </>,

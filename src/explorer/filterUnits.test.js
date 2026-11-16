@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { AREA_RANGES, filterUnits, sortUnitsBy } from './filterUnits'
 import { buildModel } from './model'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 
 // The list's filters and its sorts (spec §7.8; the concept's gr.js:158-171),
 // on the sheets snapshot the concept shows (extract §5.4): 192 apartments, 69
 // of them free, exposures for block Б only.
 
-const { units } = buildModel(snapshotData())
+const { units } = buildModel(snapshotData(), GR_PROJECT)
 const labels = (list) => list.map((unit) => unit.label)
 const distinct = (list, key) => [...new Set(list.map((unit) => unit[key]))]
 

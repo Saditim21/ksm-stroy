@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { buildModel } from '../../explorer/model'
+import { GR_PROJECT } from '../../explorer/projects/gr'
 import { snapshotData } from '../../explorer/testing'
 import { ExplorerContext } from '../../explorer/useExplorer'
 import BlocksSection from './BlocksSection'
@@ -13,7 +14,7 @@ import BlocksSection from './BlocksSection'
 // those same elements fill. The page's provider is stood in for by its
 // context, its model given.
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const half = (id) => document.getElementById(id)
 // What a block's half holds, in order: its name, its facts, its squares, its
@@ -22,7 +23,7 @@ const shape = (id) => [...half(id).children].map((child) => `${child.tagName.toL
 
 function renderBlocks(model) {
   const at = (value) => (
-    <ExplorerContext.Provider value={{ model: value, openUnit: () => {} }}>
+    <ExplorerContext.Provider value={{ project: GR_PROJECT, model: value, openUnit: () => {} }}>
       <BlocksSection />
     </ExplorerContext.Provider>
   )

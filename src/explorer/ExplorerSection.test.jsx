@@ -9,6 +9,7 @@ import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
 import { loadSurfaces } from './loadSurfaces'
 import { loadUnitList } from './loadUnitList'
+import { GR_PROJECT } from './projects/gr'
 import { LOADING, named, snapshotAvailability } from './testing'
 
 // The explorer's section on the Golden Residence page, #explorer (spec §8.2
@@ -49,7 +50,7 @@ function renderSection(props = {}, url = '/projects/golden-residence') {
         <Route
           path="*"
           element={(
-            <ExplorerProvider routeBlock={null}>
+            <ExplorerProvider project={GR_PROJECT} routeBlock={null}>
               <ExplorerSection {...props} />
               <Where />
               <Go to="/projects/golden-residence?floor=А-3">go</Go>
@@ -62,7 +63,7 @@ function renderSection(props = {}, url = '/projects/golden-residence') {
   )
 }
 
-beforeAll(() => Promise.all([loadSurfaces(), loadUnitList()]))
+beforeAll(() => Promise.all([loadSurfaces(GR_PROJECT), loadUnitList()]))
 
 beforeEach(() => {
   availability = snapshotAvailability()

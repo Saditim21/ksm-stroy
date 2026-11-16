@@ -12,26 +12,29 @@ import { STATUS_LABEL } from '../utils/propertyStatus'
 import { trapTab } from '../utils/trapTab'
 import { cropFor, planShapes } from './planGeometry'
 import { findUnit, floorKey } from './model'
-import { PLANS } from './plans'
 import PlanSvg from './PlanSvg'
 import { afterimage } from './planMotion'
 import { stepUnit } from './surfaceModel'
 
-// The unit panel (spec §7.7; extract §4.24; the concept's explorer.js:696-809,
-// golden-residence.html:303-310): one apartment, a modal dialog over the
-// stage, named for the unit. Two halves on a seam: the floor's plan cropped
-// on the unit, outlined, with its caption; then „А *501*“, its block, floor
-// and type with its status, its areas in м², its type, exposure („няма данни
-// в таблицата“ when the sheet has none), status and price where the sheet has
-// one, what it offers by its status, and the previous and next units on the
-// floor, round from either end.
+// The unit panel (spec §7.7; M3 §6.4; extract §4.24; the concept's
+// explorer.js:696-809, golden-residence.html:303-310): one apartment, a modal
+// dialog over the stage, named for the unit. Two halves on a seam: the
+// floor's plan cropped on the unit, outlined, with its caption; then „А
+// *501*“ („А-*101*“ on Многофамилна), its block, floor and type with its
+// status, its areas in м², its type, exposure („няма данни в таблицата“ when
+// the sheet has none), status and price where the sheet has one, the date of
+// numbers that are not live, what it offers by its status, and the previous
+// and next units on the floor, round from either end. Идеални части shows
+// while the project's sheets give any: Многофамилна's give none (M3 §2).
 //
 // - available: solid „Изпратете запитване“; reserved, and a status the rules
 //   do not know: „Попитайте за апартамента“. Either hands the unit to
 //   onInquire. Sold and blocked units say why they offer nothing.
 // - `unitId` is a label („А 501“), looked up through normalizeUnitId; the
-//   parent (ExplorerContext.jsx) shows the panel only for a unit the model
-//   has. onStep(-1 | 1) asks for the previous or the next.
+//   parent (ExplorerDialogs.jsx) shows the panel only for a unit the model
+//   has. onStep(-1 | 1) asks for the previous or the next. `project` and its
+//   `plans` (plans.js) give the plan to crop and its numbers; `dated` is the
+//   provider's.
 // - Escape closes it, anywhere, and goes no further: the stage under it stays
 //   (its own keys wait while it is covered). Tab stays inside; a click on the
 //   backdrop closes it too. The focus moves to its action after 500 ms (20 ms
@@ -68,10 +71,10 @@ const ARROW_ON = (
   </svg>
 )
 
-// „А 501“ as the title sets it: the block's letter, and the number in the
-// italic.
+// „А 501“ and „А-101“ as the title sets them: the block's letter with the
+// space or the dash after it, and the number in the italic.
 function splitLabel(label) {
-  const match = /^(\S+)\s+(.+)$/.exec(label)
+  const match = /^(\S+?[\s-]+)(.+)$/.exec(label)
   return match ? [match[1], match[2]] : [null, label]
 }
 
@@ -108,14 +111,14 @@ export default function UnitPanel({ model, unitId, ...handlers }) {
   return unit ? <Panel model={model} unit={unit} {...handlers} /> : null
 }
 
-function Panel({ model, unit, onClose, onStep, onInquire }) {
+function Panel({ project, plans, dated = null, model, unit, onClose, onStep, onInquire }) {
   const rootRef = useRef(null)
   const leftRef = useRef(null)
   const rightRef = useRef(null)
   const titleId = useId()
   const motionNow = useMotionNow()
   useScrollLock(PALETTE.umber)
-  const plan = PLANS[unit.block]
+  const plan = plans[unit.block]
   const shape = planShapes(plan).find(({ suffix }) => suffix === unit.suffix)
   // The crop matches the left half's box, measured (cropFor).
   const [aspect, setAspect] = useState(1)
@@ -210,6 +213,8 @@ function Panel({ model, unit, onClose, onStep, onInquire }) {
   const [previous, next] = [stepUnit(model, unit, -1), stepUnit(model, unit, 1)]
   const [letter, number] = splitLabel(unit.label)
   const sub = [`Блок${NBSP}${unit.block}`, `етаж ${unit.floor}`, unit.type].filter(Boolean).join(' · ')
+  // Идеални части while the project's sheets give any (M3 §2, §6.4).
+  const ideal = model.units.some((each) => each.idealParts != null)
 
   // A step: the details fade out first, with motion.
   const step = (delta) => {
@@ -234,14 +239,14 @@ function Panel({ model, unit, onClose, onStep, onInquire }) {
       <div className="up__box">
         <Seam />
         <div ref={leftRef} className="up__l">
-          <PlanSvg plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
+          <PlanSvg project={project} plan={plan} units={units} mode="crop" viewBox={crop} focus={unit.suffix} />
           <p className="up__cap">
             План на етаж {unit.floor}, блок{NBSP}{unit.block}. {unit.label} е{NBSP}очертан.
           </p>
         </div>
         <div ref={rightRef} className="up__r">
           <p className="up__id" id={titleId}>
-            {letter ? <>{letter} </> : null}
+            {letter}
             <em>{number}</em>
           </p>
           <div className="up__sub">
@@ -249,13 +254,14 @@ function Panel({ model, unit, onClose, onStep, onInquire }) {
           </div>
           <dl className="up__dl">
             <Area term="Застроена площ" value={unit.builtArea} />
-            <Area term="Идеални части" value={unit.idealParts} />
+            {ideal ? <Area term="Идеални части" value={unit.idealParts} /> : null}
             <Area term="Обща площ" value={unit.totalArea} />
             <Fact term="Вид">{unit.type || '—'}</Fact>
             <Fact term="Изложение">{unit.exposure || `няма данни в${NBSP}таблицата`}</Fact>
             <Fact term="Статус">{status === 'unknown' ? unit.statusText || STATUS_LABEL.unknown : STATUS_LABEL[status]}</Fact>
             {unit.price ? <Fact term="Цена">{unit.price}</Fact> : null}
           </dl>
+          {dated ? <p className="small up__date">По данни към {dated}.</p> : null}
           {NOTES[status] ? <p className="small up__note">{NOTES[status]}</p> : null}
           {action ? (
             <div className="up__actions">

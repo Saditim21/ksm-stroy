@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ExplorerProvider } from './ExplorerContext'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotAvailability } from './testing'
 import useExplorer from './useExplorer'
 
@@ -41,7 +42,7 @@ function renderAt(entry) {
   render(
     <MemoryRouter initialEntries={[entry]}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><Probe /></ExplorerProvider>} />
+        <Route path="*" element={<ExplorerProvider project={GR_PROJECT} routeBlock={null}><Probe /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )

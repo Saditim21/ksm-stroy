@@ -4,6 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
 import { loadUnitList } from './loadUnitList'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotAvailability } from './testing'
 
 // The switch between „Визуално“ and „По критерии“ with motion (spec §5.7,
@@ -32,7 +33,7 @@ function renderSection() {
   render(
     <MemoryRouter initialEntries={['/projects/golden-residence']}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection /></ExplorerProvider>} />
+        <Route path="*" element={<ExplorerProvider project={GR_PROJECT} routeBlock={null}><ExplorerSection /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )

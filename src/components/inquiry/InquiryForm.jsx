@@ -4,7 +4,7 @@ import useMotionNow from '../../motion/useMotionNow'
 import { EMAIL_PATTERN } from '../../services/emailPattern'
 import { scrollToId } from '../../utils/scroll'
 import Button from '../ui/Button'
-import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInquiryState } from './inquiryStore'
+import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry form (spec §10; extract §4.14), in the concept's style: fields
 // underlined in hair-ctl, a select with a brass chevron (inquiry.css). Name,
@@ -20,10 +20,11 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, removePick, resetInquiry, useInqu
 //
 // What the visitor asks about comes from the page's options
 // (inquiryStore.js), and the page can preset it, with apartments picked in
-// the explorer as chips. The picks go with a Golden Residence subject only,
-// its apartments or its garages (ruling FR4): under another they neither
-// show nor go with the lead, and they stay in the store, so choosing Golden
-// Residence again brings them back.
+// the explorer as chips. A pick goes only with its own project's subject
+// (ruling FR4, extended by M3 §8): Golden Residence's with its apartments or
+// its garages, Многофамилна's with Многофамилна (OPTION_PROJECT). Under
+// another subject a pick neither shows nor goes with the lead, and it stays
+// in the store, so choosing its project again brings it back.
 //
 // The send path (src/services/inquiry.js, with EmailJS behind it) is a chunk
 // of its own, out of the page's first-load JS (spec §10): it starts loading
@@ -113,7 +114,7 @@ export default function InquiryForm({ page = 'home' }) {
   const options = INQUIRY_OPTIONS[page] ?? INQUIRY_OPTIONS.home
   const { option, picks } = useInquiryState()
   const chosen = options.some(({ value }) => value === option) ? option : options[0].value
-  const shown = chosen === 'golden-residence' || chosen === 'garage' ? picks : []
+  const shown = picks.filter((pick) => pick.project === OPTION_PROJECT[chosen])
   const [values, setValues] = useState(BLANK)
   // Once a send has been tried, each field's problem shows, and follows the
   // typing until it is fixed.
@@ -192,7 +193,7 @@ export default function InquiryForm({ page = 'home' }) {
         email: values.email,
         phone: values.phone,
         subject,
-        picks: [...shown],
+        picks: shown.map((pick) => pick.label),
         message: values.message,
       }),
       (error) => {
@@ -260,9 +261,9 @@ export default function InquiryForm({ page = 'home' }) {
             </span>
             <ul className="chips" role="list" aria-labelledby="f-picks">
               {shown.map((pick) => (
-                <li key={pick} className="chip">
-                  Апартамент {pick}
-                  <button type="button" aria-label={`Махнете ${pick}`} onClick={unpick(pick)}>
+                <li key={pick.label} className="chip">
+                  Апартамент {pick.label}
+                  <button type="button" aria-label={`Махнете ${pick.label}`} onClick={unpick(pick)}>
                     <span aria-hidden="true">×</span>
                   </button>
                 </li>

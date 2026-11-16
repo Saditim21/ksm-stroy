@@ -13,7 +13,8 @@ const any = (value) => value == null || value === ''
 /**
  * The units that pass every filter given, in their order. Each field null or
  * undefined (or '') means any:
- * - block: 'А' | 'Б'; floor: 1–8; type: the sheet's Вид („Ателие“);
+ * - block: 'А' | 'Б'; floor: one of the project's (Golden Residence 1–8,
+ *   Многофамилна 2–10); type: the sheet's Вид („Ателие“);
  * - area: a key of AREA_RANGES; a unit whose area the sheet does not give
  *   never matches a range;
  * - exposure: matched by `includes` on the lower-cased Изложение, so „юг“

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { formatFloorParam, parseFloorParam } from './floorParam'
+import { GR_PROJECT } from './projects/gr'
+
+// Golden Residence's floors, 1–8.
+const FLOORS = GR_PROJECT.floors
 
 // The ?floor of a deep link (spec §7.10; Review Focus 2): a bare floor names
 // the route's own block on a block route, „Б-5“ names the block, a Latin A or
@@ -10,13 +14,13 @@ describe('parseFloorParam', () => {
   it.each([
     ['3', 'А', { block: 'А', floor: 3 }], ['Б-5', 'А', { block: 'Б', floor: 5 }], ['B-5', null, { block: 'Б', floor: 5 }],
     ['А-8', null, { block: 'А', floor: 8 }], ['9', 'А', null], ['Б-0', null, null], ['5', null, null], ['', 'А', null], [null, 'А', null],
-  ])('parseFloorParam(%j, %j)', (value, route, expected) => expect(parseFloorParam(value, route)).toEqual(expected))
+  ])('parseFloorParam(%j, %j)', (value, route, expected) => expect(parseFloorParam(value, route, FLOORS)).toEqual(expected))
 
   // What a hand-edited address may hold: other cases, spaces, a stray letter.
   it.each([
     ['a-2', null, { block: 'А', floor: 2 }], ['б-4', 'А', { block: 'Б', floor: 4 }], [' 6 ', 'Б', { block: 'Б', floor: 6 }],
     ['В-3', null, null], ['А-', null, null], ['А-3-4', null, null], ['3.5', 'А', null], ['А-03', null, { block: 'А', floor: 3 }],
-  ])('reads %j on %j as %j', (value, route, expected) => expect(parseFloorParam(value, route)).toEqual(expected))
+  ])('reads %j on %j as %j', (value, route, expected) => expect(parseFloorParam(value, route, FLOORS)).toEqual(expected))
 })
 
 it('writes bare floors for the route’s own block only', () => {
@@ -28,7 +32,7 @@ it('writes bare floors for the route’s own block only', () => {
 it('reads back what it writes', () => {
   for (const route of ['А', 'Б', null]) {
     for (const block of ['А', 'Б']) {
-      for (const floor of [1, 4, 8]) expect(parseFloorParam(formatFloorParam({ block, floor }, route), route)).toEqual({ block, floor })
+      for (const floor of [1, 4, 8]) expect(parseFloorParam(formatFloorParam({ block, floor }, route), route, FLOORS)).toEqual({ block, floor })
     }
   }
 })

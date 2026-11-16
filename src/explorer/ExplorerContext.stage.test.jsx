@@ -5,6 +5,7 @@ import { mockMatchMedia } from '../test/media'
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
 import { loadSurfaces } from './loadSurfaces'
+import { GR_PROJECT } from './projects/gr'
 import { named, snapshotAvailability } from './testing'
 
 // Ruling C8.10, at the stage itself: a floor opened from a mini plan's unit
@@ -46,7 +47,7 @@ function openFromMiniPlan() {
   render(
     <MemoryRouter initialEntries={[GR]}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection /><Where /></ExplorerProvider>} />
+        <Route path="*" element={<ExplorerProvider project={GR_PROJECT} routeBlock={null}><ExplorerSection /><Where /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -57,7 +58,7 @@ function openFromMiniPlan() {
 }
 
 let restoreMedia
-beforeAll(() => loadSurfaces())
+beforeAll(() => loadSurfaces(GR_PROJECT))
 beforeEach(() => {
   availability = snapshotAvailability()
   restoreMedia = mockMatchMedia({ fine: true })

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { presetInquiry } from '../components/inquiry/inquiryStore'
 import { getLenis } from '../utils/lenis'
 import { findUnit, floorKey } from './model'
+import { plansOf } from './plans'
 import PlanStage from './PlanStage'
 import { stepUnit } from './surfaceModel'
 import UnitPanel from './UnitPanel'
@@ -30,14 +31,17 @@ import UnitPanel from './UnitPanel'
 //   inquiry's close gives the focus to nothing: the inquiry focuses the
 //   form's first field once its glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
-//   and ?unit), then presets the form (presetInquiry), whose glide waits for
-//   the first frame with no scroll lock held: after this close's commit.
+//   and ?unit), then presets the form (presetInquiry) with the project's
+//   option and the unit as a pick of the project's (M3 §8), whose glide
+//   waits for the first frame with no scroll lock held: after this close's
+//   commit.
 //
 // `state` is useExplorerState()'s; `opening` the stage's { fromRect, opener }
 // (ruling F5), which setOpening(null) spends; `unitOpener` the element that
 // opened the unit panel; openUnit, closeStage, setFloor, setBlock and
 // focusRail the provider's (its setFloor and setBlock call off a unit still
-// to open, ruling C8.2).
+// to open, ruling C8.2); `project` and `dated` the provider's too, the
+// project's plans having loaded with this chunk (loadSurfaces.js).
 
 // Gives `element` the focus if it can take it: in the page, neither inert nor
 // hidden, and focusable. Whether it did. (No browser focuses an element under
@@ -102,7 +106,8 @@ function focusRailOf(at, focusRail) {
   else focusInto(selectedTab())
 }
 
-export default function ExplorerDialogs({ model, state, opening, setOpening, unitOpener, openUnit, closeStage, setFloor, setBlock, focusRail }) {
+export default function ExplorerDialogs({ project, dated, model, state, opening, setOpening, unitOpener, openUnit, closeStage, setFloor, setBlock, focusRail }) {
+  const plans = plansOf(project)
   const { stage, unitId } = state
   const unit = findUnit(model, unitId)
   const showStage = Boolean(stage)
@@ -144,13 +149,16 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
   const inquire = (target) => {
     quiet.current = true
     closeStage()
-    presetInquiry({ option: 'golden-residence', pick: target.label })
+    presetInquiry({ option: project.option, pick: { project: project.id, label: target.label } })
   }
 
   return (
     <>
       {showStage ? (
         <PlanStage
+          project={project}
+          plans={plans}
+          dated={dated}
           model={model}
           block={stage.block}
           floor={stage.floor}
@@ -164,6 +172,9 @@ export default function ExplorerDialogs({ model, state, opening, setOpening, uni
       ) : null}
       {showUnit ? (
         <UnitPanel
+          project={project}
+          plans={plans}
+          dated={dated}
           model={model}
           unitId={unitId}
           onClose={state.closeUnit}

@@ -1,23 +1,23 @@
 // The plans' geometry (spec §7.4, §7.7; the concept's explorer.js:15-79,
-// :702-712), on the floor plans' own grid
-// (src/data/maps/golden-residence.floors.json): polygons in image pixels,
-// each plan at its drawing's size. What the edge panels, the sheet, the plan
-// stage and the unit panel draw: only modules of the surfaces' lazy chunk
-// (surfaces.js) import it, so it travels there and not in a route's
-// first-load JS, as surfaceModel.js does (rulings C7.7, FR5). The facade's
-// geometry is geometry.js's.
+// :702-712), on the floor plans' own grid (a project's floors map,
+// src/data/maps/*.floors.json): polygons in image pixels, each plan at its
+// drawing's size. What the edge panels, the sheet, the plan stage and the
+// unit panel draw: only modules of the surfaces' lazy chunk (surfaces.js)
+// import it, so it travels there and not in a route's first-load JS, as
+// surfaceModel.js does (rulings C7.7, FR5). The facade's geometry is
+// geometry.js's.
 import { bbox, pathD } from './geometry'
 
-/** The plan of a block: the floors.json entry that applies to it (one typical
- * floor serves all eight, spec §9). */
+/** The plan of a block: the floors map's entry that applies to it (one
+ * typical floor serves all of a block's floors, spec §9). */
 export function planFor(floorsMap, block) {
   return floorsMap.find((entry) => entry.appliesTo.blocks.includes(block))
 }
 
 const pointsOf = (plan) => plan.shapes.filter((shape) => shape.type === 'apartment').flatMap((shape) => shape.polygons[0])
 
-/** The box around a plan's 12 apartments, `pad` wider on every side: a
- * plan's viewBox (spec §7.4: 14, or 4 in mini). */
+/** The box around a plan's apartments, `pad` wider on every side: a plan's
+ * viewBox (spec §7.4: 14, or 4 in mini). */
 export function planBox(plan, pad) {
   const box = bbox(pointsOf(plan))
   return { x: box.x - pad, y: box.y - pad, w: box.w + pad * 2, h: box.h + pad * 2 }

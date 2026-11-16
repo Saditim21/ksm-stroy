@@ -1,24 +1,10 @@
-// The facade's geometry (spec §7.2; the concept's explorer.js:15-79,
-// :232-233), on the building map's own grid
-// (src/data/maps/golden-residence.building.json): polygons in image pixels,
-// the facade at 1200 wide. The plans' geometry, which only an opened floor's
-// surfaces draw, is planGeometry.js's, so it stays out of the first load.
-
-// The facade's grid (the building map's image, 1200 × 599, and the sky-cut
-// picture drawn over it at that size), its seam, the desktop crop, the phone
-// crop of each block, and where each block's rail stands, just outside its
-// outer edge.
-export const FACADE = Object.freeze({
-  width: 1200,
-  height: 599,
-  seamX: 605,
-  vbFull: Object.freeze({ x: 0, y: 112, w: 1200, h: 454 }),
-  vbPhone: Object.freeze({
-    'А': Object.freeze({ x: 0, y: 132, w: 628, h: 388 }),
-    'Б': Object.freeze({ x: 572, y: 132, w: 628, h: 388 }),
-  }),
-  railX: Object.freeze({ 'А': 71, 'Б': 1129 }),
-})
+// The facade's geometry (spec §7.2; M3 §6.3; the concept's explorer.js:15-79,
+// :232-233), on a building map's own grid (src/data/maps/*.building.json, a
+// project's facade.map): polygons in image pixels, the facade 1200 wide. A
+// project's crops and rails are its stylesheet's (explorer.css holds Golden
+// Residence's), its seam its facade's (projects/*.js). The plans' geometry,
+// which only an opened floor's surfaces draw, is planGeometry.js's, so it
+// stays out of the first load.
 
 /** The box of a list of [x, y] points: { x, y, w, h }. */
 export function bbox(points) {
@@ -37,4 +23,32 @@ export function floorShapes(buildingMap) {
   return buildingMap.shapes
     .filter((shape) => shape.type === 'floor')
     .map(({ block, floor, polygons: [points] }) => ({ block, floor, key: `${block}-${floor}`, d: pathD(points), bbox: bbox(points) }))
+}
+
+const facades = new WeakMap()
+
+/**
+ * A building map's facade, worked out once a map, so what the facade keys its
+ * state by keeps its identity from render to render (useHotFloor.js):
+ * { shapes: floorShapes(), shape: Map<key, shape>, rails: { 'А': shapes,
+ *   'Б': shapes } (each block's top floor first), placeholders: Map<key,
+ *   floor> }. A placeholder is a floor the data has not reached: its plan
+ * without statuses, `—` counts (model.js's shape).
+ */
+export function facadeOf(buildingMap) {
+  if (!facades.has(buildingMap)) {
+    const shapes = floorShapes(buildingMap)
+    const rails = { 'А': [], 'Б': [] }
+    for (const shape of [...shapes].sort((a, b) => b.floor - a.floor)) rails[shape.block].push(shape)
+    facades.set(buildingMap, {
+      shapes,
+      shape: new Map(shapes.map((shape) => [shape.key, shape])),
+      rails,
+      placeholders: new Map(shapes.map(({ key, block, floor }) => [
+        key,
+        Object.freeze({ block, floor, units: [], counts: null, colour: 'unknown' }),
+      ])),
+    })
+  }
+  return facades.get(buildingMap)
 }

@@ -70,6 +70,15 @@ describe('the facade’s layout (spec §7.2)', () => {
 })
 
 describe('the rails (spec §7.2)', () => {
+  // Golden Residence's, the stylesheet's defaults: just outside each block's
+  // outer edge, at grid x 71 and 1129, over the picture and its drawing on
+  // the building map's whole grid, 1200 × 599.
+  it('stands each block’s rail at grid x 71 and 1129, on the 1200 × 599 grid', () => {
+    expect(declaredFor('.fx__rail--a').left).toBe('calc((71 - var(--vbx)) / var(--vbw) * 100%)')
+    expect(declaredFor('.fx__rail--b').left).toBe('calc((1129 - var(--vbx)) / var(--vbw) * 100%)')
+    expect(declaredFor('.fx__frame')).toMatchObject({ width: 'calc(1200 / var(--vbw) * 100%)', height: 'calc(599 / var(--vbh) * 100%)' })
+  })
+
   it('sets each row min(30px, var(--pitch)) tall, centred on its floor, so no two overlap', () => {
     expect(declaredFor('.fx__cnt')).toMatchObject({ height: 'min(30px, var(--pitch))', 'margin-top': 'calc(min(30px, var(--pitch)) / -2)' })
   })
@@ -356,6 +365,20 @@ it('fits the list’s table in its box on a small phone', () => {
   expect(declaredFor('.lv .utable td', [SMALL])).toEqual({ 'padding-right': '5px', 'padding-left': '5px' })
   expect(declaredFor('.lv .utable th:last-child', [SMALL])).toEqual({ 'padding-right': '0' })
   expect(declaredFor('.lv .utable td:first-child', ['@media (max-width: 560px)'])).toEqual({ 'padding-left': '5px' })
+})
+
+// FR7 (spec §11): from 360 px the four columns fit; under it, at 320 px,
+// they scrolled 21 px past the table's box. 12 px, 3 px apart, and the
+// status chips closer, fit them with 8 px to spare (measured in Chrome).
+// The first column's 5 px (ruling C8.12) and the last's none come from the
+// wider rules, whose selectors outweigh these, so they still hold.
+it('fits the list’s table in its box from 320 px', () => {
+  const NARROW = '@media (max-width: 359px)'
+  expect(declaredFor('.lv .utable', [NARROW])).toEqual({ 'font-size': '12px' })
+  expect(declaredFor('.lv .utable td', [NARROW])).toEqual({ 'padding-right': '3px', 'padding-left': '3px' })
+  expect(declaredFor('.lv .utable th', [NARROW])).toEqual({ 'padding-right': '3px', 'padding-left': '3px' })
+  expect(declaredFor('.lv .utable .st', [NARROW])).toEqual({ gap: '6px', 'font-size': '12px' })
+  expect(rulesFor(rules, '.lv .utable td:first-child').filter((rule) => rule.atRules.includes(NARROW))).toEqual([])
 })
 
 // Spec §2.1: a control's border is hair-ctl.

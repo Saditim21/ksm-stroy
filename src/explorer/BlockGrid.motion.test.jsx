@@ -2,6 +2,7 @@ import { act, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockMatchMedia } from '../test/media'
 import { buildModel } from './model'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 
 // The squares' entrance (spec §5.7; extract §4.27; the concept's
@@ -32,16 +33,18 @@ const fakeMotion = vi.hoisted(() => {
 })
 vi.mock('../motion/engine.js', () => ({ default: fakeMotion }))
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
 
 // A fresh motion runtime (its memoised load and idle queue) and grid for
-// every test.
+// every test; the grid's explorer, which sizes it, a fresh module with it.
 let BlockGrid
+let ExplorerContext
 let idle
 let restoreMedia
 beforeEach(async () => {
   vi.resetModules()
   BlockGrid = (await import('./BlockGrid')).default
+  ;({ ExplorerContext } = await import('./useExplorer'))
   fakeMotion.gsap.from.mockClear()
   fakeMotion.gsap.context.mockClear()
   idle = []
@@ -70,9 +73,11 @@ async function flushMotion() {
 // (jsdom's): jsdom lays nothing out.
 function renderBlock(block, top) {
   const view = render(
-    <div className="blk">
-      <BlockGrid model={MODEL} block={block} onUnit={() => {}} />
-    </div>,
+    <ExplorerContext.Provider value={{ project: GR_PROJECT }}>
+      <div className="blk">
+        <BlockGrid model={MODEL} block={block} onUnit={() => {}} />
+      </div>
+    </ExplorerContext.Provider>,
   )
   const half = view.container.querySelector('.blk')
   vi.spyOn(half, 'getBoundingClientRect').mockReturnValue({ top, bottom: top + 600, left: 0, right: 600, width: 600, height: 600, x: 0, y: top })

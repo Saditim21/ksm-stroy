@@ -212,7 +212,7 @@ describe('an inquiry from the unit panel', () => {
     fireEvent.click(within(panel).getByRole('button', { name: 'Изпратете запитване' }))
     await waitFor(() => expect(document.querySelector('.ps, .up')).toBeNull())
     expect(replaced.mock.calls.map(([, , url]) => url)).toEqual(['/projects/golden-residence/block-a'])
-    expect(presetInquiry).toHaveBeenCalledWith({ option: 'golden-residence', pick: 'А 301' })
+    expect(presetInquiry).toHaveBeenCalledWith({ option: 'golden-residence', pick: { project: 'golden-residence', label: 'А 301' } })
     expect(within(document.getElementById('kontakti')).getByText('Апартамент А 301')).toBeInTheDocument()
     expect(document.activeElement).toBe(document.body)
   }, 30000)

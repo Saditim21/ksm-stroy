@@ -1,7 +1,9 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { recordingMotion } from '../test/gsap'
 import { buildModel } from './model'
+import { loadPlans } from './plans'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 import UnitPanel from './UnitPanel'
 
@@ -35,10 +37,15 @@ function model() {
     row('А 304', 'Скоро'),
     row('А 305', 'Блокиран', { price: '95 000 €' }),
   ]
-  return buildModel(data)
+  return buildModel(data, GR_PROJECT)
 }
 
 const MODEL = model()
+// Golden Residence's plans, as the surfaces have them once they have loaded.
+let PLANS
+beforeAll(async () => {
+  PLANS = await loadPlans(GR_PROJECT)
+})
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const panel = (name) => screen.getByRole('dialog', { name })
 const inquiry = (dialog) => within(dialog).queryAllByRole('button', { name: /запитване/i })
@@ -46,7 +53,7 @@ const fact = (dialog, term) => [...dialog.querySelectorAll('.up__dl > div')].fin
 
 function renderPanel(unitId, props = {}) {
   const handlers = { onClose: vi.fn(), onStep: vi.fn(), onInquire: vi.fn() }
-  const view = render(<UnitPanel model={MODEL} unitId={unitId} {...handlers} {...props} />)
+  const view = render(<UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId={unitId} {...handlers} {...props} />)
   return { ...handlers, ...view }
 }
 
@@ -180,7 +187,7 @@ describe('as a dialog', () => {
     const handlers = { onClose: vi.fn(), onStep: vi.fn(), onInquire: vi.fn() }
     render(
       <div onKeyDown={parent}>
-        <UnitPanel model={MODEL} unitId="А 302" {...handlers} />
+        <UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId="А 302" {...handlers} />
       </div>,
     )
 
@@ -294,7 +301,7 @@ it('opens with the halves parting from the seam over 0.7 s, the panel fading in 
     expect(recorder.tweens[0].vars).toEqual({ clearProps: 'opacity,clipPath,transform' })
 
     recorder.reset()
-    rerender(<UnitPanel model={MODEL} unitId="А 302" onClose={onClose} onStep={onStep} onInquire={onInquire} />)
+    rerender(<UnitPanel project={GR_PROJECT} plans={PLANS} model={MODEL} unitId="А 302" onClose={onClose} onStep={onStep} onInquire={onInquire} />)
     expect(recorder.timelines).toHaveLength(0)
     expect(recorder.tweens).toHaveLength(1)
     expect(recorder.tweens[0].targets).toBe(panel('А 302').querySelector('.up__r'))

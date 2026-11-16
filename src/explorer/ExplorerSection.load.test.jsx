@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotAvailability } from './testing'
 
 // Ruling C8.7: the list, „По критерии“, is a lazy chunk (loadUnitList.js).
@@ -36,7 +37,7 @@ function renderSection(url) {
   render(
     <MemoryRouter initialEntries={[url]}>
       <Routes>
-        <Route path="*" element={<ExplorerProvider routeBlock={null}><ExplorerSection /><Where /></ExplorerProvider>} />
+        <Route path="*" element={<ExplorerProvider project={GR_PROJECT} routeBlock={null}><ExplorerSection /><Where /></ExplorerProvider>} />
       </Routes>
     </MemoryRouter>,
   )

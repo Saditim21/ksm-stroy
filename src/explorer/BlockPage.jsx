@@ -7,13 +7,15 @@ import { preloadWithDocument } from '../utils/documentPreloads'
 import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
 import { ExplorerProvider } from './ExplorerContext'
 import ExplorerSection from './ExplorerSection'
+import { GR_PROJECT } from './projects/gr'
 
 // A Golden Residence block page, /projects/golden-residence/block-a and
 // block-b (spec §7.11, §8.3): the way back to the building, the H1 „Golden
 // Residence, блок *А*“ and the block's facts, hinged on the seam; then the
 // explorer, starting on its own block, and the Golden Residence inquiry. The
-// page's ExplorerProvider writes the block's own floors bare in the address
-// (?floor=5), and reads a deep link to a floor or a unit once it has hydrated.
+// page's ExplorerProvider, Golden Residence's (GR_PROJECT), writes the
+// block's own floors bare in the address (?floor=5), and reads a deep link to
+// a floor or a unit once it has hydrated.
 //
 // Why that order: the routes contract looks for „блок А“ followed by anything
 // but a letter in the page's run-together text, and the facts line starts
@@ -38,7 +40,7 @@ const BACK = (
 export default function BlockPage({ block }) {
   preloadWithDocument(PRELOADS)
   return (
-    <ExplorerProvider routeBlock={block}>
+    <ExplorerProvider project={GR_PROJECT} routeBlock={block}>
       <div className="bp hinge">
         <div className="bp__id">
           <Link to="/projects/golden-residence" prefetch="intent" className="link bp__back">

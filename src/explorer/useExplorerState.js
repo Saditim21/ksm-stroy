@@ -17,16 +17,17 @@ import { formatFloorParam, parseFloorParam } from './floorParam'
 //   It is React Router's useSearchParams written out (useLocation, and
 //   navigate('?…') as that hook's setter does it), which keeps that hook's
 //   code out of the page's first-load JS (ruling C8.5).
-// - `routeBlock` is the block route's letter, or null on the Golden
-//   Residence page: a block route writes its own floors bare („5“), and the
-//   Golden Residence page always writes the letter („А-5“) (floorParam.js).
+// - `routeBlock` is the block route's letter, or null on a project's own
+//   page: a block route writes its own floors bare („5“), and the project's
+//   page always writes the letter („А-5“) (floorParam.js).
+// - `floors` is the project's { min, max }: ?floor opens no other floor.
 // - Changing the floor or the block drops ?unit, as closing the stage drops
 //   both.
 //
 // stage: { block, floor } | null; unitId: the ?unit label as written, or
 // null (the provider looks it up, ExplorerContext.jsx); view: 'visual' |
 // 'list'.
-export default function useExplorerState({ routeBlock = null }) {
+export default function useExplorerState({ routeBlock = null, floors }) {
   const hydrated = useHydrated()
   const { search } = useLocation()
   const navigate = useNavigate()
@@ -35,7 +36,7 @@ export default function useExplorerState({ routeBlock = null }) {
   const unitValue = hydrated ? params.get('unit') : null
   const viewValue = hydrated ? params.get('view') : null
 
-  const stage = useMemo(() => parseFloorParam(floorValue, routeBlock), [floorValue, routeBlock])
+  const stage = useMemo(() => parseFloorParam(floorValue, routeBlock, floors), [floorValue, routeBlock, floors])
   const unitId = unitValue?.trim() || null
   const view = viewValue === 'list' ? 'list' : 'visual'
 

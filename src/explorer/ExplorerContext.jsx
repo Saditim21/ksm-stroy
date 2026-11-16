@@ -8,13 +8,17 @@ import { buildModel, findUnit } from './model'
 import { ExplorerContext } from './useExplorer'
 import useExplorerState from './useExplorerState'
 
-// The explorer of a page (spec §7.6–7.10): the Golden Residence page wraps its
-// sections in it, from the hero to the inquiry, and each block page its own
-// (BlockPage.jsx, `routeBlock` its letter). It builds the model from the
-// availability store, holds the address's state (useExplorerState), and
-// renders the page's two dialogs, the plan stage and the unit panel, while the
-// address opens them (ExplorerDialogs.jsx, which also gives the focus back as
-// each goes). Sections read it through useExplorer() (useExplorer.js).
+// The explorer of a page (spec §7.6–7.10; M3 §6.4): a project's page wraps
+// its sections in it, from the hero to the inquiry, and each block page its
+// own (BlockPage.jsx, `routeBlock` its letter). `project` is the page's
+// building (projects/gr.js, projects/mn.js; its shape is useExplorer.js's):
+// the model is built from the data it reads from the availability store
+// (project.modelData), dated where it says so (project.dated), the address's
+// floors are its own (useExplorerState), and its plans load with the
+// dialogs. The provider renders the page's two dialogs, the plan stage and
+// the unit panel, while the address opens them (ExplorerDialogs.jsx, which
+// also gives the focus back as each goes). Sections read it through
+// useExplorer() (useExplorer.js).
 //
 // - The opening's { fromRect, opener } (ruling F5) stays here, never in the
 //   address: the stage grows from fromRect, and closing gives the focus back
@@ -37,17 +41,20 @@ import useExplorerState from './useExplorerState'
 //   landing ends once the address asks for no dialog the page can show: a
 //   close, an inquiry, a unit the sheets do not have, or dialogs whose chunk
 //   did not load. A floor opened in place is no landing.
-// - The dialogs are the surfaces' chunk (surfaces.js), loaded when the
-//   address asks for one; the full facade has usually loaded it before, as it
-//   neared the screen. Until it is in, nothing shows.
+// - The dialogs are the surfaces' chunk (surfaces.js), loaded with the
+//   project's plans when the address asks for one; the full facade has
+//   usually loaded both before, as it neared the screen. Until they are in,
+//   nothing shows.
 
 const UNIT_AFTER_MS = 820
 const holdEuRow = (on) => document.documentElement.toggleAttribute('data-eu-hold', on)
 
-export function ExplorerProvider({ routeBlock = null, children }) {
+export function ExplorerProvider({ project, routeBlock = null, children }) {
   const snapshot = useAvailability()
-  const model = useMemo(() => buildModel(snapshot.data), [snapshot.data])
-  const state = useExplorerState({ routeBlock })
+  const data = project.modelData(snapshot)
+  const model = useMemo(() => buildModel(data, project), [data, project])
+  const dated = project.dated(snapshot)
+  const state = useExplorerState({ routeBlock, floors: project.floors })
   const { stage, unitId } = state
   const hydrated = useHydrated()
   const motionNow = useMotionNow()
@@ -86,12 +93,12 @@ export function ExplorerProvider({ routeBlock = null, children }) {
   // new ask while it is not in: a failed load may be tried again
   // (loadSurfaces.js), so the next floor or unit opened after one failed
   // still opens; one in flight is shared.
-  const [surfaces, setSurfaces] = useState(loadedSurfaces)
+  const [surfaces, setSurfaces] = useState(() => loadedSurfaces(project))
   const wanted = arrived && Boolean(stage || unitId)
   useEffect(() => {
     if (!wanted || surfaces) return undefined
     let live = true
-    loadSurfaces().then(
+    loadSurfaces(project).then(
       (module) => {
         if (live) setSurfaces(module)
       },
@@ -103,7 +110,7 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     return () => {
       live = false
     }
-  }, [wanted, surfaces, stage, unitId])
+  }, [wanted, surfaces, stage, unitId, project])
 
   // The opening: where the stage grows from and what opened it; and what
   // opened the unit panel.
@@ -131,20 +138,12 @@ export function ExplorerProvider({ routeBlock = null, children }) {
     latest.current.openUnit(label)
   }, [])
 
-  const closeStage = useCallback(() => {
+  // The address's closeStage, setFloor and setBlock, each calling off a unit
+  // still to open first.
+  const [closeStage, setFloor, setBlock] = useMemo(() => ['closeStage', 'setFloor', 'setBlock'].map((name) => (value) => {
     clearTimeout(unitTimer.current)
-    latest.current.closeStage()
-  }, [])
-
-  const setFloor = useCallback((floor) => {
-    clearTimeout(unitTimer.current)
-    latest.current.setFloor(floor)
-  }, [])
-
-  const setBlock = useCallback((block) => {
-    clearTimeout(unitTimer.current)
-    latest.current.setBlock(block)
-  }, [])
+    latest.current[name](value)
+  }), [])
 
   // The floor whose rail is to take the focus back, when a stage has closed
   // with no opener to give it to and its rail is off screen (a phone's facade
@@ -155,8 +154,8 @@ export function ExplorerProvider({ routeBlock = null, children }) {
   const railFocused = useCallback(() => setRailFocus(null), [])
 
   const value = useMemo(
-    () => ({ ...state, model, snapshot, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused }),
-    [state, model, snapshot, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused],
+    () => ({ ...state, model, snapshot, project, dated, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused }),
+    [state, model, snapshot, project, dated, openFloor, openUnit, closeStage, setFloor, setBlock, railFocus, railFocused],
   )
 
   return (
@@ -164,6 +163,8 @@ export function ExplorerProvider({ routeBlock = null, children }) {
       {children}
       {surfaces && arrived ? (
         <surfaces.ExplorerDialogs
+          project={project}
+          dated={dated}
           model={model}
           state={state}
           opening={opening}

@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import Button from '../components/ui/Button'
 import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
-import { GR_FACTS } from '../config/facts'
 import useMotionNow from '../motion/useMotionNow'
 import { formatArea, formatDecimal, plural } from '../utils/format'
 import { floorKey } from './model'
@@ -13,12 +12,14 @@ import { rangeLine } from './surfaceModel'
 // The edge panel of a block (spec §7.3; extract §4.21; the concept's
 // explorer.js:284-301, :403-440): a floor the pointer or the keyboard is on,
 // slid in from its block's outer edge over that block's rail. The floor's
-// title, its кота where the drawings give one, its plan in status colours,
-// its counts, the range of its free areas, and „Отворете плана“. A polite
-// live region, so the keyboard hears the floor it moves to.
+// title, its meta (the project's word on the floor, where it has one: the
+// кота the drawings give, the attic), its plan in status colours, its
+// counts, the range of its free areas, and „Отворете плана“. A polite live
+// region, so the keyboard hears the floor it moves to.
 //
 // `floor` is the facade's floor (model.js) or null, and null closes the
-// panel: it keeps the last floor on show while it slides out. With motion
+// panel: it keeps the last floor on show while it slides out; `plan` is its
+// block's plan, and `project` the facade's (useExplorer.js). With motion
 // (useMotionNow) it slides in over 0.45 s expo.out, its plan drawing, and out
 // over 0.35 s expo.in; a new floor crossfades. Without, it is there at once.
 
@@ -59,23 +60,27 @@ export function FloorRange({ floor, className }) {
   return <p className={className}>{words}</p>
 }
 
-/** The floor's meta line: „кота +3,06 · 12 апартамента“ where the drawings
- * give the floor's level (spec §9: only А1), else „12 апартамента“; with
- * `free`, the plan stage's, its free apartments after it („· 4 свободни“, `—`
- * until the data arrives). */
-export function FloorMeta({ floor, free = false, className }) {
-  const count = floor.units.length || GR_FACTS.perFloor
+/** The floor's meta line: its apartments, „12 апартамента“, after the
+ * project's word on the floor where it has one (project.floorMeta: „кота
+ * +3,06“ where the drawings give Golden Residence's level, spec §9, only А1;
+ * „тавански етаж“ on Многофамилна's top floor, M3 §2). With `free`, the plan
+ * stage's, its free apartments after it („· 4 свободни“, `—` until the data
+ * arrives), and with `dated`, the date of numbers that are not live („· по
+ * данни към 01.12.2025“, M3 §6.4). */
+export function FloorMeta({ project, floor, free = false, dated = null, className }) {
+  const count = floor.units.length || project.perFloor
   const parts = [`${count} ${plural(count, 'апартамент', 'апартамента')}`]
-  const level = GR_FACTS.elevations[floorKey(floor.block, floor.floor)]
-  if (level != null) parts.unshift(`кота +${formatDecimal(level)}`)
+  const word = project.floorMeta(floor)
+  if (word) parts.unshift(word)
   if (free) {
     const n = floor.counts ? floor.counts.available : null
     parts.push(`${n ?? '—'} ${plural(n, 'свободен', 'свободни')}`)
   }
+  if (dated) parts.push(`по данни към ${dated}`)
   return <p className={className}>{parts.join(' · ')}</p>
 }
 
-export default function FloorPanel({ side, floor, plan, onOpenFloor, onUnit, onPointerEnter, onPointerLeave }) {
+export default function FloorPanel({ project, side, floor, plan, onOpenFloor, onUnit, onPointerEnter, onPointerLeave }) {
   const ref = useRef(null)
   const motionNow = useMotionNow()
   // The floor on show: the last one given, kept while the panel slides out.
@@ -123,9 +128,9 @@ export default function FloorPanel({ side, floor, plan, onOpenFloor, onUnit, onP
       {shown ? (
         <>
           <FloorTitle floor={shown} className="fxp__title" />
-          <FloorMeta floor={shown} className="fxp__meta" />
+          <FloorMeta project={project} floor={shown} className="fxp__meta" />
           <div className="fxp__plan">
-            <PlanSvg plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
+            <PlanSvg project={project} plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
           </div>
           <FloorCounts counts={shown.counts} className="fxp__counts" />
           <FloorRange floor={shown} className="fxp__range" />

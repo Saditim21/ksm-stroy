@@ -7,7 +7,9 @@
 import { floorKey } from './model'
 
 /**
- * What the range line of a floor's panel says (spec §7.3):
+ * What the range line of a floor's panel says (spec §7.3), from the floor's
+ * counts and its units (model.js), the smallest and the largest total area of
+ * its free ones making the range:
  * - { kind: 'range', min, max }: free units of different areas;
  * - { kind: 'single', area, one }: every free unit has one area (`one` when
  *   only one is free);
@@ -18,11 +20,13 @@ import { floorKey } from './model'
  * carry a status the rules do not know („Скоро“, ruling R1), which is not sold
  * out: nothing to say.
  */
-export function rangeLine({ counts, minFree, maxFree }) {
+export function rangeLine({ counts, units }) {
   if (counts.available > 0) {
-    if (minFree == null) return null
-    if (minFree === maxFree) return { kind: 'single', area: minFree, one: counts.available === 1 }
-    return { kind: 'range', min: minFree, max: maxFree }
+    const areas = units.filter((unit) => unit.status === 'available' && unit.totalArea != null).map((unit) => unit.totalArea)
+    if (!areas.length) return null
+    const [min, max] = [Math.min(...areas), Math.max(...areas)]
+    if (min === max) return { kind: 'single', area: min, one: counts.available === 1 }
+    return { kind: 'range', min, max }
   }
   if (counts.reserved > 0) return { kind: 'reserved' }
   return counts.sold + counts.blocked === counts.total ? { kind: 'soldout' } : null

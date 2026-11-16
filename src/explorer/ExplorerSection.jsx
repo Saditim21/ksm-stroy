@@ -3,7 +3,6 @@ import RollingNumber from '../components/ui/RollingNumber'
 import Seam from '../components/ui/Seam'
 import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
-import { GR_FACTS } from '../config/facts'
 import useMotionNow from '../motion/useMotionNow'
 import useReveals from '../motion/useReveals'
 import Facade from './Facade'
@@ -24,9 +23,9 @@ import ViewTabs from './ViewTabs'
 // final state.
 //
 // It sits inside the page's ExplorerProvider (ExplorerContext.jsx), whose
-// model it shows: the facade's floors open their plan stage in place
-// (openFloor), the list's rows their unit (openUnit), and the facade takes
-// the floor whose rail the provider asks to focus as a stage closes
+// project and model it shows: the facade's floors open their plan stage in
+// place (openFloor), the list's rows their unit (openUnit), and the facade
+// takes the floor whose rail the provider asks to focus as a stage closes
 // (railFocus).
 //
 // - The view is the address's ?view (useExplorerState), read once the page
@@ -61,7 +60,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)
   const viewsRef = useRef(null)
   useReveals(ref)
-  const { model, view, setView, openFloor, openUnit, railFocus, railFocused } = useExplorer()
+  const { project, model, view, setView, openFloor, openUnit, railFocus, railFocused } = useExplorer()
   const motionNow = useMotionNow()
   const Heading = `h${headingLevel}`
 
@@ -174,7 +173,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
             <b>
               <RollingNumber value={model ? model.totals.available : null} />
             </b>{' '}
-            от {GR_FACTS.apartments}.
+            от {project.total}.
           </p>
         </div>
         <Seam />
@@ -188,10 +187,11 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
           ))}
         </ul>
       </div>
-      <StaleNotice className="explorer__notice" />
+      <StaleNotice project={project} className="explorer__notice" />
       <div ref={viewsRef} className="views">
         <div id={`${ID}-visual`} role="tabpanel" aria-labelledby={`${ID}-tab-visual`} data-view="visual" hidden={view !== 'visual'}>
           <Facade
+            project={project}
             model={model}
             mode="full"
             initialBlock={initialBlock}
@@ -202,7 +202,7 @@ export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
           />
         </div>
         <div id={`${ID}-list`} role="tabpanel" aria-labelledby={`${ID}-tab-list`} data-view="list" hidden={view !== 'list'}>
-          {UnitList ? <UnitList model={model} block={initialBlock} onUnit={openUnit} /> : null}
+          {UnitList ? <UnitList project={project} model={model} block={initialBlock} onUnit={openUnit} /> : null}
         </div>
       </div>
     </section>

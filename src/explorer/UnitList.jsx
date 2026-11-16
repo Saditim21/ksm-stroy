@@ -1,32 +1,34 @@
 import { useId, useMemo, useState } from 'react'
 import StatusChip from '../components/ui/StatusChip'
 import { statusWord } from '../components/ui/status'
-import { GR_FACTS } from '../config/facts'
 import { formatArea } from '../utils/format'
 import { filterUnits, sortUnitsBy } from './filterUnits'
 
-// „По критерии“ (spec §7.8; extract §4.26; the concept's gr.js:106-183): all
-// of Golden Residence's apartments in one table, with its filters in a bar
-// above it and the live meta „**N** от 192 · K свободни“ at the bar's end.
+// „По критерии“ (spec §7.8; M3 §6.2 #3; extract §4.26; the concept's
+// gr.js:106-183): all of a project's apartments in one table, with its
+// filters in a bar above it and the live meta „**N** от 192 · K свободни“ at
+// the bar's end, out of the project's total.
 // - Filters: Блок, Вид and Статус as pills (aria-pressed), Етаж, Площ and
 //   Изложение as selects; each starts at its „all“, but Блок at `block`
 //   when given: a block page's list starts on its own block (spec §7.11).
+//   Вид offers the project's types, Етаж its floors.
 // - The table: Имот, Етаж, Вид, Обща площ, Изложение and Статус; Имот, Етаж
 //   and Обща площ sort (aria-sort), a second click turning the order; Етаж
 //   and Изложение hide on a phone (explorer.css). Rows are in the tab order,
 //   named by their unit first; a click, Enter or Space opens the unit
 //   (onUnit, with its label, ruling F10). Sold rows are dimmed.
-// - An empty list says so; the footnote explains the sold rows and the
-//   exposures.
-// `model` is buildModel()'s, or null until the data arrives: the meta reads
-// `—` then, never a zero, and the table has no rows. The list is a lazy chunk
-// of its own (loadUnitList.js, ruling C8.5).
+// - An empty list says so. Where the project has a word on its exposures
+//   (Golden Residence's), the footnote explains the sold rows and the
+//   exposures; Многофамилна's list has none, its section's lead saying the
+//   first (the concept's mnogofamilna.html:105).
+// `project` is the explorer's (useExplorer.js), `model` buildModel()'s, or
+// null until the data arrives: the meta reads `—` then, never a zero, and the
+// table has no rows. The list is a lazy chunk of its own (loadUnitList.js,
+// ruling C8.5).
 
 const ALL = null
 const BLOCKS = [[ALL, 'Всички'], ['А', 'А'], ['Б', 'Б']]
-const TYPES = [[ALL, 'Всички'], ['2-стаен', '2-стаен'], ['3-стаен', '3-стаен'], ['Ателие', 'Ателие']]
 const STATUSES = [[ALL, 'Всички'], ['available', 'Свободни'], ['reserved', 'Резервирани'], ['sold', 'Продадени'], ['blocked', 'Блокирани']]
-const FLOORS = [['', 'Всички'], ...Array.from({ length: GR_FACTS.floors }, (_, i) => [String(i + 1), `етаж ${i + 1}`])]
 // A no-break space keeps each area's number with its „м²“ (spec §3.3). The
 // values are AREA_RANGES' keys (filterUnits.js).
 const AREAS = [['', 'Всяка'], ['do-70', 'до 70\u00a0м²'], ['70-100', '70–100\u00a0м²'], ['nad-100', 'над 100\u00a0м²']]
@@ -78,7 +80,16 @@ function SortHead({ by, label, sort, onSort, className }) {
   )
 }
 
-export default function UnitList({ model, block = ALL, onUnit }) {
+// The project's Вид and Етаж options, each with its „all“ first.
+function optionsOf({ types, floors: { min, max } }) {
+  return {
+    types: [[ALL, 'Всички'], ...types.map((type) => [type, type])],
+    floors: [['', 'Всички'], ...Array.from({ length: max - min + 1 }, (_, i) => [String(min + i), `етаж ${min + i}`])],
+  }
+}
+
+export default function UnitList({ project, model, block = ALL, onUnit }) {
+  const { types, floors } = useMemo(() => optionsOf(project), [project])
   const [filters, setFilters] = useState(() => ({ ...NO_FILTERS, block }))
   const [sort, setSort] = useState({ key: 'id', dir: 'asc' })
   const rows = useMemo(() => (model ? sortUnitsBy(filterUnits(model.units, filters), sort) : []), [model, filters, sort])
@@ -96,13 +107,13 @@ export default function UnitList({ model, block = ALL, onUnit }) {
     <div className="lv">
       <div className="lv__bar">
         <Pills label="Блок" options={BLOCKS} value={filters.block} onChange={filter('block')} />
-        <Select label="Етаж" options={FLOORS} value={filters.floor} onChange={filter('floor')} />
-        <Pills label="Вид" options={TYPES} value={filters.type} onChange={filter('type')} />
+        <Select label="Етаж" options={floors} value={filters.floor} onChange={filter('floor')} />
+        <Pills label="Вид" options={types} value={filters.type} onChange={filter('type')} />
         <Select label="Площ" options={AREAS} value={filters.area} onChange={filter('area')} />
         <Select label="Изложение" options={EXPOSURES} value={filters.exposure} onChange={filter('exposure')} />
         <Pills label="Статус" options={STATUSES} value={filters.status} onChange={filter('status')} />
         <p className="lv__meta" aria-live="polite">
-          <b>{model ? rows.length : '—'}</b> от {GR_FACTS.apartments} · {free ?? '—'} {statusWord('available', free)}
+          <b>{model ? rows.length : '—'}</b> от {project.total} · {free ?? '—'} {statusWord('available', free)}
         </p>
       </div>
       <div className="lv__table" data-lenis-prevent="">
@@ -147,9 +158,11 @@ export default function UnitList({ model, block = ALL, onUnit }) {
           </tbody>
         </table>
       </div>
-      <p className="small lv__note">
-        Продадените остават в&nbsp;списъка. Изложение има само за блок&nbsp;Б, така е&nbsp;в&nbsp;таблицата.
-      </p>
+      {project.exposureNote ? (
+        <p className="small lv__note">
+          Продадените остават в&nbsp;списъка. {project.exposureNote}
+        </p>
+      ) : null}
     </div>
   )
 }

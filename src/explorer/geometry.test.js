@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import building from '../data/maps/golden-residence.building.json'
 import floors from '../data/maps/golden-residence.floors.json'
-import { FACADE, bbox, floorShapes } from './geometry'
+import mnBuilding from '../data/maps/mnogofamilna.building.json'
+import { bbox, facadeOf, floorShapes } from './geometry'
 import { cropFor, labelPoint, planBox, planFor, planShapes } from './planGeometry'
+import { GR_PROJECT } from './projects/gr'
 
 // The explorer's geometry (spec §7.2, §7.4, §7.7; extract §4.20, §4.22, §5.3):
-// the facade's grid and crops, the floors on it, the plan of a block, where a
-// unit's label sits, and the crop that frames one unit.
+// the facade's grid, the floors on it, the plan of a block, where a unit's
+// label sits, and the crop that frames one unit. A project's crops and rails
+// are its stylesheet's (explorer.css holds Golden Residence's, pinned by
+// explorer.css.test.js).
 
 // Whether [x, y] lies inside the polygon (even-odd ray casting).
 function inside([x, y], polygon) {
@@ -19,16 +23,40 @@ function inside([x, y], polygon) {
   return hit
 }
 
-it('keeps the facade’s grid, its crops and its rails (spec §7.2)', () => {
-  expect(FACADE).toEqual({
-    width: 1200,
-    height: 599,
-    seamX: 605,
-    vbFull: { x: 0, y: 112, w: 1200, h: 454 },
-    vbPhone: { 'А': { x: 0, y: 132, w: 628, h: 388 }, 'Б': { x: 572, y: 132, w: 628, h: 388 } },
-    railX: { 'А': 71, 'Б': 1129 },
+// Spec §7.2: Golden Residence's facade is drawn on its building map's grid,
+// 1200 × 599, the seam at x 605 from y 120 to 520.
+it('keeps Golden Residence’s facade on its building map’s grid, its seam at x 605 (spec §7.2)', () => {
+  expect(GR_PROJECT.facade.map).toBe(building)
+  expect([building.imageWidth, building.imageHeight]).toEqual([1200, 599])
+  expect(GR_PROJECT.facade.seam).toEqual({ x: 605, top: 120, bottom: 520 })
+})
+
+// The facade's floors are worked out once a building map, so the facade's
+// state keeps the identities it is keyed by (useHotFloor.js): each floor by
+// its key, each block's rail from its top floor down, and a stand-in for
+// each floor until the data reaches it (`—`, never a zero).
+describe('facadeOf', () => {
+  it('works a map’s facade out once, and each map’s its own', () => {
+    expect(facadeOf(building)).toBe(facadeOf(building))
+    expect(facadeOf(mnBuilding)).not.toBe(facadeOf(building))
+    expect(facadeOf(building).shapes).toEqual(floorShapes(building))
   })
-  expect([building.imageWidth, building.imageHeight]).toEqual([FACADE.width, FACADE.height])
+
+  it('keys the floors, runs each rail from the top floor down, and stands in for each floor', () => {
+    const facade = facadeOf(building)
+    expect(facade.shape.get('А-5')).toBe(facade.shapes.find(({ key }) => key === 'А-5'))
+    expect(facade.rails['А'].map(({ floor }) => floor)).toEqual([8, 7, 6, 5, 4, 3, 2, 1])
+    expect(facade.rails['Б'].map(({ key }) => key)).toEqual(['Б-8', 'Б-7', 'Б-6', 'Б-5', 'Б-4', 'Б-3', 'Б-2', 'Б-1'])
+    expect(facade.placeholders.get('Б-3')).toEqual({ block: 'Б', floor: 3, units: [], counts: null, colour: 'unknown' })
+    expect(Object.isFrozen(facade.placeholders.get('Б-3'))).toBe(true)
+  })
+
+  // Многофамилна's map: floors 2–10 in each block.
+  it('takes any project’s map', () => {
+    const facade = facadeOf(mnBuilding)
+    expect(facade.shapes).toHaveLength(18)
+    expect(facade.rails['А'].map(({ floor }) => floor)).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2])
+  })
 })
 
 it('boxes a set of points', () => {

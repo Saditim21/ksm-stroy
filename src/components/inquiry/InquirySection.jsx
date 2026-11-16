@@ -6,13 +6,15 @@ import InquiryForm from './InquiryForm'
 import { clearInquiryOption } from './inquiryStore'
 import './inquiry.css'
 
-// The closing inquiry (spec §6.12, §8.1, §8.2; extract §4.14), a split on the
-// seam: on the left, #zapitvane, the heading, the lead, the phones, the email
-// on Golden Residence and the hours; on the right, the form (InquiryForm).
-// `page` picks the copy and the form's options: Home's from production's
-// contact page (Contact:506–509), Golden Residence's from decision A1, its
-// inquiries going to КСМ Строй. Non-breaking spaces after the one-letter
-// words (spec §3.3).
+// The closing inquiry (spec §6.12, §8.1, §8.2; M3 §6.2 #6; extract §4.14), a
+// split on the seam: on the left, #zapitvane, the heading, the lead, the
+// phones, the email on the projects' pages and the hours; on the right, the
+// form (InquiryForm). `page` picks the copy and the form's options: Home's
+// from production's contact page (Contact:506–509), Golden Residence's from
+// decision A1, its inquiries going to КСМ Строй, and Многофамилна's
+// production's „Свържете се с нас“ with Golden Residence's call to call or
+// write (the concept notes). Non-breaking spaces after the one-letter words
+// (spec §3.3).
 //
 // The headings rise line by line, the copy fades in and the seam draws as the
 // section comes into view (useReveals); the markup is the final state.
@@ -43,6 +45,15 @@ const COPY = {
         с&nbsp;вас.
       </>
     ),
+    email: true,
+  },
+  mnogofamilna: {
+    title: (
+      <>
+        Свържете се с&nbsp;<em>нас</em>
+      </>
+    ),
+    lead: <>Обадете се или изпратете запитване и&nbsp;ще се свържем с&nbsp;вас.</>,
     email: true,
   },
 }

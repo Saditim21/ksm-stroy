@@ -7,7 +7,8 @@ import FloorPanel from './FloorPanel'
 import FloorSheet from './FloorSheet'
 import { loadSurfaces } from './loadSurfaces'
 import { buildModel, floorKey } from './model'
-import { PLANS } from './plans'
+import { loadPlans } from './plans'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 
 // The facade's motion as a floor turns hot (spec §5.7; extract §4.20, §4.21,
@@ -22,13 +23,18 @@ vi.mock('../motion/runtime', () => ({ loadMotion: () => new Promise(() => {}), g
 let motion = null
 vi.mock('../motion/useMotionNow', () => ({ default: () => () => motion }))
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
 const floorOf = (block, floor) => MODEL.floors.get(floorKey(block, floor))
 const recorder = recordingMotion()
 // What a tween or a step was, without its targets (elements, compared on their own).
 const shape = ({ method, from, vars }) => (from ? { method, from, vars } : { method, vars })
 
-beforeAll(() => loadSurfaces())
+// The surfaces and Golden Residence's plans are in before the first render.
+let PLANS
+beforeAll(async () => {
+  await loadSurfaces(GR_PROJECT)
+  PLANS = await loadPlans(GR_PROJECT)
+})
 
 let restore
 beforeEach(() => {
@@ -44,7 +50,7 @@ afterEach(() => {
 
 describe('the edge panel', () => {
   const renderPanel = (side, floor) => {
-    const props = { side, plan: PLANS[side], onOpenFloor: vi.fn(), onUnit: vi.fn() }
+    const props = { project: GR_PROJECT, side, plan: PLANS[side], onOpenFloor: vi.fn(), onUnit: vi.fn() }
     const view = render(<FloorPanel {...props} floor={floor} />)
     return { ...view, show: (next) => view.rerender(<FloorPanel {...props} floor={next} />) }
   }
@@ -103,7 +109,7 @@ describe('the edge panel', () => {
 
 describe('the phone’s sheet', () => {
   const renderSheet = (floor) => {
-    const props = { plan: PLANS['А'], anchor: null, onClose: vi.fn(), onStep: vi.fn(), onOpen: vi.fn(), onUnit: vi.fn() }
+    const props = { project: GR_PROJECT, plan: PLANS['А'], anchor: null, onClose: vi.fn(), onStep: vi.fn(), onOpen: vi.fn(), onUnit: vi.fn() }
     const view = render(<FloorSheet {...props} floor={floor} />)
     return { ...view, show: (next) => view.rerender(<FloorSheet {...props} floor={next} />) }
   }
@@ -141,7 +147,7 @@ describe('the lens', () => {
   const box = (node) => Object.fromEntries(['x', 'y', 'width', 'height'].map((name) => [name, Number(node.getAttribute(name))]))
 
   it('lands on the first hot floor at once, its tint fading in over 0.2 s, then moves floor to floor over 0.25 s power2.out', () => {
-    render(<Facade model={MODEL} mode="full" onOpenFloor={vi.fn()} />)
+    render(<Facade project={GR_PROJECT} model={MODEL} mode="full" onOpenFloor={vi.fn()} />)
     const hole = document.querySelector('.fx__hole')
     const tint = document.querySelector('.fx__tint')
     const highlight = document.querySelector('.fx__hl')
@@ -170,7 +176,7 @@ describe('the lens', () => {
   // facade goes (a link followed within 0.25 s of a hover) must not throw
   // from its last frames.
   it('lets a lens still moving finish quietly once the facade has gone', () => {
-    const { unmount } = render(<Facade model={MODEL} mode="full" onOpenFloor={vi.fn()} />)
+    const { unmount } = render(<Facade project={GR_PROJECT} model={MODEL} mode="full" onOpenFloor={vi.fn()} />)
     fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
     fireEvent.pointerOver(rail('А', 6), { pointerType: 'mouse' })
     const move = recorder.tweens.find(({ targets }) => Array.isArray(targets) && targets.some((node) => node.classList.contains('fx__hole')))

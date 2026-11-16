@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { recordingMotion } from '../test/gsap'
 import { planBox } from './planGeometry'
 import { buildModel } from './model'
-import { PLANS } from './plans'
+import { loadPlans } from './plans'
 import PlanStage from './PlanStage'
+import { GR_PROJECT } from './projects/gr'
 import { named, snapshotData } from './testing'
 
 // The plan stage (spec §7.6; extract §4.23): a floor's full plan, its counts,
@@ -17,14 +18,19 @@ import { named, snapshotData } from './testing'
 let motion = null
 vi.mock('../motion/useMotionNow', () => ({ default: () => () => motion }))
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
+// Golden Residence's plans, as the surfaces have them once they have loaded.
+let PLANS
+beforeAll(async () => {
+  PLANS = await loadPlans(GR_PROJECT)
+})
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const stage = (name = 'Блок А · Етаж 5') => screen.getByRole('dialog', { name: named(name) })
 const rows = (dialog = stage()) => within(dialog.querySelector('tbody')).getAllByRole('row')
 
 function renderStage(props = {}) {
   const handlers = { onClose: vi.fn(), onFloor: vi.fn(), onBlock: vi.fn(), onUnit: vi.fn() }
-  const view = render(<PlanStage model={MODEL} block="А" floor={5} fromRect={null} {...handlers} {...props} />)
+  const view = render(<PlanStage project={GR_PROJECT} plans={PLANS} model={MODEL} block="А" floor={5} fromRect={null} {...handlers} {...props} />)
   return { ...handlers, ...view }
 }
 
@@ -60,9 +66,9 @@ describe('the bar', () => {
     expect(text(stage().querySelector('.ps__step output'))).toBe('етаж 5')
     expect(stage().querySelector('.ps__step output')).toHaveAttribute('aria-live', 'polite')
 
-    rerender(<PlanStage model={MODEL} block="А" floor={1} fromRect={null} onClose={vi.fn()} onFloor={onFloor} onBlock={vi.fn()} onUnit={vi.fn()} />)
+    rerender(<PlanStage project={GR_PROJECT} plans={PLANS} model={MODEL} block="А" floor={1} fromRect={null} onClose={vi.fn()} onFloor={onFloor} onBlock={vi.fn()} onUnit={vi.fn()} />)
     expect(within(stage('Блок А · Етаж 1')).getByRole('button', { name: 'По-долен етаж' })).toBeDisabled()
-    rerender(<PlanStage model={MODEL} block="А" floor={8} fromRect={null} onClose={vi.fn()} onFloor={onFloor} onBlock={vi.fn()} onUnit={vi.fn()} />)
+    rerender(<PlanStage project={GR_PROJECT} plans={PLANS} model={MODEL} block="А" floor={8} fromRect={null} onClose={vi.fn()} onFloor={onFloor} onBlock={vi.fn()} onUnit={vi.fn()} />)
     expect(within(stage('Блок А · Етаж 8')).getByRole('button', { name: 'По-горен етаж' })).toBeDisabled()
   })
 
@@ -379,7 +385,7 @@ describe('the motion', () => {
 
   it('fades a new block’s plan in over 0.35 s, and crossfades a new floor’s fills', () => {
     const { rerender, onClose, onFloor, onBlock, onUnit } = renderStage()
-    const props = { model: MODEL, fromRect: null, onClose, onFloor, onBlock, onUnit }
+    const props = { project: GR_PROJECT, plans: PLANS, model: MODEL, fromRect: null, onClose, onFloor, onBlock, onUnit }
     recorder.reset()
 
     rerender(<PlanStage {...props} block="Б" floor={5} />)

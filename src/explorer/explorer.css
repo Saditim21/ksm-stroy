@@ -1361,6 +1361,23 @@
   .lv .utable th:last-child { padding-right: 0; }
 }
 
+/* Under 360 px (FR7; spec §11: 320 px holds) they fit the table's box, 280 px
+   wide at 320, with room to spare: 12 px, 3 px apart, and the status chips
+   closer and in 12 px. The first column keeps its 5 px and the last ends
+   with none (the rules above, which these do not outweigh). */
+@media (max-width: 359px) {
+  .lv .utable { font-size: 12px; }
+  .lv .utable td,
+  .lv .utable th {
+    padding-right: 3px;
+    padding-left: 3px;
+  }
+  .lv .utable .st {
+    gap: 6px;
+    font-size: 12px;
+  }
+}
+
 /* Under 375 px the stage's table takes its cells closer, 12 px at its edges,
    so its four columns fit a 320 or a 360 px screen (spec §11). */
 @media (max-width: 374px) {

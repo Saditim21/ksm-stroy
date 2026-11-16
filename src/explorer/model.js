@@ -1,11 +1,11 @@
 // The explorer's numbers (spec §7.1, §9; the concept's core.js:104-124), from
 // useAvailability()'s `data`: the units (src/data/availability/select.js),
-// each floor's counts by status, its colour and the range of its free areas,
-// each block's counts, types and exposures, and the totals. Statuses follow
-// src/utils/propertyStatus.js: text the rules do not know counts in the
-// total only. What only an opened floor's surfaces read from it, the range
-// line and the unit panel's previous and next, is surfaceModel.js's, so it
-// stays out of the first load.
+// each floor's counts by status and its colour, each block's counts, types
+// and exposures, and the totals. Statuses follow src/utils/propertyStatus.js:
+// text the rules do not know counts in the total only. What only an opened
+// floor's surfaces read from it, the range line (with the range of a floor's
+// free areas) and the unit panel's previous and next, is surfaceModel.js's,
+// so it stays out of the first load.
 import { PROJECT_BLOCKS } from '../config/blocks'
 import { apartmentUnits } from '../data/availability/select'
 import { summarizeFloor } from '../utils/availability'
@@ -31,39 +31,30 @@ function tally(units, key) {
 
 function floorStats(block, floor, units) {
   const sorted = [...units].sort((a, b) => a.suffix.localeCompare(b.suffix))
-  const { color } = summarizeFloor(sorted)
-  const areas = sorted.filter((unit) => unit.status === 'available' && unit.totalArea != null).map((unit) => unit.totalArea)
-  return {
-    block,
-    floor,
-    units: sorted,
-    counts: countsOf(sorted),
-    colour: color,
-    minFree: areas.length ? Math.min(...areas) : null,
-    maxFree: areas.length ? Math.max(...areas) : null,
-  }
+  return { block, floor, units: sorted, counts: countsOf(sorted), colour: summarizeFloor(sorted).color }
 }
 
 /**
  * Model = {
  *   units: Unit[],
  *   floors: Map<'А-5', { block, floor, units: Unit[] (by suffix), counts: { available, reserved, sold, blocked, total },
- *                        colour: 'available' | 'reserved' | 'sold' | 'unknown', minFree: number | null, maxFree: number | null }>,
+ *                        colour: 'available' | 'reserved' | 'sold' | 'unknown' }>,
  *   blocks: { 'А': { counts, types: { '2-стаен': 56, … }, exposure: { 'Юг': 24, … } }, 'Б': { … } },
  *   totals: { available, reserved, sold, blocked, total },
  * }
- * The colour is summarizeFloor()'s (v2 spec §9), minFree and maxFree the
- * smallest and largest total area of the floor's free units.
+ * The colour is summarizeFloor()'s (v2 spec §9).
  *
- * Null while there is no data, and while a block has no rows: never half the
- * building's counts (as grFree, select.js).
+ * `data` is what `project` (projects/gr.js, projects/mn.js) reads from the
+ * store (its modelData): the model is of that project's blocks, from
+ * data[project.id]. Null while there is no data, and while a block has no
+ * rows: never half the building's counts (as grFree, select.js).
  */
-export function buildModel(data) {
-  const slots = data?.['golden-residence']
-  const blocks = PROJECT_BLOCKS['golden-residence']
-  if (!slots || blocks.some(({ id }) => !slots[id])) return null
+export function buildModel(data, { id }) {
+  const slots = data?.[id]
+  const blocks = PROJECT_BLOCKS[id]
+  if (!slots || blocks.some((block) => !slots[block.id])) return null
 
-  const units = apartmentUnits(data)
+  const units = apartmentUnits(data, id)
   const byFloor = new Map()
   for (const unit of units) {
     const key = floorKey(unit.block, unit.floor)

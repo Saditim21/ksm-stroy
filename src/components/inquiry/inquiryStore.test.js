@@ -1,13 +1,16 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { acquireScrollLock, releaseScrollLock, setLenis } from '../../utils/lenis'
-import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
+import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry's shared state (spec §10, §5.3): the option the form's select
 // shows and the apartments sent to it, which any action on the page can
 // preset (the Многофамилна half, the explorer's units, the parking actions).
 // A preset glides the page to the form, #zapitvane, and then focuses its
 // first field.
+
+// A pick of Golden Residence's, as its explorer hands one to the form.
+const grPick = (label) => ({ project: 'golden-residence', label })
 
 afterEach(() => {
   resetInquiry()
@@ -29,6 +32,20 @@ it('offers each page its four subjects', () => {
     ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
     ['other', 'Друго', 'Друго'],
   ])
+  // Spec M3 §6.2 #6, §8: Многофамилна's page puts its building first.
+  expect(rows('mnogofamilna')).toEqual([
+    ['mnogofamilna', 'Многофамилна сграда, ж.к. Връбница-1', 'Многофамилна сграда, ж.к. Връбница-1'],
+    ['golden-residence', 'Golden Residence, жк Левски Г', 'Golden Residence'],
+    ['build', 'Строителство или ремонт', 'Строителство или ремонт'],
+    ['other', 'Друго', 'Друго'],
+  ])
+  expect(INQUIRY_OPTIONS.mnogofamilna[1].label).toBe('Golden Residence, жк\u00a0Левски\u00a0Г')
+})
+
+// Spec M3 §8: the project whose apartments go with each subject; the others
+// take none.
+it('names the project of each apartment subject', () => {
+  expect(OPTION_PROJECT).toEqual({ 'golden-residence': 'golden-residence', garage: 'golden-residence', mnogofamilna: 'mnogofamilna-sgrada' })
 })
 
 describe('the store', () => {
@@ -40,30 +57,48 @@ describe('the store', () => {
 
   it('merges a preset: the option, and each pick once', () => {
     const { result } = state()
-    act(() => presetInquiry({ option: 'golden-residence', pick: 'А 301' }))
-    act(() => presetInquiry({ pick: 'А 302' }))
-    act(() => presetInquiry({ pick: 'А 301' }))
-    expect(result.current).toEqual({ option: 'golden-residence', picks: ['А 301', 'А 302'] })
+    act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
+    act(() => presetInquiry({ pick: grPick('А 302') }))
+    act(() => presetInquiry({ pick: grPick('А 301') }))
+    expect(result.current).toEqual({ option: 'golden-residence', picks: [grPick('А 301'), grPick('А 302')] })
   })
 
   it('removePick drops one pick', () => {
     const { result } = state()
-    act(() => presetInquiry({ pick: 'А 301' }))
-    act(() => presetInquiry({ pick: 'А 302' }))
-    act(() => removePick('А 301'))
-    expect(result.current.picks).toEqual(['А 302'])
+    act(() => presetInquiry({ pick: grPick('А 301') }))
+    act(() => presetInquiry({ pick: grPick('А 302') }))
+    act(() => removePick(grPick('А 301')))
+    expect(result.current.picks).toEqual([grPick('А 302')])
+  })
+
+  // Spec M3 §8: a pick is its project and its label, and two picks are the
+  // same only when both match: „А 101“ of Golden Residence is not „А-101“ of
+  // Многофамилна, nor an „А 101“ another project might write.
+  it('presetInquiry dedupes picks by project and label', () => {
+    const { result } = state()
+    const gr = { project: 'golden-residence', label: 'А 101' }
+    const mn = { project: 'mnogofamilna-sgrada', label: 'А-101' }
+    act(() => presetInquiry({ pick: gr }))
+    act(() => presetInquiry({ pick: mn }))
+    act(() => presetInquiry({ pick: { ...gr } }))
+    act(() => presetInquiry({ pick: { ...mn } }))
+    act(() => presetInquiry({ pick: { project: 'mnogofamilna-sgrada', label: 'А 101' } }))
+    expect(result.current.picks).toEqual([gr, mn, { project: 'mnogofamilna-sgrada', label: 'А 101' }])
+
+    act(() => removePick({ ...mn }))
+    expect(result.current.picks).toEqual([gr, { project: 'mnogofamilna-sgrada', label: 'А 101' }])
   })
 
   it('chooseInquiryOption keeps the visitor’s choice, and the picks', () => {
     const { result } = state()
-    act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
     act(() => chooseInquiryOption('other'))
-    expect(result.current).toEqual({ option: 'other', picks: ['А 301'] })
+    expect(result.current).toEqual({ option: 'other', picks: [grPick('А 301')] })
   })
 
   it('resetInquiry clears it', () => {
     const { result } = state()
-    act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
     act(() => resetInquiry())
     expect(result.current).toEqual({ option: null, picks: [] })
   })
@@ -73,9 +108,9 @@ describe('the store', () => {
   // pages hand them on.
   it('clearInquiryOption drops the option, and keeps the picks', () => {
     const { result } = state()
-    act(() => presetInquiry({ option: 'mnogofamilna', pick: 'А 301' }))
+    act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
     act(() => clearInquiryOption())
-    expect(result.current).toEqual({ option: null, picks: ['А 301'] })
+    expect(result.current).toEqual({ option: null, picks: [grPick('А 301')] })
   })
 })
 
@@ -108,7 +143,7 @@ describe('the glide to the form', () => {
   it('waits for the scroll locks, then glides once, and focuses the name 1.5 s later', () => {
     const focus = vi.spyOn(input, 'focus')
     acquireScrollLock()
-    presetInquiry({ pick: 'А 301' })
+    presetInquiry({ pick: grPick('А 301') })
     for (let frame = 0; frame < 5; frame += 1) vi.advanceTimersToNextFrame()
     expect(lenis.scrollTo).not.toHaveBeenCalled()
 
@@ -134,7 +169,7 @@ describe('the glide to the form', () => {
   // page stays where it is, and the focus with it.
   it('gives up after 500 ms of waiting', () => {
     acquireScrollLock()
-    presetInquiry({ pick: 'А 301' })
+    presetInquiry({ pick: grPick('А 301') })
     vi.advanceTimersByTime(600)
     releaseScrollLock()
     vi.advanceTimersByTime(2000)
@@ -144,8 +179,8 @@ describe('the glide to the form', () => {
 
   // A second preset takes over from the first: one glide, one focus.
   it('glides once for two presets in a row', () => {
-    presetInquiry({ pick: 'А 301' })
-    presetInquiry({ pick: 'А 302' })
+    presetInquiry({ pick: grPick('А 301') })
+    presetInquiry({ pick: grPick('А 302') })
     vi.advanceTimersToNextFrame()
     vi.advanceTimersByTime(1500)
     expect(lenis.scrollTo).toHaveBeenCalledTimes(1)

@@ -66,6 +66,25 @@ it('shows the facade in compact mode, its floors with their counts', () => {
   expect(screen.getByRole('button', { name: /^Блок А, етаж 5: 4 свободни/ })).toBeInTheDocument()
 })
 
+// Spec §7.2: the compact facade's caption, the teaser's own, is a live region
+// that names the floor pointed at, „Блок А · *етаж 5*“, with its counts, and
+// else gives the hint.
+it('names the floor pointed at in the caption, with its counts, and else gives the hint', () => {
+  renderTeaser()
+  const caption = document.querySelector('#etazhi .fx__cap')
+
+  expect(caption).toHaveAttribute('aria-live', 'polite')
+  expect(text(caption)).toBe('Посочете етаж: свободните, резервираните и продадените апартаменти на него. Кликнете, за да отворите плана му.')
+  // Spec §3.3: the one-letter „и“ bound to the word after it.
+  expect(caption.textContent).toContain('и\u00a0продадените')
+
+  fireEvent.pointerOver(screen.getByRole('button', { name: /^Блок А, етаж 5:/ }), { pointerType: 'mouse' })
+  expect(text(caption.querySelector('.t'))).toBe('Блок А · етаж 5')
+  expect(caption.querySelector('.t em')).toHaveTextContent(/^етаж 5$/)
+  expect([...caption.querySelectorAll('.st')].map(text)).toEqual(['4 свободни', '2 резервирани', '6 продадени', '0 блокирани'])
+  expect(caption.querySelector('.hint')).toBeNull()
+})
+
 it('leads both ways into the explorer: „Визуално“ and „По критерии“', () => {
   renderTeaser()
   const ways = screen.getByRole('navigation', { name: 'Два начина да изберете апартамент' })

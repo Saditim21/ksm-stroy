@@ -5,6 +5,7 @@ import { mouseClick, tap } from '../test/pointer'
 import Facade from './Facade'
 import { loadSurfaces } from './loadSurfaces'
 import { buildModel } from './model'
+import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
 
 // The facade (spec §7.2, §7.3; extract §4.20, §4.21): the free count of each
@@ -13,13 +14,13 @@ import { snapshotData } from './testing'
 // a fine pointer, and no phone width. The panels' chunk (surfaces.js) is in
 // before the first render, as on a facade the page has scrolled near.
 
-const MODEL = buildModel(snapshotData())
+const MODEL = buildModel(snapshotData(), GR_PROJECT)
 const text = (element) => element.textContent.replace(/\s+/g, ' ').trim()
 const rail = (block, floor) => screen.getByRole('button', { name: new RegExp(`^Блок ${block}, етаж ${floor}[:.]`) })
 const panel = (side) => document.querySelector(`.fxp--${side}`)
 const floorPath = (key) => document.querySelector(`.fx__floor[data-k="${key}"]`)
 
-beforeAll(() => loadSurfaces())
+beforeAll(() => loadSurfaces(GR_PROJECT))
 
 let restore
 beforeEach(() => {
@@ -32,7 +33,7 @@ afterEach(() => {
 
 function renderFacade(props = {}) {
   const onOpenFloor = vi.fn()
-  render(<Facade model={MODEL} mode="full" onOpenFloor={onOpenFloor} {...props} />)
+  render(<Facade project={GR_PROJECT} model={MODEL} mode="full" onOpenFloor={onOpenFloor} {...props} />)
   return onOpenFloor
 }
 
@@ -386,20 +387,22 @@ describe('touch at desktop width', () => {
   })
 })
 
+// The compact caption's words are the page's (Home's teaser, whose test reads
+// them, teaser.test.jsx): the facade sets them in its live region, for the
+// floor that is hot, or for none.
 describe('compact mode (spec §7.2)', () => {
-  it('names the floor in the caption with its counts, and opens on a click', () => {
-    const onOpenFloor = renderFacade({ mode: 'compact' })
-    const caption = document.querySelector('.fx__cap')
+  it('sets the page’s caption for the hot floor in a live region, and opens on a click', () => {
+    const caption = (floor) => (floor ? `${floor.block}-${floor.floor}: ${floor.counts.available} свободни` : 'Посочете етаж')
+    const onOpenFloor = renderFacade({ mode: 'compact', caption })
+    const live = document.querySelector('.fx__cap')
 
     expect(document.querySelector('.fx')).toHaveClass('fx--compact')
     expect(document.querySelector('.fxp')).toBeNull()
-    expect(caption).toHaveAttribute('aria-live', 'polite')
-    expect(text(caption)).toBe('Посочете етаж: свободните, резервираните и продадените апартаменти на него. Кликнете, за да отворите плана му.')
+    expect(live).toHaveAttribute('aria-live', 'polite')
+    expect(text(live)).toBe('Посочете етаж')
 
     fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
-    expect(text(caption.querySelector('.t'))).toBe('Блок А · етаж 5')
-    expect(caption.querySelector('.t em')).toHaveTextContent('етаж 5')
-    expect([...caption.querySelectorAll('.st')].map(text)).toEqual(['4 свободни', '2 резервирани', '6 продадени', '0 блокирани'])
+    expect(text(live)).toBe('А-5: 4 свободни')
 
     fireEvent.click(rail('А', 5))
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 5])
@@ -509,7 +512,7 @@ describe('the panels’ chunk', () => {
     const observers = observeByHand()
     vi.resetModules()
     const { default: FreshFacade } = await import('./Facade')
-    render(<FreshFacade model={MODEL} mode="full" onOpenFloor={() => {}} />)
+    render(<FreshFacade project={GR_PROJECT} model={MODEL} mode="full" onOpenFloor={() => {}} />)
 
     expect(document.querySelector('.fxp')).toBeNull()
     fireEvent.pointerOver(rail('А', 5), { pointerType: 'mouse' })
@@ -536,7 +539,7 @@ describe('the panels’ chunk', () => {
     try {
       const { default: FreshFacade } = await import('./Facade')
       const onOpenFloor = vi.fn()
-      render(<FreshFacade model={MODEL} mode="full" onOpenFloor={onOpenFloor} />)
+      render(<FreshFacade project={GR_PROJECT} model={MODEL} mode="full" onOpenFloor={onOpenFloor} />)
 
       fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
       await waitFor(() => expect(errors).toHaveBeenCalled())
@@ -554,7 +557,7 @@ describe('the panels’ chunk', () => {
     const observers = observeByHand()
     vi.resetModules()
     const { default: FreshFacade } = await import('./Facade')
-    render(<FreshFacade model={MODEL} mode="compact" onOpenFloor={() => {}} />)
+    render(<FreshFacade project={GR_PROJECT} model={MODEL} mode="compact" caption={() => null} onOpenFloor={() => {}} />)
 
     fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
     expect(observers).toHaveLength(0)
@@ -571,7 +574,7 @@ describe('the panels’ chunk', () => {
 // (explorer.css.test.js); and the other block still answers.
 it('gives a rail of the other block the focus back on a desktop, both blocks still answering', () => {
   const onRailFocused = vi.fn()
-  const props = { model: MODEL, mode: 'full', initialBlock: 'А', onOpenFloor: vi.fn(), onRailFocused }
+  const props = { project: GR_PROJECT, model: MODEL, mode: 'full', initialBlock: 'А', onOpenFloor: vi.fn(), onRailFocused }
   const { rerender } = render(<Facade {...props} />)
   const facade = document.querySelector('.fx')
   expect(facade).toHaveAttribute('data-block', 'А')

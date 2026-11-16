@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Button from '../components/ui/Button'
-import { GR_FACTS } from '../config/facts'
 import useMotionNow from '../motion/useMotionNow'
 import { getLenis } from '../utils/lenis'
 import { FloorCounts, FloorRange, FloorTitle } from './FloorPanel'
@@ -13,12 +12,13 @@ import { crossfadePlan, drawPlan } from './planMotion'
 // explorer.js:303-325, :442-480): the floor a first tap chose, at the bottom
 // of the screen over the page. Its title and × („Затворете“), its plan, its
 // counts and the range of its free areas, then solid „Отворете плана“ and a
-// 48 px stepper ▲ „етаж 5“ ▼ through the block's floors. A portal on <body>,
-// mounted from its first showing on; it never shows from 901 px
-// (explorer.css), where touch uses the edge panel.
+// 48 px stepper ▲ „етаж 5“ ▼ through the block's floors, the project's
+// (project.floors). A portal on <body>, mounted from its first showing on; it
+// never shows from 901 px (explorer.css), where touch uses the edge panel.
 //
 // `floor` is the facade's floor (model.js) or null, and null closes the
-// sheet: it keeps the last floor on show while it slides away. On its first
+// sheet: it keeps the last floor on show while it slides away; `plan` is its
+// block's plan, and `project` the facade's (useExplorer.js). On its first
 // showing the page scrolls so `anchor` (the facade's stage) sits above it.
 // With motion (useMotionNow) it rises over 0.5 s expo.out, its plan drawing,
 // and sinks over 0.35 s expo.in; a new floor crossfades. Without, it is
@@ -50,7 +50,7 @@ function keepAbove(sheet, stage, smooth) {
   })
 }
 
-export default function FloorSheet({ floor, plan, onClose, onStep, onOpen, onUnit, anchor }) {
+export default function FloorSheet({ project, floor, plan, onClose, onStep, onOpen, onUnit, anchor }) {
   const ref = useRef(null)
   const motionNow = useMotionNow()
   // The floor on show: the last one given, kept while the sheet slides away.
@@ -96,7 +96,7 @@ export default function FloorSheet({ floor, plan, onClose, onStep, onOpen, onUni
         </button>
       </div>
       <div className="sheet__plan">
-        <PlanSvg plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
+        <PlanSvg project={project} plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
       </div>
       <FloorCounts counts={shown.counts} className="sheet__counts" />
       <FloorRange floor={shown} className="sheet__range" />
@@ -105,13 +105,13 @@ export default function FloorSheet({ floor, plan, onClose, onStep, onOpen, onUni
           Отворете плана
         </Button>
         <div className="step">
-          <button type="button" aria-label="По-горен етаж" disabled={shown.floor >= GR_FACTS.floors} onClick={() => onStep(1)}>
+          <button type="button" aria-label="По-горен етаж" disabled={shown.floor >= project.floors.max} onClick={() => onStep(1)}>
             {UP}
           </button>
           <output>
             етаж <b>{shown.floor}</b>
           </output>
-          <button type="button" aria-label="По-долен етаж" disabled={shown.floor <= 1} onClick={() => onStep(-1)}>
+          <button type="button" aria-label="По-долен етаж" disabled={shown.floor <= project.floors.min} onClick={() => onStep(-1)}>
             {DOWN}
           </button>
         </div>
