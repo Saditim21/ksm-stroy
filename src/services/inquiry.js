@@ -7,7 +7,8 @@
 // its message is under 10 characters. A teammate owns the proxy, and it
 // never changes, so the lead is made valid here: the name trimmed, and a
 // short message given the line „Запитване за: …“ with the lead's subject.
-// The form checks the rest before sending (InquiryForm.jsx).
+// The form checks the rest before sending (InquiryForm.jsx, with the checks
+// of src/components/inquiry/inquiryChecks.js).
 //
 // Every build but production marks the subject „[ТЕСТ]“, in the CRM and in
 // the email (spec §14.3).
@@ -17,8 +18,8 @@
 
 /* global IS_PRODUCTION_BUILD */
 
-// The proxy's own pattern, for the form's email check: emailPattern.js's,
-// which the form has from its first render.
+// The proxy's own pattern, emailPattern.js's, which the form's email check
+// (src/components/inquiry/inquiryChecks.js) reads too.
 export { EMAIL_PATTERN } from './emailPattern'
 // The proxy's shortest message.
 const MIN_MESSAGE = 10

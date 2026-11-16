@@ -69,11 +69,14 @@ it('labels every field, the consent and the action', () => {
   expect(field('Интересувам се от')).toHaveValue('golden-residence')
 })
 
+// The checks come with the send path (sendPath.js, ruling T2a), which the
+// form's first send may still be loading: each case waits for its messages.
 describe('checking the fields before anything is sent', () => {
   it('an empty form sends nothing, names each problem and focuses the name', async () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await user.click(submit())
 
+    expect(await screen.findByText(ERRORS.name)).toBeInTheDocument()
     expect(send).not.toHaveBeenCalled()
     for (const message of [ERRORS.name, ERRORS.phone, ERRORS.email, ERRORS.consent]) expect(screen.getByText(message)).toBeInTheDocument()
     expect(field('Име')).toHaveFocus()
@@ -90,7 +93,7 @@ describe('checking the fields before anything is sent', () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@пример.бг' })
     await user.click(submit())
-    expect(screen.getByText(ERRORS.latin)).toBeInTheDocument()
+    expect(await screen.findByText(ERRORS.latin)).toBeInTheDocument()
     // Spec §3.3: the one-letter „с“ bound to the word after it.
     expect(screen.getByText(ERRORS.latin).textContent).toContain('имейл с\u00a0латински')
     expect(field('Имейл')).toHaveFocus()
@@ -104,7 +107,7 @@ describe('checking the fields before anything is sent', () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@xn--e1afmkfd.xn--90ae' })
     await user.click(submit())
-    expect(screen.getByText(ERRORS.latin)).toBeInTheDocument()
+    expect(await screen.findByText(ERRORS.latin)).toBeInTheDocument()
     expect(send).not.toHaveBeenCalled()
   })
 
@@ -112,7 +115,7 @@ describe('checking the fields before anything is sent', () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { email: 'ivan@' })
     await user.click(submit())
-    expect(screen.getByText(ERRORS.email)).toBeInTheDocument()
+    expect(await screen.findByText(ERRORS.email)).toBeInTheDocument()
     expect(send).not.toHaveBeenCalled()
   })
 
@@ -122,7 +125,7 @@ describe('checking the fields before anything is sent', () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { name: ' И' })
     await user.click(submit())
-    expect(screen.getByText(ERRORS.name)).toBeInTheDocument()
+    expect(await screen.findByText(ERRORS.name)).toBeInTheDocument()
     expect(send).not.toHaveBeenCalled()
   })
 
@@ -132,7 +135,7 @@ describe('checking the fields before anything is sent', () => {
     render(<InquiryForm page="home" options={HOME_OPTIONS} />)
     await fill(user, { phone: '+359 88' })
     await user.click(submit())
-    expect(screen.getByText(ERRORS.phone)).toBeInTheDocument()
+    expect(await screen.findByText(ERRORS.phone)).toBeInTheDocument()
     expect(send).not.toHaveBeenCalled()
     await user.type(field('Телефон'), '1')
     expect(screen.queryByText(ERRORS.phone)).toBeNull()

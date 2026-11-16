@@ -5,16 +5,17 @@
    the opening, :146-169 the blocks, the list and the building, :201-233
    their phones) with the tokens of src/index.css, --screen-h for vh, and the
    system's type: the name reads across the seam at Home's slogan size (M3
-   §4.1). The blocks' squares and halves are Golden Residence's
-   (src/pages/golden-residence/gr.css), sized for this building.
+   §4.1). The blocks' squares and halves are a block in numbers'
+   (src/explorer/blockGrid.css), sized here for this building.
 
    The page's own stylesheet (src/routes/mnogofamilna.jsx), after the
    site's: plain CSS, in no Tailwind layer. A section's padding, the seam,
    the split and the hinge are the site's (src/styles/diptych.css); the
    facade, its lights, its crops and its dialogs are the explorer's
    (src/explorer/explorer.css) and Многофамилна's own
-   (src/explorer/mn-facade.css); the gallery's its component's
-   (src/components/gallery/spreads.css), the status counts' theirs
+   (src/explorer/mn-facade.css); the blocks' squares and the gallery's
+   their components' (src/explorer/blockGrid.css,
+   src/components/gallery/spreads.css), the status counts' theirs
    (src/components/ui/status.css), the inquiry's styles its component's.
 
    The opening moves by CSS from first paint (Diptych §5.5), only under the
@@ -119,107 +120,17 @@
 .mnx__facade { margin-top: clamp(12px, calc(var(--screen-h) * .02), 24px); }
 
 /* ---------- the blocks (spec M3 §6.2 #2) ---------- */
-/* Golden Residence's blocks in numbers (gr.css), sized for this building:
+/* A block in numbers is its component's (src/explorer/blockGrid.css):
    Блок А against the seam, right-aligned, Блок Б after it, each its name,
-   its facts, its squares, its counts and types, and the way to its page.
-   Under the section's own class, as the two pages size the same squares
-   differently. */
+   its facts, its squares in their statuses' patterns, its counts and types.
+   Here, this building's size, under the section's own class: 8 squares a
+   floor and 9 floors, 352 px wide at most (the concept's :147-149), the
+   whole width on a small phone (below); and the way to each block's page,
+   as wide as its words, its underline with them, on the block's own side. */
 .mnb { background: var(--onyx); }
-.mnb .blk {
-  display: grid;
-  align-content: start;
-  gap: 26px;
-  padding: 0 clamp(28px, 5vw, 96px);
-}
-.mnb .blk--a {
-  justify-items: end;
-  text-align: right;
-}
-.mnb .blk__name {
-  font-family: var(--serif);
-  font-size: clamp(52px, 5.2vw, 88px);
-  font-weight: 500;
-  line-height: .9;
-}
-.mnb .blk__name em { color: var(--brass-l); }
-.mnb .blk__sub {
-  margin-top: -10px;
-  color: var(--ivory-2);
-  font-size: 15px;
-}
-/* The squares (BlockGrid.jsx): 8 across, a floor a row, 4 px apart, each
-   its status's pattern (Diptych §7.9); the floor numbers beside them on the
-   seam's side. 352 px wide at most, the concept's (:147-149). */
-.mnb .blk__floors {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: stretch;
-  gap: 8px;
-  width: min(100%, 352px);
-}
-.mnb .blk--a .blk__floors { grid-template-columns: 1fr auto; }
-.mnb .blk__fl {
-  display: grid;
-  grid-template-rows: repeat(9, 1fr);
-  align-items: center;
-  height: 100%;
-  color: var(--stone);
-  font-size: 10px;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.mnb .blk__grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
-  width: 100%;
-}
-.mnb .blk__grid button {
-  position: relative;
-  aspect-ratio: 1;
-  border: 1px solid var(--c);
-  background: transparent;
-  transition: transform .2s var(--e-out);
-}
-/* The entrance (BlockGrid.jsx) holds the squares at opacity 0 until the
-   block reaches 75 % of the screen. Focus that arrives before, with no
-   scroll, shows them, a square's ring with it (WCAG 2.4.7): important, over
-   the entrance's inline opacity. */
-.mnb .blk__grid:focus-within button { opacity: 1 !important; }
-.mnb .blk__grid .s-none { --c: var(--hair); }
-.mnb .blk__grid .s-free {
-  --c: var(--status-free);
-  background: rgba(79, 191, 133, .55);
-}
-.mnb .blk__grid .s-reserved {
-  --c: var(--status-reserved);
-  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
-}
-.mnb .blk__grid .s-sold {
-  --c: rgba(212, 87, 78, .7);
-  background-image: radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px);
-  background-size: 4px 4px;
-}
-.mnb .blk__grid .s-blocked {
-  --c: var(--status-blocked);
-  border-style: dashed;
-}
-/* The block's counts by status, its room types with their date, and the
-   way to its page. */
-.mnb .blk__stats {
-  display: grid;
-  gap: 10px;
-}
-.mnb .blk--a .blk__stats .legend { justify-content: flex-end; }
-.mnb .blk__types {
-  color: var(--ivory-2);
-  font-size: 14px;
-}
-.mnb .blk__types b {
-  color: var(--ivory);
-  font-weight: 600;
-}
-/* The way to the block's page, as wide as its words, its underline with
-   them, on the block's own side. */
+.mnb .blk__floors { width: min(100%, 352px); }
+.mnb .blk__fl { grid-template-rows: repeat(9, 1fr); }
+.mnb .blk__grid { grid-template-columns: repeat(8, 1fr); }
 .mnb .blk__go {
   justify-self: start;
   margin-top: 4px;
@@ -327,28 +238,39 @@
 }
 
 /* ---------- the night grade and the gallery's photos (spec M3 §6.2 #4, #5) ---------- */
-/* The daylight renders taken to the night palette, by CSS: quieter, warmer
-   and darker, the sky fading from the top into the umber behind it. On the
-   building's picture (its <picture>, the placeholder's colour with it) and
-   on the gallery's photos (their <img>, each its spread half's `photo`;
+/* The daylight renders taken to the night palette by CSS, as the concept's
+   derivatives have them (its img/mnogofamilna/mn-*.webp): each photo's sky
+   cut away along its skyline, so the umber behind the picture is its night
+   sky, and the rest as rendered, a little warmer and darker. The cut is a
+   mask in the photo's own pixels, traced from the concept's derivative (the
+   towers, the street, the lamps and the trees under the sky; the leaves
+   that hang into the sky go with it), and sized and placed as the photo is
+   (cover, at the photo's position, --at), so the two meet at any crop. On
+   the building's picture (its <picture>, the placeholder's colour with it)
+   and on the gallery's photos (their <img>, each its spread half's `photo`;
    spreads.css keeps umber under every layer). The drawings stay as drawn. */
 .mn-night {
-  filter: saturate(.6) sepia(.18) brightness(.82) contrast(1.08);
-  mask-image: linear-gradient(to bottom, rgb(0 0 0 / .1), rgb(0 0 0 / .5) 28%, #000 58%);
+  --at: 50% 50%;
+  filter: sepia(.12) brightness(.94);
+  object-position: var(--at);
+  mask-position: var(--at);
+  mask-size: cover;
+  mask-repeat: no-repeat;
 }
-/* How the gallery frames each photo (MnGallery.jsx): the blocks on their
-   towers, the perspective on its nearer pair (the concept's
-   mnogofamilna.js:1101-1102). */
-.mn-gal--block { object-position: 50% 46%; }
-.mn-gal--persp { object-position: 58% 50%; }
-
-/* A square pointed at grows by 1.18, where a fine pointer hovers. */
-@media (hover: hover) and (pointer: fine) {
-  .mnb .blk__grid button:hover {
-    z-index: 1;
-    transform: scale(1.18);
-  }
+/* Блок А and Блок Б (photo-3, photo-4), on their towers, and the front
+   (photo-1); the perspective (photo-2), on its nearer pair in the gallery
+   (the concept's mnogofamilna.js:1101-1102). */
+.mn-night--block-a {
+  --at: 50% 46%;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='709' height='829' viewBox='0 0 709 829'%3E%3Cpath d='M0 829L0 498L3 498L3 426L5 423L5 402L6 398L8 395L12 392L22 392L26 394L30 398L33 402L35 410L36 415L40 417L44 419L47 422L47 428L45 437L24 437L23 426L25 418L32 415L32 412L30 402L27 398L23 396L12 396L9 399L9 424L11 426L11 498L12 499L73 513L74 216L332 216L333 232L351 254L354 254L358 240L379 239L380 216L576 216L576 574L709 575L709 829Z'/%3E%3C/svg%3E");
 }
+.mn-night--block-b {
+  --at: 50% 46%;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='643' height='829' viewBox='0 0 643 829'%3E%3Cpath d='M0 829L0 509L3 509L8 525L12 525L18 513L42 511L43 218L285 218L287 242L304 242L309 252L333 236L337 231L339 218L544 219L544 575L565 575L565 596L568 597L576 597L578 421L596 411L617 411L618 434L622 435L623 418L629 418L630 435L635 436L637 405L643 406L643 829Z'/%3E%3C/svg%3E");
+}
+.mn-night--front { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1352' height='829' viewBox='0 0 1352 829'%3E%3Cpath d='M0 829L0 497L2 426L6 398L9 398L12 498L23 498L70 514L80 512L81 214L333 214L335 233L350 251L355 251L358 239L375 239L376 214L617 214L619 508L633 510L646 535L662 527L662 514L668 514L669 508L678 506L681 499L703 501L704 507L713 510L717 524L723 522L727 512L756 512L758 214L995 214L997 241L1012 241L1017 249L1024 249L1044 231L1044 216L1048 214L1296 215L1297 415L1316 412L1318 416L1325 416L1327 424L1332 422L1333 417L1337 417L1338 434L1344 435L1345 405L1352 405L1352 829Z'/%3E%3C/svg%3E"); }
+.mn-night--persp { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1356' height='826' viewBox='0 0 1356 826'%3E%3Cpath d='M0 826L0 574L17 574L21 522L25 522L26 527L26 565L32 572L54 572L54 567L59 567L61 563L108 568L136 566L138 569L151 572L155 546L156 441L175 434L176 403L260 382L302 390L305 388L305 371L395 347L417 349L435 345L554 381L554 485L556 501L563 502L565 312L574 308L574 301L731 260L740 260L770 273L782 272L809 260L809 240L1093 167L1097 167L1168 241L1168 273L1179 282L1180 502L1183 553L1196 558L1238 557L1253 563L1279 562L1293 556L1296 545L1303 149L1307 140L1318 140L1331 150L1348 151L1348 51L1356 53L1356 826Z'/%3E%3C/svg%3E"); }
+.mn-gal--persp { --at: 58% 50%; }
 
 /* From 901 px, where a hinge's halves stand side by side, its title and its
    lead wrap short of the page's gutter (spec M3 §4.1, the critic's hinge
@@ -417,23 +339,8 @@
     padding: 0 12px;
   }
   .mnx__facade { margin-top: 26px; }
-  /* The blocks: left-aligned, block А's floors moved to the left of its
-     squares, the second block under a brass rule. */
-  .mnb .blk,
-  .mnb .blk--a {
-    justify-items: start;
-    padding: 0 var(--gut);
-    text-align: left;
-  }
-  .mnb .blk--a { padding-bottom: 56px; }
-  .mnb .blk--b {
-    margin: 0 var(--gut);
-    padding: 56px 0 0;
-    border-top: 1px solid var(--brass);
-  }
-  .mnb .blk--a .blk__floors { grid-template-columns: auto 1fr; }
-  .mnb .blk--a .blk__floors .blk__fl { order: -1; }
-  .mnb .blk--a .blk__stats .legend { justify-content: flex-start; }
+  /* The blocks stack left-aligned (blockGrid.css), block А's way to its
+     page with them. */
   .mnb .blk--a .blk__go { justify-self: start; }
   /* The list's bar wraps onto more rows as the screen narrows (measured:
      268 px at 768, 393 px at 600, 435 px from 360 to 480, 556 px at 320). */

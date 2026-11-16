@@ -128,40 +128,18 @@ describe('the story (spec §6.15, §5.8)', () => {
   })
 })
 
+// A block in numbers' own rules (the halves, the squares and their
+// patterns, the focus fix, the hover, the phone stacking) are its
+// component's, their pins with them (src/explorer/blockGrid.css.test.js);
+// here, this page's: its squares' size, its exposures and its note.
 describe('the blocks (spec §6.16; extract §4.27)', () => {
-  it('sets each block’s 12 × 8 squares 4 px apart, 500 px wide at most, the floors beside them', () => {
-    expect(declaredFor('.blk__grid')).toMatchObject({ display: 'grid', 'grid-template-columns': 'repeat(12, 1fr)', gap: '4px', width: '100%' })
-    expect(declaredFor('.blk__grid button')).toMatchObject({ 'aspect-ratio': '1', border: '1px solid var(--c)' })
-    expect(declaredFor('.blk__floors')).toMatchObject({ display: 'grid', 'grid-template-columns': 'auto 1fr', gap: '8px', width: 'min(100%, 500px)' })
-    expect(declaredFor('.blk--a .blk__floors')['grid-template-columns']).toBe('1fr auto')
-    expect(declaredFor('.blk__fl')).toMatchObject({ 'grid-template-rows': 'repeat(8, 1fr)', 'font-size': '10px', color: 'var(--stone)' })
+  it('sets each block’s squares 12 across and 8 floors down, 500 px wide at most', () => {
+    expect(declaredFor('.blk__grid')).toEqual({ 'grid-template-columns': 'repeat(12, 1fr)' })
+    expect(declaredFor('.blk__floors')).toEqual({ width: 'min(100%, 500px)' })
+    expect(declaredFor('.blk__fl')).toEqual({ 'grid-template-rows': 'repeat(8, 1fr)' })
   })
 
-  // Spec §7.9: never colour alone; a status's pattern on each square.
-  it('marks each square by its status’s pattern, blocked by a dashed outline, and waits in a hair outline', () => {
-    expect(declaredFor('.blk__grid .s-free')).toMatchObject({ '--c': 'var(--status-free)', background: 'rgba(79, 191, 133, .55)' })
-    expect(declaredFor('.blk__grid .s-reserved').background).toBe('repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px)')
-    expect(declaredFor('.blk__grid .s-sold')).toMatchObject({ '--c': 'rgba(212, 87, 78, .7)', 'background-image': 'radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px)', 'background-size': '4px 4px' })
-    expect(declaredFor('.blk__grid .s-blocked')).toMatchObject({ '--c': 'var(--status-blocked)', 'border-style': 'dashed' })
-    expect(declaredFor('.blk__grid .s-none')['--c']).toBe('var(--hair)')
-  })
-
-  it('grows a square pointed at by 1.18, where a fine pointer hovers', () => {
-    expect(declaredFor('.blk__grid button:hover', [FINE])).toMatchObject({ transform: 'scale(1.18)', 'z-index': '1' })
-  })
-
-  // WCAG 2.4.7: the squares' entrance holds them at opacity 0 until the
-  // block reaches 75 % of the screen, and the focus can arrive before that
-  // with no scroll. While it is inside the grid every square shows, its ring
-  // with it: important, over the entrance's inline opacity.
-  it('shows every square while the focus is in its grid, over the entrance', () => {
-    const [rule] = rulesFor(rules, '.blk__grid:focus-within button')
-    expect(rule.atRules).toEqual([])
-    expect(rule.declarations).toEqual([{ prop: 'opacity', value: '1', important: true }])
-  })
-
-  it('sets the stats: the types in 14 px, the exposures four across in the serif, two on a small phone', () => {
-    expect(declaredFor('.blk__types')).toMatchObject({ 'font-size': '14px', color: 'var(--ivory-2)' })
+  it('sets the exposures four across in the serif, two on a small phone, and the note', () => {
     expect(declaredFor('.blk__expo')).toMatchObject({ display: 'grid', 'grid-template-columns': 'repeat(4, auto)', gap: '10px 22px' })
     expect(declaredFor('.blk__expo b')).toMatchObject({ display: 'block', font: '600 26px/1 var(--serif)' })
     expect(declaredFor('.blk__expo', ['@media (max-width: 560px)'])['grid-template-columns']).toBe('repeat(2, auto)')
@@ -175,14 +153,6 @@ describe('the blocks (spec §6.16; extract §4.27)', () => {
   it('keeps the room of block Б’s exposure rows while they wait for the data', () => {
     expect(declaredFor('.blk__expo:empty')['min-height']).toBe('calc(2 * (26px + 1.6em) + 10px)')
     expect(declaredFor('.blk__expo:empty', ['@media (max-width: 560px)'])['min-height']).toBe('calc(4 * (26px + 1.6em) + 3 * 10px)')
-  })
-
-  // Extract §4.27, phones: left-aligned, block А's floors moved to the left.
-  it('turns block А’s floors to the left of its squares on a phone, and its counts left-aligned', () => {
-    expect(declaredFor('.blk--a .blk__floors', [PHONE])['grid-template-columns']).toBe('auto 1fr')
-    expect(declaredFor('.blk--a .blk__floors .blk__fl', [PHONE]).order).toBe('-1')
-    expect(declaredFor('.blk--a .blk__stats .legend')['justify-content']).toBe('flex-end')
-    expect(declaredFor('.blk--a .blk__stats .legend', [PHONE])['justify-content']).toBe('flex-start')
   })
 })
 
@@ -232,8 +202,9 @@ it('sizes nothing by vh or svh', () => {
 
 // Spec §2.2: a hover effect needs a pointer that hovers, so a tap never
 // leaves one behind.
+// The squares' hover moved with them (src/explorer/blockGrid.css.test.js
+// pins it, and counts it); any :hover rule this page gains needs one too.
 it('keeps every :hover rule where a fine pointer hovers', () => {
   const hovers = rules.filter((rule) => rule.selector.includes(':hover'))
-  expect(hovers.length).toBeGreaterThan(0)
   for (const rule of hovers) expect(rule.atRules, rule.selector).toContain(FINE)
 })

@@ -1,17 +1,18 @@
 /* The Golden Residence page (spec
    docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md §5.5, §5.8,
-   §6.14–6.18, §8.2): the hero, the story, the two blocks, the framing of
-   the gallery's renders and the garages and parking places, ported from the
-   concept's css/diptych.css (:417-430 and :799-807 the hero, :432-451,
-   :808-814 and :906-914 the story, :653-676, :834-839 and :898 the blocks,
-   :693-715 and :845-848 the parking) with the tokens of src/index.css,
-   --screen-h for vh, and the
+   §6.14–6.18, §8.2): the hero, the story, the two blocks' size and
+   exposures, the framing of the gallery's renders and the garages and
+   parking places, ported from the concept's css/diptych.css (:417-430 and
+   :799-807 the hero, :432-451, :808-814 and :906-914 the story, :898 the
+   blocks, :693-715 and :845-848 the parking) with the tokens of
+   src/index.css, --screen-h for vh, and the
    spec's fixes: the hero's entrance is CSS from the first paint and names no
    view transition (ruling F8); without motion the story stays in one column
    with its pictures inline (spec §5.8); a control's border is hair-ctl;
    hover effects need a fine pointer; nothing takes the focus ring away, and
    no box that holds a control clips it (spec §11). The parking legend's
-   status counts are src/components/ui/status.css's, the gallery's
+   status counts are src/components/ui/status.css's, the blocks' halves and
+   squares src/explorer/blockGrid.css's, the gallery's
    src/components/gallery/spreads.css's, the explorer's styles
    src/explorer/explorer.css's.
 
@@ -314,101 +315,14 @@
 }
 
 /* ---------- the blocks (spec §6.16; extract §4.27) ---------- */
-/* Блок А against the seam, right-aligned; Блок Б after it. */
+/* A block in numbers is its component's (src/explorer/blockGrid.css): the
+   halves, the squares and their patterns, the counts and the types. Here,
+   this page's own: its section's ground, its squares 12 across and 8 floors
+   down, 500 px wide at most, and its exposures, four across, or the note. */
 .blocks { background: var(--onyx); }
-.blk {
-  display: grid;
-  align-content: start;
-  gap: 26px;
-  padding: 0 clamp(28px, 5vw, 96px);
-}
-.blk--a {
-  justify-items: end;
-  text-align: right;
-}
-.blk__name {
-  font-family: var(--serif);
-  font-size: clamp(52px, 5.2vw, 88px);
-  font-weight: 500;
-  line-height: .9;
-}
-.blk__name em { color: var(--brass-l); }
-.blk__sub {
-  margin-top: -10px;
-  color: var(--ivory-2);
-  font-size: 15px;
-}
-/* The squares (BlockGrid.jsx): 12 across, 4 px apart, each its status's
-   pattern (spec §7.9); a neutral hair outline until the data arrives. The
-   floor numbers stand beside them on the seam's side. */
-.blk__floors {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: stretch;
-  gap: 8px;
-  width: min(100%, 500px);
-}
-.blk--a .blk__floors { grid-template-columns: 1fr auto; }
-.blk__fl {
-  display: grid;
-  grid-template-rows: repeat(8, 1fr);
-  align-items: center;
-  height: 100%;
-  color: var(--stone);
-  font-size: 10px;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.blk__grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 4px;
-  width: 100%;
-}
-.blk__grid button {
-  position: relative;
-  aspect-ratio: 1;
-  border: 1px solid var(--c);
-  background: transparent;
-  transition: transform .2s var(--e-out);
-}
-/* The entrance (BlockGrid.jsx) holds the squares at opacity 0 until the
-   block reaches 75 % of the screen. Focus that arrives before, with no
-   scroll, shows them, a square's ring with it (WCAG 2.4.7): important, over
-   the entrance's inline opacity. */
-.blk__grid:focus-within button { opacity: 1 !important; }
-.blk__grid .s-none { --c: var(--hair); }
-.blk__grid .s-free {
-  --c: var(--status-free);
-  background: rgba(79, 191, 133, .55);
-}
-.blk__grid .s-reserved {
-  --c: var(--status-reserved);
-  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
-}
-.blk__grid .s-sold {
-  --c: rgba(212, 87, 78, .7);
-  background-image: radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px);
-  background-size: 4px 4px;
-}
-.blk__grid .s-blocked {
-  --c: var(--status-blocked);
-  border-style: dashed;
-}
-/* The block's counts by status and its room types; its exposures, four
-   across, or the note. */
-.blk__stats {
-  display: grid;
-  gap: 10px;
-}
-.blk--a .blk__stats .legend { justify-content: flex-end; }
-.blk__types {
-  color: var(--ivory-2);
-  font-size: 14px;
-}
-.blk__types b {
-  color: var(--ivory);
-  font-weight: 600;
-}
+.blk__floors { width: min(100%, 500px); }
+.blk__fl { grid-template-rows: repeat(8, 1fr); }
+.blk__grid { grid-template-columns: repeat(12, 1fr); }
 .blk__expo {
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -557,13 +471,6 @@
 }
 .park__list li > span:last-child { color: var(--stone); }
 
-@media (hover: hover) and (pointer: fine) {
-  .blk__grid button:hover {
-    z-index: 1;
-    transform: scale(1.18);
-  }
-}
-
 /* ---------- phones: the halves stack (spec §4) ---------- */
 @media (max-width: 900px) {
   /* The hero: the render framed to the tall tower, the facts stacked around
@@ -623,24 +530,8 @@
     background: var(--brass);
   }
 
-  /* The blocks and the parking: left-aligned, the second half under a brass
-     rule. */
-  .blk,
-  .blk--a {
-    justify-items: start;
-    padding: 0 var(--gut);
-    text-align: left;
-  }
-  .blk--a { padding-bottom: 56px; }
-  .blk--b {
-    margin: 0 var(--gut);
-    padding: 56px 0 0;
-    border-top: 1px solid var(--brass);
-  }
-  .blk--a .blk__floors { grid-template-columns: auto 1fr; }
-  .blk--a .blk__floors .blk__fl { order: -1; }
-  .blk--a .blk__stats .legend { justify-content: flex-start; }
-
+  /* The parking: left-aligned, the second half under a brass rule (the
+     blocks' halves stack in their component's stylesheet). */
   .park__half,
   .park__half--a {
     justify-items: start;

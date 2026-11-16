@@ -11,7 +11,8 @@ import { TypeCounts } from './MnBlocks'
 // The building, #sgradata (spec M3 §6.2 #4; the concept's
 // mnogofamilna.html:111-131): a split on the seam. On the left the street
 // perspective (production's photo-2), graded to the night palette by the
-// page's stylesheet (mn.css); on the right the brochure's own line, „С
+// page's stylesheet (mn.css: its sky cut away, the umber behind it for the
+// night); on the right the brochure's own line, „С
 // магазини и подземни *гаражи*“, production's description
 // (src/constants/properties.js:29) without its floors' sentence, which the
 // data contradicts (spec M3 §2), the УПИ address, and the building's facts,
@@ -70,7 +71,7 @@ export default function MnBuilding() {
           image={mnImages['mn-persp']}
           alt="Многофамилната сграда откъм улицата, визуализация"
           sizes={SIZES}
-          className="mn-night"
+          className="mn-night mn-night--persp"
         />
       </figure>
       <div className="mns__text">

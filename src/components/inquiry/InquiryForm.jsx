@@ -1,20 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { PRIMARY_PHONE } from '../../config/site'
-import { EMAIL_PATTERN } from '../../services/emailPattern'
 import Button from '../ui/Button'
 import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, resetInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry form (spec §10; extract §4.14), in the concept's style: fields
 // underlined in hair-ctl, a select with a brass chevron (inquiry.css). Name,
 // phone and email are required, the message is not, and the consent is
-// checked here: the browser's own checks are off (noValidate), so each
-// problem is named in Bulgarian under its field, which is marked
-// aria-invalid, and the focus goes to the first. The rules are what the lead
-// proxy (api/odoo-lead.js) would otherwise drop without a trace: a name
-// under 2 characters once trimmed, an email outside its pattern (Latin
-// letters only, so a Cyrillic or punycode domain gets a message of its own),
-// and the phone needs 6 digits. A short message is the lead's to top up
-// (src/services/inquiry.js).
+// checked before anything is sent: the browser's own checks are off
+// (noValidate), so each problem is named in Bulgarian under its field, which
+// is marked aria-invalid, and the focus goes to the first. The checks
+// (inquiryChecks.js) are what the lead proxy (api/odoo-lead.js) would
+// otherwise drop without a trace; only a send runs them, so they come with
+// the send path (below). Once a send has been tried, each problem follows
+// the typing until it is fixed.
 //
 // What the visitor asks about comes from the page's options (`page`'s in
 // inquiryStore.js, Golden Residence's, or the `options` any other page hands
@@ -26,11 +24,12 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, reset
 // another subject a pick neither shows nor goes with the lead, and it stays
 // in the store, so choosing its project again brings it back.
 //
-// The send path (sendPath.js: src/services/inquiry.js, with EmailJS behind
-// it, and the thank-you) is a chunk of its own, out of the page's first-load
-// JS (spec §10): it starts loading as the visitor first steps into the form,
-// and a send waits for it. A load that fails fails the send it held up, as a
-// refused email does, and is not kept: the next send loads it again.
+// The send path (sendPath.js: the checks, src/services/inquiry.js with
+// EmailJS behind it, and the thank-you) is a chunk of its own, out of the
+// page's first-load JS (spec §10, ruling T2a): it starts loading as the
+// visitor first steps into the form, and a send waits for it, the form busy
+// meanwhile. A load that fails fails the send it held up, as a refused email
+// does, and is not kept: the next send loads it again.
 //
 // While an inquiry is on its way (the send path, the EmailJS chunk, the round
 // trip) the form is busy and its action reads as the legacy Contact form's
@@ -40,13 +39,6 @@ import { chooseInquiryOption, INQUIRY_OPTIONS, OPTION_PROJECT, removePick, reset
 // motion (spec §5.7); a failed one says so and keeps what was typed. A new
 // preset after a thank-you brings the form back.
 
-const ERRORS = {
-  name: 'Въведете име.',
-  phone: 'Въведете телефон, поне 6 цифри.',
-  email: 'Въведете имейл, например ime@primer.bg.',
-  emailLatin: 'Въведете имейл с латински букви, например ime@primer.bg.',
-  consent: 'Отбележете съгласието, за да изпратим запитването.',
-}
 const CONSENT = 'Съгласен съм КСМ Строй да използва данните ми, за да отговори на запитването.'
 // The phone in a sentence, kept on one line.
 const PHONE = PRIMARY_PHONE.label.split(' ').join(String.fromCharCode(0xa0))
@@ -57,15 +49,11 @@ const SENDING = 'Изпращане...'
 // The fields that can be wrong, in the order the focus looks for the first.
 const IDS = { name: 'f-name', phone: 'f-tel', email: 'f-email', consent: 'f-consent' }
 const ORDER = ['name', 'phone', 'email', 'consent']
-// A Cyrillic letter, or a domain the browser has turned into punycode.
-const NOT_LATIN = /\p{Script=Cyrillic}|(^|[@.])xn--/iu
-const MIN_NAME = 2
-const MIN_PHONE_DIGITS = 6
 
 // The send path's module, loading or loaded, for every form on the page and
 // every later visit to it, and the module itself once it is in (`sent`): a
-// sent inquiry has loaded it, so its thank-you is there to show. A load that
-// failed is dropped, to be tried again.
+// form that has tried a send has loaded it, so its checks and its thank-you
+// are there to use. A load that failed is dropped, to be tried again.
 let sendPath = null
 let sent = null
 function loadSendPath() {
@@ -84,16 +72,6 @@ function loadSendPath() {
 // The form's focus starts the load; if it fails, the send says so.
 const preloadSendPath = () => {
   loadSendPath().catch(() => {})
-}
-
-function validate({ name, phone, email, consent }) {
-  const errors = {}
-  if (name.trim().length < MIN_NAME) errors.name = ERRORS.name
-  if (phone.replace(/\D/g, '').length < MIN_PHONE_DIGITS) errors.phone = ERRORS.phone
-  const mail = email.trim()
-  if (!EMAIL_PATTERN.test(mail)) errors.email = NOT_LATIN.test(mail) ? ERRORS.emailLatin : ERRORS.email
-  if (!consent) errors.consent = ERRORS.consent
-  return errors
 }
 
 // An error's id, which its field names as its description.
@@ -130,7 +108,8 @@ export default function InquiryForm({ page = 'golden-residence', options = INQUI
   const [status, setStatus] = useState('idle')
   const form = useRef(null)
   const mounted = useRef(true)
-  const errors = tried ? validate(values) : {}
+  // A form that has tried a send has its checks: the send path is in.
+  const errors = tried ? sent.validate(values) : {}
 
   // A preset after the thank-you (the store is cleared on a send) is a new
   // inquiry: the form comes back, with the visitor's details still in it.
@@ -161,29 +140,39 @@ export default function InquiryForm({ page = 'golden-residence', options = INQUI
   async function onSubmit(event) {
     event.preventDefault()
     if (status === 'sending') return
-    const found = validate(values)
+    // The checks come with the send path: in already, from the visitor's
+    // first step into the form, or loaded now, the form busy until it is in.
+    let path = sent
+    if (!path) {
+      setStatus('sending')
+      path = await loadSendPath().catch((error) => {
+        console.error('[inquiry] the send did not load:', error)
+      })
+      if (!mounted.current) return
+      if (!path) {
+        setStatus('failed')
+        return
+      }
+    }
+    const found = path.validate(values)
     setTried(true)
     const first = ORDER.find((key) => found[key])
     if (first) {
+      // Not busy: the form as the send found it.
+      setStatus(status)
       form.current.querySelector(`#${IDS[first]}`).focus()
       return
     }
     setStatus('sending')
     const subject = options.find(({ value }) => value === chosen).subject
-    const { ok } = await loadSendPath().then(
-      ({ sendInquiry }) => sendInquiry({
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-        subject,
-        picks: shown.map((pick) => pick.label),
-        message: values.message,
-      }),
-      (error) => {
-        console.error('[inquiry] the send did not load:', error)
-        return { ok: false }
-      },
-    )
+    const { ok } = await path.sendInquiry({
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      subject,
+      picks: shown.map((pick) => pick.label),
+      message: values.message,
+    })
     if (!mounted.current) return
     if (ok) {
       resetInquiry()

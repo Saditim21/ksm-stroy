@@ -4,13 +4,16 @@ import { statusLook } from '../components/ui/status'
 import useMotion from '../motion/useMotion'
 import { formatArea } from '../utils/format'
 import useExplorer from './useExplorer'
+import './blockGrid.css'
 
 // A block in numbers (spec §6.16; M3 §4.4; extract §4.27; the concept's
 // gr.js:185-210): its apartments as a grid of squares, sized from the
 // explorer's project (useExplorer.js): a row a floor, its top floor first,
 // and a column a number on the floor (Golden Residence 12 × 8, floors 8 → 1;
 // Многофамилна 8 × 9, floors 10 → 2). Each square is a button in its status's
-// pattern (the page's stylesheet, gr.css or mn.css), named „А 501, Продаден“
+// pattern (blockGrid.css, which also styles the half each page sets around
+// the grid; the page's stylesheet, gr.css or mn.css, gives the grid its
+// columns, its floors and its width), named „А 501, Продаден“
 // and titled „А 501 · 2-стаен · 62,18 м² · Продаден“, by the project's unit
 // label („А-101“ on Многофамилна's floor 2). The floor numbers stand on the
 // seam's side: after block А's grid, before block Б's. A click opens the

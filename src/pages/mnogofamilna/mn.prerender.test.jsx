@@ -211,6 +211,8 @@ it('#sgradata: „С магазини и подземни гаражи“, produ
   expect(photo.getAttribute('src')).toMatch(/^\/img\/mn-persp-\d+\.webp$/)
   expect(photo.getAttribute('alt')).toBe('Многофамилната сграда откъм улицата, визуализация')
   expect(photo.getAttribute('loading')).toBe('lazy')
+  // The night grade, the perspective's own sky cut (mn.css), on the picture.
+  expect([...building.querySelector('.mns__media picture').classList]).toEqual(expect.arrayContaining(['mn-night', 'mn-night--persp']))
 })
 
 // Spec M3 §6.2 #5: „Галерия със *снимки*“, three spreads: Блок А with Блок
@@ -241,6 +243,17 @@ it('#galeriya: three spreads, the third the two drawings whole, under production
   for (const layer of [...layers(0), ...layers(1)]) expect(layer.classList.contains('gal__img--whole')).toBe(false)
   expect(layers(2).map((layer) => textOf(layer.querySelector('.gal__title')))).toEqual(['Архитектурен план на етажа', 'Блок А и Б – надземни и подземни гаражи'])
   expect(layers(2)[1].querySelector('.gal__title').textContent).toBe('Блок\u00A0А\u00A0и\u00A0Б\u00A0– надземни и\u00A0подземни гаражи')
+
+  // The photos take the night grade, each its own sky cut (mn.css), the
+  // mask that matches its file; the drawings keep their colours.
+  for (const layer of [...layers(0), ...layers(1)]) {
+    const img = layer.querySelector('img')
+    const photo = source(layer).replace(/^\/img\/mn-/, '')
+    expect(img.classList.contains('mn-night'), source(layer)).toBe(true)
+    expect(img.classList.contains(`mn-night--${photo}`), source(layer)).toBe(true)
+    expect([...img.classList].filter((name) => name.startsWith('mn-night--')), source(layer)).toHaveLength(1)
+  }
+  for (const layer of layers(2)) expect(layer.querySelector('img').className, source(layer)).toBe('')
 })
 
 // The sections under the opening are the final state too: nothing in them

@@ -3,12 +3,12 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { HOME_INQUIRY } from '../../pages/home/inquiry'
 import InquiryForm from './InquiryForm'
 
-// The send path (sendPath.js: src/services/inquiry.js, and EmailJS behind it,
-// with the thank-you) is a chunk of its own, out of the first-load JS of
-// every page with the form (spec §10, FR5): the form starts loading it as the
-// visitor first steps into it, and a send waits for it. These cases have a
-// file of their own (ruling PF12), so no other case has loaded the send path
-// before them.
+// The send path (sendPath.js: the form's checks, src/services/inquiry.js, and
+// EmailJS behind it, with the thank-you) is a chunk of its own, out of the
+// first-load JS of every page with the form (spec §10, FR5, ruling T2a): the
+// form starts loading it as the visitor first steps into it, and a send
+// waits for it. These cases have a file of their own (ruling PF12), so no
+// other case has loaded the send path before them.
 
 // The send path's stand-in: it counts its loads, and fails to load, as a
 // chunk that never arrives, while `failing` is set.
@@ -90,4 +90,40 @@ it('says an inquiry whose send path did not load was not sent, and loads it agai
     // The send path itself again, with nothing loaded through it.
     vi.doUnmock('./sendPath')
   }
+})
+
+// Ruling T2a: the checks come with the send path. A send tried before the
+// path is in (a click that never focused the form, as Safari's on a button
+// does not) waits for it, the form busy; then each problem is named, the
+// focus on the first, and the form is no longer busy.
+it('checks a send tried before the send path is in, busy until it is', async () => {
+  // A fresh form, with no send path loaded.
+  vi.resetModules()
+  const { default: FreshForm } = await import('./InquiryForm')
+  render(<FreshForm page="home" options={HOME_INQUIRY.options} />)
+  const form = document.querySelector('form')
+
+  submit()
+  expect(form).toHaveAttribute('aria-busy', 'true')
+  expect(screen.getByRole('button', { name: 'Изпращане...' })).toHaveAttribute('aria-disabled', 'true')
+
+  expect(await screen.findByText('Въведете име.')).toBeInTheDocument()
+  expect(form).not.toHaveAttribute('aria-busy')
+  expect(field('Име')).toHaveFocus()
+  expect(field('Име')).toHaveAttribute('aria-invalid', 'true')
+  expect(screen.queryByRole('alert')).toBeNull()
+})
+
+// While the send path loads, the form takes no second send.
+it('sends once when the action is pressed again while the send path loads', async () => {
+  vi.resetModules()
+  const { default: FreshForm } = await import('./InquiryForm')
+  render(<FreshForm page="home" options={HOME_INQUIRY.options} />)
+  const before = service.sendInquiry.mock.calls.length
+
+  fill()
+  submit()
+  fireEvent.click(screen.getByRole('button', { name: 'Изпращане...' }))
+  expect(await screen.findByRole('status')).toHaveTextContent('Благодарим ви.')
+  expect(service.sendInquiry).toHaveBeenCalledTimes(before + 1)
 })

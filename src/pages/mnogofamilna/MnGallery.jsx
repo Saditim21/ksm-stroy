@@ -10,22 +10,22 @@ import mnImages from '../../data/images/mnogofamilna.json'
 // then the drawings, the typical floor and the garages, each whole on the
 // umber, never cropped, under production's own title
 // (src/pages/Projects.jsx:872 and :662, in sentence case). The photos take
-// the page's night grade and their framing from its stylesheet (mn.css:
-// mn-night, mn-gal--*); they are decoration, the caption says what they
-// show.
+// the page's night grade, each its own sky cut, and their framing from its
+// stylesheet (mn.css: mn-night, mn-night--*, mn-gal--persp); they are
+// decoration, the caption says what they show.
 
 // The garages' drawing's title, production's (Projects.jsx:662).
 const GARAGES = 'Блок\u00A0А\u00A0и\u00A0Б\u00A0– надземни и\u00A0подземни гаражи'
 
 const SPREADS = [
   {
-    left: { image: mnImages['mn-block-a'], photo: 'mn-night mn-gal--block' },
-    right: { image: mnImages['mn-block-b'], photo: 'mn-night mn-gal--block' },
+    left: { image: mnImages['mn-block-a'], photo: 'mn-night mn-night--block-a' },
+    right: { image: mnImages['mn-block-b'], photo: 'mn-night mn-night--block-b' },
     caption: 'Блок\u00A0А и\u00A0блок\u00A0Б.',
   },
   {
-    left: { image: mnImages['mn-front'], photo: 'mn-night' },
-    right: { image: mnImages['mn-persp'], photo: 'mn-night mn-gal--persp' },
+    left: { image: mnImages['mn-front'], photo: 'mn-night mn-night--front' },
+    right: { image: mnImages['mn-persp'], photo: 'mn-night mn-night--persp mn-gal--persp' },
     caption: 'Двата блока откъм улицата.',
   },
   {

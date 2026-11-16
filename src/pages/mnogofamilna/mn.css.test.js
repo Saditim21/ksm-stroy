@@ -1,3 +1,4 @@
+import mnImages from '../../data/images/mnogofamilna.json'
 import { firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
 
 // src/pages/mnogofamilna/mn.css, the Многофамилна page's own (its opening, the
@@ -148,41 +149,23 @@ it('keeps the list’s room before it loads', () => {
   expect(declaredFor(page, '.mnl .lv__table')).toMatchObject({ height: 'var(--list-table)', flex: '1 0 auto' })
 })
 
-// Spec M3 §6.2 #2 (the concept's mnogofamilna.css:147-149): Golden
-// Residence's blocks in numbers sized for this building, 8 squares a floor
-// and 9 floors, 352 px wide at most, the whole width on a small phone; under
-// the section's own class, as Golden Residence's page sizes its squares 12 ×
-// 8 under the same names (gr.css).
+// Spec M3 §6.2 #2 (the concept's mnogofamilna.css:147-149): a block in
+// numbers (src/explorer/blockGrid.css, its pins in
+// src/explorer/blockGrid.css.test.js) sized for this building, 8 squares a
+// floor and 9 floors, 352 px wide at most, the whole width on a small phone;
+// under the section's own class, as Golden Residence's page sizes the same
+// squares 12 × 8 (gr.css).
 describe('the blocks (spec M3 §6.2 #2)', () => {
-  it('sets each block’s squares 8 across and 9 floors down, 4 px apart, 352 px wide at most', () => {
-    expect(declaredFor(page, '.mnb .blk__grid')).toMatchObject({ display: 'grid', 'grid-template-columns': 'repeat(8, 1fr)', gap: '4px' })
-    expect(declaredFor(page, '.mnb .blk__fl')['grid-template-rows']).toBe('repeat(9, 1fr)')
-    expect(declaredFor(page, '.mnb .blk__floors')).toMatchObject({ width: 'min(100%, 352px)', 'grid-template-columns': 'auto 1fr' })
+  it('sets each block’s squares 8 across and 9 floors down, 352 px wide at most', () => {
+    expect(declaredFor(page, '.mnb .blk__grid')).toEqual({ 'grid-template-columns': 'repeat(8, 1fr)' })
+    expect(declaredFor(page, '.mnb .blk__fl')).toEqual({ 'grid-template-rows': 'repeat(9, 1fr)' })
+    expect(declaredFor(page, '.mnb .blk__floors')).toEqual({ width: 'min(100%, 352px)' })
     expect(declaredFor(page, '.mnb .blk__floors', ['@media (max-width: 560px)']).width).toBe('100%')
-    expect(declaredFor(page, '.mnb .blk__grid button')).toMatchObject({ 'aspect-ratio': '1', border: '1px solid var(--c)' })
-    // Every rule for the squares and the halves is the section's own.
-    const blocks = page.filter((rule) => rule.selectors.some((selector) => /\.blk/.test(selector)))
-    for (const rule of blocks) for (const selector of rule.selectors) expect(selector, rule.selector).toMatch(/^\.mnb /)
-  })
-
-  // Diptych §7.9: never colour alone, each square its status's pattern.
-  it('marks each square by its status’s pattern, as Golden Residence’s do', () => {
-    expect(declaredFor(page, '.mnb .blk__grid .s-free')['--c']).toBe('var(--status-free)')
-    expect(declaredFor(page, '.mnb .blk__grid .s-reserved').background).toMatch(/^repeating-linear-gradient\(-45deg/)
-    expect(declaredFor(page, '.mnb .blk__grid .s-sold')['background-image']).toMatch(/^radial-gradient\(/)
-    expect(declaredFor(page, '.mnb .blk__grid .s-blocked')['border-style']).toBe('dashed')
-    expect(declaredFor(page, '.mnb .blk__grid .s-none')['--c']).toBe('var(--hair)')
-  })
-
-  // WCAG 2.4.7: the focus can reach a grid before its squares' entrance, and
-  // shows them, important, over the entrance's inline opacity.
-  it('shows every square while the focus is in its grid', () => {
-    const [rule] = rulesFor(page, '.mnb .blk__grid:focus-within button')
-    expect(rule.declarations).toEqual([{ prop: 'opacity', value: '1', important: true }])
-  })
-
-  it('grows a square pointed at by 1.18 only where a fine pointer hovers', () => {
-    expect(declaredFor(page, '.mnb .blk__grid button:hover', ['@media (hover: hover) and (pointer: fine)'])).toMatchObject({ transform: 'scale(1.18)', 'z-index': '1' })
+    // Every rule of the page's for the squares and the halves is the
+    // section's own.
+    const blocks = page.filter((rule) => rule.selectors.some((selector) => /.blk/.test(selector)))
+    expect(blocks.length).toBeGreaterThan(0)
+    for (const rule of blocks) for (const selector of rule.selectors) expect(selector, rule.selector).toMatch(/^.mnb /)
   })
 
   // The way to each block's page is as wide as its words, on the block's
@@ -191,13 +174,6 @@ describe('the blocks (spec M3 §6.2 #2)', () => {
     expect(declaredFor(page, '.mnb .blk__go')['justify-self']).toBe('start')
     expect(declaredFor(page, '.mnb .blk--a .blk__go')['justify-self']).toBe('end')
     expect(declaredFor(page, '.mnb .blk--a .blk__go', [PHONE])['justify-self']).toBe('start')
-  })
-
-  // Spec M3 §4.1: halves stack on a phone; the second block under a brass
-  // rule.
-  it('stacks the blocks on a phone, block Б under a brass rule', () => {
-    expect(declaredFor(page, '.mnb .blk--b', [PHONE])['border-top']).toBe('1px solid var(--brass)')
-    expect(declaredFor(page, '.mnb .blk--a .blk__floors', [PHONE])['grid-template-columns']).toBe('auto 1fr')
   })
 })
 
@@ -213,14 +189,46 @@ it('sets the building’s picture beside its words, stacked on a phone', () => {
 })
 
 // Spec M3 §6.2 #4, #5: the daylight renders are taken to the night palette
-// by CSS, quieter, warmer and darker, their sky fading from the top into the
-// umber behind them; the drawings keep their colours.
-it('grades the photos to the night palette, their sky fading into the umber', () => {
-  const grade = declaredFor(page, '.mn-night')
-  expect(grade.filter).toMatch(/saturate\(\.\d+\).*sepia\(\.\d+\).*brightness\(\.\d+\)/)
-  expect(grade['mask-image']).toMatch(/^linear-gradient\(to bottom, /)
-  expect(declaredFor(page, '.mn-gal--block')['object-position']).toBe('50% 46%')
-  expect(declaredFor(page, '.mn-gal--persp')['object-position']).toBe('58% 50%')
+// by CSS, as the concept's derivatives have them: each photo's sky cut away
+// along its skyline, so the umber behind it is the night sky, the rest a
+// little warmer and darker. The cut is a mask in the photo's own pixels,
+// sized and placed as the photo is (cover, at --at, its object-position too),
+// so the two meet at any crop; the drawings keep their colours
+// (mn.prerender.test.jsx).
+describe('the night grade (spec M3 §6.2 #4, #5)', () => {
+  it('cuts each photo’s sky with a mask sized and placed as the photo is', () => {
+    expect(declaredFor(page, '.mn-night')).toMatchObject({
+      '--at': '50% 50%',
+      filter: 'sepia(.12) brightness(.94)',
+      'object-position': 'var(--at)',
+      'mask-position': 'var(--at)',
+      'mask-size': 'cover',
+      'mask-repeat': 'no-repeat',
+    })
+  })
+
+  // The concept's framing (its mnogofamilna.js:1101-1102): the blocks on
+  // their towers, the gallery's perspective on its nearer pair.
+  it('frames the blocks at 50% 46% and the gallery’s perspective at 58% 50%', () => {
+    expect(declaredFor(page, '.mn-night--block-a')['--at']).toBe('50% 46%')
+    expect(declaredFor(page, '.mn-night--block-b')['--at']).toBe('50% 46%')
+    expect(declaredFor(page, '.mn-gal--persp')['--at']).toBe('58% 50%')
+  })
+
+  // Each mask is the photo's skyline in the photo's own pixels: an SVG as
+  // wide and tall as the image (its manifest's w and h), one path that keeps
+  // everything under the skyline, down to the photo's bottom edge.
+  it('draws each photo’s skyline in its own pixels, keeping the street', () => {
+    for (const [id, image] of [['block-a', 'mn-block-a'], ['block-b', 'mn-block-b'], ['front', 'mn-front'], ['persp', 'mn-persp']]) {
+      const { w, h } = mnImages[image]
+      const mask = declaredFor(page, `.mn-night--${id}`)['mask-image']
+      const svg = decodeURIComponent(/^url\("data:image\/svg\+xml,(.*)"\)$/.exec(mask)?.[1] ?? '')
+      expect(svg, id).toContain(`width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'`)
+      const paths = [...svg.matchAll(/<path d='([^']+)'\/>/g)].map(([, d]) => d)
+      expect(paths, id).toHaveLength(1)
+      expect(paths[0], id).toMatch(new RegExp(`^M0 ${h}L.*L${w} ${h}Z$`))
+    }
+  })
 })
 
 // Spec M3 §4.1 (the critic's hinge fix): from 901 px no hinge's title or lead
