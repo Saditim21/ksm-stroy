@@ -149,7 +149,7 @@ The phone value follows "/". Serif means Cormorant 500 at `-0.005em` unless note
 
 | Role | Face | Size | Line-height |
 |---|---|---|---|
-| Home H1 | serif, `-0.01em` | `clamp(46px, 5.7vw, 98px)` / `clamp(28px, 8.4vw, 46px)` (two lines down to 320 px) | 1.06 / 1.08 |
+| Home H1 | serif, `-0.01em` | `clamp(46px, 5.7vw, 98px)` / `clamp(28px, 8.4vw, 46px)` (two lines down to 320 px; below 360 px: `-0.03em` with 12 px right padding, so row 1 fits at the 28 px floor) | 1.06 / 1.08 |
 | GR H1 | serif, `-0.012em` | `clamp(54px, 8.6vw, 148px)` / `clamp(48px, 13.5vw, 80px)` | 0.9 |
 | h2 | serif | `clamp(40px, 4.6vw, 76px)` | 1 |
 | h3 | serif | `clamp(30px, 2.6vw, 44px)` | 1.05 |
@@ -318,9 +318,10 @@ The route change runs through React's `<ViewTransition>` in `RouteTransition`: k
 
 - **What closes.** The doors close the whole view, not only the page:
   - the page's own group (`page-out` / `page-in`);
-  - the root snapshot, which holds the footer, the grain and the ground. `::view-transition-old(root)` and `-new(root)` run the same keyframes, so a footer link closes like any other;
+  - the root snapshot, which holds the footer and the dark ground. `::view-transition-old(root)` and `-new(root)` run the same keyframes, so a footer link closes like any other. A legacy page's light ground is painted by the page frame while the doors run, and by `<main>` without motion;
   - an open menu (§6.4). It is its own group, `site-menu`, painted above the page, so the doors close over it as in the concept.
-  - What the doors uncover is onyx: `::view-transition` carries `background: var(--onyx)`.
+  - What the doors uncover is onyx under the grain: `::view-transition` carries `background: var(--onyx)`.
+  - **The grain** is a transition group of its own, `grain`, above every other group. It keeps the browser's default crossfade, so it stays constant through a change and fades out or in over 0.25 s to or from a legacy page, which renders no grain.
 - **The header** is its own transition group. It stays on top and switches at once.
 - **The mark** shows only in the intro.
 - **Arrival.** `RouteTransition` decides it when a page mounts, from a first-render ref. It never compares location keys: React Router gives the first entry the key `"default"`, and Back restores it.
@@ -334,7 +335,7 @@ The route change runs through React's `<ViewTransition>` in `RouteTransition`: k
 - **Unsupported browsers:** instant.
 - **After a route change:**
   - `LenisScrollSync` waits up to `TRANSITION_MAX_MS = 1400` before `ScrollTrigger.refresh()`.
-  - Focus moves to `#main` (with `preventScroll`), but not on the first load, nor on a hash or query change.
+  - Focus moves with `preventScroll`, but not on the first load, nor on a hash or query change. When the arriving address has a hash whose element exists, the focus goes to that element (`tabindex="-1"` if it has none). Otherwise it goes to `#main`.
 - **Prefetch.** Links in the menu, the footer and the hero halves use `prefetch="intent"`.
 
 ### 5.7 Scroll- and action-driven motion
@@ -739,6 +740,7 @@ The order is always available, reserved, sold, blocked.
 - **When.** All three are read after `useHydrated()` and written with `replace`. Closing the stage removes `?floor` and `?unit`.
 - **One source.** The stage and the unit panel are open exactly while the URL says so, so a dialog closes in the same commit as its URL change.
 - **Deep links.** When a URL opens the stage on arrival, the page first jumps (no glide) to `#explorer`, so closing the stage leaves the reader at the facade. A close with no opener to return to focuses the hot floor's rail.
+  - On a deep-link landing the header keeps its 36 px EU row in view and the dialogs start below it, until the landing's dialogs close. Stages opened in place keep the full screen. §1.9's EU rule is the reason.
 - **How `?floor` is written.** The GR page always writes the letter (`А-5`). A block route writes its own floors bare.
 
 ### 7.11 Block routes
@@ -864,12 +866,13 @@ The order is always available, reserved, sold, blocked.
 
 - **Focus ring.** 2 px, offset 3 px, in the text colour of the ground it sits on: ivory on the dark grounds, onyx inside `.on-light` (light plates and the legacy ground). Under forced colours it is Highlight, never `currentColor`.
   - Links over positioned media (hero halves, works and gallery media) carry the ring on an inset overlay (`-4px`).
-  - Facade floors show focus as the dashed highlight plus the ring on their rail.
+  - A keyboard-focused rail shows the dashed highlight, plus the ring on its rail where no open panel covers it. A block's edge panel lies over its own rail (§7.3), and while it is open the dashed lens is the focus indicator.
   - Plan units show it as the hot outline.
 - **Clipping.** No `overflow: hidden` on an ancestor of a focusable element if it would clip the ring.
 - **Dialogs** (menu, stage, unit panel): `role="dialog"`, `aria-modal`, a name, a Tab trap, Escape, focus moved in and returned. A dialog under another is inert.
 - **Keyboard paths:**
   - rails: arrows and Enter;
+  - block grids: one tab stop each, with a roving tabindex. Arrows move between squares (←→ along a floor, ↑↓ between floors), Home and End go to the floor's ends, and Enter and Space open the unit;
   - stage: switch, stepper, close, units, rows, and PageUp/PageDown;
   - unit panel: action, previous and next, close;
   - tabs: ←→;
@@ -937,3 +940,12 @@ v2 spec §10 stands, with these amendments:
 - „над 15 години опит“ against 2008.
 - Block А has no Изложение column.
 - One typical plan is used for every floor, though the real А1 plan differs.
+
+## Amendments (2026-11-16)
+
+- §3.2, Home H1: below 360 px, `-0.03em` with 12 px right padding (T3a).
+- §5.6, What closes: the root snapshot holds the footer and the dark ground; a legacy page's light ground is painted by the page frame (by `<main>` without motion); the grain is its own transition group above all others (T1c, T5a).
+- §5.6, After a route change: focus goes to the hash target when it exists, else to `#main` (FR2).
+- §7.10, Deep links: a deep-link landing keeps the 36 px EU row in view (T7a).
+- §11, Focus ring: the dashed lens is the focus indicator while an edge panel covers its rail (T6a).
+- §11, Keyboard paths: each block grid is one tab stop with a roving tabindex (T8a).

@@ -709,7 +709,7 @@ The teammate's text from `origin/vidimost-es` (description, aims, budget, dates,
 - `src/utils/propertyStatus.js` is the single source:
   - precedence: sold > reserved > blocked > available;
   - an empty cell is available;
-  - unknown text passes through, and the UI shows it as „Няма информация".
+  - unknown text passes through. The UI shows a unit's own status text when it has one (for example „Скоро"), and otherwise „Няма информация".
 - **Floor:**
   - green if ≥ 1 free;
   - amber if 0 free and ≥ 1 reserved;
@@ -728,7 +728,7 @@ The teammate's text from `origin/vidimost-es` (description, aims, budget, dates,
 | LCP | ≤ 2.5 s |
 | CLS | ≤ 0.02 |
 | TBT | ≤ 150 ms |
-| Bytes requested before LCP | ≤ 250 kB |
+| Bytes requested before LCP (the transfer size of every request the page started before the LCP was painted, in an unthrottled trace) | ≤ 250 kB |
 | LCP image | ≤ 60 kB mobile, ≤ 200 kB desktop |
 | First-load JS per route, gz (React, the router and app code; GSAP and Lenis are deferred) | ≤ 160 kB |
 | Motion chunk, gz | ≤ 60 kB |
@@ -892,3 +892,9 @@ Nothing is pushed or deployed without the user's go-ahead. Merge `main` into `re
 - Astro means a rebuild with islands;
 - Next's static export breaks the Odoo proxy;
 - React Router framework mode prerenders within the same React tree.
+
+## Amendments (2026-11-16)
+
+- §9, Data and status rules: an unknown status shows the unit's own text, else „Няма информация" (M1 R1, A4).
+- §10, Budgets: "bytes before LCP" is the transfer size of every request started before the LCP was painted, in an unthrottled trace, as the M1 baseline note defines it (M1 ruling, "bytes before LCP").
+- §3.2, Home type ladder (M1 A5): superseded, not applied. The Diptych spec's §3 replaced that look.
