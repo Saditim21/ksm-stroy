@@ -7,11 +7,12 @@
 // date goes with them. Its plans are data, there at once (ruling PF3: the
 // block pages prerender mini plans of its one typical floor).
 //
-// Its facade is a placeholder until Task 4 brings the night render and its
-// lights: the building map, the alt text, the class its stylesheet's
-// geometry hangs on and the seam are its own; the picture is the daylight
-// crop already in the pipeline.
-import mnImages from '../../data/images/mnogofamilna.json'
+// Its facade is a placeholder until Task 4 brings the night render's lights:
+// the building map, the alt text, the class its stylesheet's geometry hangs
+// on and the seam are its own; the picture is the night render with its
+// lights off (mn-night's mn-dusk-off), the same crop of the 3308 px master
+// as the daylight one it replaces.
+import mnNight from '../../data/images/mn-night.json'
 import building from '../../data/maps/mnogofamilna.building.json'
 import floors from '../../data/maps/mnogofamilna.floors.json'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
@@ -38,7 +39,7 @@ export const MN_PROJECT = Object.freeze({
   exposureNote: null,
   facade: Object.freeze({
     map: building,
-    picture: Object.freeze({ ...mnImages['mnogofamilna-sgrada1'], color: 'transparent' }),
+    picture: Object.freeze({ ...mnNight['mn-dusk-off'], color: 'transparent' }),
     sizes: '100vw',
     alt: 'Фасада на Многофамилна жилищна сграда',
     className: 'fx--mn',

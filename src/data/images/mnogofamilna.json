@@ -1,15 +1,62 @@
 {
-  "mnogofamilna-sgrada1": {
-    "path": "/img/mnogofamilna-sgrada1",
-    "w": 3308,
-    "h": 2020,
+  "mn-block-a": {
+    "path": "/img/mn-block-a",
+    "w": 709,
+    "h": 829,
     "widths": [
-      768,
-      1024,
-      1440,
-      1920,
-      2560
+      480,
+      709
     ],
-    "color": "#546476"
+    "color": "#7B8D8B"
+  },
+  "mn-block-b": {
+    "path": "/img/mn-block-b",
+    "w": 643,
+    "h": 829,
+    "widths": [
+      480,
+      643
+    ],
+    "color": "#5B7987"
+  },
+  "mn-front": {
+    "path": "/img/mn-front",
+    "w": 1352,
+    "h": 829,
+    "widths": [
+      800,
+      1352
+    ],
+    "color": "#5B7883"
+  },
+  "mn-garages": {
+    "path": "/img/mn-garages",
+    "w": 1750,
+    "h": 1236,
+    "widths": [
+      900,
+      1750
+    ],
+    "color": "#BFB9B5"
+  },
+  "mn-persp": {
+    "path": "/img/mn-persp",
+    "w": 1356,
+    "h": 826,
+    "widths": [
+      800,
+      1356
+    ],
+    "color": "#657F96"
+  },
+  "mn-plan-drawing": {
+    "path": "/img/mn-plan-drawing",
+    "w": 1748,
+    "h": 900,
+    "widths": [
+      900,
+      1748
+    ],
+    "color": "#BAB7B4"
   }
 }

@@ -64,24 +64,6 @@
     ]
   },
   {
-    "id": "mnogofamilna-sgrada1",
-    "group": "mnogofamilna",
-    "src": "src/assets/продажби/project 1/sgrada1.jpg",
-    "crop": {
-      "left": 0,
-      "top": 155,
-      "width": 3308,
-      "height": 2020
-    },
-    "widths": [
-      768,
-      1024,
-      1440,
-      1920,
-      2560
-    ]
-  },
-  {
     "id": "eu-cofunded-bg",
     "group": "shell",
     "src": "git:origin/vidimost-es:public/eu/eu-cofunded-bg.png",
@@ -219,7 +201,7 @@
   },
   {
     "id": "mn-dusk",
-    "group": "home",
+    "group": "mn-night",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/mn-dusk-2400.webp",
     "widths": [
       800,
@@ -227,6 +209,225 @@
       1600,
       1920,
       2400
+    ]
+  },
+  {
+    "id": "mn-dusk-off",
+    "group": "mn-night",
+    "src": "src/assets/mnogofamilna/mn-dusk-off-2400.webp",
+    "widths": [
+      800,
+      1400,
+      1600,
+      1920,
+      2400
+    ]
+  },
+  {
+    "id": "mn-front",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/photos/photo-1.png",
+    "widths": [
+      800,
+      1352
+    ]
+  },
+  {
+    "id": "mn-persp",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/photos/photo-2.png",
+    "widths": [
+      800,
+      1356
+    ]
+  },
+  {
+    "id": "mn-block-a",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/photos/photo-3.png",
+    "widths": [
+      480,
+      709
+    ]
+  },
+  {
+    "id": "mn-block-b",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/photos/photo-4.png",
+    "widths": [
+      480,
+      643
+    ]
+  },
+  {
+    "id": "mn-plan-drawing",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/building-all-floors-architecture.png",
+    "widths": [
+      900,
+      1748
+    ]
+  },
+  {
+    "id": "mn-garages",
+    "group": "mnogofamilna",
+    "src": "src/assets/продажби/project 1/building-garages.png",
+    "widths": [
+      900,
+      1750
+    ]
+  },
+  {
+    "id": "mn-plan-line",
+    "group": "mn-plans",
+    "src": "C:/ksm-stroy/design/2026-11-16-m3m4-concepts/img/mnogofamilna/plan-mn.webp",
+    "widths": [
+      1200,
+      2400
+    ]
+  },
+  {
+    "id": "mn-apt-a102",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-A/apartment-a2-floor1.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-a106",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-A/apartment-a6-floor1.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-a802",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-A/apartment-a58-floor8.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-a808",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-A/apartment-a64-floor8.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b102",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment B2.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b106",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment B6.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b107",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment B7.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b207",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-207-floor2.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b307",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b23-floor3.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b407",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b31-floor4.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b607",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b47-floor6.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b702",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b50-floor7.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b707",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b55-floor7.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b801",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b57-floor8.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b803",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b59-floor8.png",
+    "widths": [
+      600,
+      1000
+    ]
+  },
+  {
+    "id": "mn-apt-b807",
+    "group": "mn-plans",
+    "src": "src/assets/продажби/project 1/apartment-B-floor 1/apartment-b63-floor8.png",
+    "widths": [
+      600,
+      1000
     ]
   },
   {

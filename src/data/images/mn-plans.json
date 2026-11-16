@@ -1,0 +1,172 @@
+{
+  "mn-apt-a102": {
+    "path": "/img/mn-apt-a102",
+    "w": 1100,
+    "h": 986,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#A8A09B"
+  },
+  "mn-apt-a106": {
+    "path": "/img/mn-apt-a106",
+    "w": 1100,
+    "h": 888,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#A69B94"
+  },
+  "mn-apt-a802": {
+    "path": "/img/mn-apt-a802",
+    "w": 1040,
+    "h": 1014,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#BDB9B8"
+  },
+  "mn-apt-a808": {
+    "path": "/img/mn-apt-a808",
+    "w": 1100,
+    "h": 1232,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9F9692"
+  },
+  "mn-apt-b102": {
+    "path": "/img/mn-apt-b102",
+    "w": 1112,
+    "h": 1068,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#C0BDBA"
+  },
+  "mn-apt-b106": {
+    "path": "/img/mn-apt-b106",
+    "w": 1102,
+    "h": 884,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#B9B3AF"
+  },
+  "mn-apt-b107": {
+    "path": "/img/mn-apt-b107",
+    "w": 1098,
+    "h": 892,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9D938B"
+  },
+  "mn-apt-b207": {
+    "path": "/img/mn-apt-b207",
+    "w": 1096,
+    "h": 864,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9C928B"
+  },
+  "mn-apt-b307": {
+    "path": "/img/mn-apt-b307",
+    "w": 1096,
+    "h": 866,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9B9189"
+  },
+  "mn-apt-b407": {
+    "path": "/img/mn-apt-b407",
+    "w": 1098,
+    "h": 876,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9A8F89"
+  },
+  "mn-apt-b607": {
+    "path": "/img/mn-apt-b607",
+    "w": 1102,
+    "h": 860,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9A9089"
+  },
+  "mn-apt-b702": {
+    "path": "/img/mn-apt-b702",
+    "w": 1038,
+    "h": 1012,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#BDB9B8"
+  },
+  "mn-apt-b707": {
+    "path": "/img/mn-apt-b707",
+    "w": 1098,
+    "h": 898,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9E948A"
+  },
+  "mn-apt-b801": {
+    "path": "/img/mn-apt-b801",
+    "w": 1096,
+    "h": 1276,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9B938F"
+  },
+  "mn-apt-b803": {
+    "path": "/img/mn-apt-b803",
+    "w": 1098,
+    "h": 1274,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#ADA49B"
+  },
+  "mn-apt-b807": {
+    "path": "/img/mn-apt-b807",
+    "w": 1098,
+    "h": 838,
+    "widths": [
+      600,
+      1000
+    ],
+    "color": "#9B9288"
+  },
+  "mn-plan-line": {
+    "path": "/img/mn-plan-line",
+    "w": 2400,
+    "h": 1236,
+    "widths": [
+      1200,
+      2400
+    ],
+    "color": "#F1F2EE"
+  }
+}

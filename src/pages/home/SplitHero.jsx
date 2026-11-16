@@ -7,7 +7,7 @@ import { GR_FACTS, MNOGO_DATED } from '../../config/facts'
 import { grFree } from '../../data/availability/select'
 import { useAvailability } from '../../data/availability/useAvailability'
 import grImages from '../../data/images/golden-residence.json'
-import homeImages from '../../data/images/home.json'
+import mnNight from '../../data/images/mn-night.json'
 import { plural } from '../../utils/format'
 import { cutNextTransition } from '../../utils/viewTransition'
 
@@ -192,7 +192,7 @@ export default function SplitHero() {
 
       <a href="#zapitvane" className="half half--mn" aria-label={MN_NAME} onClick={toInquiry}>
         <div className="half__media">
-          <ResponsivePicture image={homeImages['mn-dusk']} alt="" sizes="100vw" eager />
+          <ResponsivePicture image={mnNight['mn-dusk']} alt="" sizes="100vw" eager />
         </div>
         <div className="half__shade" />
         <div className="half__info">

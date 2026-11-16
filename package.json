@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "check:dist": "node scripts/check-dist.mjs",
     "images": "node scripts/images/build-images.mjs",
+    "mn-lights-off": "node scripts/images/mn-lights-off.mjs",
     "mn-snapshot": "node scripts/mnogofamilna/build-snapshot.mjs",
     "smoke": "node scripts/smoke/smoke.mjs",
     "perf": "node scripts/perf/lighthouse.mjs",
