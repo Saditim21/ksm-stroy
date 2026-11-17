@@ -96,6 +96,38 @@ it('draws the hot row’s brass rule down its seam side', () => {
   expect(declaredFor('.mbr.is-hot .mbr__no b').color).toBe('var(--brass-l)')
 })
 
+// The rule draws over the seam (spec M3 §6.5), for both blocks at every width.
+// The seam is 1 px wide, centred on the halves' edge, above the split's other
+// children (src/styles/diptych.css: `.split > .seam`). The rule lies on the
+// same pixel, centred on that edge: the rows' padding on their seam side, and
+// half a pixel, back from the row. And it paints above the seam: its z-index
+// tops the seam's, in the stacking context they share, since neither the row,
+// the rows' column nor the split makes one of its own. Flush against the edge
+// and under the seam, one block's rule was covered whole once the pixels
+// snapped (Б's at 1440 with Windows' scrollbar, А's at an even width).
+it('draws the hot row’s rule on the seam’s own pixel, above it, for both blocks', () => {
+  const seamDepths = rulesFor(rulesOf('src/styles/diptych.css'), '.split > .seam').map((each) => valueOf(each, 'z-index')).filter(Boolean)
+  const seamDepth = Number(seamDepths.at(-1))
+  const rule = declaredFor('.mbr::before')
+  const mirrored = declaredFor('.mbp--b .mbr::before')
+
+  expect(seamDepth).toBeGreaterThan(0)
+  expect(Number(rule['z-index'])).toBeGreaterThan(seamDepth)
+  expect(rule.left).toBe('calc(-1 * clamp(28px, 4vw, 72px) - .5px)')
+  expect(mirrored.right).toBe(rule.left)
+  expect(rule.width).toBe('1px')
+  // The rows' padding on their seam side is the rule's way back to the edge.
+  expect(declaredFor('.mbl__rows').padding).toBe('0 var(--gut) 0 clamp(28px, 4vw, 72px)')
+  expect(declaredFor('.mbp--b .mbl__rows', [DESKTOP]).padding).toBe('0 clamp(28px, 4vw, 72px) 0 var(--gut)')
+  for (const selector of ['.mbr', '.mbl__rows', '.mbl']) {
+    for (const each of rulesFor(rules, selector)) {
+      for (const prop of ['z-index', 'isolation', 'transform', 'opacity', 'filter', 'contain', 'will-change']) {
+        expect(valueOf(each, prop), `${selector} ${prop}`).toBeUndefined()
+      }
+    }
+  }
+})
+
 describe('the head’s entrance (Diptych §5.5, M3 §4.2)', () => {
   // Every rule that declares an animation starts with :root.js and sits
   // inside @media (prefers-reduced-motion: no-preference); outside @keyframes

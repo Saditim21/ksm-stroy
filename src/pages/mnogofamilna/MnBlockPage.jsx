@@ -14,6 +14,7 @@ import { Dated } from '../../explorer/ExplorerSection'
 import Facade from '../../explorer/Facade'
 import { FloorCounts } from '../../explorer/FloorFacts'
 import { facadeOf } from '../../explorer/geometry'
+import { loadSurfaces } from '../../explorer/loadSurfaces'
 import { planFor } from '../../explorer/planGeometry'
 import { MN_PROJECT } from '../../explorer/projects/mn'
 import useExplorer from '../../explorer/useExplorer'
@@ -61,6 +62,11 @@ import './mn-block.css'
 // its plan, opens the stage, growing from the row's plan, and its close
 // gives the focus back to the row's „Отворете плана“; a floor opened from
 // the facade grows from its row's plan where the row is on the screen.
+// The stage and the unit panel are a chunk of their own (surfaces.js), with
+// Многофамилна's plans, which the block's facade never loads (block mode has
+// no panels): the page warms them as a pointer comes over its floors, presses
+// in them, or the focus comes into them, so the first floor opened opens at
+// once (spec M3 §10, Diptych §12: preloaded on the first hover or focus).
 //
 // The availability API and both display faces, which the title sets in the
 // first viewport, are preloaded with the document the page is first loaded
@@ -124,8 +130,8 @@ function Floors({ block }) {
   const own = useMemo(() => blockFacade(project, block, SIZES), [project, block])
   const { shape } = facadeOf(own.facade.map)
   const isFloor = useCallback((key) => shape.has(key), [shape])
-  const hotState = useHotFloor({ compact: true, isFloor })
-  const { hot, setHot, clearHot } = hotState
+  const hotFloor = useHotFloor({ compact: true, isFloor })
+  const { hot, setHot, clearHot } = hotFloor
   const ref = useRef(null)
   const rowsRef = useRef(null)
   // The floor whose row crosses the middle of a desktop's screen, or null.
@@ -164,6 +170,11 @@ function Floors({ block }) {
     if (middle && hot?.key !== middle) setHot(middle, 'scroll')
     else if (!middle && hot) clearHot()
   }, [hot, middle, setHot, clearHot])
+  // What the facade and the rows show: until the effect above has made the
+  // middle row the hot floor, they show it already, so a floor that lets go
+  // hands over to it in the same render. The facade's lens glides there, and
+  // its lit floor never goes out on the way.
+  const hotState = hot || !middle ? hotFloor : { ...hotFloor, hot: { key: middle, source: 'scroll' }, lens: middle }
 
   // A row's floor, or a unit of it, grows from the row's plan, and gives the
   // focus back to the row's „Отворете плана“ (ruling C7.2).
@@ -180,9 +191,14 @@ function Floors({ block }) {
   // A stage that closes with no opener gives the focus to its floor's rail:
   // this block's (the facade has no other).
   const asked = useMemo(() => railFocus && { block, floor: railFocus.floor }, [railFocus, block])
+  // The dialogs' chunk and the plans, warmed (one load in flight is shared);
+  // a failed load is asked for again as a floor opens, and said then.
+  const warm = () => {
+    loadSurfaces(project).catch(() => {})
+  }
 
   return (
-    <section ref={ref} className="mbl split" id="explorer" aria-labelledby="mbl-h">
+    <section ref={ref} className="mbl split" id="explorer" aria-labelledby="mbl-h" onPointerEnter={warm} onPointerDown={warm} onFocus={warm}>
       <h2 className="sr-only" id="mbl-h">
         Етажи и&nbsp;апартаменти
       </h2>

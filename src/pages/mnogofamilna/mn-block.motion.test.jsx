@@ -107,14 +107,39 @@ it('lights nothing at scroll 0', async () => {
 })
 
 // A pointer the reader holds over a floor keeps it: the middle row waits.
-it('keeps a floor pointed at while the page scrolls under it', async () => {
+// Once the pointer leaves, the middle row comes back after the hot floor's
+// 320 ms, in the same update as the pointed floor lets go: the facade's lens
+// glides from the pointed floor to the middle row's, and its lit floor never
+// goes out on the way (its tint never fades to 0).
+it('keeps a floor pointed at while the page scrolls under it, and gives the middle row back once it lets go', async () => {
   const { rows, trigger } = await renderPage({ fine: true })
   const pointed = document.querySelector('#explorer .mbr[data-k="А-3"]')
+  const tint = document.querySelector('#explorer .fx__tint')
 
   fireEvent.pointerOver(pointed, { pointerType: 'mouse' })
   scrolledTo(rows, -500)
   act(() => trigger.onUpdate())
   expect(hotRows()).toEqual(['А-3'])
+
+  vi.useFakeTimers()
+  try {
+    recorder.reset()
+    fireEvent.pointerLeave(rows, { pointerType: 'mouse' })
+    act(() => vi.advanceTimersByTime(319))
+    expect(hotRows()).toEqual(['А-3'])
+
+    act(() => vi.advanceTimersByTime(1))
+    expect(hotRows()).toEqual(['А-7'])
+    expect(document.querySelector('#explorer .fx__cnt[data-k="А-7"]')).toHaveClass('is-hot')
+    expect(document.querySelector('#explorer .fx')).toHaveClass('is-hot')
+    const fades = recorder.tweens.filter((tween) => tween.targets === tint)
+    expect(fades.map((tween) => tween.vars.attr)).toEqual([])
+    const glides = recorder.tweens.filter((tween) => Array.isArray(tween.targets) && tween.targets.includes(tint))
+    expect(glides).toHaveLength(1)
+    expect(glides[0].vars.attr).toEqual(expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }))
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 // A window narrowed to a phone's width lets the middle row go: the facade

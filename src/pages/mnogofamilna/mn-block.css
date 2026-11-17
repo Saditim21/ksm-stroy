@@ -98,7 +98,11 @@
    statuses' colours, and its range line and „Отворете плана“ under a rule.
    A hot floor's row (MnBlockPage.jsx: pointed at, focused, or, on a
    desktop, across the screen's middle) warms, its number turns brass-l, and
-   a brass-l rule draws down its seam side, over the seam. */
+   a brass-l rule draws down its seam side, over the seam: on the seam's own
+   pixel, centred as the seam is on the halves' edge (the rows' padding and
+   half a pixel back), and above it (the split's seam is at z-index 4,
+   src/styles/diptych.css; the row, the rows and the split make no stacking
+   context of their own). So both blocks draw it alike at every width. */
 .mbr {
   position: relative;
   display: grid;
@@ -111,9 +115,10 @@
 .mbr::before {
   content: '';
   position: absolute;
+  z-index: 5;
   top: -1px;
   bottom: 0;
-  left: calc(-1 * clamp(28px, 4vw, 72px));
+  left: calc(-1 * clamp(28px, 4vw, 72px) - .5px);
   width: 1px;
   background: var(--brass-l);
   transform: scaleY(0);
@@ -122,7 +127,7 @@
 }
 .mbp--b .mbr::before {
   left: auto;
-  right: calc(-1 * clamp(28px, 4vw, 72px));
+  right: calc(-1 * clamp(28px, 4vw, 72px) - .5px);
 }
 .mbr.is-hot { background: rgba(184, 149, 74, .05); }
 .mbr.is-hot::before { transform: scaleY(1); }
