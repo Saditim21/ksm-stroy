@@ -65,6 +65,11 @@ import '../../components/inquiry/inquiry.css'
 // The store outlives the page (inquiryStore.js), so the section clears the
 // option it leaves (ruling C5.1), as InquirySection does.
 //
+// Home's photographs (home.json) and Многофамилна's snapshot come in under a
+// query of their own (?contact): the build gives this page its own copy of
+// what it reads from them, so Home's chunk and Многофамилна's stay as they
+// were (ruling M4-PF3).
+//
 // The heading rises line by line as the section comes up from below
 // (useReveals); the markup is the final state.
 

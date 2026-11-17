@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import Seam from '../components/ui/Seam'
-import Ways from '../components/ui/Ways'
+import Ways from '../components/ui/Ways.jsx?contact'
 import { PRIMARY_PHONE, SITE } from '../config/site'
 import { availabilityPreload } from '../data/availability/useAvailability'
 import useReveals from '../motion/useReveals'
@@ -19,6 +19,12 @@ import '../pages/contact/contact.css'
 // both halves (ContactInquiry.jsx, #zapitvane), which every other page's
 // „Запитване“ lands on; the two offices (Offices.jsx, #ofisi); and the
 // closing, production's call to action as the system's two ways.
+//
+// Ways comes in under a query of its own (Ways.jsx?contact), as the form's
+// photographs and Многофамилна's snapshot do (ContactInquiry.jsx): the build
+// gives this page its own copy rather than a chunk shared with Home's
+// teaser, which would add about 220 B to Home's first load (ruling M4-PF3).
+// The two pages still share ways.css, a stylesheet of its own.
 
 // How the site's shell frames this page (src/shell/handle.js): below the
 // solid header, with the inquiry the header's „Запитване“ goes to.
