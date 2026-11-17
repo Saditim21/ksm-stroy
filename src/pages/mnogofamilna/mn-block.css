@@ -1,0 +1,304 @@
+/* A Многофамилна block page (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §6.3, §6.5; Diptych §5.5): the head's other side and its entrance, the
+   floors beside the block's pinned facade, Б mirrored, and the facade's
+   crop of one block. Ported from the concept's css/mnogofamilna-block-a.css
+   and js/mnogofamilna.js:391-452 (its 'block' mode) with the tokens of
+   src/index.css, --screen-h for vh, and the system's type and focus ring.
+
+   The page's own stylesheet (MnBlockPage.jsx), after the site's: plain CSS,
+   in no Tailwind layer. The head is Golden Residence's block page head (.bp,
+   src/explorer/explorer.css; M3 §4.1); the seam, the split and the hinge are
+   the site's (src/styles/diptych.css); the facade and its lights are the
+   explorer's (explorer.css) and Многофамилна's (src/explorer/mn-facade.css),
+   whose rules this one outweighs by a class where it changes them; the
+   status counts are their component's (src/components/ui/status.css).
+
+   The head moves by CSS from first paint (Diptych §5.5), only under the
+   motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes, held by a `both`
+   fill; every entrance waits --arrive (src/styles/motion.css). The facade's
+   own entrance, its lights switching on bottom to top, is mn-facade.css's. */
+
+/* ---------- the head (spec M3 §6.5) ---------- */
+/* The way back and the H1 against the seam (.bp); after it, the block's
+   facts, its counts by status and the date they are from. */
+.mbp .bp__title .split-line { display: block; }
+.mbh {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+/* From 901 px, where the halves stand side by side, the head keeps out of
+   the page's gutter (spec M3 §4.1). */
+@media (min-width: 901px) {
+  .mbp .bp.hinge > :first-child { margin-left: var(--gut); }
+  .mbp .bp.hinge > :nth-child(2) { margin-right: var(--gut); }
+}
+
+/* ---------- the floors beside the facade (spec M3 §6.5) ---------- */
+/* A split on the seam: the block's facade in one half, pinned while the
+   floors scroll in the other (А's facade on the left, Б's on the right). */
+.mbl {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: clamp(44px, calc(var(--screen-h) * .07), 84px);
+  padding-bottom: clamp(72px, calc(var(--screen-h) * .12), 140px);
+  background: var(--onyx);
+}
+.mbl__pin {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  padding: clamp(24px, calc(var(--screen-h) * .06), 64px) clamp(28px, 4vw, 72px) 18px var(--gut);
+}
+.mbl__pin > .fx-wrap { width: 100%; }
+/* What lights, as of when, and what the rail counts. */
+.mbl__cap {
+  max-width: 34em;
+  margin-top: 18px;
+  color: var(--stone);
+  font-size: 13px;
+  text-align: center;
+  text-wrap: balance;
+}
+.mbl__cap b {
+  color: var(--ivory-2);
+  font-weight: 500;
+}
+.mbl__rows {
+  padding: 0 var(--gut) 0 clamp(28px, 4vw, 72px);
+  border-bottom: 1px solid var(--hair-2);
+}
+@media (min-width: 901px) {
+  .mbl__pin {
+    position: sticky;
+    top: var(--bar-h);
+    height: calc(var(--screen-h) - var(--bar-h));
+  }
+  /* Block Б, mirrored: its facade on the right, its floors on the left,
+     each half's gutter on its outer edge. */
+  .mbp--b .mbl__pin {
+    order: 2;
+    padding: clamp(24px, calc(var(--screen-h) * .06), 64px) var(--gut) 18px clamp(28px, 4vw, 72px);
+  }
+  .mbp--b .mbl__rows {
+    order: 1;
+    padding: 0 clamp(28px, 4vw, 72px) 0 var(--gut);
+  }
+}
+
+/* ---------- a floor (spec M3 §6.5) ---------- */
+/* Its number in the serif, then its meta, its counts, its plan in its
+   statuses' colours, and its range line and „Отворете плана“ under a rule.
+   A hot floor's row (MnBlockPage.jsx: pointed at, focused, or, on a
+   desktop, across the screen's middle) warms, its number turns brass-l, and
+   a brass-l rule draws down its seam side, over the seam. */
+.mbr {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(64px, 6vw, 92px) minmax(0, 1fr);
+  gap: 0 clamp(16px, 2vw, 28px);
+  padding: 30px 0 32px;
+  border-top: 1px solid var(--hair-2);
+  transition: background-color .3s var(--e-soft);
+}
+.mbr::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: 0;
+  left: calc(-1 * clamp(28px, 4vw, 72px));
+  width: 1px;
+  background: var(--brass-l);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition: transform .45s var(--e-out);
+}
+.mbp--b .mbr::before {
+  left: auto;
+  right: calc(-1 * clamp(28px, 4vw, 72px));
+}
+.mbr.is-hot { background: rgba(184, 149, 74, .05); }
+.mbr.is-hot::before { transform: scaleY(1); }
+.mbr__no {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+.mbr__no b {
+  color: var(--ivory);
+  font: 600 clamp(48px, 4.4vw, 68px)/.86 var(--serif);
+  font-variant-numeric: lining-nums;
+  transition: color .25s;
+}
+.mbr.is-hot .mbr__no b { color: var(--brass-l); }
+.mbr__no span {
+  color: var(--stone);
+  font-size: 12px;
+  letter-spacing: .02em;
+}
+.mbr__body {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.mbr__meta {
+  color: var(--stone);
+  font-size: 13px;
+}
+.mbr__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+.mbr__counts .st {
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.mbr__plan {
+  position: relative;
+  height: clamp(128px, 13vw, 200px);
+  margin: 6px 0 2px;
+}
+.mbr__plan svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* A mini plan's label, halo, line and dash keep their sizes on screen once
+   its fit() has measured it (PlanSvg.jsx), after the page has hydrated;
+   until then these, for the scale a row's plan is drawn at on a desktop
+   (about .5 of the floor plan's grid) and on a phone (about .3), so the
+   prerendered numbers read at their size from the first paint. */
+.mbr__plan .plan {
+  --fs: 20px;
+  --hs: 6px;
+  --lw: 2px;
+  --dash: 8 6;
+}
+.mbr__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair-2);
+  color: var(--ivory-2);
+  font-size: 13px;
+}
+.mbr__foot b {
+  color: var(--ivory);
+  font-weight: 600;
+}
+.mbr__go .arr { width: 16px; }
+
+/* ---------- the facade, one block (spec M3 §6.3, §6.5) ---------- */
+/* Block mode (blockFacade.jsx) draws one block's floors and rail; what the
+   facade draws for a whole building stays out: the courtyard's seam, the
+   blocks' names, the phone's block switch, and its own caption, the page
+   setting its words under the facade. */
+.fx.fx--block .fx__seam,
+.fx.fx--block .fx__bname,
+.fx.fx--block .fxm,
+.fx.fx--block .fx__cap { display: none; }
+/* On a desktop, the block's own crop on the building map's grid: А
+   0 / 196 / 600 × 436, Б 610 / 196 / 600 × 436 (spec M3 §6.3), its fades
+   the concept's (js/mnogofamilna.js:440). The stage takes the half's width
+   less its rail's 64 px, or the screen's height less 150 px over the crop's
+   aspect, standing against the seam, its rail on the outer side; the
+   smallest gap between two floors' centres (31) sets the rail's pitch. */
+@media (min-width: 901px) {
+  .fx.fx--mn.fx--block {
+    --sw: min(calc(100cqw - 64px), calc((var(--screen-h) - 150px) * 600 / 436));
+    --sh: calc(var(--sw) * 436 / 600);
+    --pitch: calc(var(--sw) * 31 / 600);
+    --vbx: 0;
+    --vby: 196;
+    --vbw: 600;
+    --vbh: 436;
+    --fl: .127;
+    --fr: .117;
+    height: auto;
+  }
+  .fx.fx--mn.fx--block[data-block="Б"] {
+    --vbx: 610;
+    --fl: .117;
+    --fr: .12;
+  }
+  .fx--mn.fx--block .fx__stage {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-left: auto;
+  }
+  .fx--mn.fx--block[data-block="Б"] .fx__stage { margin-left: 0; }
+}
+
+/* ---------- phones (spec M3 §4.1, §6.5) ---------- */
+/* The halves stack, the facade first and not pinned, the building's crop of
+   the block across the column (mn-facade.css), then the floors. The rows'
+   rule, which stands on the seam, goes with it. */
+@media (max-width: 900px) {
+  /* The building's long name keeps whole on a phone, in a reader's text
+     spacing too (the concept's 10.6vw; never above the head's 52 px). */
+  .mbp .bp__title { font-size: clamp(34px, 10.6vw, 52px); }
+  .mbl {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 8px;
+  }
+  .mbl__pin { padding: 8px var(--gut) 26px; }
+  .mbl__rows { padding: 0 var(--gut); }
+  .fx.fx--mn.fx--block { --pitch: calc(100cqw * 31 / 652); }
+  .fx--mn.fx--block .fx__stage { margin: 0; }
+  .mbr {
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 24px 0 26px;
+  }
+  .mbr::before { display: none; }
+  .mbr__no b { font-size: 46px; }
+  .mbr__plan { height: clamp(96px, 30vw, 150px); }
+  .mbr__plan .plan {
+    --fs: 34px;
+    --hs: 10px;
+    --lw: 3.4px;
+    --dash: 14 10;
+  }
+}
+
+/* ---------- the head's entrance (Diptych §5.5) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The seam draws down; the title rises from its mask (a mask clips only
+     while its line rises, so nothing cuts a glyph once it lands); then the
+     way back comes up 14 px, and the facts, the counts and the date after
+     it, 0.07 s apart. */
+  :root.js .mbp .bp > .seam {
+    animation: mnb-draw 1.1s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .mbp .bp__title .line-mask {
+    animation: mnb-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + .15s);
+  }
+  :root.js .mbp .bp__title .split-line {
+    animation: mnb-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .15s);
+  }
+  :root.js .mbp .bp__back,
+  :root.js .mbh > * {
+    animation: mnb-up .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .3s + var(--n, 0) * .07s);
+  }
+  .mbh > :nth-child(1) { --n: 1; }
+  .mbh > :nth-child(2) { --n: 2; }
+  .mbh > :nth-child(3) { --n: 3; }
+}
+
+@keyframes mnb-draw { from { transform: scaleY(0); } }
+@keyframes mnb-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its line rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes mnb-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes mnb-up { from { opacity: 0; transform: translateY(14px); } }

@@ -7,6 +7,7 @@ import { loadSurfaces } from './loadSurfaces'
 import { buildModel } from './model'
 import { GR_PROJECT } from './projects/gr'
 import { snapshotData } from './testing'
+import useHotFloor from './useHotFloor'
 
 // The facade (spec §7.2, §7.3; extract §4.20, §4.21): the free count of each
 // floor on its block's outer edge, the edge panel with the floor's plan, and
@@ -571,6 +572,17 @@ describe('the panels’ chunk', () => {
     }
   })
 
+  it('never loads in block mode', async () => {
+    const observers = observeByHand()
+    vi.resetModules()
+    const { default: FreshFacade } = await import('./Facade')
+    render(<FreshFacade project={GR_PROJECT} model={MODEL} mode="block" initialBlock="Б" onOpenFloor={() => {}} />)
+
+    fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
+    expect(observers).toHaveLength(0)
+    expect((await import('./loadSurfaces')).loadedSurfaces()).toBeNull()
+  })
+
   it('never loads in compact mode', async () => {
     const observers = observeByHand()
     vi.resetModules()
@@ -609,4 +621,39 @@ it('gives a rail of the other block the focus back on a desktop, both blocks sti
   expect(panel('a')).toHaveAttribute('data-open')
   expect(text(panel('a').querySelector('.fxp__title'))).toBe('Блок А · Етаж 5')
   expect(panel('b')).not.toHaveAttribute('data-open')
+})
+
+// A block page's facade (spec M3 §6.5; blockFacade.jsx): block mode, with no
+// panels and no sheet, and a hot floor its page drives (`hotState`, the
+// page's own useHotFloor()), which its rows set too: the facade shows it,
+// and pointing at a floor sets it.
+describe('block mode, its hot floor the page’s (spec M3 §6.5)', () => {
+  function Page({ seen, ...props }) {
+    const isFloor = (key) => /^[АБ]-\d$/.test(key)
+    const hotState = useHotFloor({ compact: true, isFloor })
+    seen.current = hotState
+    return <Facade project={GR_PROJECT} model={MODEL} mode="block" hotState={hotState} {...props} />
+  }
+
+  it('shows the floor its page makes hot, and makes the floor pointed at its page’s', () => {
+    const seen = { current: null }
+    const onOpenFloor = vi.fn()
+    render(<Page seen={seen} onOpenFloor={onOpenFloor} />)
+
+    expect(document.querySelector('.fxp')).toBeNull()
+    act(() => seen.current.setHot('А-6', 'kbd'))
+    expect(rail('А', 6)).toHaveClass('is-hot')
+    expect(document.querySelector('.fx')).toHaveClass('is-hot', 'is-kbd')
+
+    fireEvent.pointerOver(rail('А', 3), { pointerType: 'mouse' })
+    expect(seen.current.hot).toMatchObject({ key: 'А-3', source: 'mouse' })
+    expect(rail('А', 6)).not.toHaveClass('is-hot')
+    expect(document.querySelector('.fxp')).toBeNull()
+
+    act(() => seen.current.clearHot())
+    expect(document.querySelector('.fx')).not.toHaveClass('is-hot')
+
+    fireEvent.click(rail('А', 3))
+    expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 3])
+  })
 })

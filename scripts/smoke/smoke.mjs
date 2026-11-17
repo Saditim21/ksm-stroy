@@ -153,6 +153,8 @@ const VISITS = [
   { path: '/projects/mnogofamilna-sgrada?floor=%D0%91-5', dialog: 'Блок Б · Етаж 5' },
   { path: '/projects/mnogofamilna-sgrada?unit=%D0%90-802', dialog: 'А-802' },
   { path: '/projects/mnogofamilna-sgrada?view=list', lands: 'spisak' },
+  // A block page's floor, written bare (spec M3 §6.5): floor 7 of block А.
+  { path: '/projects/mnogofamilna-sgrada/block-a?floor=7', dialog: 'Блок А · Етаж 7' },
   { path: '/contact?apartment=%D0%90%20301' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },

@@ -96,16 +96,15 @@ describe('the header', () => {
   })
 
   // Home, the Golden Residence page and its block pages, and Многофамилна's
-  // page have an inquiry of their own (their handle's `inquiry`); a
-  // Многофамилна block page, still legacy, takes its project to the contact
-  // page.
+  // page and its block pages have an inquiry of their own (their handle's
+  // `inquiry`); a page without one takes „Запитване“ to the contact page.
   it.each([
     ['/', '#zapitvane'],
     ['/about', '/contact'],
     ['/projects/golden-residence', '#zapitvane'],
     ['/projects/golden-residence/block-a', '#zapitvane'],
     ['/projects/mnogofamilna-sgrada', '#zapitvane'],
-    ['/projects/mnogofamilna-sgrada/block-a', '/contact?project=mnogofamilna-sgrada'],
+    ['/projects/mnogofamilna-sgrada/block-a', '#zapitvane'],
   ])('on %s, „Запитване“ opens %s', async (path, href) => {
     renderSiteAt(path)
     const header = within(await siteHeader())
@@ -210,10 +209,9 @@ describe('the header as the page scrolls', () => {
 // (src/shell/handle.js), read from the real modules. Home and the Golden
 // Residence page, rebuilt in Diptych, run under the see-through header, each
 // with an inquiry of its own, as the Golden Residence block pages and
-// Многофамилна's page (rebuilt in M3, its explorer below the header) have
-// too under the solid header. Многофамилна's block pages and every other
-// page are solid. The pages not yet rebuilt are legacy: they keep
-// production's light look.
+// Многофамилна's page and block pages (rebuilt in M3) have too under the
+// solid header. Every other page is solid. The pages not yet rebuilt are
+// legacy: they keep production's light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
@@ -224,8 +222,8 @@ const HANDLES = {
   '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/mnogofamilna-sgrada': { header: 'solid', ...MNOGOFAMILNA, inquiry: true },
-  '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
-  '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA, legacy: true },
+  '/projects/mnogofamilna-sgrada/block-a': { header: 'solid', ...MNOGOFAMILNA, inquiry: true },
+  '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA, inquiry: true },
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
   '/contact': { header: 'solid', legacy: true },

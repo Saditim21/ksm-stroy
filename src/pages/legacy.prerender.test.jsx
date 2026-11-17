@@ -11,12 +11,14 @@ import Contact from './Contact'
 // until the JS runs. It is their final visual state (plan, global rules): no
 // element starts faded out, collapsed or moved away for an entrance animation
 // to bring it in later. (Home, the Golden Residence page and its block
-// pages, and the Многофамилна page, rebuilt, are
+// pages, and the Многофамилна page and its block pages, rebuilt, are
 // src/pages/home/home.prerender.test.jsx's,
 // src/pages/golden-residence/gr.prerender.test.jsx's,
-// src/explorer/BlockPage.prerender.test.jsx's and
-// src/pages/mnogofamilna/mn.prerender.test.jsx's.) No page the site serves is
-// wrapped in the legacy ApartmentProvider any more, so neither are these.
+// src/explorer/BlockPage.prerender.test.jsx's,
+// src/pages/mnogofamilna/mn.prerender.test.jsx's and
+// src/pages/mnogofamilna/mn-block.prerender.test.jsx's.) No page the site
+// serves is wrapped in the legacy ApartmentProvider any more, so neither are
+// these.
 
 const prerender = (Page) => renderToString(
   <MemoryRouter>{createElement(Page)}</MemoryRouter>,

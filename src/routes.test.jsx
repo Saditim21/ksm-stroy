@@ -71,8 +71,8 @@ function headAt(module, pathname, { caseSensitive } = {}) {
 it.each([
   [goldenResidenceBlock, '/projects/golden-residence/block-a', 'Golden Residence, блок А - KSM Stroy'],
   [goldenResidenceBlock, '/projects/golden-residence/block-b/', 'Golden Residence, блок Б - KSM Stroy'],
-  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-a/', 'Многофамилна жилищна сграда, блок А - KSM Stroy'],
-  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-b', 'Многофамилна жилищна сграда, блок Б - KSM Stroy'],
+  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-a/', 'Многофамилна сграда, блок А - KSM Stroy'],
+  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-b', 'Многофамилна сграда, блок Б - KSM Stroy'],
 ])('the head of %#: %s', (module, pathname, title) => {
   const head = headAt(module, pathname)
 
@@ -94,8 +94,8 @@ it.each([
   {
     module: mnogofamilnaBlock,
     path: '/projects/mnogofamilna-sgrada/BLOCK-B',
-    shows: ['Многофамилна сграда', 'БЛОК B'],
-    title: 'Многофамилна жилищна сграда, блок Б - KSM Stroy',
+    shows: ['Многофамилна сграда, блок Б'],
+    title: 'Многофамилна сграда, блок Б - KSM Stroy',
     canonical: '/projects/mnogofamilna-sgrada/block-b',
   },
 ])('under the dev server, $path shows its block, with its head', async ({ module, path, shows, title, canonical }) => {

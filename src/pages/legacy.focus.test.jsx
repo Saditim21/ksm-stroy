@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { createElement } from 'react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { goOffline, renderSiteAt } from '../../tests/contracts/site'
+import { goOffline } from '../../tests/contracts/site'
 import Blog from './Blog'
 import Contact from './Contact'
 import Projects from './Projects'
@@ -68,22 +68,3 @@ it('/contact: the closing band is on dusk; the form is not', () => {
   }
   expect(onDusk(screen.getByRole('button', { name: /Изпрати съобщение/ }))).toBe(false)
 })
-
-// A Многофамилна block page's full-screen floor plan, opened from a free
-// apartment: its bar and zoom controls sit on black; the gold card of the
-// chosen apartment does not, and its „Контакт“ keeps the onyx ring. (The
-// Golden Residence block pages are the Diptych explorer, dark throughout.)
-it.each([
-  { path: '/projects/mnogofamilna-sgrada/block-a', floor: 'Етаж 9', apartment: 'А-802' },
-])('$path: the full-screen plan’s bar and zoom controls are on dusk; the apartment’s gold card is not', async ({ path, floor, apartment }) => {
-  renderSiteAt(path)
-
-  fireEvent.click(await screen.findByText(floor, {}, { timeout: 15000 }))
-  const row = (await screen.findAllByText(apartment)).map((cell) => cell.closest('tr')).find(Boolean)
-  fireEvent.click(row)
-  const viewer = (await screen.findByRole('button', { name: '✕' })).closest('.fixed')
-  for (const name of ['✕', 'Увеличи', 'Намали', 'Нулирай']) {
-    expect(onDusk(within(viewer).getByRole('button', { name })), name).toBe(true)
-  }
-  expect(onDusk(within(viewer).getByRole('button', { name: 'Контакт' }))).toBe(false)
-}, 30000)

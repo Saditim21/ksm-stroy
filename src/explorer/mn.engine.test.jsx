@@ -3,11 +3,11 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { presetInquiry } from '../components/inquiry/inquiryStore'
 import { MN_SNAPSHOT_DATA } from '../data/mnogofamilna/snapshot'
 import BlockGrid from './BlockGrid'
-import { FloorMeta } from './FloorPanel'
+import { FloorMeta } from './FloorFacts'
 import { parseFloorParam } from './floorParam'
 import { loadSurfaces } from './loadSurfaces'
 import { buildModel } from './model'
-import { loadPlans } from './plans'
+import { loadPlans, plansOf } from './plans'
 import PlanSvg from './PlanSvg'
 import { GR_PROJECT } from './projects/gr'
 import { MN_PROJECT } from './projects/mn'
@@ -129,13 +129,13 @@ it('plan labels show the apartment number', async () => {
 // Spec M3 §2, §6.4: floor 10 is „тавански етаж“; a floor has eight
 // apartments.
 it('floor meta', () => {
-  const { unmount } = render(<FloorMeta project={MN_PROJECT} floor={MODEL.floors.get('Б-10')} />)
+  const { unmount } = render(<FloorMeta project={MN_PROJECT} plan={plansOf(MN_PROJECT)['Б']} floor={MODEL.floors.get('Б-10')} />)
   const attic = text(document.querySelector('p'))
   expect(attic).toContain('8 апартамента')
   expect(attic).toContain('тавански етаж')
   unmount()
 
-  render(<FloorMeta project={MN_PROJECT} floor={MODEL.floors.get('Б-9')} />)
+  render(<FloorMeta project={MN_PROJECT} plan={plansOf(MN_PROJECT)['Б']} floor={MODEL.floors.get('Б-9')} />)
   expect(text(document.querySelector('p'))).toBe('8 апартамента')
 })
 

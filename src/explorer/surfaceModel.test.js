@@ -76,17 +76,22 @@ describe('stepUnit', () => {
 // Ruling FR5: model.js travels in the first-load JS of the Golden Residence
 // pages, which have no bytes to spare, so what only an opened floor needs
 // stays out of it, in the surfaces' lazy chunk (surfaces.js), and only
-// modules of that chunk import it.
+// modules of that chunk import it: the dialogs, and a floor's facts
+// (FloorFacts.jsx), which the surfaces show and so does a Многофамилна block
+// page (M3 §6.5), whose head's counts and rows' range lines it prerenders:
+// there it travels in a chunk the block page shares with the surfaces' alone.
 describe('the surfaces’ part of the model', () => {
   it('is not in model.js', () => {
     expect(Object.keys(model)).not.toContain('rangeLine')
     expect(Object.keys(model)).not.toContain('stepUnit')
   })
 
-  it('is imported only by modules of the surfaces’ chunk', () => {
+  it('is imported only by modules of the surfaces’ chunk, and by a block page through a floor’s facts', () => {
     const sources = import.meta.glob(['../**/*.{js,jsx}', '!../**/*.test.{js,jsx}', '!../test/**'], { query: '?raw', import: 'default', eager: true })
     expect(Object.keys(sources)).toEqual(expect.arrayContaining(['./model.js', './surfaces.js', '../root.jsx']))
-    const importers = Object.keys(sources).filter((path) => /from '\.\/surfaceModel'/.test(sources[path]))
-    expect(importers.sort()).toEqual(['./ExplorerDialogs.jsx', './FloorPanel.jsx', './UnitPanel.jsx'])
+    // The modules whose imports name `module`'s file: from './surfaceModel', from '../../explorer/FloorFacts'.
+    const importers = (module) => Object.keys(sources).filter((path) => sources[path].includes(`/${module}'`)).sort()
+    expect(importers('surfaceModel')).toEqual(['./ExplorerDialogs.jsx', './FloorFacts.jsx', './UnitPanel.jsx'])
+    expect(importers('FloorFacts')).toEqual(['../pages/mnogofamilna/FloorRows.jsx', '../pages/mnogofamilna/MnBlockPage.jsx', './FloorPanel.jsx', './FloorSheet.jsx', './PlanStage.jsx'])
   })
 })

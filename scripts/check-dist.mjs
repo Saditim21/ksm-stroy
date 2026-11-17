@@ -83,14 +83,16 @@ const FLIP_BUDGET = 10 * KIB
 // pulled framer-motion or swiper in would otherwise turn its FAIL into a
 // WARN. M2 adds each route it rebuilds: Task 3 `/`, Task 5
 // `/projects/golden-residence`, Task 7 both Golden Residence block routes; M3
-// Task 4 `/projects/mnogofamilna-sgrada`. A route listed here before it is
-// prerendered gets a note.
+// Task 4 `/projects/mnogofamilna-sgrada`, Task 6 both Многофамилна block
+// routes. A route listed here before it is prerendered gets a note.
 const MUST_BE_V2 = [
   '/',
   '/projects/golden-residence',
   '/projects/golden-residence/block-a',
   '/projects/golden-residence/block-b',
   '/projects/mnogofamilna-sgrada',
+  '/projects/mnogofamilna-sgrada/block-a',
+  '/projects/mnogofamilna-sgrada/block-b',
   '/eu-proekt',
   '/404',
 ]

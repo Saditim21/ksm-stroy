@@ -7,7 +7,7 @@ import useMotionNow from '../motion/useMotionNow'
 import { PALETTE } from '../styles/palette'
 import { formatArea } from '../utils/format'
 import { trapTab } from '../utils/trapTab'
-import { FloorCounts, FloorMeta } from './FloorPanel'
+import { FloorCounts, FloorMeta } from './FloorFacts'
 import { planBox } from './planGeometry'
 import { floorKey } from './model'
 import { sizePlan } from './planModes'
@@ -299,7 +299,7 @@ export default function PlanStage({ project, plans, dated = null, model, block, 
             <h2 className="ps__title" id={titleId}>
               Блок&nbsp;{block} · <em>Етаж {floor}</em>
             </h2>
-            <FloorMeta project={project} floor={data} free dated={dated} className="ps__meta" />
+            <FloorMeta project={project} plan={plans[block]} floor={data} free dated={dated} className="ps__meta" />
           </div>
           <div className="ps__mid">
             <div className="seg ps__blocks" role="group" aria-label="Блок">

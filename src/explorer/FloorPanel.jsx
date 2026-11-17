@@ -1,14 +1,10 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import Button from '../components/ui/Button'
-import StatusCount from '../components/ui/StatusCount'
-import { STATUS_ORDER } from '../components/ui/status'
 import useMotionNow from '../motion/useMotionNow'
-import { formatArea, formatDecimal, plural } from '../utils/format'
+import { FloorCounts, FloorMeta, FloorRange } from './FloorFacts'
 import { floorKey } from './model'
 import { crossfadePlan, drawPlan } from './planMotion'
-import { plansOf } from './plans'
 import PlanSvg from './PlanSvg'
-import { rangeLine } from './surfaceModel'
 
 // The edge panel of a block (spec §7.3; extract §4.21; the concept's
 // explorer.js:284-301, :403-440): a floor the pointer or the keyboard is on,
@@ -23,6 +19,7 @@ import { rangeLine } from './surfaceModel'
 // block's plan, and `project` the facade's (useExplorer.js). With motion
 // (useMotionNow) it slides in over 0.45 s expo.out, its plan drawing, and out
 // over 0.35 s expo.in; a new floor crossfades. Without, it is there at once.
+// The counts, the range line and the meta are FloorFacts.jsx's.
 
 /** „Блок А · *Етаж 5*“, the panel's and the sheet's title. */
 export function FloorTitle({ floor, className }) {
@@ -31,54 +28,6 @@ export function FloorTitle({ floor, className }) {
       Блок&nbsp;{floor.block} · <em>Етаж {floor.floor}</em>
     </p>
   )
-}
-
-/** The floor's four counts, `—` until the data arrives. */
-export function FloorCounts({ counts, className }) {
-  return (
-    <div className={className}>
-      {STATUS_ORDER.map((status) => (
-        <StatusCount key={status} status={status} count={counts ? counts[status] : null} />
-      ))}
-    </div>
-  )
-}
-
-/** The range line (spec §7.3), nothing until the data arrives. */
-export function FloorRange({ floor, className }) {
-  const line = floor.counts ? rangeLine(floor) : null
-  if (!line) return null
-  let words
-  if (line.kind === 'range') {
-    words = <>свободни от <b>{formatDecimal(line.min)}</b> до <b>{formatArea(line.max)}</b></>
-  } else if (line.kind === 'single') {
-    words = <>{line.one ? 'свободен' : 'свободни'}: <b>{formatArea(line.area)}</b></>
-  } else if (line.kind === 'reserved') {
-    words = 'Няма свободни, има резервирани.'
-  } else {
-    words = <span className="fxp__soldout">Разпродаден етаж</span>
-  }
-  return <p className={className}>{words}</p>
-}
-
-/** The floor's meta line: its apartments, „12 апартамента“, after the
- * project's word on the floor where it has one (its plans' floorMeta,
- * plans.js: „кота +3,06“ where the drawings give Golden Residence's level,
- * spec §9, only А1; „тавански етаж“ on Многофамилна's top floor, M3 §2).
- * With `free`, the plan stage's, its free apartments after it („· 4
- * свободни“, `—` until the data arrives), and with `dated`, the date of
- * numbers that are not live („· по данни към 01.12.2025“, M3 §6.4). */
-export function FloorMeta({ project, floor, free = false, dated = null, className }) {
-  const count = floor.units.length || project.perFloor
-  const parts = [`${count} ${plural(count, 'апартамент', 'апартамента')}`]
-  const word = plansOf(project)?.[floor.block].floorMeta(floor)
-  if (word) parts.unshift(word)
-  if (free) {
-    const n = floor.counts ? floor.counts.available : null
-    parts.push(`${n ?? '—'} ${plural(n, 'свободен', 'свободни')}`)
-  }
-  if (dated) parts.push(`по данни към ${dated}`)
-  return <p className={className}>{parts.join(' · ')}</p>
 }
 
 export default function FloorPanel({ project, side, floor, plan, onOpenFloor, onUnit, onPointerEnter, onPointerLeave }) {
@@ -129,7 +78,7 @@ export default function FloorPanel({ project, side, floor, plan, onOpenFloor, on
       {shown ? (
         <>
           <FloorTitle floor={shown} className="fxp__title" />
-          <FloorMeta project={project} floor={shown} className="fxp__meta" />
+          <FloorMeta project={project} plan={plan} floor={shown} className="fxp__meta" />
           <div className="fxp__plan">
             <PlanSvg plan={plan} units={shown.units} mode="mini" onUnit={(unit, event) => onUnit(unit, { fromRect: planRect(), opener: event.target })} />
           </div>

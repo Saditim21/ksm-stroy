@@ -3,9 +3,10 @@
 // src/data/maps/*.floors.json): polygons in image pixels, each plan at its
 // drawing's size. What the edge panels, the sheet, the plan stage and the
 // unit panel draw: only modules of the surfaces' lazy chunk (surfaces.js)
-// import it, so it travels there and not in a route's first-load JS, as
-// surfaceModel.js does (rulings C7.7, FR5). The facade's geometry is
-// geometry.js's.
+// import it, and a Многофамилна block page, whose rows prerender mini plans
+// (MnBlockPage.jsx), so it travels in a chunk those two share and in no other
+// route's first-load JS, as surfaceModel.js does (rulings C7.7, FR5). The
+// facade's geometry is geometry.js's.
 import { bbox, pathD } from './geometry'
 
 /** The plan of a block: the floors map's entry that applies to it (one

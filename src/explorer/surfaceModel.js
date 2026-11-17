@@ -1,9 +1,11 @@
 // What only the surfaces read from the explorer's model (model.js): the range
-// line of a floor's edge panel and sheet (FloorPanel.jsx, spec §7.3), and the
+// line of a floor's edge panel and sheet (FloorFacts.jsx, spec §7.3), and the
 // unit panel's previous and next (ExplorerDialogs.jsx, UnitPanel.jsx, spec
-// §7.7). Only modules of the surfaces' lazy chunk (surfaces.js) import it, so
-// it travels there and not in a route's first-load JS, as model.js does for
-// buildModel and findUnit, which the first load needs (rulings C7.7, FR5).
+// §7.7). Only modules of the surfaces' lazy chunk (surfaces.js) import it,
+// and a Многофамилна block page's rows (FloorRows.jsx, its range lines), so
+// it travels in a chunk those two share and in no other route's first-load
+// JS, as model.js does for buildModel and findUnit, which every explorer's
+// first load needs (rulings C7.7, FR5).
 import { floorKey } from './model'
 
 /**

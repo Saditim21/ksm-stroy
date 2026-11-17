@@ -20,7 +20,9 @@ import './explorer.css'
 // 320 ms. A mouse click, Enter or Space opens the floor (`onOpenFloor(block,
 // floor, unitLabel?, { fromRect, opener })`); a touch or pen tap on a floor
 // that is not hot only previews it, and the second tap opens it. Compact
-// mode (Home) has no panel and no sheet. The caption under the facade is its
+// mode (Home) has no panel and no sheet, and neither has block mode, a block
+// page's facade of one block (blockFacade.jsx), whose rows show its floors.
+// The caption under the facade is its
 // page's (`caption(floor)`, of the hot floor or null): the explorer's
 // (ExplorerSection.jsx), Многофамилна's opening's, or Home's teaser's, a
 // live region in compact mode; so each page's words stay out of the code the
@@ -46,7 +48,10 @@ import './explorer.css'
 // (useMotion) brings the picture, the seam and the counts in once, as the
 // facade comes up from below. The hot floor's state is useHotFloor's, the
 // rails FacadeRails'; the pointer and the keys are handled here, on the stage
-// around them.
+// around them. `hotState`, where a page hands one over, is a hot floor of the
+// page's own (its useHotFloor(), in the same shape): the facade shows and sets
+// that one instead, and so does whatever else the page lights it from (a
+// block page's rows, MnBlockPage.jsx).
 //
 // The edge panels and the sheet, and their wiring to the hot floor
 // (FacadeSurfaces.jsx, which the facade hands its state and handlers, `fx`),
@@ -82,8 +87,8 @@ const readLens = (node) => node && Object.fromEntries(['x', 'y', 'width', 'heigh
 // A floor of the model, or its placeholder until the data reaches it.
 const floorOf = (model, facade, key) => model?.floors.get(key) ?? facade.placeholders.get(key)
 
-export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, onOpenFloor, onRailFocused }) {
-  const compact = mode === 'compact'
+export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, hotState, onOpenFloor, onRailFocused }) {
+  const compact = mode !== 'full'
   const { map, picture, priority, sizes, alt, className, seam, Lights, namesApart } = project.facade
   const { min, max } = project.floors
   const facade = facadeOf(map)
@@ -97,7 +102,8 @@ export default function Facade({ project, model, mode = 'full', caption, initial
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
   const isFloor = useCallback((key) => facade.shape.has(key), [facade])
-  const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = useHotFloor({ compact, isFloor })
+  const own = useHotFloor({ compact, isFloor })
+  const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = hotState ?? own
 
   // Hidden, the facade lets its hot floor go.
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import useMotion from './useMotion'
 
 // The pictures of a section that open from the seam as they come into view
@@ -15,25 +16,18 @@ import useMotion from './useMotion'
 // What the opening sets goes with it. What is already on screen when the
 // setup runs stays as it is: the first viewport never moves for JS (its
 // motion is CSS, spec §5.5). The markup is the final state.
-const FROM = { l: 'inset(0% 0% 0% 100%)', r: 'inset(0% 100% 0% 0%)' }
-const FROM_THE_TOP = 'inset(0% 0% 100% 0%)'
-const PHONE = '(max-width: 900px)'
-
+//
+// The setup is a chunk of its own (wipes.js), out of the page's first-load
+// JS (M3 §10, ruling T2a: Многофамилна's main page offsets the bytes its
+// block pages' shared code costs it): the first run of the motion loads it,
+// where motion runs at all, and the setup runs once it is in, long before
+// the section comes up from below. A chunk that does not load leaves the
+// pictures as they are, open.
 export default function useWipes(scopeRef) {
-  useMotion(scopeRef, ({ gsap }) => {
-    const scope = scopeRef.current
-    if (!scope) return
-    const phone = window.matchMedia(PHONE).matches
-    for (const picture of scope.querySelectorAll('[data-wipe]')) {
-      if (picture.getBoundingClientRect().top < window.innerHeight) continue
-      const img = picture.querySelector('img')
-      const wipe = gsap.timeline({ scrollTrigger: { trigger: picture, start: 'top 84%', once: true } })
-      wipe.fromTo(
-        picture,
-        { clipPath: phone ? FROM_THE_TOP : FROM[picture.dataset.wipe] ?? FROM_THE_TOP },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.inOut', clearProps: 'clipPath' },
-      )
-      if (img) wipe.fromTo(img, { scale: 1.14 }, { scale: 1, duration: 1.6, ease: 'expo.out', clearProps: 'transform' }, 0.1)
-    }
-  })
+  const [wipes, setWipes] = useState(null)
+  useMotion(scopeRef, (motion) => {
+    if (wipes) return wipes(motion, scopeRef.current)
+    import('./wipes').then((module) => setWipes(() => module.default), () => {})
+    return undefined
+  }, [wipes])
 }
