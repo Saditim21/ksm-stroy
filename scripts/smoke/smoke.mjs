@@ -43,7 +43,12 @@
 //     screen, under the header, and the EU line in view all the same, which
 //     the landing keeps until the visitor first moves the page (M3 §8). So
 //     do the links that land on Контакти's form (`lands`: ?apartment=,
-//     ?project= or #zapitvane, M3/M4 §7.3, §8).
+//     ?project= or #zapitvane, M3/M4 §7.3, §8). No scroll the page makes
+//     itself may end such a landing (src/shell/landingHold.js): after its
+//     shot, the visit takes the page to the top and back, as every
+//     ScrollTrigger.refresh() does, and the EU line must still be in view
+//     once the header could have slid; then a key, the visitor's first
+//     move, must let the row go (data-eu-hold off <html>).
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -433,6 +438,35 @@ async function inspectLinks({ pathname, text, scroll, jumped = false }) {
   return states
 }
 
+// A landing's hold against the page's own scrolls (M3 §8; M4 Task 4, fix
+// round 2), once its visit's checks and its shot are done, long after the
+// hold's first 400 ms: the page to the top and back in one task, as every
+// ScrollTrigger.refresh() takes it (the motion's idle queue makes one as it
+// drains, src/motion/runtime.js), and the browser's `scroll` heard; then the
+// header's slide (0.5 s) waited out, and „За проекта“ must still be in view.
+// Then a key, the visitor's first move, must let the row go. The problems.
+async function landingHold(page) {
+  const problems = []
+  await page.evaluate(() => new Promise((resolve) => {
+    const y = scrollY
+    window.addEventListener('scroll', () => setTimeout(resolve, 700), { once: true, passive: true })
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    window.scrollTo({ top: y, behavior: 'instant' })
+    // Chrome fires `scroll` at its next frame, for a round trip too; the
+    // check goes on all the same if it does not.
+    setTimeout(resolve, 2000)
+  }))
+  const links = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: true })
+  if (!links.some(({ issues }) => issues.length === 0)) {
+    problems.push(`a scroll the page made itself (to the top and back, as ScrollTrigger's refresh does) let the EU row go: „За проекта“ ${links.length === 0 ? 'not found' : links[0].issues.join(', ')}`)
+    return problems
+  }
+  await page.keyboard.press('Shift')
+  const released = await page.waitForFunction(() => !document.documentElement.hasAttribute('data-eu-hold'), { timeout: 2000 }).then(() => true, () => false)
+  if (!released) problems.push('the visitor’s first key did not let the EU row go (data-eu-hold still on <html> 2 s on)')
+  return problems
+}
+
 // In the page: the names of the dialogs open on top (none hidden under
 // another), by the text their aria-labelledby names, else their aria-label.
 function openDialogs() {
@@ -580,6 +614,9 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       }
 
       await page.screenshot({ path: shot })
+
+      // After the shot, which shows the landing as it lands.
+      if (lands) problems.push(...await landingHold(page))
 
       if (pathname === '/') {
         const posterLinks = await page.evaluate(inspectLinks, { pathname: POSTER_PDF, scroll: true })

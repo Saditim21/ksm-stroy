@@ -6,16 +6,20 @@ import { holdEuRow, releaseOnFirstMove } from './landingHold'
 // #zapitvane keeps the header's 36 px EU row in view. holdEuRow marks <html>
 // with data-eu-hold, which the header and the dialogs read (src/styles/
 // shell.css, src/explorer/explorer.css); releaseOnFirstMove lets the landing
-// go on the visitor's first scroll, wheel, touch move or key, 400 ms on, so
-// the landing's own jump never does.
+// go on the visitor's own first move, 400 ms on: the wheel, a touch move, a
+// key or a pointer's press. Never on a scroll, which the page makes too: the
+// landing's own jump, and every ScrollTrigger.refresh(), which takes the page
+// to the top and back.
 
 const MOVES = {
-  scroll: () => fireEvent.scroll(window),
   wheel: () => fireEvent.wheel(window, { deltaY: 120 }),
   'touch move': () => fireEvent.touchMove(window),
   key: () => fireEvent.keyDown(document.body, { key: 'ArrowDown' }),
+  // On the page's scrollbar, Chrome sends it to <html>.
+  'pointer press': () => fireEvent.pointerDown(document.documentElement),
 }
-const TYPES = ['scroll', 'wheel', 'touchmove', 'keydown']
+const TYPES = ['wheel', 'touchmove', 'keydown', 'pointerdown']
+const LISTENED = [...TYPES, 'scroll']
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -55,6 +59,46 @@ it('releaseOnFirstMove ignores moves before 400 ms and releases on the first aft
   }
 })
 
+// What this pins (M4 Task 4, fix round 2): Многофамилна's ?view=list landing
+// lost its row whenever the motion's idle queue drained more than 400 ms
+// after the jump. That queue's ScrollTrigger.refresh() (src/motion/
+// runtime.js) takes the page to the top and back, and the browser then fires
+// `scroll`, which the hold took for the visitor's. Here window.scrollTo fires
+// `scroll` as a browser's does (jsdom's scrolls nothing).
+it('lets no scroll the page makes itself go, 400 ms on or later; the visitor’s wheel does', () => {
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => fireEvent.scroll(window))
+  const release = vi.fn()
+  const stop = releaseOnFirstMove(release)
+  vi.advanceTimersByTime(500)
+
+  // ScrollTrigger.refresh(): to the top, and back to where the page was.
+  window.scrollTo(0, 0)
+  window.scrollTo(0, 1991)
+  // The document's own scroll event, which a scroll of the page fires too.
+  fireEvent.scroll(document)
+  vi.advanceTimersByTime(5000)
+  window.scrollTo(0, 1991)
+  expect(release).not.toHaveBeenCalled()
+
+  fireEvent.wheel(window, { deltaY: 120 })
+  expect(release).toHaveBeenCalledTimes(1)
+  stop()
+})
+
+// A move that something on its way stops, as a dialog stops its Escape, is
+// still the visitor's: the hold hears it before anything under it does.
+it('hears a move whose propagation something stops', () => {
+  const release = vi.fn()
+  const stop = releaseOnFirstMove(release)
+  vi.advanceTimersByTime(400)
+  const stopIt = (event) => event.stopPropagation()
+  document.body.addEventListener('keydown', stopIt)
+  fireEvent.keyDown(document.body, { key: 'Escape' })
+  document.body.removeEventListener('keydown', stopIt)
+  expect(release).toHaveBeenCalledTimes(1)
+  stop()
+})
+
 it('waits as long as `after` says', () => {
   const release = vi.fn()
   const stop = releaseOnFirstMove(release, { after: 1000 })
@@ -73,11 +117,12 @@ it('its cleanup removes every listener', () => {
   const release = vi.fn()
   const stop = releaseOnFirstMove(release)
   vi.advanceTimersByTime(400)
-  const added = add.mock.calls.filter(([type]) => TYPES.includes(type))
+  const added = add.mock.calls.filter(([type]) => LISTENED.includes(type))
   expect(added.map(([type]) => type).sort()).toEqual([...TYPES].sort())
 
   stop()
-  for (const [type, listener] of added) expect(remove).toHaveBeenCalledWith(type, listener)
+  // Each with the options it was added with, its capture above all.
+  for (const [type, listener, options] of added) expect(remove).toHaveBeenCalledWith(type, listener, options)
   for (const move of Object.values(MOVES)) move()
   expect(release).not.toHaveBeenCalled()
 
@@ -85,7 +130,7 @@ it('its cleanup removes every listener', () => {
   add.mockClear()
   releaseOnFirstMove(release)()
   vi.advanceTimersByTime(1000)
-  expect(add.mock.calls.filter(([type]) => TYPES.includes(type))).toEqual([])
+  expect(add.mock.calls.filter(([type]) => LISTENED.includes(type))).toEqual([])
   for (const move of Object.values(MOVES)) move()
   expect(release).not.toHaveBeenCalled()
 })

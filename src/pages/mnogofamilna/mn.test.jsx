@@ -232,16 +232,17 @@ it('?view=list&floor=Б-5 gives the stage’s focus back to #spisak’s list', a
 // Spec §1.9 (ruling T7a), M3 §6.4, §8: a landing on the list keeps the EU
 // line in view, as a deep link's does. The page holds the header's EU row
 // (data-eu-hold on <html>) from before its jump to #spisak until the visitor
-// first moves the page, by a scroll, the wheel, a touch or a key, 400 ms on:
-// the jump's own scroll comes before that, and lets nothing go.
+// first moves the page, by the wheel, a touch, a key or a pointer's press,
+// 400 ms on. No scroll lets it go: neither the jump's own nor any the page
+// makes later, as ScrollTrigger's refresh does (src/shell/landingHold.js).
 describe('?view=list lands on #spisak with the EU row in view', () => {
   const held = () => document.documentElement.hasAttribute('data-eu-hold')
   const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms) })
   const MOVES = {
-    scroll: () => fireEvent.scroll(window),
     wheel: () => fireEvent.wheel(window, { deltaY: 120 }),
     'touch move': () => fireEvent.touchMove(window),
     key: () => fireEvent.keyDown(document.body, { key: 'ArrowDown' }),
+    'pointer press': () => fireEvent.pointerDown(document.documentElement),
   }
   // #spisak 3000 px down the page, as jsdom lays nothing out; the jump there
   // notes whether the row was held as it went.
@@ -269,6 +270,28 @@ describe('?view=list lands on #spisak with the EU row in view', () => {
     await wait(300)
     expect(held()).toBe(true)
     MOVES[move]()
+    expect(held()).toBe(false)
+  })
+
+  // What M4 Task 4's fix round 2 pins: the motion's idle queue drains with a
+  // ScrollTrigger.refresh() (src/motion/runtime.js), which takes the page to
+  // the top and back, and the browser fires `scroll`. In Chrome that came
+  // 230–450 ms after the jump, and past 400 ms the row went. Here it comes
+  // 500 ms on, scrollTo firing `scroll` as a browser's does.
+  it('keeps the row through a scroll the page makes itself 400 ms on, and lets it go on the wheel', async () => {
+    const jumps = landingAt(3000)
+    renderSiteAt(`${PATH}?view=list`)
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true }]))
+
+    await wait(500)
+    vi.mocked(window.scrollTo).mockImplementation(() => fireEvent.scroll(window))
+    window.scrollTo(0, 0)
+    window.scrollTo(0, 3000)
+    fireEvent.scroll(document)
+    await wait(100)
+    expect(held()).toBe(true)
+
+    fireEvent.wheel(window, { deltaY: 120 })
     expect(held()).toBe(false)
   })
 

@@ -270,9 +270,16 @@ describe('a link’s landing', () => {
     expect(held()).toBe(true)
     // The jump's own scroll, and a move in the first 400 ms, keep it.
     fireEvent.scroll(window)
+    fireEvent.wheel(window, { deltaY: 120 })
     await wait(200)
     expect(held()).toBe(true)
     await wait(300)
+    expect(held()).toBe(true)
+    // So does a scroll the page makes itself later, as ScrollTrigger's
+    // refresh does (to the top and back; src/shell/landingHold.js): only the
+    // visitor's own move lets it go.
+    fireEvent.scroll(window)
+    fireEvent.scroll(document)
     expect(held()).toBe(true)
     fireEvent.wheel(window, { deltaY: 120 })
     expect(held()).toBe(false)

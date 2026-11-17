@@ -46,10 +46,11 @@ import useExplorerState from './useExplorerState'
 //   unit the sheets do not have, or dialogs whose chunk did not load. A floor
 //   opened in place is no landing.
 // - A landing on the list with no dialog over it holds the row the same way,
-//   from just before its jump until the visitor first moves the page, by a
-//   scroll, the wheel, a touch or a key, 400 ms on (M3 §8, as Контакти's
-//   landing lets go; the jump's own scroll comes before), or opens a dialog
-//   over the list, in place.
+//   from just before its jump until the visitor first moves the page, by the
+//   wheel, a touch, a key or a pointer's press, 400 ms on (M3 §8, as
+//   Контакти's landing lets go; no scroll does, neither the jump's own nor
+//   the ScrollTrigger refresh that follows it: src/shell/landingHold.js), or
+//   opens a dialog over the list, in place.
 // - The dialogs are the surfaces' chunk (surfaces.js), loaded with the
 //   project's plans when the address asks for one; the full facade has
 //   usually loaded both before, as it neared the screen. Until they are in,
