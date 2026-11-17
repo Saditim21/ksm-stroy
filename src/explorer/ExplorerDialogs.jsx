@@ -31,9 +31,11 @@ import UnitPanel from './UnitPanel'
 //   section of its own (#spisak, Многофамилна's, M3 §6.2 #3) shows its rails
 //   and its list at once; there, while the address shows the list
 //   (?view=list, which lands the page on it), a unit's row takes the focus
-//   before its rail, far up the page (ruling PF11, M3 §6.4). An
-//   inquiry's close gives the focus to nothing: the inquiry focuses the
-//   form's first field once its glide ends (spec §7.7).
+//   before its rail, far up the page (ruling PF11, M3 §6.4), and a stage's
+//   floor, or a row the filters leave out, gives it to the list's first
+//   control, on the screen the page shows. An inquiry's close gives the
+//   focus to nothing: the inquiry focuses the form's first field once its
+//   glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
 //   and ?unit), then presets the form (presetInquiry) with the project's
 //   option and the unit as a pick of the project's (M3 §8), whose glide
@@ -97,14 +99,16 @@ function showRow(row) {
 // under [hidden] is in the facade's panel while the list is on show: the
 // focus goes to the unit's row then (`at.label`, a unit panel's), brought
 // into the table's view, else to the selected tab, and the facade is not
-// asked. With `list`, the address showing the list, a unit's row in a list
-// of its own section (#spisak) comes first, brought into view.
+// asked. With `list`, the address showing the list, a list of its own
+// section (#spisak) comes first, the page having landed on it: a unit's row
+// there, brought into view, else the list's first control.
 function focusRailOf(at, focusRail, list) {
   const listed = list && at.label ? rowOf(at.label) : null
   if (listed?.closest('#spisak') && focusInto(listed)) {
     showRow(listed)
     return
   }
+  if (list && focusInto(document.querySelector('#spisak .lv button'))) return
   const rail = railOf(at)
   if (focusInto(rail)) return
   if (!rail?.closest('[hidden]')) {

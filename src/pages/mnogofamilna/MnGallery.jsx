@@ -12,7 +12,10 @@ import mnImages from '../../data/images/mnogofamilna.json'
 // (src/pages/Projects.jsx:872 and :662, in sentence case). The photos take
 // the page's night grade, each its own sky cut, and their framing from its
 // stylesheet (mn.css: mn-night, mn-night--*, mn-gal--persp); they are
-// decoration, the caption says what they show.
+// decoration, the caption says what they show. The drawings' plates show
+// their titles, so their spread's live caption says the two to screen
+// readers only (ruling T5a): the pair is never printed twice, and the change
+// is still announced.
 
 // The garages' drawing's title, production's (Projects.jsx:662).
 const GARAGES = 'Блок\u00A0А\u00A0и\u00A0Б\u00A0– надземни и\u00A0подземни гаражи'
@@ -21,7 +24,7 @@ const SPREADS = [
   {
     left: { image: mnImages['mn-block-a'], photo: 'mn-night mn-night--block-a' },
     right: { image: mnImages['mn-block-b'], photo: 'mn-night mn-night--block-b' },
-    caption: 'Блок\u00A0А и\u00A0блок\u00A0Б.',
+    caption: 'Блок\u00A0А\u00A0и\u00A0блок\u00A0Б.',
   },
   {
     left: { image: mnImages['mn-front'], photo: 'mn-night mn-night--front' },
@@ -32,7 +35,7 @@ const SPREADS = [
     whole: true,
     left: { image: mnImages['mn-plan-drawing'], caption: 'Архитектурен план на етажа' },
     right: { image: mnImages['mn-garages'], caption: GARAGES },
-    caption: `Архитектурен план на етажа. ${GARAGES}.`,
+    caption: <span className="sr-only">Архитектурен план на етажа. {GARAGES}.</span>,
   },
 ]
 

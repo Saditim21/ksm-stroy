@@ -126,6 +126,27 @@ describe('#blokove', () => {
   }, 30000)
 })
 
+// Spec M3 §6.2 #5, ruling T5a: the drawings' spread, the third, shows each
+// drawing under its title on its plate, and its live caption says the two
+// titles to screen readers only, so the pair is never printed twice; the
+// live region stays, so the change is still announced.
+it('#galeriya: the drawings’ spread says its titles to screen readers only', () => {
+  renderSiteAt(PATH)
+  const gallery = section('galeriya')
+  const next = within(gallery).getByRole('button', { name: 'Следващи' })
+
+  fireEvent.click(next)
+  fireEvent.click(next)
+
+  expect(text(gallery.querySelector('.gal__n'))).toBe('03 / 03')
+  expect([...gallery.querySelectorAll('.gal__img[data-shown]')].map((layer) => layer.getAttribute('data-spread'))).toEqual(['2', '2'])
+  const caption = gallery.querySelector('.gal__cap')
+  expect(caption).toHaveAttribute('aria-live', 'polite')
+  expect([...caption.childNodes].map((node) => node.nodeName)).toEqual(['SPAN'])
+  expect(caption.firstChild).toHaveClass('sr-only')
+  expect(caption.textContent).toBe('Архитектурен план на етажа. Блок А и Б – надземни и подземни гаражи.')
+})
+
 // Spec M3 §6.2 #3: all 144 apartments, sold ones included, with the live
 // meta.
 it('lists all 144 apartments, 16 of them free', async () => {
@@ -192,6 +213,20 @@ it('?view=list&unit=А-802 gives the focus back to А-802’s row in #spisak', a
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   const row = [...section('spisak').querySelectorAll('tr.row')].find((each) => text(each.querySelector('.uid')) === 'А-802')
   expect(document.activeElement).toBe(row)
+}, 30000)
+
+// Spec M3 §6.4: a link that shows the list and opens a floor's stage lands
+// on #spisak, the stage over it. The stage has no opener to give the focus
+// back to, and its floor's rail is two screens up, at the facade: the list's
+// first control takes it, on the screen the page shows.
+it('?view=list&floor=Б-5 gives the stage’s focus back to #spisak’s list', async () => {
+  renderSiteAt(`${PATH}?view=list&floor=${encodeURIComponent('Б-5')}`)
+  await screen.findByRole('dialog', { name: named('Блок Б · Етаж 5') }, { timeout: 15000 })
+  await waitFor(() => expect(section('spisak').querySelector('.lv__meta')).not.toBeNull(), { timeout: 15000 })
+
+  fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  expect(document.activeElement).toBe(section('spisak').querySelector('.lv button'))
 }, 30000)
 
 // Spec §1.9 (ruling T7a), M3 §6.4, §8: a landing on the list keeps the EU

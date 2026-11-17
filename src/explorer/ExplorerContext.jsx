@@ -118,8 +118,8 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   }, [landing])
 
   // The opening: where the stage grows from and what opened it, a new object
-  // at every floor opened, with or without either; and what opened the unit
-  // panel.
+  // at every floor opened, with or without either, and at every unit opened,
+  // as it was; and what opened the unit panel.
   const [opening, setOpening] = useState(null)
   const unitOpener = useRef(null)
   const unitTimer = useRef(0)
@@ -128,10 +128,11 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   // The dialogs' chunk, once the address asks for a dialog, and again at each
   // floor or unit opened while it is not in: a failed load may be tried again
   // (loadSurfaces.js), so the next one opened after one failed still opens.
-  // Each floor opened is a new opening, the same floor again included, whose
-  // address stays as it was (FR9). While the chunk is not in, only openFloor
-  // can change the floor: the stage's own controls are in the chunk, and the
-  // explorer never adds to the history (useExplorerState.js). One load in
+  // Each floor or unit opened is a new opening, the same one again included,
+  // whose address stays as it was (FR9), so one open asks once. While the
+  // chunk is not in, only openFloor can change the floor, and only openUnit
+  // the unit: the stage's and the panel's own controls are in the chunk, and
+  // the explorer never adds to the history (useExplorerState.js). One load in
   // flight is shared.
   const [surfaces, setSurfaces] = useState(() => loadedSurfaces(project))
   const wanted = arrived && Boolean(stage || unitId)
@@ -150,7 +151,7 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
     return () => {
       live = false
     }
-  }, [wanted, surfaces, unitId, project, opening])
+  }, [wanted, surfaces, project, opening])
 
   const openFloor = useCallback((block, floor, unitLabel, meta) => {
     clearTimeout(unitTimer.current)
@@ -166,6 +167,8 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
 
   const openUnit = useCallback((label, opener) => {
     clearTimeout(unitTimer.current)
+    // A new opening, the stage's own kept, for the chunk's load to follow.
+    setOpening((current) => ({ ...current }))
     const focused = document.activeElement === document.body ? null : document.activeElement
     unitOpener.current = opener ?? focused
     latest.current.openUnit(label)

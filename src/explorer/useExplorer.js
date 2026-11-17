@@ -52,6 +52,8 @@ export const ExplorerContext = createContext(null)
 /** The explorer's state and model, for a section inside ExplorerProvider. */
 export default function useExplorer() {
   const explorer = useContext(ExplorerContext)
-  if (!explorer) throw new Error('useExplorer() needs an <ExplorerProvider> around it')
+  // Worded short: it ships in every explorer page's first load, and its
+  // bytes offset FR9's unit retry (ruling FW2).
+  if (!explorer) throw new Error('useExplorer() needs an ExplorerProvider')
   return explorer
 }

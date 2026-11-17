@@ -234,9 +234,11 @@ it('#galeriya: three spreads, the third the two drawings whole, under production
     ['/img/mn-plan-drawing', '/img/mn-garages'],
   ])
   expect(layers(3)).toEqual([])
-  // The first spread on show, its caption the live one.
+  // The first spread on show, its caption the live one, „А и“ bound as the
+  // copy rules bind a one-letter word (ruling T5b): read as written, since
+  // textOf folds a no-break space into a plain one.
   expect([...gallery.querySelectorAll('.gal__img[data-shown]')].map((layer) => layer.getAttribute('data-spread'))).toEqual(['0', '0'])
-  expect(textOf(gallery.querySelector('.gal__cap'))).toBe('Блок А и блок Б.')
+  expect(gallery.querySelector('.gal__cap').textContent).toBe('Блок А и блок Б.')
 
   // The drawings: whole, on their plates, each under its title.
   for (const layer of layers(2)) expect(layer.classList.contains('gal__img--whole')).toBe(true)
