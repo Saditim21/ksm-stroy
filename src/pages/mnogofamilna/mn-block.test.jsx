@@ -102,6 +102,31 @@ describe('a row and its floor on the facade, one hot floor (spec M3 §6.5)', () 
     expect(rail('А-5')).not.toHaveClass('is-hot')
   })
 
+  // The pointer leaving the rows lets the floor go after the hot floor's
+  // 320 ms; coming back to the same row before then keeps it lit (a flick
+  // across the seam and back), as moving to any other row would.
+  it('keeps a row lit when the pointer leaves the rows and comes back to it within 320 ms', () => {
+    vi.useFakeTimers()
+    try {
+      const rows = document.querySelector('#explorer .mbl__rows')
+      fireEvent.pointerOver(row('А-5'), { pointerType: 'mouse' })
+      fireEvent.pointerLeave(rows, { pointerType: 'mouse' })
+      fireEvent.pointerOver(row('А-5'), { pointerType: 'mouse' })
+      act(() => vi.advanceTimersByTime(320))
+
+      expect(row('А-5')).toHaveClass('is-hot')
+      expect(rail('А-5')).toHaveClass('is-hot')
+
+      fireEvent.pointerLeave(rows, { pointerType: 'mouse' })
+      act(() => vi.advanceTimersByTime(320))
+
+      expect(row('А-5')).not.toHaveClass('is-hot')
+      expect(rail('А-5')).not.toHaveClass('is-hot')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   // A finger passing over a row lights nothing: a touch only taps.
   it('lights nothing for a finger passing over a row', () => {
     fireEvent.pointerOver(row('А-3'), { pointerType: 'touch' })

@@ -3,7 +3,7 @@ import Button from '../../components/ui/Button'
 import RollingNumber from '../../components/ui/RollingNumber'
 import Seam from '../../components/ui/Seam'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
-import { FacadeCaption } from '../../explorer/ExplorerSection'
+import { Dated, FacadeCaption } from '../../explorer/ExplorerSection'
 import Facade from '../../explorer/Facade'
 import useExplorer from '../../explorer/useExplorer'
 import { bindAddress, plural } from '../../utils/format'
@@ -24,9 +24,10 @@ import { bindAddress, plural } from '../../utils/format'
 //   loading it as the glide focuses it (MnList.jsx).
 // - Then the night facade (Facade.jsx with Многофамилна's project: its lit
 //   floors, crops and fades are projects/mn.js's and mn-facade.css's), its
-//   caption saying what lights, as of when, then what the explorer's facade
-//   says everywhere: what its rails count and how to open a floor, in a
-//   desktop's words and a phone's (FacadeCaption, ExplorerSection.jsx).
+//   caption saying what lights, as of when (Dated, as a block page says
+//   it), then what the explorer's facade says everywhere: what its rails
+//   count and how to open a floor, in a desktop's words and a phone's
+//   (FacadeCaption; both ExplorerSection.jsx).
 //
 // The entrance is mn.css's and mn-facade.css's, all CSS from the first
 // paint: the name rises across the seam, the rest comes up after it, the
@@ -58,10 +59,9 @@ function toInquiry(event) {
 export default function MnHero() {
   const { project, model, dated, openFloor, railFocus, railFocused } = useExplorer()
   const free = model ? model.totals.available : null
-  const lit = dated ? `, по данни към ${dated}` : ''
   const caption = () => (
     <>
-      Светят етажите със свободни апартаменти{lit}. <FacadeCaption />
+      <Dated>Светят етажите със свободни апартаменти</Dated> <FacadeCaption />
     </>
   )
 

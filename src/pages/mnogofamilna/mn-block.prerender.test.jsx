@@ -141,8 +141,12 @@ describe.each([
     expect(rails.map((rail) => textOf(rail.querySelector('.n'))).join(' ')).not.toMatch(/—/)
     // No edge panel and no sheet: a block page's rows are its floors' panels.
     expect(html.querySelectorAll('.fxp, .sheet')).toHaveLength(0)
-    // What lights, as of when; and what the rail counts.
-    expect(textOf(html.querySelector('#explorer .mbl__cap'))).toMatch(/^Светят етажите със свободни апартаменти, по данни към 01\.12\.2025\. Цифрите отстрани са свободните апартаменти на всеки етаж\./)
+    // What lights, and as of when: the concept's one sentence
+    // (mnogofamilna-block-a.html:90). None of the main page's words on how
+    // to open a floor: here the rows say it, and a phone's first tap on the
+    // facade shows no plan, the block's facade having no sheet.
+    expect(textOf(html.querySelector('#explorer .mbl__cap'))).toBe('Светят етажите със свободни апартаменти, по данни към 01.12.2025.')
+    expect(html.querySelectorAll('#explorer .cap-desk, #explorer .cap-phone')).toHaveLength(0)
   })
 
   // Spec M3 §6.5: block Б mirrored by a class on the page's root, the same

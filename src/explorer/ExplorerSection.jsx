@@ -71,6 +71,27 @@ export function FacadeCaption() {
 }
 const caption = () => <FacadeCaption />
 
+/** `children`, a sentence, then the date of the explorer's numbers where
+ * they are dated (`, по данни към 01.12.2025`; nothing with live rows), and
+ * a full stop. Both Многофамилна pages say what their lit facade shows this
+ * way: the opening before FacadeCaption (MnHero.jsx), a block page alone
+ * (MnBlockPage.jsx).
+ * It lives here, beside FacadeCaption, so that a block page imports this
+ * module as the opening does, which keeps the explorer's shared chunks
+ * whole: this module with ExplorerContext.jsx's, and StaleNotice with
+ * Facade.jsx's. A block page that imports nothing from here splits both,
+ * and Golden Residence's first-load JS grows by about 780 B (measured in
+ * Task 6's first fix round). */
+export function Dated({ children }) {
+  const { dated } = useExplorer()
+  return (
+    <>
+      {children}
+      {dated ? `, по данни към ${dated}` : ''}.
+    </>
+  )
+}
+
 export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)
   useReveals(ref)

@@ -52,38 +52,44 @@
   padding: clamp(24px, calc(var(--screen-h) * .06), 64px) clamp(28px, 4vw, 72px) 18px var(--gut);
 }
 .mbl__pin > .fx-wrap { width: 100%; }
-/* What lights, as of when, and what the rail counts. */
+/* What lights, and as of when: the concept's one sentence, set as the
+   concept sets it (css/mnogofamilna-block-a.css:22). */
 .mbl__cap {
   max-width: 34em;
   margin-top: 18px;
   color: var(--stone);
   font-size: 13px;
   text-align: center;
-  text-wrap: balance;
-}
-.mbl__cap b {
-  color: var(--ivory-2);
-  font-weight: 500;
 }
 .mbl__rows {
   padding: 0 var(--gut) 0 clamp(28px, 4vw, 72px);
   border-bottom: 1px solid var(--hair-2);
 }
 @media (min-width: 901px) {
-  .mbl__pin {
-    position: sticky;
-    top: var(--bar-h);
-    height: calc(var(--screen-h) - var(--bar-h));
-  }
   /* Block Б, mirrored: its facade on the right, its floors on the left,
-     each half's gutter on its outer edge. */
+     each half's gutter on its outer edge; its facade 18 px under the
+     floors' top, as the concept stands it (css/mnogofamilna-block-a.css:24). */
   .mbp--b .mbl__pin {
     order: 2;
-    padding: clamp(24px, calc(var(--screen-h) * .06), 64px) var(--gut) 18px clamp(28px, 4vw, 72px);
+    padding: 18px var(--gut) 18px clamp(28px, 4vw, 72px);
   }
   .mbp--b .mbl__rows {
     order: 1;
     padding: 0 clamp(28px, 4vw, 72px) 0 var(--gut);
+  }
+}
+/* With motion, the facade's half pinned under the bar while the floors
+   scroll. Without it (reduced motion or data saver, the motion gate's
+   `:root.js`) it is not pinned, as Diptych §5.8 drops the site's other
+   sticky media and the concept unpins it (css/mnogofamilna-block-a.css:74-76):
+   it stands at the top of its half, as tall as it is. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 901px) {
+    :root.js .mbl__pin {
+      position: sticky;
+      top: var(--bar-h);
+      height: calc(var(--screen-h) - var(--bar-h));
+    }
   }
 }
 

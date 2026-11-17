@@ -6,7 +6,7 @@ import { availabilityPreload } from '../../data/availability/useAvailability'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
 import { blockFacade } from '../../explorer/blockFacade'
 import { ExplorerProvider } from '../../explorer/ExplorerContext'
-import { FacadeCaption } from '../../explorer/ExplorerSection'
+import { Dated } from '../../explorer/ExplorerSection'
 import Facade from '../../explorer/Facade'
 import { FloorCounts } from '../../explorer/FloorFacts'
 import { facadeOf } from '../../explorer/geometry'
@@ -31,10 +31,13 @@ import './mn-block.css'
 //   the date they are from after it.
 // - Then #explorer, a split: in one half the block's own night facade, its
 //   crop, its rail and its lit floors (Facade.jsx in block mode,
-//   blockFacade.jsx), pinned from 901 px while the floors scroll in the
-//   other, a row a floor, from 10 down to 2 (FloorRows.jsx); under the
-//   facade what lights, as of when, and what the rail counts (FacadeCaption,
-//   as Многофамилна's opening says it).
+//   blockFacade.jsx), pinned from 901 px, where motion plays, while the
+//   floors scroll in the other, a row a floor, from 10 down to 2
+//   (FloorRows.jsx); under the facade what lights, and as of when, the
+//   concept's one sentence, as Многофамилна's opening says it (Dated).
+//   How to open a floor the rows say; the main page's words on it
+//   (FacadeCaption) do not fit here: the block's facade has no sheet, so a
+//   phone's first tap shows no plan.
 // - Then the inquiry (#kontakti, #zapitvane), in Многофамилна's words and
 //   with its subjects, Многофамилна first and chosen (MN_INQUIRY).
 // Its numbers are the dated snapshot of 01.12.2025 until Многофамилна's
@@ -113,7 +116,7 @@ function Head({ block }) {
 }
 
 function Floors({ block }) {
-  const { project, model, dated, openFloor, railFocus, railFocused } = useExplorer()
+  const { project, model, openFloor, railFocus, railFocused } = useExplorer()
   const own = useMemo(() => blockFacade(project, block, SIZES), [project, block])
   const { shape } = facadeOf(own.facade.map)
   const isFloor = useCallback((key) => shape.has(key), [shape])
@@ -192,7 +195,7 @@ function Floors({ block }) {
           onRailFocused={railFocused}
         />
         <p className="mbl__cap">
-          Светят етажите със свободни апартаменти{dated ? `, по данни към ${dated}` : ''}. <FacadeCaption />
+          <Dated>Светят етажите със свободни апартаменти</Dated>
         </p>
       </div>
       <FloorRows project={project} model={model} block={block} plan={plan} hotState={hotState} onOpen={openRow} rowsRef={rowsRef} />

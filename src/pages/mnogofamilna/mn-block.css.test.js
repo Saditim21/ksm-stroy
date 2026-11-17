@@ -21,14 +21,18 @@ function declaredFor(selector, atRules = []) {
 
 // Spec M3 §6.5: the facade's half stays pinned while the floors scroll, on a
 // desktop; on a phone the facade comes first and scrolls with the page.
-it('pins the facade’s half only from 901 px', () => {
+// Without motion (reduced motion, data saver: the motion gate, `:root.js`)
+// it is not pinned, as Diptych §5.8 drops the other sticky media and the
+// concept unpins it (css/mnogofamilna-block-a.css:74-76): it stands at the
+// top of its half, as tall as it is.
+it('pins the facade’s half only from 901 px, and only with motion', () => {
   const sticky = rules.filter((rule) => valueOf(rule, 'position') === 'sticky')
 
-  expect(sticky.map((rule) => rule.selector)).toEqual(['.mbl__pin'])
-  for (const rule of sticky) expect(rule.atRules).toEqual([DESKTOP])
-  const pin = declaredFor('.mbl__pin', [DESKTOP])
+  expect(sticky.map((rule) => [rule.selector, rule.atRules])).toEqual([[':root.js .mbl__pin', [NO_PREFERENCE, DESKTOP]]])
+  const pin = declaredFor(':root.js .mbl__pin', [NO_PREFERENCE, DESKTOP])
   expect(pin.top).toBe('var(--bar-h)')
   expect(pin.height).toBe('calc(var(--screen-h) - var(--bar-h))')
+  for (const rule of rulesFor(rules, '.mbl__pin')) expect(valueOf(rule, 'height'), rule.atRules.join(' / ')).toBeUndefined()
 })
 
 // Spec M3 §6.5: block Б is mirrored, its facade on the right as the block
@@ -36,6 +40,9 @@ it('pins the facade’s half only from 901 px', () => {
 // side, and each half's gutter on its own outer edge.
 it('mirrors block Б’s halves by its root’s class', () => {
   expect(declaredFor('.mbp--b .mbl__pin', [DESKTOP]).order).toBe('2')
+  // Б's facade stands 18 px under the floors' top, as the concept has it
+  // (css/mnogofamilna-block-a.css:24); А's sits lower, by its clamp.
+  expect(declaredFor('.mbp--b .mbl__pin', [DESKTOP]).padding).toBe('18px var(--gut) 18px clamp(28px, 4vw, 72px)')
   expect(declaredFor('.mbp--b .mbl__rows', [DESKTOP]).order).toBe('1')
   const rule = declaredFor('.mbr::before')
   const mirrored = declaredFor('.mbp--b .mbr::before')

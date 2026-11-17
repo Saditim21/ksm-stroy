@@ -6,11 +6,12 @@ import { mockMatchMedia } from '../test/media'
 import { tap } from '../test/pointer'
 import { setLenis } from '../utils/lenis'
 import { ExplorerProvider } from './ExplorerContext'
-import ExplorerSection from './ExplorerSection'
+import ExplorerSection, { Dated } from './ExplorerSection'
 import { loadSurfaces } from './loadSurfaces'
 import { loadUnitList } from './loadUnitList'
 import { GR_PROJECT } from './projects/gr'
-import { LOADING, named, snapshotAvailability } from './testing'
+import { MN_PROJECT } from './projects/mn'
+import { ExplorerTestProvider, LOADING, named, snapshotAvailability } from './testing'
 
 // The explorer's section on the Golden Residence page, #explorer (spec §8.2
 // #3, §9), inside the page's ExplorerProvider: the heading, the lead with the
@@ -458,6 +459,31 @@ describe('the focus after a dialog over the list', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(screen.getByTestId('where')).toHaveTextContent(/^\/projects\/golden-residence\?view=list$/)
     expect(document.activeElement).toBe(selectedTab())
+  })
+})
+
+// A sentence and the date of the explorer's numbers: what Многофамилна's lit
+// facade shows, under it on both its pages (spec M3 §5.1, §6.5; the
+// concept's mnogofamilna-block-a.html:90), with the date while its numbers
+// are the dated snapshot, none once its rows are live.
+describe('Dated', () => {
+  const caption = (project) => {
+    render(
+      <ExplorerTestProvider project={project}>
+        <p data-testid="caption">
+          <Dated>Светят етажите със свободни апартаменти</Dated>
+        </p>
+      </ExplorerTestProvider>,
+    )
+    return text(screen.getByTestId('caption'))
+  }
+
+  it('says what lights, as of the snapshot’s date', () => {
+    expect(caption(MN_PROJECT)).toBe('Светят етажите със свободни апартаменти, по данни към 01.12.2025.')
+  })
+
+  it('drops the date with live rows', () => {
+    expect(caption({ ...MN_PROJECT, dated: () => null })).toBe('Светят етажите със свободни апартаменти.')
   })
 })
 

@@ -23,7 +23,7 @@ import PlanSvg from '../../explorer/PlanSvg'
 // the focus is in it: it takes the hot class, which draws the brass rule
 // down its seam side (mn-block.css). A finger passing over a row lights
 // nothing. The pointer leaving the rows, or the focus, lets it go after the
-// hot floor's 320 ms.
+// hot floor's 320 ms; the pointer back on a row before then keeps it.
 //
 // `onOpen(row, unitLabel?)` opens the row's floor, or one of its units: the
 // page grows the stage from the row's plan, and gives the focus back to the
@@ -34,15 +34,19 @@ import PlanSvg from '../../explorer/PlanSvg'
 const keyOf = (event) => event.target.closest?.('.mbr')?.dataset.k
 
 export default function FloorRows({ project, model, block, plan, hotState, onOpen, rowsRef }) {
-  const { hot, setHot, scheduleClose } = hotState
+  const { hot, setHot, scheduleClose, cancelClose } = hotState
   const { min, max } = project.floors
   const floors = Array.from({ length: max - min + 1 }, (_, i) => max - i)
 
-  // A hovering pointer, never a finger or a pen passing over; once a row.
+  // A hovering pointer, never a finger or a pen passing over. A row the
+  // pointer has already made hot stays hot without a new render, and a
+  // close its leaving set off is called off.
   const onPointerOver = (event) => {
     if (event.pointerType === 'touch' || event.pointerType === 'pen') return
     const key = keyOf(event)
-    if (key && (hot?.key !== key || hot.source !== 'mouse')) setHot(key, 'mouse')
+    if (!key) return
+    if (hot?.key === key && hot.source === 'mouse') cancelClose()
+    else setHot(key, 'mouse')
   }
   const onPointerLeave = (event) => {
     if (event.pointerType === 'mouse') scheduleClose()
