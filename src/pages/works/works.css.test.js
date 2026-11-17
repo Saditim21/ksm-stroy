@@ -34,24 +34,21 @@ describe('the opening’s motion (Diptych §5.5, M3/M4 §4.2, §7.2)', () => {
   })
 
   // Spec §7.2: the title rises, the seam draws down, the lead and the filter
-  // follow, and the first row's plates open from the seam, the cover first,
-  // its photo settling, then the two smaller ones. All from --arrive.
-  it('raises the title, draws the seam and opens the first row’s plates from the seam', () => {
+  // follow, the first row's cover photo settles and its two smaller plates
+  // open from the seam. All from --arrive.
+  it('raises the title, draws the seam and opens the first row’s smaller plates from the seam', () => {
     expect(valueOf(animationOf(':root.js .ob__h1 .split-line'), 'animation')).toBe('works-rise .95s var(--e-out) both')
     expect(valueOf(animationOf(':root.js .ob__seam'), 'animation')).toBe('works-draw 1.6s var(--e-out) both')
     expect(valueOf(animationOf(':root.js .ob__lead'), 'animation')).toBe('works-up 1s var(--e-out) both')
     expect(valueOf(animationOf(':root.js .ob__filter'), 'animation')).toBe('works-up 1s var(--e-out) both')
-    const cover = animationOf(':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover')
-    expect(valueOf(cover, 'animation')).toBe('works-wipe 1.15s var(--e-io) both')
     expect(valueOf(animationOf(':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m1'), 'animation')).toBe('works-wipe 1s var(--e-io) both')
-    expect(valueOf(animationOf(':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover img'), 'animation')).toBe('works-settle 1.5s var(--e-out) both')
+    expect(valueOf(animationOf(':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m2'), 'animation')).toBe('works-wipe 1s var(--e-io) both')
     for (const selector of [
       ':root.js .ob__h1 .line-mask',
       ':root.js .ob__h1 .split-line',
       ':root.js .ob__seam',
       ':root.js .ob__lead',
       ':root.js .ob__filter',
-      ':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover',
       ':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m1',
       ':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m2',
       ':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover img',
@@ -65,12 +62,37 @@ describe('the opening’s motion (Diptych §5.5, M3/M4 §4.2, §7.2)', () => {
     expect(keyframes('works-rise')[0].declarations).toEqual([{ prop: 'transform', value: 'translateY(112%)', important: false }])
   })
 
-  // On a phone the halves stack and the seam hides: the plates open from
-  // their top, as a picture does there (useWipes).
-  it('opens the first row’s plates from their top on a phone', () => {
-    const phone = rulesFor(rules, ':root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph')
-      .find((rule) => rule.atRules.join(' / ') === `${NO_PREFERENCE} / ${PHONE}`)
-    expect(valueOf(phone, 'animation-name')).toBe('works-wipe-top')
+  // Diptych §5.5 (v2 rule 5.2.3, which §5.9 keeps): the first row's cover is
+  // the page's LCP image (Register.jsx gives it fetchpriority=high). It is
+  // whole from the first frame, never wiped, clipped or faded: its photo
+  // only settles in scale, from --arrive, as Home's and Golden Residence's
+  // do. Of the first row, only the two smaller plates open from the seam.
+  it('keeps the first row’s cover, the LCP image, whole from the first frame: its photo only settles in scale', () => {
+    const FIRST_ROW = ':root.js .ob__list:not(.is-folded) > .wk:first-child '
+    const animated = rules
+      .filter((rule) => rule.declarations.some(({ prop }) => prop === 'animation' || prop === 'animation-name'))
+      .flatMap((rule) => rule.selectors
+        .filter((selector) => selector.includes('.wk:first-child') || selector.includes('.wk__ph') || selector.includes('.wk__pic'))
+        .map((selector) => [selector.replace(FIRST_ROW, ''), valueOf(rule, 'animation') ?? valueOf(rule, 'animation-name'), rule.atRules.join(' / ')]))
+    expect(animated).toEqual([
+      ['.wk__ph--cover img', 'works-settle 1.5s var(--e-out) both', NO_PREFERENCE],
+      ['.wk__ph--m1', 'works-wipe 1s var(--e-io) both', NO_PREFERENCE],
+      ['.wk__ph--m2', 'works-wipe 1s var(--e-io) both', NO_PREFERENCE],
+      ['.wk__ph--m1', 'works-wipe-top', `${NO_PREFERENCE} / ${PHONE}`],
+      ['.wk__ph--m2', 'works-wipe-top', `${NO_PREFERENCE} / ${PHONE}`],
+    ])
+    expect(valueOf(animationOf(`${FIRST_ROW}.wk__ph--cover img`), 'animation-delay')).toBe('var(--arrive)')
+    expect(keyframes('works-settle').flatMap((rule) => rule.declarations)).toEqual([{ prop: 'transform', value: 'scale(1.12)', important: false }])
+  })
+
+  // On a phone the halves stack and the seam hides: the smaller plates open
+  // from their top, as a picture does there (useWipes).
+  it('opens the first row’s smaller plates from their top on a phone', () => {
+    for (const plate of ['.wk__ph--m1', '.wk__ph--m2']) {
+      const phone = rulesFor(rules, `:root.js .ob__list:not(.is-folded) > .wk:first-child ${plate}`)
+        .find((rule) => rule.atRules.join(' / ') === `${NO_PREFERENCE} / ${PHONE}`)
+      expect(valueOf(phone, 'animation-name'), plate).toBe('works-wipe-top')
+    }
     expect(keyframes('works-wipe-top')[0].declarations).toEqual([{ prop: 'clip-path', value: 'inset(0% 0% 100% 0%)', important: false }])
   })
 

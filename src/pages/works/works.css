@@ -250,9 +250,11 @@
 /* ---------- motion (Diptych §5.5, §5.7; spec §7.2) ---------- */
 @media (prefers-reduced-motion: no-preference) {
   /* The opening: the title rises from its mask, the seam draws down, the
-     description and the filter follow, and the first row's plates open from
-     the seam, the cover first, its photo settling, then the two smaller
-     ones. Once the filter has been used (.is-folded), a row it brings back
+     description and the filter follow. The first row's cover is the page's
+     LCP image (Register.jsx): it is whole from the first frame, never wiped
+     or faded, and its photo only settles in scale (Diptych §5.5; v2 rule
+     5.2.3, which Diptych §5.9 keeps); the two smaller plates open from the
+     seam. Once the filter has been used (.is-folded), a row it brings back
      is not opened again. */
   :root.js .ob__h1 .line-mask {
     animation: works-mask .95s linear backwards;
@@ -274,13 +276,9 @@
     animation: works-up 1s var(--e-out) both;
     animation-delay: calc(var(--arrive) + .32s);
   }
-  :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover {
-    animation: works-wipe 1.15s var(--e-io) both;
-    animation-delay: calc(var(--arrive) + .4s);
-  }
   :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--cover img {
     animation: works-settle 1.5s var(--e-out) both;
-    animation-delay: calc(var(--arrive) + .52s);
+    animation-delay: var(--arrive);
   }
   :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m1 {
     animation: works-wipe 1s var(--e-io) both;
@@ -290,10 +288,11 @@
     animation: works-wipe 1s var(--e-io) both;
     animation-delay: calc(var(--arrive) + .72s);
   }
-  /* On a phone the halves stack and the seam hides: the plates open from
-     their top, as a picture does there (useWipes). */
+  /* On a phone the halves stack and the seam hides: the smaller plates open
+     from their top, as a picture does there (useWipes). */
   @media (max-width: 900px) {
-    :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph { animation-name: works-wipe-top; }
+    :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m1,
+    :root.js .ob__list:not(.is-folded) > .wk:first-child .wk__ph--m2 { animation-name: works-wipe-top; }
   }
 }
 

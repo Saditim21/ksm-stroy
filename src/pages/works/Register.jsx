@@ -32,13 +32,18 @@ import { lineOf, photoOf, WORKS } from './works'
 //   stay close the gaps with Flip (0.75 s expo.inOut) and the rows it brings
 //   fade in (0.6 s, 0.3 s late), as the concept's js/obekti.js:30-56 does,
 //   and a choice made while a fold plays is let go, as there. Without
-//   motion, or if Flip cannot load, the rows change at once.
-// - The first row's plates open from the seam with the opening (works.css,
-//   CSS from the first paint); each row below opens its three plates from
-//   the seam together as it comes up (useWipes, on the row's media, as the
-//   concept's one timeline a row does), and its plates' photos are the only
-//   ones of the work the page asks for (the first row's at once, its cover
-//   first: the page's largest paint), the rest coming with the book.
+//   motion the rows change at once; if Flip cannot load, they change at
+//   once when the fade is done.
+// - The first row opens with the opening (works.css, CSS from the first
+//   paint): its cover, the page's largest paint and so its LCP image, is
+//   whole from the first frame, its photo only settling in scale (Diptych
+//   §5.5), and its two smaller plates open from the seam. Each row below
+//   opens its three plates from the seam together as it comes up (useWipes,
+//   on the row's media, as the concept's one timeline a row does), each row
+//   the scope of its own, so that no motion's scope takes in the opening
+//   (spec M3/M4 §4.2: useMotion is never used above the fold). A row's
+//   plates' photos are the only ones of the work the page asks for (the
+//   first row's at once, its cover first), the rest coming with the book.
 
 const loadBook = () => import('./Book')
 // Flip (src/motion/flip.js), through a chunk of its own, not in the page's
@@ -74,11 +79,11 @@ const MINOR_SIZES = '(max-width: 900px) calc(50vw - 24px), 14vw'
 
 // One work's row. The first row's plates open with the opening (CSS); the
 // rows below open theirs from the seam as they come up (data-wipe on the
-// three together, left of the seam).
-function Row({ work, first, hidden, onOpen }) {
+// three together, left of the seam: LaterRow).
+function Row({ ref, work, first, hidden, onOpen }) {
   const count = work.photos.length
   return (
-    <li className="wk" id={work.id} hidden={hidden}>
+    <li ref={ref} className="wk" id={work.id} hidden={hidden}>
       <article className="wk__in" aria-labelledby={`wk-${work.id}`}>
         <div className="wk__media" data-wipe={first ? undefined : 'l'}>
           {PLATES[work.id].map((index, place) => (
@@ -125,9 +130,19 @@ function Row({ work, first, hidden, onOpen }) {
   )
 }
 
+// A row below the first: the scope of its own wipes (useWipes), so that the
+// opening, the head and the first row, lies in no motion's scope (spec
+// M3/M4 §4.2). A row whose plates are already on screen when its wipes are
+// set up, as the second row's top edge is on a desktop, stays as it is
+// (src/motion/wipes.js).
+function LaterRow(props) {
+  const ref = useRef(null)
+  useWipes(ref)
+  return <Row {...props} ref={ref} />
+}
+
 export default function Register() {
   const list = useRef(null)
-  useWipes(list)
   const motionNow = useMotionNow()
   // The filter's choice, at once; the rows it shows, once a fold has faded
   // the rows it drops.
@@ -170,23 +185,23 @@ export default function Register() {
       if (leaving.length === 0) resolve()
       else gsap.to(leaving, { opacity: 0, duration: 0.28, ease: 'power2.out', onComplete: resolve })
     })
-    Promise.all([loadFlip(), faded]).then(
-      ([Flip]) => {
-        const before = rows.filter((row) => !row.hidden)
-        const staying = before.filter((row) => !leaving.includes(row))
-        fold.current = { motion, Flip, state: staying.length > 0 ? Flip.getState(staying) : null, before, leaving }
-        setShown(next)
-      },
-      () => {
-        if (leaving.length > 0) gsap.set(leaving, { clearProps: 'opacity' })
-        folding.current = false
-        setShown(next)
-      },
-    )
+    // Flip, or null where it cannot load (offline, or a new deploy that
+    // replaced its chunk). The fold waits for the fade either way: cleared
+    // while the fade plays, the rows it drops would end at opacity 0, and
+    // come back unseen.
+    const flipped = loadFlip().catch(() => null)
+    Promise.all([flipped, faded]).then(([Flip]) => {
+      const before = rows.filter((row) => !row.hidden)
+      const staying = before.filter((row) => !leaving.includes(row))
+      fold.current = { motion, Flip, state: Flip && staying.length > 0 ? Flip.getState(staying) : null, before, leaving }
+      setShown(next)
+    })
   }
 
-  // The fold, once the rows have changed: the rows that stay go from where
-  // they were (Flip), the rows it brings fade in.
+  // The fold, once the rows have changed: the rows it dropped, hidden now,
+  // lose their fade; the rows that stay go from where they were (Flip), the
+  // rows it brings fade in. Without Flip, the rows it brings show at once.
+  // Either way the triggers below are measured again when it is done.
   useLayoutEffect(() => {
     const pending = fold.current
     if (!pending) return
@@ -198,6 +213,11 @@ export default function Register() {
     const done = () => {
       folding.current = false
       ScrollTrigger.refresh()
+    }
+    if (!Flip) {
+      if (entering.length > 0) gsap.set(entering, { clearProps: 'opacity' })
+      done()
+      return
     }
     if (entering.length > 0) {
       gsap.set(entering, { opacity: 0 })
@@ -254,9 +274,10 @@ export default function Register() {
         onPointerDown={warm}
         onFocus={warm}
       >
-        {WORKS.map((work, i) => (
-          <Row key={work.id} work={work} first={i === 0} hidden={!fits(work, shown)} onOpen={open} />
-        ))}
+        {WORKS.map((work, i) => {
+          const Each = i === 0 ? Row : LaterRow
+          return <Each key={work.id} work={work} first={i === 0} hidden={!fits(work, shown)} onOpen={open} />
+        })}
       </ol>
       {book && BookView ? <BookView {...book} onClose={close} /> : null}
     </section>

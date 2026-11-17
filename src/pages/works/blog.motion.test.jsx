@@ -8,13 +8,15 @@ import { mockMatchMedia } from '../../test/media'
 
 // The motion of Обекти (spec M3/M4 §7.2, §4.2; Diptych §5.5, §5.7; ruling
 // M4-PF11): the opening's (the title rising, the seam drawing, the first
-// row's plates opening from the seam) is CSS (works.css.test.js); under it,
-// each row's plates open from the seam as the row comes up from below
-// (useWipes), and the closing reveals what it holds once: its heading rises
-// line by line, its line fades up, its seam draws (useReveals). What is
-// already on screen when the motion runs stays as it is: the first viewport
-// never moves for JS. And the filter folds the register with Flip: the rows
-// it drops fade, the gaps close (spec §7.2).
+// row's cover settling and its smaller plates opening from the seam) is CSS
+// (works.css.test.js), and no motion's scope takes it in; under it, each
+// row's plates open from the seam as the row comes up from below (useWipes,
+// each row its own scope), and the closing reveals what it holds once: its
+// heading rises line by line, its line fades up, its seam draws
+// (useReveals). What is already on screen when the motion runs stays as it
+// is: the first viewport never moves for JS. And the filter folds the
+// register with Flip: the rows it drops fade, the gaps close (spec §7.2);
+// without Flip, the rows change at once once the fade is done.
 //
 // The motion engine is a recording stand-in (src/test/gsap.js), as the
 // engine module useMotion() loads and as what useMotionNow() hands over;
@@ -40,7 +42,9 @@ let restoreMedia
 let flushMotion
 beforeEach(() => {
   recorder.reset()
-  vi.mocked(loadFlip).mockClear()
+  // Back to its own implementation (Flip, loaded), should a test have made
+  // it fail.
+  vi.mocked(loadFlip).mockReset()
   for (const fn of Object.values(flip.Flip)) fn.mockClear()
   vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('offline') }))
   flushMotion = stubIdle()
@@ -120,6 +124,22 @@ describe('the rows and the closing, coming up from below', () => {
     }
     expect(recorder.timelines.some(({ vars }) => opening.some((part) => part.contains(vars.scrollTrigger.trigger)))).toBe(false)
   })
+
+  // Spec §4.2 (useMotion is never used above the fold): no motion's scope
+  // takes in the opening, the head or the first row, nor lies inside it.
+  // Each row below the first is the scope of its own wipes, and the closing
+  // of its reveals.
+  it('scope no motion over the opening: each row below the first is its own', async () => {
+    renderPage()
+    await flushMotion()
+
+    const scopes = [...new Set(recorder.motion.gsap.context.mock.calls.map(([, scope]) => scope))]
+    const opening = [document.querySelector('.ob__head'), document.querySelector('#top .wk:first-child')]
+    for (const scope of scopes) {
+      for (const part of opening) expect(scope.contains(part) || part.contains(scope)).toBe(false)
+    }
+    expect(sameElements(scopes, [...all('#top .wk:not(:first-child)'), document.querySelector('.ob-close')])).toBe(true)
+  })
 })
 
 // Spec §5.7, Diptych §5.5: no replays, and the first viewport never moves
@@ -193,5 +213,52 @@ describe('the filter, with motion', () => {
     expect(targetsOf([fadeIn])).toEqual(back)
     expect(fadeIn.vars).toMatchObject({ duration: 0.6, delay: 0.3, clearProps: 'opacity' })
     expect(rows.every((row) => !row.hidden)).toBe(true)
+  })
+
+  // Where Flip cannot load (offline, or a new deploy that replaced its
+  // chunk), the fold still lets the fade of the rows it drops end, then
+  // changes the rows at once: the dropped rows lose their fade only once it
+  // is done (cleared while it plays, the fade would end at opacity 0 and
+  // the rows come back unseen), the rows it brings back show at once, and
+  // the triggers below are measured again. The filter is then free.
+  it('changes the rows at once, once the fade is done, when Flip cannot load', async () => {
+    vi.mocked(loadFlip).mockImplementation(() => Promise.reject(new TypeError('Failed to fetch dynamically imported module')))
+    renderPage({ media: { fine: true } })
+    await flushMotion()
+    recorder.reset()
+    const filter = screen.getByRole('group', { name: 'Покажи' })
+    const rows = all('#top .wk')
+    const dropped = rows.filter((row) => row.id !== 'panorama')
+    const sets = () => recorder.tweens.filter((tween) => tween.method === 'set')
+
+    fireEvent.click(within(filter).getByRole('button', { name: 'Груб строеж 1' }))
+    await waitFor(() => expect(loadFlip).toHaveBeenCalledTimes(1))
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+    // Flip has failed and the fade still plays: nothing is cleared, and no
+    // row changes, before it ends.
+    const fade = recorder.tweens.find((tween) => tween.method === 'to' && tween.vars.opacity === 0)
+    expect(targetsOf([fade])).toEqual(dropped)
+    expect(sets()).toHaveLength(0)
+    expect(rows.filter((row) => !row.hidden)).toHaveLength(7)
+    expect(recorder.motion.ScrollTrigger.refresh).not.toHaveBeenCalled()
+
+    await act(async () => fade.vars.onComplete())
+    await waitFor(() => expect(rows.filter((row) => !row.hidden).map((row) => row.id)).toEqual(['panorama']))
+    expect(sets().map(({ vars }) => vars)).toEqual([{ clearProps: 'opacity' }])
+    expect(targetsOf(sets())).toEqual(dropped)
+    expect(recorder.motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1)
+    recorder.reset()
+
+    // Flip fails again. No row leaves: the six come back at once, with no
+    // fade in, their opacity cleared.
+    fireEvent.click(within(filter).getByRole('button', { name: 'Всички проекти 7' }))
+    await waitFor(() => expect(rows.every((row) => !row.hidden)).toBe(true))
+    await waitFor(() => expect(recorder.motion.ScrollTrigger.refresh).toHaveBeenCalledTimes(1))
+    expect(recorder.tweens.filter((tween) => tween.method !== 'set')).toHaveLength(0)
+    expect(sets().map(({ vars }) => vars)).toEqual([{ clearProps: 'opacity' }])
+    expect(targetsOf(sets())).toEqual(dropped)
+    expect(loadFlip).toHaveBeenCalledTimes(2)
+    expect(flip.Flip.getState).not.toHaveBeenCalled()
+    expect(flip.Flip.from).not.toHaveBeenCalled()
   })
 })
