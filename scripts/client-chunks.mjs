@@ -46,8 +46,8 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // them, but neither the form nor the facade: it takes in the facade's group
 // the same way, which is headed by the motion hook so that it does. Splitting
 // what Продажби shares into a chunk of its own cost every other page of the
-// group about 730 B (measured in M4 Task 3: Home 1,136 B and Golden
-// Residence 1,217 B more in all, against 288 B and 484 B this way).
+// group about 730 B, the two chunks against the one (measured in M4 Task 3;
+// this way Home's first load grew 164 B and Golden Residence's 477 B).
 export const GROUPS = [
   // On every page with motion: Home, both projects' pages and their block
   // pages, Контакти and Продажби. The form, the facade and what they share,
