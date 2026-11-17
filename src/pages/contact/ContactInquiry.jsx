@@ -22,6 +22,7 @@ import homeImages from '../../data/images/home.json?contact'
 import mnNight from '../../data/images/mn-night.json'
 import { MN_SNAPSHOT_DATA } from '../../data/mnogofamilna/snapshot.js?contact'
 import { GR_PROJECT } from '../../explorer/projects/gr'
+import StaleNotice from '../../explorer/StaleNotice'
 import useHydrated from '../../hooks/useHydrated'
 import useMotionAllowed from '../../hooks/useMotionAllowed'
 import useReveals from '../../motion/useReveals'
@@ -44,7 +45,9 @@ import '../../components/inquiry/inquiry.css'
 //   anything else. The visitor's choice opens its picture from the seam (CSS,
 //   1 s; contact.css), at once under reduced motion. The pictures load as
 //   the visitor first reaches for the subjects; the chosen one is there from
-//   the start;
+//   the start. Under the subjects, the stale-data notice says so when Golden
+//   Residence's count is not live: the data built into the site, or none
+//   (StaleNotice.jsx; spec §5.2, §5.3, Diptych §9);
 // - right, the heading, then the fields. Construction brings „Тип проект“
 //   and „Бюджет“ (production's six kinds and five ranges; a range is shown
 //   typeset and sent as production's string) and production's message hint;
@@ -55,12 +58,13 @@ import '../../components/inquiry/inquiry.css'
 //
 // A link's prefill and landing (spec §7.3, §8): once the page has hydrated,
 // the address's subject and apartments (prefill.js) seed the form where it
-// is, with no glide, and Golden Residence's apartments as soon as its data
-// is in. With ?project=, ?apartment= or #zapitvane the page then lands on
-// the form, once the prefill has rendered (waiting a moment for Golden
-// Residence's data when it asks for its apartments), the header's EU row
-// held (src/shell/landingHold.js) until the visitor first moves the page. A
-// send is never re-seeded.
+// is, with no glide. Golden Residence's apartments wait for its data, a
+// moment at most, and join the form as soon as it is in; nothing else is
+// seeded again, so what the visitor changes meanwhile, a chip taken away,
+// stays changed. With ?project=, ?apartment= or #zapitvane the page then
+// lands on the form, once the prefill has rendered, the header's EU row held
+// (src/shell/landingHold.js) until the visitor first moves the page. A send
+// is never re-seeded.
 //
 // The store outlives the page (inquiryStore.js), so the section clears the
 // option it leaves (ruling C5.1), as InquirySection does.
@@ -116,9 +120,6 @@ const STRIPS = [
 
 // Whether an address lands on the form.
 const landsOnForm = (search, hash) => /[?&](project|apartment)=/.test(search) || hash === `#${INQUIRY}`
-
-// Whether the address's prefill asks for Golden Residence's apartments.
-const asksForGr = (search, option) => (option === null || option === 'golden-residence') && new URLSearchParams(search).has('apartment')
 
 // The landing's jump: the form's top, or higher where its heading would sit
 // under the header (a phone), so the heading clears the header. At once,
@@ -210,11 +211,14 @@ export default function ContactInquiry() {
   const [warm, setWarm] = useState(false)
   const reach = () => setWarm(true)
 
-  // The address's prefill: its subject and its apartments, seeded once
-  // (Golden Residence's apartments in a second step, should its data come
-  // later), never after a send. `prefilled` is the address whose prefill
-  // has rendered, for the landing.
-  const seeded = useRef({ search: null, gr: false })
+  // The address's prefill, seeded once, never after a send: its subject and
+  // its apartments. Apartments that wait for their units (prefill.js's
+  // `pending`: Golden Residence's, before the store's data) hold the seed a
+  // moment at most (LANDING_WAIT_MS); if the data is not in by then, the
+  // subject goes alone and they follow as it comes, in a second step that
+  // seeds nothing else: what the first gave is the visitor's to change.
+  // `prefilled` is the address whose prefill has rendered, for the landing.
+  const seeded = useRef({ search: null, pending: false })
   const [prefilled, setPrefilled] = useState(null)
   const [waited, setWaited] = useState(false)
   useEffect(() => {
@@ -224,18 +228,24 @@ export default function ContactInquiry() {
   }, [hydrated, settled])
   useEffect(() => {
     if (!hydrated) return
-    const done = seeded.current
-    if (done.search === search && (done.gr || grUnits === null)) return
+    const first = seeded.current.search !== search
+    if (!first && !seeded.current.pending) return
     if (busy) {
-      seeded.current = { search, gr: true }
+      seeded.current = { search, pending: false }
       return
     }
     const prefill = parsePrefill(search, { gr: grUnits, mn: MN_UNITS })
-    const first = done.search !== search
-    if (first && grUnits === null && !settled && !waited && asksForGr(search, prefill.option)) return
-    seedInquiry(first ? prefill : { picks: prefill.picks })
-    seeded.current = { search, gr: grUnits !== null }
-    if (first) setPrefilled(search)
+    if (first) {
+      if (prefill.pending && !settled && !waited) return
+      seedInquiry({ option: prefill.option, picks: prefill.picks })
+      setPrefilled(search)
+    } else {
+      // The second step: the apartments that waited, once their units are
+      // in, and only those.
+      if (prefill.pending) return
+      seedInquiry({ picks: prefill.picks })
+    }
+    seeded.current = { search, pending: prefill.pending }
   }, [hydrated, search, grUnits, settled, waited, busy])
 
   // The landing: the EU row held from the moment the page knows it lands
@@ -336,6 +346,9 @@ export default function ContactInquiry() {
                   ) : null}
                 </label>
               ))}
+              {/* Golden Residence's count above, when it is not live: the
+                  data built into the site, or none (`—`). */}
+              <StaleNotice project={GR_PROJECT} className="subj__notice" />
             </fieldset>
           </div>
         </div>

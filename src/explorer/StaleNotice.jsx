@@ -1,5 +1,6 @@
 import { PRIMARY_PHONE } from '../config/site'
 import { useAvailability } from '../data/availability/useAvailability'
+import './staleNotice.css'
 
 // The stale-data notice (spec §9; M3 §5.3; ruling F15): the one place that
 // decides when a page says its availability may be old, and how. It takes the
@@ -9,8 +10,10 @@ import { useAvailability } from '../data/availability/useAvailability'
 // fake zero without a word. Never while the data loads, nor in the
 // prerendered page, which has no data yet, only `—`. And never over dated
 // numbers (project.dated): dated is not stale, the date says how old they
-// are (Многофамилна's snapshot). The explorer and Home's teaser carry it, so
-// Home never shows the built-in counts without it.
+// are (Многофамилна's snapshot). The explorer, Home's teaser and Контакти's
+// subjects carry it, so no page shows Golden Residence's built-in counts
+// without it. It brings its own look (staleNotice.css), so a page without
+// the explorer has it too.
 export default function StaleNotice({ project, className = '' }) {
   const snapshot = useAvailability()
   const { status, origin } = snapshot

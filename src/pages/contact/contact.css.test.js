@@ -95,6 +95,15 @@ it('pins the picture only with motion, on a desktop', () => {
   expect(declaredFor(':root[data-eu-hold] .ask__frame', [DESKTOP]).top).toBe('var(--header-h)')
 })
 
+// Spec §5.2, §5.3, Diptych §9: the stale-data notice sits under the subjects
+// as they are set, against the seam on a desktop and flush with the legend on
+// a phone; its words and its phone are the component's own stylesheet's
+// (src/explorer/staleNotice.css).
+it('sets the stale-data notice under the subjects, as they are set', () => {
+  expect(declaredFor('.subj .subj__notice')).toMatchObject({ margin: '14px 0 0', padding: '0', 'text-align': 'right' })
+  expect(declaredFor('.subj .subj__notice', [PHONE])['text-align']).toBe('left')
+})
+
 // Spec §7.3: the visitor's subject opens its picture from the seam (the left
 // half's right edge), 1 s; on a phone from the band's foot; at once without
 // motion.

@@ -310,6 +310,53 @@ describe('a link’s landing', () => {
     expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
   })
 
+  // The second step adds Golden Residence's apartments, and only those: what
+  // the first seed gave, Многофамилна's chip here, is the visitor's to keep or
+  // take away, and stays taken away when Golden Residence's data comes later
+  // (the store's fallback can take 10 s), so the lead goes without it.
+  it('keeps a Многофамилна chip the visitor took away gone when Golden Residence’s data comes', async () => {
+    availability.value = LOADING
+    const jumps = landingAt(3000)
+    renderSiteAt(`/contact?project=mn&apartment=${encodeURIComponent('Б-702')}`)
+    await waitFor(() => expect(jumps).toHaveLength(1))
+    expect(screen.getByText('Апартамент Б-702')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Махнете Б-702' }))
+    expect(screen.queryByText('Апартамент Б-702')).toBeNull()
+    act(() => availability.set(snapshotAvailability()))
+    await wait(50)
+    expect(screen.queryByText('Апартамент Б-702')).toBeNull()
+    expect(subject('Многофамилна сграда')).toBeChecked()
+    expect(jumps).toHaveLength(1)
+
+    await fill()
+    await user.click(send())
+    await screen.findByRole('status')
+    expect(leads()[0].projectType).toBe('[ТЕСТ] Многофамилна сграда, ж.к. Връбница-1')
+  })
+
+  // Golden Residence's apartments wait for its data 1.2 s at most; the page
+  // then lands without them and adds them as the data comes, with no second
+  // jump, leaving the subject the visitor has chosen meanwhile as it is.
+  it('lands without Golden Residence’s apartments after 1.2 s, then adds them as its data comes', async () => {
+    availability.value = LOADING
+    const jumps = landingAt(3000)
+    renderSiteAt(`/contact?apartment=${encodeURIComponent('А 301')}`)
+    await wait(1000)
+    expect(jumps).toEqual([])
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true, chosen: 'golden-residence' }]), { timeout: 1500 })
+    expect(screen.queryByText('Апартамент А 301')).toBeNull()
+
+    await user.click(subject('Многофамилна сграда'))
+    act(() => availability.set(snapshotAvailability()))
+    await wait(50)
+    expect(subject('Многофамилна сграда')).toBeChecked()
+    expect(screen.queryByText('Апартамент А 301')).toBeNull()
+    await user.click(subject('Golden Residence'))
+    expect(screen.getByText('Апартамент А 301')).toBeInTheDocument()
+    expect(jumps).toHaveLength(1)
+  })
+
   it('drops an apartment no unit has, and lands all the same', async () => {
     const jumps = landingAt(3000)
     renderSiteAt(`/contact?apartment=${encodeURIComponent('А 999')}`)
@@ -377,6 +424,37 @@ it('shows what the page says, in its own words', async () => {
   for (const line of ['Как можете да се свържете с нас', 'Нашите офиси', 'Готови сте да започнете своя проект?', 'Обадете се сега']) {
     expect(mainText()).toContain(line)
   }
-  // The count is the store's: the smoke run's sheets, here.
+  // The count is the store's: the smoke run's sheets, here, live, so no
+  // notice says otherwise.
+  expect(document.querySelector('.stale')).toBeNull()
   expect(screen.getByRole('radio', { name: 'Golden Residence' })).toHaveAccessibleDescription(`${grFree(snapshotAvailability())} свободни от 192 · жк\u00A0Левски\u00A0Г`)
+})
+
+// Spec M3/M4 §5.2, §5.3, Diptych §9: Golden Residence's count among the
+// subjects is the store's, so when the store ends on the data built into the
+// site, or on no data at all (`—`), the page says so, under the subjects and
+// before the fields. When it shows is StaleNotice's own question (ruling F15:
+// StaleNotice.test.jsx); this checks that the page carries it.
+describe('the stale-data notice', () => {
+  const NOTICE = 'Наличността не се зареди. Показваме последните данни, които имаме; за актуална информация: +359 887 886 166.'
+  const fallback = { ...snapshotAvailability('built-in'), status: 'fallback' }
+
+  it.each([
+    ['the data built into the site', fallback, `${grFree(fallback)} свободни от 192 · жк\u00A0Левски\u00A0Г`],
+    ['no data at all', { status: 'error', data: null, origin: null, updatedAt: null }, '— свободни от 192 · жк\u00A0Левски\u00A0Г'],
+  ])('says so under the subjects over %s', async (_, state, meta) => {
+    availability.value = state
+    renderSiteAt('/contact')
+    await screen.findByRole('group', { name: 'Интересувам се от' })
+
+    expect(subject('Golden Residence')).toHaveAccessibleDescription(meta)
+    const notices = document.querySelectorAll('#zapitvane .stale')
+    expect(notices).toHaveLength(1)
+    const [notice] = notices
+    expect(notice.textContent.replace(/\s+/g, ' ').trim()).toBe(NOTICE)
+    expect(within(notice).getByRole('link', { name: '+359 887 886 166' })).toHaveAttribute('href', 'tel:+359887886166')
+    const last = within(subjects()).getAllByRole('radio').at(-1)
+    expect(last.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(notice.compareDocumentPosition(screen.getByLabelText('Име')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
 })

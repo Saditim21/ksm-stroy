@@ -302,6 +302,16 @@
 @media (hover: hover) and (pointer: fine) {
   .subj:not(:disabled) .subj__opt:hover .subj__name { color: var(--ivory); }
 }
+/* The stale-data notice (spec §5.2, §5.3; Diptych §9), when Golden
+   Residence's count above is not live: under the subjects, set as they are,
+   against the seam; on a phone, flush with the legend. Its words and its
+   phone are the component's (src/explorer/staleNotice.css). */
+.subj .subj__notice {
+  max-width: 34em;
+  margin: 14px 0 0;
+  padding: 0;
+  text-align: right;
+}
 
 /* The form's half: the fields, the construction group, the thank-you. */
 .ask__fields {
@@ -498,6 +508,10 @@
     left: -34px;
     width: 22px;
     transform-origin: 0 50%;
+  }
+  .subj .subj__notice {
+    margin-top: 12px;
+    text-align: left;
   }
   .ask__fields {
     grid-column: 1;

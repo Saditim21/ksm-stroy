@@ -5,7 +5,8 @@ import { parsePrefill } from './prefill'
 // ruling M4-PF12): the subject `?project=` names, and the apartments
 // `?apartment=` names, each only if it is a unit of that subject's project,
 // at most six. Without ?project= the form keeps its own first subject, Golden
-// Residence, whose apartments the store knows only once its data is in.
+// Residence, whose apartments the store knows only once its data is in: until
+// then they wait (`pending`), and the page adds them when it comes.
 
 const GR = new Set(['А 101', 'А 301', 'А 302', 'А 303', 'Б 201', 'Б 202', 'Б 203', 'Б 204'])
 const MN = new Set(['А-101', 'А-301', 'Б-702', 'Б-703'])
@@ -26,7 +27,7 @@ describe('the subject', () => {
     ['drugo', 'other'],
     ['other', 'other'],
   ])('?project=%s chooses %s', (slug, option) => {
-    expect(parsePrefill(`?project=${slug}`, units)).toEqual({ option, picks: [] })
+    expect(parsePrefill(`?project=${slug}`, units)).toEqual({ option, picks: [], pending: false })
   })
 
   it('?project=stroitelstvo gives build', () => {
@@ -49,20 +50,20 @@ describe('the subject', () => {
 describe('the apartments', () => {
   // Latin A and B read as the Cyrillic letters the units are named by.
   it('?project=GR&apartment=A 301 gives Golden Residence’s „А 301“ once its units are in, and none before', () => {
-    expect(parsePrefill('?project=GR&apartment=A 301', { gr: null, mn: MN })).toEqual({ option: 'golden-residence', picks: [] })
-    expect(parsePrefill('?project=GR&apartment=A 301', units)).toEqual({ option: 'golden-residence', picks: [gr('А 301')] })
+    expect(parsePrefill('?project=GR&apartment=A 301', { gr: null, mn: MN })).toEqual({ option: 'golden-residence', picks: [], pending: true })
+    expect(parsePrefill('?project=GR&apartment=A 301', units)).toEqual({ option: 'golden-residence', picks: [gr('А 301')], pending: false })
   })
 
   it('?apartment=Б-702 with ?project=mn gives Многофамилна’s „Б-702“', () => {
     expect(parsePrefill(`?project=mn&apartment=${encodeURIComponent('Б-702')}`, { gr: null, mn: MN }))
-      .toEqual({ option: 'mnogofamilna', picks: [mn('Б-702')] })
+      .toEqual({ option: 'mnogofamilna', picks: [mn('Б-702')], pending: false })
   })
 
   // Without ?project= the form's first subject, Golden Residence, is chosen,
   // so the apartments are its own.
   it('takes Golden Residence’s units without ?project=', () => {
-    expect(parsePrefill(`?apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: null, picks: [gr('А 301')] })
-    expect(parsePrefill(`?apartment=${encodeURIComponent('Б-702')}`, units)).toEqual({ option: null, picks: [] })
+    expect(parsePrefill(`?apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: null, picks: [gr('А 301')], pending: false })
+    expect(parsePrefill(`?apartment=${encodeURIComponent('Б-702')}`, units)).toEqual({ option: null, picks: [], pending: false })
   })
 
   it('names each apartment as its project does, however it was written', () => {
@@ -76,13 +77,43 @@ describe('the apartments', () => {
   })
 
   it('keeps no apartment for construction or anything else', () => {
-    expect(parsePrefill(`?project=stroitelstvo&apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: 'build', picks: [] })
-    expect(parsePrefill(`?project=drugo&apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: 'other', picks: [] })
+    expect(parsePrefill(`?project=stroitelstvo&apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: 'build', picks: [], pending: false })
+    expect(parsePrefill(`?project=drugo&apartment=${encodeURIComponent('А 301')}`, units)).toEqual({ option: 'other', picks: [], pending: false })
   })
 
   it('keeps six at most, and drops the seventh', () => {
     const seven = ['А 101', 'А 301', 'А 302', 'А 303', 'Б 201', 'Б 202', 'Б 203']
     const { picks } = parsePrefill(`?${seven.map((label) => `apartment=${encodeURIComponent(label)}`).join('&')}`, units)
     expect(picks).toEqual(seven.slice(0, 6).map(gr))
+  })
+})
+
+// Whether the address's apartments still wait for their project's units: only
+// Golden Residence's can, before the store's data is in, and only under its
+// subject (the form's own first, so also without ?project= or with a slug it
+// does not know). Многофамилна's units are always there, and construction or
+// anything else takes no apartment, so nothing of theirs waits. The page seeds
+// a pending prefill's apartments once the units come, and nothing else then
+// (ContactInquiry.jsx).
+describe('what waits for the units', () => {
+  const before = { gr: null, mn: MN }
+  const apartment = (label) => `apartment=${encodeURIComponent(label)}`
+
+  it.each([
+    { what: 'Golden Residence’s apartments without ?project=', search: `?${apartment('А 301')}`, pending: true },
+    { what: 'Golden Residence’s apartments under ?project=gr', search: `?project=gr&${apartment('А 301')}`, pending: true },
+    { what: 'Golden Residence’s apartments under a slug it does not know', search: `?project=apartamenti&${apartment('А 301')}`, pending: true },
+    { what: 'Многофамилна’s apartments', search: `?project=mn&${apartment('Б-702')}`, pending: false },
+    { what: 'apartments under construction', search: `?project=stroitelstvo&${apartment('А 301')}`, pending: false },
+    { what: 'apartments under anything else', search: `?project=drugo&${apartment('А 301')}`, pending: false },
+    { what: 'no apartment', search: '?project=gr', pending: false },
+    { what: 'no query', search: '', pending: false },
+  ])('before Golden Residence’s data, $what: pending $pending', ({ search, pending }) => {
+    expect(parsePrefill(search, before).pending).toBe(pending)
+  })
+
+  it('waits for nothing once Golden Residence’s units are in, kept or dropped', () => {
+    expect(parsePrefill(`?${apartment('А 301')}`, units).pending).toBe(false)
+    expect(parsePrefill(`?${apartment('А 999')}`, units)).toEqual({ option: null, picks: [], pending: false })
   })
 })

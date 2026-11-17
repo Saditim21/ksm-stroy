@@ -1,0 +1,32 @@
+/* The stale-data notice (spec §9; M3/M4 spec §5.2, §5.3; StaleNotice.jsx),
+   wherever a page carries it: under the explorer's facade, in Home's teaser,
+   under Контакти's subjects. Its own stylesheet, which the component brings,
+   so a page without the explorer has it too (moved from explorer.css as
+   Контакти took the notice, M4 Task 2). A section places it with a class
+   of its own. */
+.stale {
+  max-width: 46em;
+  margin: 0 auto 18px;
+  padding: 0 var(--gut);
+  color: var(--ivory-2);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+.stale__tel {
+  color: var(--ivory);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--brass);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Phones: flush with the gutter. */
+@media (max-width: 900px) {
+  .stale {
+    margin-left: 0;
+    text-align: left;
+  }
+}

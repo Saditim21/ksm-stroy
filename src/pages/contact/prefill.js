@@ -22,6 +22,11 @@ import { normalizeUnitId } from '../../utils/units'
 // `units` holds each project's unit labels: Golden Residence's (`gr`) once
 // the store's data is in, null until then; Многофамилна's (`mn`) from its
 // dated snapshot.
+//
+// `pending` says whether the apartments wait for their project's units: the
+// address names some, under a subject whose units are not in yet (Golden
+// Residence's, before the store's data). The page seeds them, and only them,
+// once the units come (ContactInquiry.jsx).
 
 const SUBJECTS = new Map([
   ['golden-residence', 'golden-residence'],
@@ -48,7 +53,7 @@ const MAX_PICKS = 6
 /**
  * @param {string} search the address's query, `?project=…&apartment=…`
  * @param {{ gr: Set<string> | null, mn: Set<string> }} units
- * @returns {{ option: string | null, picks: Array<{ project: string, label: string }> }}
+ * @returns {{ option: string | null, picks: Array<{ project: string, label: string }>, pending: boolean }}
  */
 export function parsePrefill(search, units) {
   const params = new URLSearchParams(search)
@@ -56,14 +61,15 @@ export function parsePrefill(search, units) {
   const option = slug === null ? null : SUBJECTS.get(slug.toLowerCase()) ?? null
   const picks = []
   const subject = UNITS[option ?? 'golden-residence']
-  const labels = subject ? units[subject.key] : null
-  if (!labels) return { option, picks }
+  if (!subject || !params.has('apartment')) return { option, picks, pending: false }
+  const labels = units[subject.key]
+  if (!labels) return { option, picks, pending: true }
   const byId = new Map([...labels].map((label) => [normalizeUnitId(label), label]))
   for (const raw of params.getAll('apartment')) {
     const label = byId.get(normalizeUnitId(raw))
     if (label && picks.length < MAX_PICKS && !picks.some((pick) => pick.label === label)) picks.push({ project: subject.project, label })
   }
-  return { option, picks }
+  return { option, picks, pending: false }
 }
 
 // The page's own links to the form, „Изпратете запитване“ in the answer and

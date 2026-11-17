@@ -48,9 +48,10 @@ export const GROUPS = [
   // with riders that only some of those pages show: the facade itself, the
   // closing inquiry's section and the status counts (not on Контакти), the
   // number that rolls in (not on a Многофамилна block page) and the
-  // stale-data notice (only on Home and Golden Residence's pages). A page
-  // loads them unused, as a Многофамилна page did before; without them,
-  // Home and Golden Residence, whose first load M4 caps, would load more.
+  // stale-data notice with its stylesheet (only on Home, Golden Residence's
+  // pages and Контакти). A page loads them unused, as a Многофамилна page
+  // did before; without them, Home and Golden Residence, whose first load
+  // M4 caps, would load more.
   { name: 'facade', head: 'src/components/inquiry/useInquiryForm.jsx', riders: ['src/explorer/Facade.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx'] },
   // On every page that waits for hydration: every page of a project, and
   // Контакти, whose prefill and landing do. The hydration hook and the

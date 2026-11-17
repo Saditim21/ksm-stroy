@@ -99,25 +99,8 @@
 /* The views: the facade's panel and the list's, one on show. */
 .views { position: relative; }
 
-/* The stale-data notice (spec §9; StaleNotice.jsx). */
-.stale {
-  max-width: 46em;
-  margin: 0 auto 18px;
-  padding: 0 var(--gut);
-  color: var(--ivory-2);
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: center;
-}
-.stale__tel {
-  color: var(--ivory);
-  font-variant-numeric: lining-nums tabular-nums;
-  white-space: nowrap;
-  text-decoration: underline;
-  text-decoration-color: var(--brass);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
+/* The stale-data notice under the facade is the component's own
+   (staleNotice.css). */
 
 /* ---------- the facade (spec §7.2; extract §4.20) ---------- */
 /* The container the root's sizes measure. */
@@ -1110,10 +1093,6 @@
   .explorer__legend .legend {
     justify-content: flex-start;
     gap: 8px 18px;
-  }
-  .stale {
-    margin-left: 0;
-    text-align: left;
   }
 
   /* The crop of the block on show (FACADE.vbPhone): its pitch on the stage,
