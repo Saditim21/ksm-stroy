@@ -4,9 +4,11 @@ import { clientChunks, GROUPS, pinnedChunks } from './client-chunks.mjs'
 
 // The browser's chunks (see client-chunks.mjs), on a small module graph built
 // as React Router's client build names its modules: the client entry, the
-// root route, and five pages, Home, a project page, a block page, the contact
+// root route, and six pages, Home, a project page, a block page, the contact
 // page, which has the inquiry form and waits for hydration but has neither a
-// facade nor an explorer, and a page with none of them.
+// facade nor an explorer, the sales page, which shows the status counts and
+// a block grid but has neither the form nor the facade, and a page with none
+// of them.
 
 const ROUTE = '?__react-router-build-client-route'
 const id = {
@@ -27,6 +29,8 @@ const id = {
   blockRoute: `/repo/src/routes/mnogofamilna-block.jsx${ROUTE}`,
   euRoute: `/repo/src/routes/eu-proekt.jsx${ROUTE}`,
   contactRoute: `/repo/src/routes/contact.jsx${ROUTE}`,
+  salesRoute: `/repo/src/routes/projects.jsx${ROUTE}`,
+  motion: '/repo/src/motion/useMotion.js',
   form: '/repo/src/components/inquiry/useInquiryForm.jsx',
   inquiry: '/repo/src/components/inquiry/InquirySection.jsx',
   counts: '/repo/src/components/ui/StatusCount.jsx',
@@ -65,12 +69,14 @@ const GRAPH = {
   [id.scroll]: { imports: [] },
   [id.format]: { imports: [] },
   [id.homeRoute]: { entry: true, imports: [id.home] },
-  [id.home]: { imports: [id.react, id.helper, id.button, id.teaser, id.facade, id.rolling, id.stale, id.dims, id.inquiry] },
+  [id.home]: { imports: [id.react, id.helper, id.button, id.motion, id.teaser, id.facade, id.rolling, id.stale, id.dims, id.inquiry] },
   [id.teaser]: { imports: [id.react] },
-  [id.projectRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.section, id.rolling, id.dims, id.inquiry] },
-  [id.blockRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.captions, id.inquiry] },
+  [id.projectRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.section, id.rolling, id.dims, id.inquiry] },
+  [id.blockRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.captions, id.inquiry] },
   [id.euRoute]: { entry: true, imports: [id.react, id.button, id.status, id.digits, id.dims] },
-  [id.contactRoute]: { entry: true, imports: [id.react, id.form, id.rolling, id.hydrated, id.hold] },
+  [id.contactRoute]: { entry: true, imports: [id.react, id.motion, id.form, id.rolling, id.hydrated, id.hold] },
+  [id.salesRoute]: { entry: true, imports: [id.react, id.motion, id.counts, id.model, id.loadSurfaces, id.rolling, id.stale, id.useExplorer] },
+  [id.motion]: { imports: [id.react] },
   [id.inquiry]: { imports: [id.react, id.form] },
   [id.form]: { imports: [id.react] },
   [id.hydrated]: { imports: [id.react] },
@@ -114,27 +120,34 @@ describe('pinnedChunks', () => {
 
   it('leaves in its entry\'s chunk what only that entry needs, and never pins an entry', () => {
     for (const own of [id.domClient, id.root, id.menu, id.teaser]) expect(pinned.has(own)).toBe(false)
-    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.blockRoute, id.euRoute, id.contactRoute]) expect(pinned.has(entry)).toBe(false)
+    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.blockRoute, id.euRoute, id.contactRoute, id.salesRoute]) expect(pinned.has(entry)).toBe(false)
   })
 
   it('makes a group of what every page with its head needs, and of its riders', () => {
-    // The facade's group is the inquiry form's: its pages are Home, the
-    // project page, the block page and the contact page, which all need the
-    // form.
-    expect(pinned.get(id.form)).toBe('facade')
-    // Riders, which the contact page doesn't need, with what they import: the
-    // facade, the closing inquiry and the status counts.
-    for (const member of [id.facade, id.model, id.loadSurfaces, id.inquiry, id.counts]) expect(pinned.get(member)).toBe('facade')
-    // Riders, which Home and the project page need and the block page doesn't,
-    // with what they import.
+    // The facade's group is the motion hook's: its pages are Home, the
+    // project page, the block page, the contact page and the sales page,
+    // which all need the hook.
+    expect(pinned.get(id.motion)).toBe('facade')
+    // Riders, which the sales page doesn't need: the form and the closing
+    // inquiry.
+    for (const member of [id.form, id.inquiry]) expect(pinned.get(member)).toBe('facade')
+    // Riders, which neither the contact page nor the sales page needs, with
+    // what they import: the facade, its model and its surfaces' loader,
+    // which the sales page needs too, and the status counts.
+    for (const member of [id.facade, id.model, id.loadSurfaces, id.counts]) expect(pinned.get(member)).toBe('facade')
+    // Riders, which Home, the project page, the contact page and the sales
+    // page need and the block page doesn't, with what they import.
     expect(pinned.get(id.rolling)).toBe('facade')
     expect(pinned.get(id.roll)).toBe('facade')
     expect(pinned.get(id.stale)).toBe('facade')
+    // A rider of the explorer's that the sales page needs too (a block grid
+    // reads its context), so it rides with the facade's group.
+    expect(pinned.get(id.useExplorer)).toBe('facade')
     // The explorer's group is the hydration hook's: its pages are the project
     // page, the block page and the contact page, which all need the hook and
     // the landing hold; the explorer itself rides along.
     for (const member of [id.hydrated, id.hold]) expect(pinned.get(member)).toBe('explorer')
-    for (const member of [id.context, id.state, id.captions, id.useExplorer]) expect(pinned.get(member)).toBe('explorer')
+    for (const member of [id.context, id.state, id.captions]) expect(pinned.get(member)).toBe('explorer')
     expect(pinned.get(id.listLoader)).toBe('explorer')
   })
 

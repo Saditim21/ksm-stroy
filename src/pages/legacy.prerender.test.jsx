@@ -3,7 +3,6 @@ import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import About from './About'
-import Projects from './Projects'
 import Blog from './Blog'
 
 // The build pre-renders the legacy pages in Node, and a visitor sees that HTML
@@ -45,11 +44,11 @@ test.each([
 })
 
 // Every page has its H1 in the HTML a visitor without JS gets (spec §6.7; the
-// smoke run checks it in the browser). These two had none on main either:
-// until M2 to M4 rebuild them, each names itself in a visually hidden H1,
-// with its name in the menu. (Home, rebuilt, is src/pages/home/home.prerender.test.jsx's.)
+// smoke run checks it in the browser). This one had none on main either:
+// until M4 rebuilds it, it names itself in a visually hidden H1, with its
+// name in the menu. (Home, rebuilt, is src/pages/home/home.prerender.test.jsx's,
+// and Продажби src/pages/projects/projects.prerender.test.jsx's.)
 test.each([
-  { path: '/projects', Page: Projects, name: 'Продажби' },
   { path: '/blog', Page: Blog, name: 'Обекти' },
 ])('$path pre-renders one H1, $name', ({ Page, name }) => {
   const headings = [...prerender(Page).matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)]
@@ -60,7 +59,6 @@ test.each([
 // A lazy photo renders no <img> before the JS runs; its <noscript> fallback is
 // all a visitor without JS gets, so it must not wait for a load event.
 test.each([
-  { path: '/projects', Page: Projects },
   { path: '/blog', Page: Blog },
 ])('$path gives its photos a visible <noscript> fallback', ({ Page }) => {
   const fallbacks = [...prerender(Page).matchAll(/<noscript>([\s\S]*?)<\/noscript>/g)]

@@ -1,0 +1,808 @@
+/* Продажби (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §7.1; Diptych §5.5, §11), ported from the concept's css/prodazhbi.css
+   (:95-207 the sales board, :209-256 the two buildings row by row, :258-264
+   the closing, :266-332 their phones) with the tokens of src/index.css,
+   --screen-h for vh, and the system's type: the H1 at the Golden Residence
+   H1's size (M3/M4 §4.1). The shell, the seam, the section's padding, the
+   hinge, the actions and the ways are the site's (src/shell,
+   src/styles/diptych.css, src/components/ui/ways.css); the squares, their
+   status looks and their keyboard are BlockGrid's (src/explorer/BlockGrid.jsx,
+   blockGrid.css). Here: their size and place on the board, the hot floor
+   and square, and the page's own parts.
+
+   The page's own stylesheet (src/routes/projects.jsx), after the site's:
+   plain CSS, in no Tailwind layer.
+
+   The opening moves by CSS from first paint (Diptych §5.5), only under the
+   motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes; every entrance
+   waits --arrive (src/styles/motion.css). Hover effects only where a pointer
+   hovers (spec §2.2). */
+
+/* A half's distance from the seam: the hinge's gap (diptych.css). */
+.pz-open,
+.pz-led { --pad: clamp(24px, 3vw, 52px); }
+
+/* ---------- 1. #top, the sales board (spec §7.1) ---------- */
+/* A little tighter above the board than the concept's (3 % and 3.6 % of the
+   screen), whose title was 23 px shorter at 1440 px than the system's
+   --fs-title: so on a 1440 × 900 screen the caption under the counts still
+   shows what a pointer is on. */
+.pz-open {
+  position: relative;
+  padding: clamp(14px, calc(var(--screen-h) * .022), 40px) 0 clamp(56px, calc(var(--screen-h) * .09), 112px);
+}
+.pz-head {
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, calc(var(--screen-h) * .016), 16px);
+  padding: 0 var(--gut);
+  text-align: center;
+}
+.pz-h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-title);
+  font-weight: 500;
+  line-height: .92;
+  letter-spacing: -.014em;
+}
+.pz-h1 .split-line { display: block; }
+.pz-lead { max-width: 40em; }
+.pz-hint {
+  max-width: 52em;
+  color: var(--stone);
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* The hint in a desktop's words where a pointer hovers, else a finger's. */
+.pz-hint__touch { display: none; }
+@media not all and (hover: hover) and (pointer: fine) {
+  .pz-hint__fine { display: none; }
+  .pz-hint__touch { display: inline; }
+}
+
+/* The board: one grid of shared rows, so both buildings' names, plots and
+   counts line up across the seam whatever wraps. The plots stand on one
+   ground line (::after) that crosses the seam. A square keeps one size on
+   both sides, so the buildings compare honestly: --p is its pitch (the
+   square and its gap), from the room in a half for 24 squares. */
+.pz-board {
+  --g: 4px;
+  --bgap: 16px;
+  --fw: 30px;
+  --lbl: 30px;
+  --p: clamp(13px, calc((50vw - var(--gut) - var(--pad) - var(--fw) - var(--bgap)) / 24), 26px);
+  --sq: calc(var(--p) - var(--g));
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: clamp(16px, calc(var(--screen-h) * .024), 44px);
+}
+.pz-board > .seam { z-index: 1; }
+.pz-board::after {
+  content: '';
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+  height: 1px;
+  margin-bottom: var(--lbl);
+  background: linear-gradient(90deg, rgba(184, 149, 74, 0), rgba(184, 149, 74, .55) 18%, rgba(184, 149, 74, .55) 82%, rgba(184, 149, 74, 0));
+  pointer-events: none;
+}
+/* A building's parts are the board's grid items: Golden Residence's
+   against the seam on the left, Многофамилна's on the right. */
+.bd { display: contents; }
+.bd > * { min-width: 0; }
+.bd--gr > * {
+  grid-column: 1;
+  justify-self: end;
+  margin: 0 var(--pad) 0 var(--gut);
+  text-align: right;
+}
+.bd--mn > * {
+  grid-column: 2;
+  justify-self: start;
+  margin: 0 var(--gut) 0 var(--pad);
+}
+.bd__name {
+  grid-row: 1;
+  font-family: var(--serif);
+  font-size: clamp(32px, 3vw, 50px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.005em;
+}
+.bd__name a { transition: color .25s; }
+.bd__addr {
+  grid-row: 2;
+  margin-top: 10px;
+  color: var(--ivory-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bd__plot {
+  grid-row: 3;
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+  padding: clamp(18px, calc(var(--screen-h) * .026), 34px) 0 var(--lbl);
+}
+.bd__count {
+  grid-row: 4;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: clamp(14px, calc(var(--screen-h) * .02), 24px);
+}
+.bd--gr .bd__count { justify-content: flex-end; }
+.bd__count .num {
+  font-size: clamp(46px, 4.2vw, 70px);
+  font-weight: 600;
+  line-height: .85;
+}
+.bd__of {
+  color: var(--ivory-2);
+  font-size: 15px;
+  line-height: 1.4;
+}
+/* The stale-data notice (StaleNotice.jsx) under Golden Residence's count,
+   on its building's side whichever stylesheet comes last. */
+.bd .bd__notice {
+  grid-row: 5;
+  max-width: 30em;
+  margin-top: 12px;
+  margin-bottom: 0;
+  padding: 0;
+}
+.bd--gr .bd__notice {
+  margin-right: var(--pad);
+  margin-left: var(--gut);
+  text-align: right;
+}
+.bd--mn .bd__notice {
+  margin-right: var(--gut);
+  margin-left: var(--pad);
+  text-align: left;
+}
+/* The caption under the count, where the first screen still shows it (the
+   concept's hover captures), two lines high whatever it says, so its changes
+   move nothing under it. */
+.bd__cap {
+  grid-row: 6;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 58px;
+  max-width: 36em;
+  margin-top: 18px;
+}
+.bd__go {
+  grid-row: 7;
+  margin-top: 14px;
+}
+
+/* The plot: a building's two blocks side by side, the floor numbers on its
+   outer side (BlockGrid draws them on each block's seam side: Golden
+   Residence's after its block А's squares, Многофамилна's before its block
+   Б's), each block's name centred under its squares. */
+.bd__blocks {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--bgap);
+}
+.bd__blk { position: relative; }
+.bd .blk__floors {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+.bd .blk__fl {
+  grid-auto-rows: var(--sq);
+  row-gap: var(--g);
+  width: var(--fw);
+  height: auto;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+.bd .blk__fl > span { transition: color .2s; }
+.bd--gr .bd__blk:first-child .blk__fl {
+  order: -1;
+  justify-items: end;
+  padding-right: 9px;
+}
+.bd--mn .bd__blk:last-child .blk__fl {
+  order: 1;
+  padding-left: 9px;
+}
+.bd--gr .bd__blk:last-child .blk__fl,
+.bd--mn .bd__blk:first-child .blk__fl { display: none; }
+.bd__bl {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 10px;
+  color: var(--stone);
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.bd--gr .bd__blk:first-child .bd__bl { left: var(--fw); }
+.bd--mn .bd__blk:last-child .bd__bl { right: var(--fw); }
+
+/* The squares at the board's size: Golden Residence 12 a floor, Многофамилна
+   8. The gap belongs to a square, so a pointer crossing it never drops the
+   hot floor. */
+.bd .blk__grid {
+  grid-auto-rows: var(--sq);
+  gap: var(--g);
+  width: auto;
+}
+.bd--gr .blk__grid { grid-template-columns: repeat(12, var(--sq)); }
+.bd--mn .blk__grid { grid-template-columns: repeat(8, var(--sq)); }
+.bd .blk__grid > button {
+  width: var(--sq);
+  height: var(--sq);
+  aspect-ratio: auto;
+  cursor: pointer;
+  transition: opacity .22s var(--e-soft), transform .22s var(--e-out);
+}
+.bd .blk__grid > button::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--g) / -2);
+}
+
+/* Each square's floor (--row, from the top) and its column (--col), by its
+   place in its grid, for the hot floor and the entrance: Golden Residence's
+   eight floors of twelve, Многофамилна's nine of eight. */
+.bd--gr .blk__grid > :nth-child(n+13) { --row: 1; }
+.bd--gr .blk__grid > :nth-child(n+25) { --row: 2; }
+.bd--gr .blk__grid > :nth-child(n+37) { --row: 3; }
+.bd--gr .blk__grid > :nth-child(n+49) { --row: 4; }
+.bd--gr .blk__grid > :nth-child(n+61) { --row: 5; }
+.bd--gr .blk__grid > :nth-child(n+73) { --row: 6; }
+.bd--gr .blk__grid > :nth-child(n+85) { --row: 7; }
+.bd--mn .blk__grid > :nth-child(n+9) { --row: 1; }
+.bd--mn .blk__grid > :nth-child(n+17) { --row: 2; }
+.bd--mn .blk__grid > :nth-child(n+25) { --row: 3; }
+.bd--mn .blk__grid > :nth-child(n+33) { --row: 4; }
+.bd--mn .blk__grid > :nth-child(n+41) { --row: 5; }
+.bd--mn .blk__grid > :nth-child(n+49) { --row: 6; }
+.bd--mn .blk__grid > :nth-child(n+57) { --row: 7; }
+.bd--mn .blk__grid > :nth-child(n+65) { --row: 8; }
+.bd--gr .blk__grid > :nth-child(12n+2) { --col: 1; }
+.bd--gr .blk__grid > :nth-child(12n+3) { --col: 2; }
+.bd--gr .blk__grid > :nth-child(12n+4) { --col: 3; }
+.bd--gr .blk__grid > :nth-child(12n+5) { --col: 4; }
+.bd--gr .blk__grid > :nth-child(12n+6) { --col: 5; }
+.bd--gr .blk__grid > :nth-child(12n+7) { --col: 6; }
+.bd--gr .blk__grid > :nth-child(12n+8) { --col: 7; }
+.bd--gr .blk__grid > :nth-child(12n+9) { --col: 8; }
+.bd--gr .blk__grid > :nth-child(12n+10) { --col: 9; }
+.bd--gr .blk__grid > :nth-child(12n+11) { --col: 10; }
+.bd--gr .blk__grid > :nth-child(12n) { --col: 11; }
+.bd--mn .blk__grid > :nth-child(8n+2) { --col: 1; }
+.bd--mn .blk__grid > :nth-child(8n+3) { --col: 2; }
+.bd--mn .blk__grid > :nth-child(8n+4) { --col: 3; }
+.bd--mn .blk__grid > :nth-child(8n+5) { --col: 4; }
+.bd--mn .blk__grid > :nth-child(8n+6) { --col: 5; }
+.bd--mn .blk__grid > :nth-child(8n+7) { --col: 6; }
+.bd--mn .blk__grid > :nth-child(8n) { --col: 7; }
+/* Its rise, its floor's above the ground, and its distance from the seam,
+   in squares: Golden Residence stands left of the seam, its block Б nearer
+   it; Многофамилна right, its block А nearer it. */
+.bd--gr .blk__grid > button { --rise: calc(7 - var(--row, 0)); }
+.bd--mn .blk__grid > button { --rise: calc(8 - var(--row, 0)); }
+.bd--gr .bd__blk:first-child .blk__grid > button { --x: calc(23 - var(--col, 0)); }
+.bd--gr .bd__blk:last-child .blk__grid > button { --x: calc(11 - var(--col, 0)); }
+.bd--mn .bd__blk:first-child .blk__grid > button { --x: var(--col, 0); }
+.bd--mn .bd__blk:last-child .blk__grid > button { --x: calc(8 + var(--col, 0)); }
+
+/* The hot floor (SalesBoard.jsx): every square of the building dims but the
+   hot block's floor, --hot (its row): 1 there, .26 elsewhere. Over the
+   squares' entrance (BlockGrid's) and the opacity a focus within the grid
+   keeps (blockGrid.css), so the keyboard lights its floor too. */
+.bd__plot[data-hot] .blk__grid > button {
+  opacity: calc(.26 + .74 * clamp(0, 1 - (var(--row, 0) - var(--hot, -9)) * (var(--row, 0) - var(--hot, -9)), 1)) !important;
+}
+/* Its floor's number in brass, on the building's outer side (data-row). */
+.bd__plot[data-row="0"] .blk__fl > :nth-child(1),
+.bd__plot[data-row="1"] .blk__fl > :nth-child(2),
+.bd__plot[data-row="2"] .blk__fl > :nth-child(3),
+.bd__plot[data-row="3"] .blk__fl > :nth-child(4),
+.bd__plot[data-row="4"] .blk__fl > :nth-child(5),
+.bd__plot[data-row="5"] .blk__fl > :nth-child(6),
+.bd__plot[data-row="6"] .blk__fl > :nth-child(7),
+.bd__plot[data-row="7"] .blk__fl > :nth-child(8),
+.bd__plot[data-row="8"] .blk__fl > :nth-child(9) { color: var(--brass-l); }
+/* The hot square, the one a pointer, the keyboard or a first tap is on:
+   ringed in brass, and grown where motion is welcome (below). The
+   keyboard's ring is the site's, 2 px ivory (spec §11). */
+.bd .blk__grid > button:focus {
+  z-index: 2;
+  outline: 1px solid var(--brass-l);
+  outline-offset: 2px;
+}
+.bd .blk__grid > button:focus-visible {
+  z-index: 3;
+  outline: 2px solid var(--ivory);
+  outline-offset: 2px;
+}
+
+/* The caption: idle, the building's legend with its counts; hot, the floor
+   with its counts and the apartment. */
+.bd__cap .legend { gap: 8px 20px; }
+.bd--gr .bd__cap .legend { justify-content: flex-end; }
+.cap__fl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+}
+.bd--gr .cap__fl,
+.bd--gr .cap__u { justify-content: flex-end; }
+.cap__fl .serif {
+  color: var(--brass-l);
+  font-size: 24px;
+  line-height: 1;
+}
+.cap__u {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  color: var(--ivory-2);
+  font-size: 14px;
+}
+.cap__u b {
+  color: var(--ivory);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bd__name a:hover { color: var(--brass-l); }
+  .bd .blk__grid > button:hover {
+    z-index: 2;
+    outline: 1px solid var(--brass-l);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- 2. #sgradite, the two buildings row by row (spec §7.1) ---------- */
+.pz-led {
+  position: relative;
+  padding: clamp(40px, calc(var(--screen-h) * .06), 72px) 0 clamp(56px, calc(var(--screen-h) * .08), 96px);
+}
+.pz-led > .seam {
+  top: clamp(40px, calc(var(--screen-h) * .06), 72px);
+  bottom: clamp(56px, calc(var(--screen-h) * .08), 96px);
+  z-index: 1;
+}
+.led { position: relative; }
+.led__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 44px 0 38px;
+}
+.led__row + .led__row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--gut);
+  right: var(--gut);
+  height: 1px;
+  background: var(--hair-2);
+}
+/* A row's name, on the seam where the two answers meet. */
+.led__k {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 0;
+  padding: 5px 14px;
+  background: var(--onyx);
+  color: var(--stone);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+.led__row--head .led__k,
+.led__row--act .led__k { display: none; }
+.led__v {
+  min-width: 0;
+  color: var(--ivory-2);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.led__v--gr {
+  padding: 0 var(--pad) 0 var(--gut);
+  text-align: right;
+}
+.led__v--mn { padding: 0 var(--gut) 0 var(--pad); }
+.led__v p { max-width: 30em; }
+.led__v--gr p { margin-left: auto; }
+.led__v--text p {
+  font-size: 17px;
+  line-height: 1.7;
+}
+.led .fig {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(40px, 3.4vw, 56px);
+  font-weight: 600;
+  line-height: .9;
+}
+.led .n {
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+}
+.led__sub {
+  margin-top: 8px;
+  color: var(--stone);
+  font-size: 13px;
+}
+.led__list {
+  display: grid;
+  gap: 4px;
+  color: var(--ivory);
+  font-size: 16px;
+}
+/* The head: each render, opening from the seam (useWipes), its name and its
+   type and year. */
+.led__row--head { padding: 0 0 46px; }
+.led__ph {
+  position: relative;
+  width: min(100%, 620px);
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--umber);
+}
+.led__v--gr .led__ph { margin-left: auto; }
+.led__ph picture { height: 100%; }
+.led__ph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.led__v--gr .led__ph img { object-position: 50% 58%; }
+.led__v--mn .led__ph img { object-position: 64% 60%; }
+.led__name {
+  margin-top: 28px;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(32px, 2.8vw, 46px);
+  font-weight: 500;
+  line-height: 1.02;
+}
+.led__type {
+  margin-top: 10px;
+  color: var(--stone);
+  font-size: 13px;
+}
+.led__row--act { padding-top: 46px; }
+.led__act {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.led__v--gr .led__act { justify-content: flex-end; }
+
+/* The names, kept in view under the header while the rows scroll (a
+   desktop's; BuildingRows.jsx says when), a picture of the head. */
+.led__bar {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: var(--bar-h);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  height: 52px;
+  border-bottom: 1px solid var(--hair-2);
+  background: rgba(14, 13, 11, .9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity .35s var(--e-soft), transform .5s var(--e-out), visibility 0s linear .5s;
+}
+.led__bar.is-on {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+.led__bar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -.5px;
+  background: var(--brass);
+}
+.led__bar span:first-child {
+  padding: 0 var(--pad) 0 var(--gut);
+  text-align: right;
+}
+.led__bar span:last-child { padding: 0 var(--gut) 0 var(--pad); }
+
+/* ---------- 3. the closing (spec §7.1) ---------- */
+.pz-close {
+  padding-bottom: clamp(72px, calc(var(--screen-h) * .11), 128px);
+  border-top: 1px solid var(--hair-2);
+}
+.pz-close .ways { margin-top: 0; }
+.pz-close .ways .serif { font-size: clamp(32px, 3.2vw, 52px); }
+/* Ruling M4-PF14: the first way, „Попитайте за цени“, in the solid look, as
+   the actions' solid one (diptych.css): ivory, its words onyx. */
+.pz-close .ways > .seam + * {
+  background: var(--ivory);
+  color: var(--onyx);
+}
+.pz-close .ways > .seam + * .small { color: rgba(14, 13, 11, .74); }
+@media (hover: hover) and (pointer: fine) {
+  .pz-close .ways > .seam + *:hover { background: #fff; }
+  .pz-close .ways > .seam + *:hover .serif { color: var(--onyx); }
+}
+
+/* ---------- motion (Diptych §5.5, §5.7; spec §7.1) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The page's one moment: the title rises, the seam draws down and the
+     ground across, then both buildings rise floor by floor from the
+     ground, each floor spreading out from the seam: a square waits 85 ms a
+     floor above the ground and 6 ms a square away from the seam. Its
+     backwards fill hands it back to its own look as it lands, the hot
+     floor's dimming included. */
+  :root.js .pz-h1 .line-mask {
+    animation: projects-mask .9s linear backwards;
+    animation-delay: var(--arrive);
+  }
+  :root.js .pz-h1 .split-line {
+    animation: projects-rise .9s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .pz-lead {
+    animation: projects-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .18s);
+  }
+  :root.js .pz-hint {
+    animation: projects-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .26s);
+  }
+  :root.js .pz-board > .seam {
+    animation: projects-draw 1.3s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .3s);
+  }
+  :root.js .pz-board::after {
+    animation: projects-ground 1.2s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .42s);
+  }
+  :root.js .bd__name,
+  :root.js .bd__addr {
+    animation: projects-up .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .34s);
+  }
+  :root.js .bd .blk__fl,
+  :root.js .bd__bl {
+    animation: projects-up .8s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .5s);
+  }
+  :root.js .bd .blk__grid > button {
+    animation: projects-cell .6s var(--e-out) backwards;
+    animation-delay: calc(var(--arrive) + .55s + var(--rise) * 85ms + var(--x) * 6ms);
+  }
+  :root.js .bd__count,
+  :root.js .bd__go,
+  :root.js .bd__cap {
+    animation: projects-up .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + 1.3s);
+  }
+
+  /* The hot square grows. */
+  .bd .blk__grid > button:focus { transform: scale(1.3); }
+  @media (hover: hover) and (pointer: fine) {
+    .bd .blk__grid > button:hover { transform: scale(1.3); }
+  }
+}
+
+@keyframes projects-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes projects-rise { from { transform: translateY(112%); } }
+@keyframes projects-up { from { opacity: 0; transform: translateY(14px); } }
+@keyframes projects-draw { from { transform: scaleY(0); } }
+@keyframes projects-ground { from { transform: scaleX(0); } }
+@keyframes projects-cell { from { opacity: 0; transform: translateY(70%) scale(.35); } }
+
+/* ---------- phones and narrow tablets: 900 px and under. The halves stack,
+   the seams hide, the second half takes the brass rule (M3/M4 §4.1) ---------- */
+@media (max-width: 900px) {
+  .pz-open { padding-top: 34px; }
+  .pz-head {
+    justify-items: start;
+    text-align: left;
+  }
+  .pz-lead {
+    padding-top: 22px;
+    border-top: 1px solid var(--brass);
+  }
+  .pz-hint { max-width: 34em; }
+
+  .pz-board {
+    --g: 3px;
+    --bgap: 12px;
+    --fw: 22px;
+    --p: clamp(11px, calc((100vw - 2 * var(--gut) - var(--fw) - var(--bgap)) / 24), 24px);
+    grid-template-columns: 1fr;
+    margin-top: 44px;
+  }
+  .pz-board > .seam,
+  .pz-board::after { display: none; }
+  .bd {
+    display: grid;
+    justify-items: start;
+    padding: 0 var(--gut);
+  }
+  .bd--gr > *,
+  .bd--mn > * {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    margin: 0;
+    text-align: left;
+  }
+  .bd--mn {
+    margin: 56px var(--gut) 0;
+    padding: 44px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .bd--gr .bd__count,
+  .bd--gr .cap__fl,
+  .bd--gr .cap__u,
+  .bd--gr .bd__cap .legend { justify-content: flex-start; }
+  .bd--gr .bd__notice,
+  .bd--mn .bd__notice {
+    margin: 14px 0 0;
+    text-align: left;
+  }
+  .bd__name { font-size: clamp(32px, 9vw, 44px); }
+  .bd__plot { padding: 26px 0 var(--lbl); }
+  .bd__blocks { border-bottom: 1px solid rgba(184, 149, 74, .55); }
+  /* Both buildings number their floors on the left, Многофамилна beside its
+     block А. */
+  .bd--mn .bd__blk:first-child .blk__fl {
+    display: grid;
+    order: -1;
+    justify-items: end;
+    padding: 0 8px 0 0;
+  }
+  .bd--mn .bd__blk:last-child .blk__fl { display: none; }
+  .bd--gr .bd__blk:first-child .blk__fl { padding: 0 8px 0 0; }
+  .bd--mn .bd__blk:first-child .bd__bl { left: var(--fw); }
+  .bd--mn .bd__blk:last-child .bd__bl { right: 0; }
+  /* On a phone the count comes before the squares, and the caption stays
+     under them, where the finger is. */
+  .bd__name { order: 1; }
+  .bd__addr { order: 2; }
+  .bd__count {
+    order: 3;
+    margin-top: 22px;
+  }
+  .bd .bd__notice {
+    grid-row: auto;
+    order: 4;
+  }
+  .bd__plot { order: 5; }
+  .bd__cap {
+    order: 6;
+    min-height: 0;
+  }
+  .bd__go {
+    order: 7;
+    margin-top: 8px;
+  }
+
+  .pz-led { padding-top: 24px; }
+  .pz-led > .seam,
+  .led__bar { display: none; }
+  /* Two spec sheets, one under the other, each answer under its row's
+     name. */
+  .led {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .led__row { display: contents; }
+  .led__row + .led__row::before,
+  .led__k { display: none; }
+  .led__v,
+  .led__v--gr,
+  .led__v--mn {
+    order: 1;
+    padding: 18px var(--gut);
+    border-top: 1px solid var(--hair-2);
+    text-align: left;
+  }
+  .led__v--mn { order: 3; }
+  .led__v--gr p { margin-left: 0; }
+  .led__v::before {
+    content: attr(data-k);
+    display: block;
+    margin-bottom: 6px;
+    color: var(--stone);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: .02em;
+  }
+  .led__row--head .led__v {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .led__row--head .led__v--gr { order: 0; }
+  .led__row--head .led__v--mn {
+    order: 2;
+    margin: 56px var(--gut) 0;
+    padding: 44px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .led__row--head .led__v::before,
+  .led__row--act .led__v::before { display: none; }
+  .led__row--act .led__v {
+    padding-top: 24px;
+    border-top: 0;
+  }
+  .led__ph { width: 100%; }
+  .led .fig { font-size: 44px; }
+  .led__v--gr .led__act { justify-content: flex-start; }
+}
+
+/* Small phones: a building's two blocks stack, so a square stays a finger's
+   size (18 px and up). */
+@media (max-width: 560px) {
+  .pz-board { --p: clamp(18px, calc((100vw - 2 * var(--gut) - var(--fw)) / 12), 27px); }
+  .bd__blocks {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--lbl) + 18px);
+    border-bottom: 0;
+  }
+  .bd__blk { border-bottom: 1px solid rgba(184, 149, 74, .55); }
+  .bd--gr .bd__blk:last-child .blk__fl,
+  .bd--mn .bd__blk:last-child .blk__fl {
+    display: grid;
+    order: -1;
+    justify-items: end;
+    padding: 0 8px 0 0;
+  }
+  .bd__blk .bd__bl,
+  .bd--gr .bd__blk:first-child .bd__bl,
+  .bd--mn .bd__blk:last-child .bd__bl {
+    left: var(--fw);
+    right: 0;
+  }
+  .bd__count .num { font-size: 52px; }
+  /* A label may wrap on a phone: at 320 px „Разгледайте апартаментите“ is
+     wider than its column. */
+  .led__act .btn { flex: 1 1 100%; }
+}

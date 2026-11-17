@@ -103,6 +103,7 @@ describe('the header', () => {
     ['/', '#zapitvane'],
     ['/contact', '#zapitvane'],
     ['/about', '/contact#zapitvane'],
+    ['/projects', '/contact#zapitvane'],
     ['/eu-proekt', '/contact#zapitvane'],
     ['/nope', '/contact#zapitvane'],
     ['/projects/golden-residence', '#zapitvane'],
@@ -203,10 +204,11 @@ describe('the header as the page scrolls', () => {
     expect(header).toHaveAttribute('data-scrolled')
   })
 
-  // Многофамилна's page opens on its explorer below the header, so the bar
-  // is solid over it from the top, as on every page with no hero under it;
-  // the EU row stays until the page scrolls.
-  it.each(['/about', '/projects/mnogofamilna-sgrada'])('is solid from the top of %s', async (path) => {
+  // Многофамилна's page opens on its explorer below the header, and
+  // Продажби on its board, so the bar is solid over them from the top, as on
+  // every page with no hero under it; the EU row stays until the page
+  // scrolls.
+  it.each(['/about', '/projects', '/projects/mnogofamilna-sgrada'])('is solid from the top of %s', async (path) => {
     renderSiteAt(path)
     const header = await siteHeader()
 
@@ -222,14 +224,15 @@ describe('the header as the page scrolls', () => {
 // Residence page, rebuilt in Diptych, run under the see-through header, each
 // with an inquiry of its own, as the Golden Residence block pages,
 // Многофамилна's page and block pages (rebuilt in M3) and Контакти (M4) have
-// too under the solid header. Every other page is solid. The pages not yet
-// rebuilt are legacy: they keep production's light look.
+// too under the solid header. Every other page is solid, Продажби (M4)
+// among them. The pages not yet rebuilt are legacy: they keep production's
+// light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
   '/': { header: 'overlay', inquiry: true },
   '/about': { header: 'solid', legacy: true },
-  '/projects': { header: 'solid', legacy: true },
+  '/projects': { header: 'solid' },
   '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/golden-residence/block-b': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },

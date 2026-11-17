@@ -41,18 +41,26 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // takes it in, so those pages keep their chunks as they were, and Контакти
 // loads the facade's and the explorer's code with them, unused, rather than
 // cost each of those pages a chunk more (about 600 B for the form's alone,
-// measured in M4 Task 2).
+// measured in M4 Task 2). Продажби (M4 Task 3) shares the reveals, the status
+// counts, the model and the explorer's context (its block grids' own) with
+// them, but neither the form nor the facade: it takes in the facade's group
+// the same way, which is headed by the motion hook so that it does. Splitting
+// what Продажби shares into a chunk of its own cost every other page of the
+// group about 730 B (measured in M4 Task 3: Home 1,136 B and Golden
+// Residence 1,217 B more in all, against 288 B and 484 B this way).
 export const GROUPS = [
-  // On every page with the inquiry form: Home, both projects' pages and their
-  // block pages, and Контакти. The form, the facade and what they share,
-  // with riders that only some of those pages show: the facade itself, the
-  // closing inquiry's section and the status counts (not on Контакти), the
-  // number that rolls in (not on a Многофамилна block page) and the
-  // stale-data notice with its stylesheet (only on Home, Golden Residence's
-  // pages and Контакти). A page loads them unused, as a Многофамилна page
-  // did before; without them, Home and Golden Residence, whose first load
-  // M4 caps, would load more.
-  { name: 'facade', head: 'src/components/inquiry/useInquiryForm.jsx', riders: ['src/explorer/Facade.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx'] },
+  // On every page with motion: Home, both projects' pages and their block
+  // pages, Контакти and Продажби. The form, the facade and what they share,
+  // with riders that only some of those pages show: the form itself and the
+  // closing inquiry's section (not on Продажби), the facade itself (on
+  // neither), the status counts (not on Контакти), the number that rolls in
+  // (not on a Многофамилна block page), the stale-data notice with its
+  // stylesheet (only on Home, Golden Residence's pages, Контакти and
+  // Продажби) and the explorer's context (only on the projects' pages and
+  // Продажби). A page loads them unused, as a Многофамилна page did before;
+  // without them, Home and Golden Residence, whose first load M4 caps, would
+  // load more.
+  { name: 'facade', head: 'src/motion/useMotion.js', riders: ['src/components/inquiry/useInquiryForm.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/explorer/Facade.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx', 'src/explorer/useExplorer.js'] },
   // On every page that waits for hydration: every page of a project, and
   // Контакти, whose prefill and landing do. The hydration hook and the
   // landing hold, with the explorer's provider, its state and the facade's

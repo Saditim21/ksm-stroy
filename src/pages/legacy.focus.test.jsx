@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline } from '../../tests/contracts/site'
 import Blog from './Blog'
-import Projects from './Projects'
 
 // A focus ring takes the colour of its ground's text (src/index.css; spec
 // §11). A legacy page is a light ground inside the dark site (.on-light), so
@@ -30,17 +29,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
-})
-
-it('/projects: the closing call to action is on dusk; the filters on the light ground are not', () => {
-  renderPage(Projects)
-
-  for (const name of ['Свържете се с нас', 'Попитайте за цени']) {
-    const button = screen.getByRole('button', { name })
-    expect(onDusk(button), name).toBe(true)
-    expect(onDusk(button.closest('a')), `${name}: its link`).toBe(true)
-  }
-  expect(onDusk(screen.getByRole('button', { name: /^Всички/ }))).toBe(false)
 })
 
 it('/blog: the closing call to action and the project viewer are on dusk; the filters are not', async () => {

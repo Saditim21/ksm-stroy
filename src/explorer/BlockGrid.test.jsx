@@ -1,9 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { MN_SNAPSHOT_DATA } from '../data/mnogofamilna/snapshot'
 import BlockGrid from './BlockGrid'
 import { buildModel } from './model'
 import { GR_PROJECT } from './projects/gr'
+import { MN_PROJECT } from './projects/mn'
 import { snapshotData } from './testing'
 import { ExplorerContext } from './useExplorer'
 
@@ -94,6 +96,25 @@ describe('BlockGrid', () => {
     const cell = screen.getByRole('button', { name: 'А 501, Няма информация' })
     expect(cell).toHaveClass('s-blocked')
     expect(title(cell)).toBe('А 501 · Няма информация')
+  })
+
+  // A page that shows two projects (Продажби's board, M3/M4 §7.1) has no
+  // explorer around its grids: each takes its project as a prop, which
+  // sizes and labels it, as the explorer's project does.
+  it('takes its project as a prop, with no explorer around it', () => {
+    const model = buildModel(MN_SNAPSHOT_DATA, MN_PROJECT)
+    render(<BlockGrid model={model} block="Б" onUnit={() => {}} project={MN_PROJECT} />)
+    const all = cells('Б')
+    expect(all).toHaveLength(72)
+    expect(all[0]).toHaveAccessibleName('Б-901, Продаден')
+    expect(screen.getByRole('button', { name: /^Б-702, / })).toHaveClass('s-free')
+    expect([...document.querySelectorAll('.blk__fl span')].map((span) => span.textContent)).toEqual(['10', '9', '8', '7', '6', '5', '4', '3', '2'])
+  })
+
+  it('takes the prop’s project over the explorer’s', () => {
+    renderGrid(<BlockGrid model={null} block="А" onUnit={() => {}} project={MN_PROJECT} />)
+    expect(cells('А')).toHaveLength(72)
+    expect(cells('А')[0]).toHaveAccessibleName('А-901')
   })
 })
 

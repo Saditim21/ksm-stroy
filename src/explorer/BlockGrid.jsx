@@ -1,14 +1,16 @@
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { cellTitle, statusText } from '../components/ui/cellTitle'
 import { statusLook } from '../components/ui/status'
 import useMotion from '../motion/useMotion'
 import { formatArea } from '../utils/format'
-import useExplorer from './useExplorer'
+import { ExplorerContext } from './useExplorer'
 import './blockGrid.css'
 
 // A block in numbers (spec §6.16; M3 §4.4; extract §4.27; the concept's
-// gr.js:185-210): its apartments as a grid of squares, sized from the
-// explorer's project (useExplorer.js): a row a floor, its top floor first,
+// gr.js:185-210): its apartments as a grid of squares, sized from its
+// project: the `project` it is given, on a page that shows two projects with
+// no explorer around them (Продажби's board, M3/M4 §7.1), else the
+// explorer's (useExplorer.js). A row a floor, its top floor first,
 // and a column a number on the floor (Golden Residence 12 × 8, floors 8 → 1;
 // Многофамилна 8 × 9, floors 10 → 2). Each square is a button in its status's
 // pattern (blockGrid.css, which also styles the half each page sets around
@@ -43,8 +45,9 @@ import './blockGrid.css'
 // in a row, the top floor's first.
 const indexIn = (event) => [...event.currentTarget.children].indexOf(event.target)
 
-export default function BlockGrid({ model, block, onUnit }) {
-  const { project } = useExplorer()
+export default function BlockGrid({ model, block, onUnit, project: given }) {
+  const explorer = useContext(ExplorerContext)
+  const project = given ?? explorer.project
   const { perFloor, floors: { min, max } } = project
   const floors = Array.from({ length: max - min + 1 }, (_, i) => max - i)
   const numbers = Array.from({ length: perFloor }, (_, i) => String(i + 1).padStart(2, '0'))

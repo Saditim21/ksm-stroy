@@ -109,6 +109,11 @@
 // without text spacing. Then text spacing at 320×568 on its block page
 // (/projects/mnogofamilna-sgrada/block-a), whose #explorer holds the block's
 // facade and its rows of floors (spec §4.5, WCAG 1.4.12).
+// Then Продажби's board (M3/M4 §7.1, §12; BOARD) at 1440×900: a real mouse
+// over a Golden Residence square shows its floor and its apartment in the
+// building's caption, on the screen, within 600 ms; a click lands on the
+// Golden Residence page with that apartment's panel open, named by its
+// label.
 // No step may log a console error or warning, or a page error.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
@@ -284,6 +289,16 @@ const MN_EXPLORER = {
   deepLink: { path: '/projects/mnogofamilna-sgrada?floor=%D0%90-9', floor: 'А-9' },
   panelWithinMs: EXPLORER.panelWithinMs,
   ring: EXPLORER.ring,
+}
+// Продажби's board (M3/M4 §7.1): the Golden Residence square the mouse
+// points at, its floor's words in the caption, and the page whose unit panel
+// a click opens, the apartment's label its name.
+const BOARD = {
+  path: '/projects',
+  label: 'А 503',
+  floor: 'Блок А, етаж 5',
+  opens: '/projects/golden-residence',
+  captionWithinMs: EXPLORER.panelWithinMs,
 }
 
 // The availability API, which the static server runs over the saved sheets:
@@ -1213,6 +1228,61 @@ async function explorerStageNarrow(page, problems, explorer) {
   }
 }
 
+// In the page: the centre of the board's Golden Residence square `label`,
+// and whether the pointer would land on it there.
+function boardSquare(label) {
+  const square = [...document.querySelectorAll('.bd--gr .blk__grid > button')].find((each) => each.getAttribute('aria-label').split(',')[0] === label)
+  if (!square) return null
+  const { left, top, width, height } = square.getBoundingClientRect()
+  const [x, y] = [left + width / 2, top + height / 2]
+  const there = document.elementFromPoint(x, y)
+  return { x, y, onScreen: y > 0 && y < innerHeight, hits: Boolean(there && square.contains(there)), there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
+}
+
+// In the page: whether Golden Residence's caption names `floor` and the
+// apartment `label`, its words wholly on the screen (the caption keeps room
+// for two lines below them).
+function boardCaption(floor, label) {
+  const caption = document.querySelector('.bd--gr .bd__cap')
+  if (!caption) return { shows: false, state: 'no caption in the page' }
+  const said = caption.textContent.replace(/\s+/g, ' ').trim()
+  const lines = [...caption.children].map((child) => child.getBoundingClientRect())
+  const box = { top: Math.min(...lines.map((line) => line.top)), bottom: Math.max(...lines.map((line) => line.bottom)), height: lines.length }
+  const onScreen = box.height > 0 && box.top >= 0 && box.bottom <= innerHeight
+  return {
+    shows: said.startsWith(floor) && said.includes(label) && onScreen,
+    state: `„${said}“, ${onScreen ? 'on screen' : `off screen (${Math.round(box.top)}–${Math.round(box.bottom)} of ${innerHeight})`}`,
+  }
+}
+
+// Продажби's board (M3/M4 §7.1): a real mouse over a Golden Residence square
+// shows its floor and its apartment in the building's caption, within
+// 600 ms; a click opens that apartment on the Golden Residence page, its
+// unit panel named by its label (the doors and the page's deep link first).
+async function boardMouse(page, problems) {
+  // The board's squares take their statuses with the data, and rise in.
+  await page.waitForFunction(() => document.querySelectorAll('.bd--gr .blk__grid > .s-none').length === 0, { timeout: 15000 })
+  await delay(2500)
+  const square = await page.evaluate(boardSquare, BOARD.label)
+  if (!square?.onScreen || !square.hits) {
+    problems.push(`the square ${BOARD.label} cannot be pointed at: ${square ? `its centre lands on ${square.there}` : 'no square'}`)
+    return
+  }
+  await page.mouse.move(square.x - 40, square.y, { steps: 2 })
+  await page.mouse.move(square.x, square.y, { steps: 4 })
+  const caption = await within(page, BOARD.captionWithinMs, boardCaption, BOARD.floor, BOARD.label)
+  if (!caption.shows) problems.push(`Golden Residence's caption does not name „${BOARD.floor}“ and ${BOARD.label} within ${BOARD.captionWithinMs} ms of the hover (${caption.state})`)
+
+  await page.mouse.click(square.x, square.y)
+  try {
+    await page.waitForFunction((pathname) => window.location.pathname === pathname, { timeout: 10000 }, BOARD.opens)
+  } catch {
+    problems.push(`a click on ${BOARD.label} does not land on ${BOARD.opens} (at ${await page.evaluate(() => window.location.pathname + window.location.search)})`)
+    return
+  }
+  if (!(await dialogOpens(page, BOARD.label, 10000))) problems.push(`a click on ${BOARD.label} opens no dialog „${BOARD.label}“ on ${BOARD.opens} (open: ${await openNames(page)})`)
+}
+
 const EXPLORER_STEPS = [
   { name: 'desktop mouse', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerMouse },
   { name: 'keyboard', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerKeyboard },
@@ -1229,6 +1299,7 @@ const EXPLORER_STEPS = [
   { name: 'deep link on a phone, with and without text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
   { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
   { name: 'text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.blockPath, run: explorerSpaced },
+  { name: 'sales board, mouse', size: VIEWPORTS[0], explorer: null, path: BOARD.path, run: boardMouse },
 ]
 
 // One step of the explorer's, in a fresh profile: its problems.

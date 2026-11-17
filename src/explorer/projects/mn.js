@@ -1,10 +1,11 @@
 // Многофамилна жилищна сграда, as the one explorer reads a project (spec M3
 // §2, §5, §6.3, §6.4; the shape is useExplorer.js's): two blocks of
 // apartments on floors 2–10, eight a floor, numbered by the data (А-101 is on
-// floor 2), the top floor the attic. Its numbers are the dated snapshot of
-// 01.12.2025 (src/data/mnogofamilna/snapshot.js) until the store holds live
-// rows of both its blocks, which its sheets would give once they are
-// published: the date goes with them.
+// floor 2), the top floor the attic. Its apartments, as a page counts and
+// names them, are MN_UNITS (mn.units.js): its id, floors and labels, and its
+// numbers, the dated snapshot of 01.12.2025 until the store holds live rows
+// of both its blocks, which its sheets would give once they are published:
+// the date goes with them. Продажби's board reads MN_UNITS alone.
 //
 // Its facade is the night render (spec M3 §6.3): the twin with every window
 // dark (mn-night's mn-dusk-off), the page's first picture, and over it the
@@ -20,15 +21,8 @@ import mnNight from '../../data/images/mn-night.json'
 import building from '../../data/maps/mnogofamilna.building.json'
 import floors from '../../data/maps/mnogofamilna.floors.json'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
-import { MN_SNAPSHOT_DATA, MN_SNAPSHOT_DATE } from '../../data/mnogofamilna/snapshot'
 import FacadeLights from '../FacadeLights'
-
-const ID = 'mnogofamilna-sgrada'
-
-// Whether the store holds live rows of both blocks (src/data/availability/
-// store.js gives Многофамилна rows only from its own sheets, or built in
-// when every read failed).
-const live = (snapshot) => ['block-a', 'block-b'].every((slot) => snapshot.origin?.[ID]?.[slot] === 'live')
+import { MN_UNITS } from './mn.units'
 
 // Each block's band on the grid, as wide as its towers (the concept's
 // mnogofamilna.js:262): the lit render shows a floor through its band.
@@ -49,15 +43,7 @@ const map = Object.freeze({
 })
 
 export const MN_PROJECT = Object.freeze({
-  id: ID,
-  option: 'mnogofamilna',
-  floors: MN_FACTS.floors,
-  perFloor: MN_FACTS.perFloor,
-  total: MN_FACTS.apartments,
-  // „А-101“ on floor 2: the data numbers the apartments by residential level.
-  unitLabel: (unit) => `${unit.block}-${unit.floor - 1}${unit.suffix}`,
-  modelData: (snapshot) => (live(snapshot) ? snapshot.data : MN_SNAPSHOT_DATA),
-  dated: (snapshot) => (live(snapshot) ? null : MN_SNAPSHOT_DATE),
+  ...MN_UNITS,
   types: Object.freeze(Object.keys(MN_FACTS.types).sort()),
   exposureNote: null,
   facade: Object.freeze({

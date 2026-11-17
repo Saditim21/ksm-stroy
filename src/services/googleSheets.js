@@ -18,7 +18,7 @@
  * browser fetch, its cache and the shapes the legacy pages read.
  */
 
-import { normalizeStatus, summarizeStatuses } from '../utils/propertyStatus';
+import { normalizeStatus } from '../utils/propertyStatus';
 import {
   APARTMENT_COLUMNS,
   SPOT_COLUMNS,
@@ -97,7 +97,7 @@ export function transformToApartmentData(rawData) {
 
 /**
  * The last step for every floor map the site shows, a sheet's rows or the
- * Многофамилна data built into the site (ApartmentContext): floor 0, the
+ * Многофамилна data built into the site (the availability store's): floor 0, the
  * Многофамилна garages that no page lists, is dropped, and every status goes
  * through normalizeStatus(). Returns new rows; the input is left as it was.
  */
@@ -190,16 +190,6 @@ export async function fetchApartmentData(block = 'blockA') {
 }
 
 /**
- * Calculate apartment statistics from floor data
- */
-export function calculateStats(floorData) {
-  const statuses = Object.values(floorData).flatMap(apartments =>
-    apartments.map(apt => apt.status)
-  );
-  return summarizeStatuses(statuses);
-}
-
-/**
  * Transform raw sheet data to garage/parking format (flat list). A row with no
  * Номер names no place (a blank line), so it is left out.
  */
@@ -260,13 +250,6 @@ export async function fetchGarageData(type = 'garages') {
 
     return null;
   }
-}
-
-/**
- * Calculate garage/parking statistics from flat list
- */
-export function calculateGarageStats(garageData) {
-  return summarizeStatuses(garageData.map(item => item.status));
 }
 
 /**
