@@ -122,11 +122,16 @@ const samePick = (a) => (b) => a.project === b.project && a.label === b.label
  * Контакти's form asks for, once the page has hydrated (M3/M4 spec §7.3,
  * src/pages/contact/ContactInquiry.jsx). Merges into the store: the option,
  * when given, replaces the one chosen (null: the form's own first); each
- * pick joins the picks once, as its project and its label.
+ * pick joins the picks once, as its project and its label. What changes
+ * nothing leaves the state as it is.
  * @param {{ option?: string | null, picks?: Array<{ project: string, label: string }> }} preset
  */
 export function seedInquiry({ option = state.option, picks = [] } = {}) {
-  update({ option, picks: [...state.picks, ...picks.filter((pick) => !state.picks.some(samePick(pick)))] })
+  let next = state.picks
+  for (const pick of picks) {
+    if (!next.some(samePick(pick))) next = [...next, pick]
+  }
+  if (option !== state.option || next !== state.picks) update({ option, picks: next })
 }
 
 /**

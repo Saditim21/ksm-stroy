@@ -120,6 +120,21 @@ describe('the store', () => {
     expect(result.current.option).toBeNull()
   })
 
+  // As the store's other actions: what changes nothing leaves the state as it
+  // is, so nothing that reads it renders again; and a pick joins once, even
+  // when a seed names it twice.
+  it('keeps the state as it is for a preset or a seed that changes nothing', () => {
+    const { result } = state()
+    act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
+    const before = result.current
+    act(() => presetInquiry())
+    act(() => presetInquiry({ option: 'golden-residence', pick: grPick('А 301') }))
+    act(() => seedInquiry({ picks: [grPick('А 301')] }))
+    expect(result.current).toBe(before)
+    act(() => seedInquiry({ picks: [grPick('А 302'), grPick('А 302')] }))
+    expect(result.current.picks).toEqual([grPick('А 301'), grPick('А 302')])
+  })
+
   it('chooseInquiryOption keeps the visitor’s choice, and the picks', () => {
     const { result } = state()
     act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
