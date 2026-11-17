@@ -1,5 +1,6 @@
 import { reactRouter } from '@react-router/dev/vite'
 import { defineConfig, loadEnv } from 'vite'
+import { clientChunks } from './scripts/client-chunks.mjs'
 import { clientRoutesCaseSensitive } from './scripts/client-routes-case.mjs'
 import { isProductionStage } from './src/seo/stage.js'
 
@@ -104,7 +105,11 @@ async function toFetchRequest(req, url) {
 export default defineConfig({
   // clientRoutesCaseSensitive(): the browser's routes keep src/routes.js's
   // caseSensitive, which React Router 8.5.1 drops (scripts/client-routes-case.mjs).
-  plugins: [!isVitest && reactRouter(), !isVitest && devApi(), !isVitest && clientRoutesCaseSensitive()],
+  // clientChunks(): the browser's build pins what every page loads, and the
+  // explorer's shared modules, in chunks of their own (scripts/client-chunks.mjs).
+  plugins: [
+    !isVitest && reactRouter(), !isVitest && devApi(), !isVitest && clientRoutesCaseSensitive(), !isVitest && clientChunks(),
+  ],
   // Build-time: only the production site is indexed (src/seo/stage.js); the
   // footer's © line carries the year of the build (src/shell/SiteFooter.jsx).
   define: {
@@ -125,7 +130,8 @@ export default defineConfig({
       'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
     ],
   },
-  // No manualChunks: React Router splits the build per route.
+  // React Router splits the build per route; clientChunks() pins some chunks
+  // of the browser's build (its manualChunks).
   build: {
     target: 'es2020',
     assetsInlineLimit: 4096,

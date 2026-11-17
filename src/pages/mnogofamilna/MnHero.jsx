@@ -3,11 +3,7 @@ import Button from '../../components/ui/Button'
 import RollingNumber from '../../components/ui/RollingNumber'
 import Seam from '../../components/ui/Seam'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
-// Load-bearing (ruling T6a): an import from ExplorerSection.jsx, whose
-// section this page never renders, keeps the explorer's shared chunks whole.
-// Without one they split, and Golden Residence passes its first-load cap and
-// this page 160 KiB (measured in Task 6's fix round).
-import { Dated, FacadeCaption } from '../../explorer/ExplorerSection'
+import { Dated, FacadeCaption } from '../../explorer/captions'
 import Facade from '../../explorer/Facade'
 import useExplorer from '../../explorer/useExplorer'
 import { bindAddress, plural } from '../../utils/format'
@@ -31,7 +27,7 @@ import { bindAddress, plural } from '../../utils/format'
 //   caption saying what lights, as of when (Dated, as a block page says
 //   it), then what the explorer's facade says everywhere: what its rails
 //   count and how to open a floor, in a desktop's words and a phone's
-//   (FacadeCaption; both ExplorerSection.jsx).
+//   (FacadeCaption; both captions.jsx).
 //
 // The entrance is mn.css's and mn-facade.css's, all CSS from the first
 // paint: the name rises across the seam, the rest comes up after it, the

@@ -5,6 +5,7 @@ import StatusCount from '../components/ui/StatusCount'
 import { STATUS_ORDER } from '../components/ui/status'
 import useMotionNow from '../motion/useMotionNow'
 import useReveals from '../motion/useReveals'
+import { Dated, FacadeCaption } from './captions'
 import Facade from './Facade'
 import { loadSurfaces } from './loadSurfaces'
 import { loadedUnitList, loadUnitList } from './loadUnitList'
@@ -57,40 +58,10 @@ import ViewTabs from './ViewTabs'
 // it has one #explorer.
 const ID = 'ex'
 
-/** The facade's caption (Facade.jsx): what its rails count, and how to open
- * a floor, in a desktop's words and a phone's (explorer.css shows one).
- * Многофамилна's opening says it too, after its lights (MnHero.jsx). */
-export function FacadeCaption() {
-  return (
-    <>
-      Цифрите отстрани са <b>свободните апартаменти</b> на всеки етаж.{' '}
-      <span className="cap-desk">Посочете етаж, кликнете, за да отворите плана му.</span>
-      <span className="cap-phone">Докоснете етаж, за да видите плана му; второ докосване го отваря.</span>
-    </>
-  )
-}
+// The facade's captions live in captions.jsx, which the Многофамилна pages
+// import without this section; they stay exported from here too.
+export { Dated, FacadeCaption }
 const caption = () => <FacadeCaption />
-
-/** `children`, a sentence, then the date of the explorer's numbers where
- * they are dated (`, по данни към 01.12.2025`; nothing with live rows), and
- * a full stop. Both Многофамилна pages say what their lit facade shows this
- * way: the opening before FacadeCaption (MnHero.jsx), a block page alone
- * (MnBlockPage.jsx).
- * It lives here, beside FacadeCaption, so that a block page imports this
- * module as the opening does, which keeps the explorer's shared chunks
- * whole: this module with ExplorerContext.jsx's, and StaleNotice with
- * Facade.jsx's. A block page that imports nothing from here splits both,
- * and Golden Residence's first-load JS grows by about 780 B (measured in
- * Task 6's first fix round). */
-export function Dated({ children }) {
-  const { dated } = useExplorer()
-  return (
-    <>
-      {children}
-      {dated ? `, по данни към ${dated}` : ''}.
-    </>
-  )
-}
 
 export default function ExplorerSection({ headingLevel = 2, initialBlock }) {
   const ref = useRef(null)

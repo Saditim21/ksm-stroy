@@ -5,12 +5,8 @@ import Seam from '../../components/ui/Seam'
 import { availabilityPreload } from '../../data/availability/useAvailability'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
 import { blockFacade } from '../../explorer/blockFacade'
+import { Dated } from '../../explorer/captions'
 import { ExplorerProvider } from '../../explorer/ExplorerContext'
-// Load-bearing (ruling T6a): an import from ExplorerSection.jsx, whose
-// section this page never renders, keeps the explorer's shared chunks whole.
-// Without one they split, and Golden Residence passes its first-load cap and
-// the Многофамилна pages 160 KiB (measured in Task 6's fix round).
-import { Dated } from '../../explorer/ExplorerSection'
 import Facade from '../../explorer/Facade'
 import { FloorCounts } from '../../explorer/FloorFacts'
 import { facadeOf } from '../../explorer/geometry'
