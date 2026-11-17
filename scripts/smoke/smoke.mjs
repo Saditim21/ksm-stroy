@@ -114,6 +114,10 @@
 // building's caption, on the screen, within 600 ms; a click lands on the
 // Golden Residence page with that apartment's panel open, named by its
 // label.
+// Then Обекти's book (M3/M4 §7.2, §12; BOOK) at 1440×900, by the keyboard:
+// Tab from the top reaches the first work's cover, Enter opens the work's
+// book, a dialog named after the work, at the cover's photo, → turns a page,
+// and Escape closes it, the focus back on the cover.
 // No step may log a console error or warning, or a page error.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
@@ -299,6 +303,15 @@ const BOARD = {
   floor: 'Блок А, етаж 5',
   opens: '/projects/golden-residence',
   captionWithinMs: EXPLORER.panelWithinMs,
+}
+// Обекти's book (M3/M4 §7.2): the plate Tab reaches first, the first work's
+// cover, the dialog it opens, named after the work, and its counter as it
+// opens at the cover's photo and once → has turned a page.
+const BOOK = {
+  path: '/blog',
+  plate: 'Green Life – Paradise Gardens and Town House: снимка 3 от 6',
+  name: 'Green Life – Paradise Gardens and Town House',
+  counters: ['02–03 / 06', '04–05 / 06'],
 }
 
 // The availability API, which the static server runs over the saved sheets:
@@ -1283,6 +1296,54 @@ async function boardMouse(page, problems) {
   if (!(await dialogOpens(page, BOARD.label, 10000))) problems.push(`a click on ${BOARD.label} opens no dialog „${BOARD.label}“ on ${BOARD.opens} (open: ${await openNames(page)})`)
 }
 
+// In the page: the name of the register's plate that has the focus, or null.
+function focusedPlate() {
+  const active = document.activeElement
+  return active?.matches('.wk__ph') ? active.getAttribute('aria-label') : null
+}
+
+// In the page: the open book's counter, or null.
+const bookCounter = () => document.querySelector('.bk .bk__n')?.textContent.replace(/\s+/g, ' ').trim() ?? null
+
+// Обекти's book (M3/M4 §7.2): Tab from the top reaches the first work's
+// cover; Enter opens its book, the dialog named after the work, at the
+// cover's photo; once it has landed, → turns a page; Escape closes it, and
+// the focus is back on the cover.
+async function bookKeyboard(page, problems) {
+  let plate = null
+  for (let tab = 0; tab < MAX_TABS && !plate; tab += 1) {
+    await page.keyboard.press('Tab')
+    plate = await page.evaluate(focusedPlate)
+  }
+  if (plate !== BOOK.plate) {
+    problems.push(`Tab from the top reaches ${plate ? `„${plate}“` : 'no plate'}, not „${BOOK.plate}“`)
+    return
+  }
+  await page.keyboard.press('Enter')
+  if (!(await dialogOpens(page, BOOK.name, 5000))) {
+    problems.push(`Enter on the plate opens no dialog „${BOOK.name}“ (open: ${await openNames(page)})`)
+    return
+  }
+  const opened = await page.evaluate(bookCounter)
+  if (opened !== BOOK.counters[0]) problems.push(`the book opens at ${opened}, not at the plate's photo, ${BOOK.counters[0]}`)
+  await delay(1200)
+  await page.keyboard.press('ArrowRight')
+  try {
+    await page.waitForFunction((wanted) => document.querySelector('.bk .bk__n')?.textContent.replace(/\s+/g, ' ').trim() === wanted, { timeout: 3000 }, BOOK.counters[1])
+  } catch {
+    problems.push(`ArrowRight does not turn the book to ${BOOK.counters[1]} (it shows ${await page.evaluate(bookCounter)})`)
+  }
+  await page.keyboard.press('Escape')
+  try {
+    await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), { timeout: 3000 })
+  } catch {
+    problems.push(`Escape leaves a dialog open: ${await openNames(page)}`)
+    return
+  }
+  const back = await page.evaluate(focusedPlate)
+  if (back !== BOOK.plate) problems.push(`after Escape the focus is on ${back ? `„${back}“` : await page.evaluate(() => document.activeElement?.tagName ?? 'nothing')}, not back on the plate`)
+}
+
 const EXPLORER_STEPS = [
   { name: 'desktop mouse', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerMouse },
   { name: 'keyboard', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerKeyboard },
@@ -1300,6 +1361,7 @@ const EXPLORER_STEPS = [
   { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
   { name: 'text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.blockPath, run: explorerSpaced },
   { name: 'sales board, mouse', size: VIEWPORTS[0], explorer: null, path: BOARD.path, run: boardMouse },
+  { name: 'works book, keyboard', size: VIEWPORTS[0], explorer: null, path: BOOK.path, run: bookKeyboard },
 ]
 
 // One step of the explorer's, in a fresh profile: its problems.

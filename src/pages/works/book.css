@@ -1,0 +1,273 @@
+/* A work's book on Обекти (Book.jsx; spec M3/M4 §7.2, §4.3, §11), ported
+   from the concept's css/obekti.css (:175-217, :238-247) with the tokens of
+   src/index.css and --screen-h for vh. Its chunk's own stylesheet: it comes
+   with the book, never in the page's first load.
+
+   The book lies over the page and its header, as the plan stage does
+   (src/explorer/explorer.css), under the grain; the plate that flies into it
+   lies over it. Its photos, and the strip's, keep their true colour: only
+   the flying plate carries the archive's grade, which lifts as it lands.
+   Hover effects only where a pointer hovers (spec §2.2). */
+
+.bk {
+  --pad: clamp(24px, 3vw, 52px);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--onyx);
+  color: var(--ivory);
+}
+
+/* The bar: the work's name and line, the counter, „Затвори“. */
+.bk__bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 28px;
+  padding: 16px var(--gut);
+  border-bottom: 1px solid var(--hair-2);
+}
+.bk__title {
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.2vw, 36px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+.bk__meta {
+  margin-top: 6px;
+  color: var(--stone);
+  font-size: 13px;
+}
+.bk__n {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.bk__n span {
+  color: var(--stone);
+  font-weight: 500;
+}
+.bk__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font: 500 14px/1 var(--sans);
+  letter-spacing: .03em;
+}
+.bk__close i {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+.bk__close i::before,
+.bk__close i::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  right: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.bk__close i::after { transform: rotate(-45deg); }
+
+/* The stage: two pages on the seam; a swipe turns them, the browser keeps
+   the vertical scroll. */
+.bk__stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 0;
+  touch-action: pan-y;
+}
+.bk__seam {
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+}
+.bk__page {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+/* A page's leaf, on the book's ground, so a page that turns covers the one
+   under it: a photo against the seam, at its own size or below (--w, --h),
+   or the title page. */
+.bk__fig {
+  position: absolute;
+  inset: clamp(18px, calc(var(--screen-h) * .04), 48px) var(--pad) clamp(18px, calc(var(--screen-h) * .04), 48px) var(--gut);
+  display: flex;
+  align-items: center;
+  margin: 0;
+  background: var(--onyx);
+}
+.bk__page--l .bk__fig { justify-content: flex-end; }
+.bk__page--r .bk__fig {
+  inset: clamp(18px, calc(var(--screen-h) * .04), 48px) var(--gut) clamp(18px, calc(var(--screen-h) * .04), 48px) var(--pad);
+  justify-content: flex-start;
+}
+.bk__pic { display: contents; }
+.bk__fig img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, var(--w));
+  max-height: min(100%, var(--h));
+}
+/* The title page: the record, where a book starts. */
+.bk__rec {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 16px;
+  padding: clamp(24px, calc(var(--screen-h) * .05), 64px) clamp(28px, 4vw, 72px);
+  text-align: right;
+}
+.bk__rec .serif {
+  max-width: 12em;
+  font-size: clamp(34px, 3.4vw, 58px);
+  line-height: 1.02;
+}
+.bk__rec .small { font-size: 14px; }
+.bk__rec h3 {
+  margin-top: 10px;
+  color: var(--stone);
+  font: 500 13px/1.3 var(--sans);
+  letter-spacing: .02em;
+}
+.bk__rec p:not(.serif, .small) {
+  max-width: 26em;
+  color: var(--ivory-2);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.bk__rec ul {
+  display: grid;
+  gap: 2px;
+  color: var(--ivory);
+  font-size: 15px;
+}
+
+/* The foot: ← and →, and the strip of every photo, the shown ones marked
+   with a brass rule. The strip scrolls: a thumbnail's ring keeps 5 px or
+   more inside it (spec §11, ruling C8.12). */
+.bk__foot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 12px var(--gut) 16px;
+  border-top: 1px solid var(--hair-2);
+}
+.bk__nav {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--hair-ctl);
+  transition: border-color .2s, background-color .2s;
+}
+.bk__nav svg {
+  width: 18px;
+  height: 10px;
+}
+.bk__strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: 6px;
+  scroll-padding-inline: 6px;
+}
+.bk__strip::-webkit-scrollbar { display: none; }
+.bk__strip button {
+  position: relative;
+  flex: none;
+  height: 54px;
+  opacity: .45;
+  transition: opacity .25s var(--e-soft);
+}
+.bk__strip button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: var(--brass-l);
+  transform: scaleX(0);
+  transition: transform .4s var(--e-out);
+}
+.bk__strip button[aria-current='true'] { opacity: 1; }
+.bk__strip button[aria-current='true']::after { transform: none; }
+.bk__strip button:focus-visible { outline-offset: 1px; }
+.bk__thumb { height: 100%; }
+.bk__thumb img {
+  width: auto;
+  height: 100%;
+}
+
+/* The plate that flies into its place (Book.jsx sets its box and its
+   picture), under the archive's grade until it lands. */
+.bk-fly {
+  position: fixed;
+  z-index: 51;
+  background: var(--umber) center / cover no-repeat;
+  filter: saturate(.5) sepia(.2) brightness(.74) contrast(1.08);
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bk__nav:hover {
+    border-color: var(--brass);
+    background-color: rgba(184, 149, 74, .08);
+  }
+  .bk__strip button:hover { opacity: .85; }
+  .bk__close:hover { color: var(--brass-l); }
+}
+
+/* ---------- phones and narrow tablets: 900 px and under: one photo a
+   page, the right page and the seam gone ---------- */
+@media (max-width: 900px) {
+  .bk__bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 16px;
+    padding: 12px 16px;
+  }
+  .bk__n {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 22px;
+  }
+  .bk__close {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .bk__stage { grid-template-columns: 1fr; }
+  .bk__seam,
+  .bk__page--r { display: none; }
+  .bk__page--l .bk__fig {
+    inset: 12px 0;
+    justify-content: center;
+  }
+  .bk__foot {
+    gap: 10px;
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  }
+  .bk__nav {
+    width: 44px;
+    height: 44px;
+  }
+  .bk__strip button { height: 46px; }
+}

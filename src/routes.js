@@ -37,7 +37,7 @@ export default [
   // two real projects above still win.
   page('projects/:id', 'routes/projects-id-redirect.jsx'),
   page('contact', 'routes/contact.jsx'),
-  page('blog', 'pages/Blog.jsx'),
+  page('blog', 'routes/blog.jsx'),
   // The page about the EU project, which the EU line on every page links to.
   page('eu-proekt', 'routes/eu-proekt.jsx'),
   // Under the dev server only: the polygon tracer for the explorer maps

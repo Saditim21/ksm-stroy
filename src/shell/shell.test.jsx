@@ -104,6 +104,7 @@ describe('the header', () => {
     ['/contact', '#zapitvane'],
     ['/about', '/contact#zapitvane'],
     ['/projects', '/contact#zapitvane'],
+    ['/blog', '/contact#zapitvane'],
     ['/eu-proekt', '/contact#zapitvane'],
     ['/nope', '/contact#zapitvane'],
     ['/projects/golden-residence', '#zapitvane'],
@@ -224,9 +225,9 @@ describe('the header as the page scrolls', () => {
 // Residence page, rebuilt in Diptych, run under the see-through header, each
 // with an inquiry of its own, as the Golden Residence block pages,
 // Многофамилна's page and block pages (rebuilt in M3) and Контакти (M4) have
-// too under the solid header. Every other page is solid, Продажби (M4)
-// among them. The pages not yet rebuilt are legacy: they keep production's
-// light look.
+// too under the solid header. Every other page is solid, Продажби and
+// Обекти (M4) among them. The pages not yet rebuilt are legacy: they keep
+// production's light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
@@ -242,7 +243,7 @@ const HANDLES = {
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
   '/contact': { header: 'solid', inquiry: true },
-  '/blog': { header: 'solid', legacy: true },
+  '/blog': { header: 'solid' },
   '/eu-proekt': { header: 'solid' },
   '/*': { header: 'solid' },
 }

@@ -1,8 +1,9 @@
 import { vi } from 'vitest'
 
 // Flip (spec §5.1) is a lazy chunk of its own, apart from the motion engine:
-// only the „Визуално / По критерии“ switch uses it. loadFlip() loads it with
-// the engine, once, and registers it on the engine's GSAP.
+// only the „Визуално / По критерии“ switch and Обекти's filter and book use
+// it. loadFlip() loads it with the engine, once, and registers it on the
+// engine's GSAP.
 const fake = vi.hoisted(() => ({
   motion: { gsap: { registerPlugin: vi.fn() }, ScrollTrigger: { refresh: () => {} } },
   Flip: { name: 'Flip' },
