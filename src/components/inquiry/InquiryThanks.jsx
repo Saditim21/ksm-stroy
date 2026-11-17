@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import useMotionNow from '../../motion/useMotionNow'
 import { scrollToId } from '../../utils/scroll'
 
-// The thank-you a sent inquiry turns into (spec §5.7, §10; InquiryForm.jsx):
+// The thank-you a sent inquiry turns into (spec §5.7, §10; useInquiryForm.jsx):
 // a status that takes the focus, once, as it arrives, and comes into view if
 // the form's end was all that showed: the glide to the inquiry goes on as far
 // as the thank-you, which on a short phone screen sits a whole contact half

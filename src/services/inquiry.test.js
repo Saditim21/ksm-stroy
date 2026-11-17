@@ -49,7 +49,7 @@ describe('buildLead', () => {
     expect(proxy).toContain(`const EMAIL_PATTERN = ${EMAIL_PATTERN}`)
   })
 
-  // The form checks an email before the send path has loaded (InquiryForm.jsx
+  // The form checks an email before the send path has loaded (useInquiryForm.jsx
   // loads this module on its first use), so the pattern is a module of its
   // own, which this one hands on to its importers.
   it("EMAIL_PATTERN is the proxy's pattern, from emailPattern.js", () => expect(EMAIL_PATTERN).toBe(OWN_PATTERN))

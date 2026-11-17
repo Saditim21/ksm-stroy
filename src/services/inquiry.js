@@ -8,7 +8,7 @@
 // its message is under 10 characters. A teammate owns the proxy, and it
 // never changes, so the lead is made valid here: the name trimmed, and a
 // short message given the line „Запитване за: …“ with the lead's subject.
-// The form checks the rest before sending (InquiryForm.jsx, with the checks
+// The form checks the rest before sending (useInquiryForm.jsx, with the checks
 // of src/components/inquiry/inquiryChecks.js).
 //
 // Every build but production marks the subject „[ТЕСТ]“, in the CRM and in

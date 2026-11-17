@@ -37,8 +37,8 @@ it('keeps the site’s focus ring on every field, the brass-l underline besides'
   expect(declaredFor('.field input:focus')['border-color']).toBe('var(--brass-l)')
 })
 
-// The form is `hidden` once sent (InquiryForm.jsx), and its own display
-// would outrank the attribute's.
+// The form is `hidden` once sent (InquiryForm.jsx; Контакти's fields,
+// ContactInquiry.jsx), and its own display would outrank the attribute's.
 it('hides a sent form, for the thank-you in its place', () => {
   expect(declaredFor('.form').display).toBe('grid')
   expect(declaredFor('.form[hidden]')).toEqual({ display: 'none' })

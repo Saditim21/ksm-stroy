@@ -103,7 +103,7 @@
   line-height: 1.4;
 }
 /* A field's hint under its label, which the field names as its description
-   (InquiryForm.jsx's `hint`: Контакти's construction message). */
+   (useInquiryForm.jsx's `hint`: Контакти's construction message). */
 .field__hint {
   margin-top: -2px;
   color: var(--stone);
@@ -164,7 +164,7 @@
   line-height: 1.5;
 }
 /* While the inquiry is on its way the action reads „Изпращане...“
-   (InquiryForm.jsx) and takes no second send. */
+   (useInquiryForm.jsx) and takes no second send. */
 .form [aria-disabled='true'] { cursor: progress; }
 
 /* The thank-you, in the form's place. */

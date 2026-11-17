@@ -1,6 +1,6 @@
 import { EMAIL_PATTERN } from '../../services/emailPattern'
 
-// The inquiry form's checks (InquiryForm.jsx; spec §10): what the lead proxy
+// The inquiry form's checks (useInquiryForm.jsx; spec §10): what the lead proxy
 // (api/odoo-lead.js) would otherwise drop without a trace. Name, phone and
 // email are required, the message is not, and the consent is checked: a
 // name under 2 characters once trimmed, an email outside the proxy's pattern
