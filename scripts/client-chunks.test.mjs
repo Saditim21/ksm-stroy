@@ -4,11 +4,11 @@ import { clientChunks, GROUPS, pinnedChunks } from './client-chunks.mjs'
 
 // The browser's chunks (see client-chunks.mjs), on a small module graph built
 // as React Router's client build names its modules: the client entry, the
-// root route, and six pages, Home, a project page, a block page, the contact
-// page, which has the inquiry form and waits for hydration but has neither a
-// facade nor an explorer, the sales page, which shows the status counts and
-// a block grid but has neither the form nor the facade, and a page with none
-// of them.
+// root route, and eight pages, Home, both projects' pages and their block
+// pages, the contact page, which has the inquiry form and waits for
+// hydration but has neither a facade nor an explorer, the sales page, which
+// shows the status counts and a block grid but has neither the form nor the
+// facade, and a page with none of them.
 
 const ROUTE = '?__react-router-build-client-route'
 const id = {
@@ -26,6 +26,8 @@ const id = {
   home: '/repo/src/pages/Home.jsx',
   teaser: '/repo/src/pages/home/TeaserSection.jsx',
   projectRoute: `/repo/src/routes/golden-residence.jsx${ROUTE}`,
+  projectBlockRoute: `/repo/src/routes/golden-residence-block.jsx${ROUTE}`,
+  mnRoute: `/repo/src/routes/mnogofamilna.jsx${ROUTE}`,
   blockRoute: `/repo/src/routes/mnogofamilna-block.jsx${ROUTE}`,
   euRoute: `/repo/src/routes/eu-proekt.jsx${ROUTE}`,
   contactRoute: `/repo/src/routes/contact.jsx${ROUTE}`,
@@ -72,6 +74,8 @@ const GRAPH = {
   [id.home]: { imports: [id.react, id.helper, id.button, id.motion, id.teaser, id.facade, id.rolling, id.stale, id.dims, id.inquiry] },
   [id.teaser]: { imports: [id.react] },
   [id.projectRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.section, id.rolling, id.dims, id.inquiry] },
+  [id.projectBlockRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.captions, id.rolling, id.stale, id.inquiry] },
+  [id.mnRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.rolling, id.inquiry] },
   [id.blockRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.captions, id.inquiry] },
   [id.euRoute]: { entry: true, imports: [id.react, id.button, id.status, id.digits, id.dims] },
   [id.contactRoute]: { entry: true, imports: [id.react, id.motion, id.form, id.rolling, id.hydrated, id.hold] },
@@ -107,6 +111,11 @@ const info =(graph) => (moduleId) => {
 }
 const pin = (graph = GRAPH, groups) => pinnedChunks(Object.keys(graph), info(graph), groups)
 const without = (moduleId) => Object.fromEntries(Object.entries(GRAPH).filter(([key]) => key !== moduleId))
+// The graph with one page more, the route module `file`, which imports
+// `imports`.
+const withPage = (file, imports) => ({ ...GRAPH, [`/repo/${file}${ROUTE}`]: { entry: true, imports } })
+// The pages that import the facade in this graph, for a group it heads.
+const FACADE_PAGES = ['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx']
 
 describe('pinnedChunks', () => {
   const pinned = pin()
@@ -120,13 +129,13 @@ describe('pinnedChunks', () => {
 
   it('leaves in its entry\'s chunk what only that entry needs, and never pins an entry', () => {
     for (const own of [id.domClient, id.root, id.menu, id.teaser]) expect(pinned.has(own)).toBe(false)
-    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.blockRoute, id.euRoute, id.contactRoute, id.salesRoute]) expect(pinned.has(entry)).toBe(false)
+    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.projectBlockRoute, id.mnRoute, id.blockRoute, id.euRoute, id.contactRoute, id.salesRoute]) expect(pinned.has(entry)).toBe(false)
   })
 
   it('makes a group of what every page with its head needs, and of its riders', () => {
-    // The facade's group is the motion hook's: its pages are Home, the
-    // project page, the block page, the contact page and the sales page,
-    // which all need the hook.
+    // The facade's group is the motion hook's: its pages, which GROUPS
+    // names, are Home, both projects' pages and their block pages, the
+    // contact page and the sales page, which all need the hook.
     expect(pinned.get(id.motion)).toBe('facade')
     // Riders, which the sales page doesn't need: the form and the closing
     // inquiry.
@@ -135,17 +144,19 @@ describe('pinnedChunks', () => {
     // what they import: the facade, its model and its surfaces' loader,
     // which the sales page needs too, and the status counts.
     for (const member of [id.facade, id.model, id.loadSurfaces, id.counts]) expect(pinned.get(member)).toBe('facade')
-    // Riders, which Home, the project page, the contact page and the sales
-    // page need and the block page doesn't, with what they import.
+    // Riders, which some of its pages need and others don't, with what they
+    // import: the number that rolls in (not on Многофамилна's block page)
+    // and the stale-data notice (on Home, Golden Residence's pages and the
+    // sales page).
     expect(pinned.get(id.rolling)).toBe('facade')
     expect(pinned.get(id.roll)).toBe('facade')
     expect(pinned.get(id.stale)).toBe('facade')
     // A rider of the explorer's that the sales page needs too (a block grid
     // reads its context), so it rides with the facade's group.
     expect(pinned.get(id.useExplorer)).toBe('facade')
-    // The explorer's group is the hydration hook's: its pages are the project
-    // page, the block page and the contact page, which all need the hook and
-    // the landing hold; the explorer itself rides along.
+    // The explorer's group is the hydration hook's: its pages are both
+    // projects' pages, their block pages and the contact page, which all
+    // need the hook and the landing hold; the explorer itself rides along.
     for (const member of [id.hydrated, id.hold]) expect(pinned.get(member)).toBe('explorer')
     for (const member of [id.context, id.state, id.captions]) expect(pinned.get(member)).toBe('explorer')
     expect(pinned.get(id.listLoader)).toBe('explorer')
@@ -175,14 +186,45 @@ describe('pinnedChunks', () => {
   })
 
   it('fails when a head or a rider is gone', () => {
-    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Gone.jsx', riders: [] }])).toThrow(/Gone\.jsx is not in the client build/)
-    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/explorer/Gone.jsx'] }])).toThrow(/Gone\.jsx is not in the client build/)
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Gone.jsx', pages: FACADE_PAGES, riders: [] }])).toThrow(/Gone\.jsx is not in the client build/)
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', pages: FACADE_PAGES, riders: ['src/explorer/Gone.jsx'] }])).toThrow(/Gone\.jsx is not in the client build/)
   })
 
   it('fails when a rider is needed by a page that doesn\'t import the group\'s head', () => {
-    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/components/ui/status.js'] }])).toThrow(/status\.js cannot ride with facade/)
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', pages: FACADE_PAGES, riders: ['src/components/ui/status.js'] }])).toThrow(/status\.js cannot ride with facade/)
     // The contact page needs the number that rolls in, and has no facade.
-    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/components/ui/RollingNumber.jsx'] }])).toThrow(/RollingNumber\.jsx cannot ride with facade/)
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', pages: FACADE_PAGES, riders: ['src/components/ui/RollingNumber.jsx'] }])).toThrow(/RollingNumber\.jsx cannot ride with facade/)
+  })
+
+  // A group's pages are named, never inferred from its head: a page that
+  // imported the head would load the group's chunk and stylesheet, its
+  // riders included, and no rider's check would fire. A page whose only tie
+  // is the motion hook (the system's reveals) or the hydration hook fails
+  // the build until GROUPS says what it loads.
+  it('fails when a page that is not one of a group\'s pages imports its head', () => {
+    expect(() => pin(withPage('src/routes/about.jsx', [id.react, id.motion]))).toThrow(
+      /src\/routes\/about\.jsx imports src\/motion\/useMotion\.js, the head of facade, but is not one of its pages.*revise GROUPS/,
+    )
+    expect(() => pin(withPage('src/routes/about.jsx', [id.react, id.hydrated]))).toThrow(
+      /src\/routes\/about\.jsx imports src\/hooks\/useHydrated\.js, the head of explorer, but is not one of its pages.*revise GROUPS/,
+    )
+    // A group that names no pages has none.
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: [] }])).toThrow(/src\/pages\/Home\.jsx imports src\/explorer\/Facade\.jsx, the head of facade, but is not one of its pages/)
+  })
+
+  it('fails when one of a group\'s pages is gone or no longer imports its head', () => {
+    const facade = (pages) => [{ name: 'facade', head: 'src/explorer/Facade.jsx', pages, riders: [] }]
+    expect(pin(GRAPH, facade(FACADE_PAGES)).get(id.facade)).toBe('facade')
+    expect(() => pin(GRAPH, facade([...FACADE_PAGES, 'src/routes/gone.jsx']))).toThrow(/src\/routes\/gone\.jsx, one of facade's pages, is not in the client build; revise GROUPS/)
+    expect(() => pin(GRAPH, facade([...FACADE_PAGES, 'src/routes/eu-proekt.jsx']))).toThrow(
+      /src\/routes\/eu-proekt\.jsx, one of facade's pages, doesn't import its head src\/explorer\/Facade\.jsx; revise GROUPS/,
+    )
+  })
+
+  it('names the pages of each group the build uses', () => {
+    const pages = Object.fromEntries(GROUPS.map(({ name, pages: named }) => [name, named]))
+    expect(pages.facade).toEqual(['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx'])
+    expect(pages.explorer).toEqual(['src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx'])
   })
 })
 

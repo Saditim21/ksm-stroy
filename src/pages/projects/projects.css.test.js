@@ -108,6 +108,24 @@ describe('the hot floor and square', () => {
   })
 })
 
+// Spec §7.1 and the concept (css/prodazhbi.css:136-137, its captures
+// prodazhbi-1440-first and -critic-1440-first): under each building, its
+// count, then „Разгледайте апартаментите“, then the caption, last, two lines
+// high whatever it says, so that its changes move nothing. The stale-data
+// notice comes after the caption, so that it moves nothing either: on a
+// 1440 × 900 screen the hot caption stays in view with the notice shown.
+it('puts each building’s link under its count, the caption under the link and the stale-data notice last', () => {
+  expect(declaredFor('.bd__plot')['grid-row']).toBe('3')
+  expect(declaredFor('.bd__count')['grid-row']).toBe('4')
+  expect(declaredFor('.bd__go')['grid-row']).toBe('5')
+  expect(declaredFor('.bd__cap')).toMatchObject({ 'grid-row': '6', 'min-height': '58px' })
+  expect(declaredFor('.bd .bd__notice')['grid-row']).toBe('7')
+  // On a phone the caption keeps to the squares, where the finger is, and
+  // the link follows it.
+  expect(declaredFor('.bd__cap', [PHONE]).order).toBe('6')
+  expect(declaredFor('.bd__go', [PHONE]).order).toBe('7')
+})
+
 // The stale-data notice keeps to its building's side over its own stylesheet's
 // centring (src/explorer/staleNotice.css, which may load after this one), and
 // to the gutter on a phone.

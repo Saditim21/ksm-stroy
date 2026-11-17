@@ -90,6 +90,12 @@ it('colours Golden Residence’s squares once its data is in, after hydration, w
   expect(grSquares()).toHaveLength(192)
   expect(textOf(container.querySelector('.bd--gr .bd__count'))).toMatch(/^\d+ свободни от 192 в момента$/)
   expect(container.querySelector('.bd--gr .stale')).not.toBeNull()
+  // The notice is its building's last part, where a desktop shows it, under
+  // the caption (projects.css): the keyboard reaches „Разгледайте
+  // апартаментите“ before the notice's phone number.
+  const building = container.querySelector('.bd--gr')
+  expect(building.lastElementChild).toBe(container.querySelector('.bd--gr .stale'))
+  expect([...building.querySelectorAll('a[href]')].map(textOf).slice(-2)).toEqual(['Разгледайте апартаментите', '+359 887 886 166'])
   expect(errors).toEqual([])
   expect(logged.mock.calls).toEqual([])
 }, 30000)

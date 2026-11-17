@@ -24,13 +24,18 @@
 .pz-led { --pad: clamp(24px, 3vw, 52px); }
 
 /* ---------- 1. #top, the sales board (spec §7.1) ---------- */
-/* A little tighter above the board than the concept's (3 % and 3.6 % of the
-   screen), whose title was 23 px shorter at 1440 px than the system's
-   --fs-title: so on a 1440 × 900 screen the caption under the counts still
-   shows what a pointer is on. */
+/* Tighter than the concept above the title (3 % of the screen), above the
+   board (3.6 %), above the squares (2.6 %), above the count (the blocks'
+   names' room, 30 px, and 2 %) and above the caption (18 px). The concept's
+   title is 23 px smaller at 1440 px than the system's --fs-title, and its
+   count 9 px shorter than RollingNumber's one-digit window. So on a
+   1440 × 900 screen the caption, under „Разгледайте апартаментите“ as the
+   concept has it, still shows the apartment a pointer is on: its second
+   line ends at 889 px (the smoke checks it). Phones keep the concept's
+   spacing (below). */
 .pz-open {
   position: relative;
-  padding: clamp(14px, calc(var(--screen-h) * .022), 40px) 0 clamp(56px, calc(var(--screen-h) * .09), 112px);
+  padding: clamp(8px, calc(var(--screen-h) * .01), 40px) 0 clamp(56px, calc(var(--screen-h) * .09), 112px);
 }
 .pz-head {
   display: grid;
@@ -65,18 +70,19 @@
    counts line up across the seam whatever wraps. The plots stand on one
    ground line (::after) that crosses the seam. A square keeps one size on
    both sides, so the buildings compare honestly: --p is its pitch (the
-   square and its gap), from the room in a half for 24 squares. */
+   square and its gap), from the room in a half for 24 squares. --lbl is the
+   room under the ground for the blocks' names. */
 .pz-board {
   --g: 4px;
   --bgap: 16px;
   --fw: 30px;
-  --lbl: 30px;
+  --lbl: 26px;
   --p: clamp(13px, calc((50vw - var(--gut) - var(--pad) - var(--fw) - var(--bgap)) / 24), 26px);
   --sq: calc(var(--p) - var(--g));
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-top: clamp(16px, calc(var(--screen-h) * .024), 44px);
+  margin-top: clamp(12px, calc(var(--screen-h) * .014), 44px);
 }
 .pz-board > .seam { z-index: 1; }
 .pz-board::after {
@@ -125,14 +131,14 @@
   align-self: end;
   display: flex;
   align-items: flex-end;
-  padding: clamp(18px, calc(var(--screen-h) * .026), 34px) 0 var(--lbl);
+  padding: clamp(12px, calc(var(--screen-h) * .014), 34px) 0 var(--lbl);
 }
 .bd__count {
   grid-row: 4;
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-top: clamp(14px, calc(var(--screen-h) * .02), 24px);
+  margin-top: clamp(12px, calc(var(--screen-h) * .016), 24px);
 }
 .bd--gr .bd__count { justify-content: flex-end; }
 .bd__count .num {
@@ -145,10 +151,27 @@
   font-size: 15px;
   line-height: 1.4;
 }
-/* The stale-data notice (StaleNotice.jsx) under Golden Residence's count,
-   on its building's side whichever stylesheet comes last. */
-.bd .bd__notice {
+/* Under the count, „Разгледайте апартаментите“, then the caption, last (the
+   concept's rows 5 and 6, css/prodazhbi.css:136-137), two lines high
+   whatever it says, so its changes move nothing. */
+.bd__go {
   grid-row: 5;
+  margin-top: 12px;
+}
+.bd__cap {
+  grid-row: 6;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 58px;
+  max-width: 36em;
+  margin-top: 14px;
+}
+/* The stale-data notice (StaleNotice.jsx) when Golden Residence's rows are
+   not live: after its caption, so that it moves nothing either, and on its
+   building's side whichever stylesheet comes last. */
+.bd .bd__notice {
+  grid-row: 7;
   max-width: 30em;
   margin-top: 12px;
   margin-bottom: 0;
@@ -164,23 +187,6 @@
   margin-left: var(--pad);
   text-align: left;
 }
-/* The caption under the count, where the first screen still shows it (the
-   concept's hover captures), two lines high whatever it says, so its changes
-   move nothing under it. */
-.bd__cap {
-  grid-row: 6;
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-height: 58px;
-  max-width: 36em;
-  margin-top: 18px;
-}
-.bd__go {
-  grid-row: 7;
-  margin-top: 14px;
-}
-
 /* The plot: a building's two blocks side by side, the floor numbers on its
    outer side (BlockGrid draws them on each block's seam side: Golden
    Residence's after its block А's squares, Многофамилна's before its block
@@ -653,6 +659,7 @@
     --g: 3px;
     --bgap: 12px;
     --fw: 22px;
+    --lbl: 30px;
     --p: clamp(11px, calc((100vw - 2 * var(--gut) - var(--fw) - var(--bgap)) / 24), 24px);
     grid-template-columns: 1fr;
     margin-top: 44px;

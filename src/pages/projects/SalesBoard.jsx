@@ -22,9 +22,11 @@ import { BUILDINGS, useBuildings } from './buildings'
 // BlockGrid of its building's project (buildings.js), standing on one ground
 // line, the floor numbers on each building's outer side. Under each: its
 // name and address, its free count (Golden Residence's live, `—` until the
-// store has its rows, and the stale-data notice when they are not live;
-// Многофамилна's from the dated snapshot, in the HTML), its caption and
-// „Разгледайте апартаментите“.
+// store has its rows; Многофамилна's from the dated snapshot, in the HTML),
+// „Разгледайте апартаментите“ and its caption (projects.css draws the
+// caption under the link; the markup keeps the concept's order), then the
+// stale-data notice when Golden Residence's rows are not live: last, where
+// a desktop shows it, so the keyboard reaches the link first.
 //
 // - Hover or focus on a square lights its floor and dims the rest
 //   (projects.css, from the plot's data-hot and data-row and the hot
@@ -225,13 +227,13 @@ function Building({ building, model, dated }) {
         </div>
       </div>
       <Count id={countId} free={model ? model.totals.available : null} total={project.total} dated={dated} />
-      <StaleNotice project={project} className="bd__notice" />
       <div className="bd__cap" aria-live="polite">
         <Caption model={model} hot={hot} />
       </div>
       <Button to={`${page}${explorer}`} variant="link" arrow className="bd__go" prefetch="intent">
         Разгледайте апартаментите
       </Button>
+      <StaleNotice project={project} className="bd__notice" />
     </div>
   )
 }
