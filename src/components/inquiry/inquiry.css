@@ -102,6 +102,14 @@
   font-size: 13px;
   line-height: 1.4;
 }
+/* A field's hint under its label, which the field names as its description
+   (InquiryForm.jsx's `hint`: Контакти's construction message). */
+.field__hint {
+  margin-top: -2px;
+  color: var(--stone);
+  font-size: 13px;
+  line-height: 1.45;
+}
 
 /* The apartments sent from the explorer, each removable. */
 .chips {

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HOME_INQUIRY } from '../../pages/home/inquiry'
 import { MN_INQUIRY } from '../../pages/mnogofamilna/inquiry'
 import { acquireScrollLock, releaseScrollLock, setLenis } from '../../utils/lenis'
-import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, MNOGOFAMILNA, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, useInquiryState } from './inquiryStore'
+import { chooseInquiryOption, clearInquiryOption, INQUIRY_OPTIONS, MNOGOFAMILNA, OPTION_PROJECT, presetInquiry, removePick, resetInquiry, seedInquiry, useInquiryState } from './inquiryStore'
 
 // The inquiry's shared state (spec §10, §5.3): the option the form's select
 // shows and the apartments sent to it, which any action on the page can
@@ -105,6 +105,21 @@ describe('the store', () => {
     expect(result.current.picks).toEqual([gr, { project: 'mnogofamilna-sgrada', label: 'А 101' }])
   })
 
+  // M3/M4 spec §7.3: what a link to Контакти's form asks for, merged as a
+  // preset is: the option, when given (null: the form's own first), and each
+  // pick once, as its project and its label.
+  it('seedInquiry merges a link’s subject and picks into the store', () => {
+    const { result } = state()
+    const mn = { project: 'mnogofamilna-sgrada', label: 'Б-702' }
+    act(() => presetInquiry({ pick: grPick('А 301') }))
+    act(() => seedInquiry({ option: 'mnogofamilna', picks: [mn, grPick('А 301')] }))
+    expect(result.current).toEqual({ option: 'mnogofamilna', picks: [grPick('А 301'), mn] })
+    act(() => seedInquiry({ picks: [grPick('Б 204')] }))
+    expect(result.current).toEqual({ option: 'mnogofamilna', picks: [grPick('А 301'), mn, grPick('Б 204')] })
+    act(() => seedInquiry({ option: null }))
+    expect(result.current.option).toBeNull()
+  })
+
   it('chooseInquiryOption keeps the visitor’s choice, and the picks', () => {
     const { result } = state()
     act(() => presetInquiry({ option: 'mnogofamilna', pick: grPick('А 301') }))
@@ -179,6 +194,26 @@ describe('the glide to the form', () => {
     expect(lenis.scrollTo).not.toHaveBeenCalled()
     vi.advanceTimersToNextFrame()
     expect(lenis.moves).toBe(1)
+  })
+
+  // M3/M4 spec §7.3: a link's prefill seeds the form where it is; the page's
+  // own landing (src/pages/contact/ContactInquiry.jsx) decides where it goes.
+  it('never glides or focuses for a seed', () => {
+    seedInquiry({ option: 'build', picks: [grPick('А 301')] })
+    vi.advanceTimersToNextFrame()
+    vi.advanceTimersByTime(2000)
+    expect(lenis.scrollTo).not.toHaveBeenCalled()
+    expect(document.activeElement).not.toBe(input)
+  })
+
+  // With nothing to preset, a preset only glides there (Контакти's own links
+  // to the form, src/pages/contact/prefill.js), and focuses the name.
+  it('glides and focuses the name for a preset with nothing to preset', () => {
+    presetInquiry()
+    vi.advanceTimersToNextFrame()
+    expect(lenis.moves).toBe(1)
+    vi.advanceTimersByTime(1500)
+    expect(document.activeElement).toBe(input)
   })
 
   // A lock still held after half a second is something else that is open: the

@@ -5,7 +5,6 @@ import { MemoryRouter } from 'react-router'
 import About from './About'
 import Projects from './Projects'
 import Blog from './Blog'
-import Contact from './Contact'
 
 // The build pre-renders the legacy pages in Node, and a visitor sees that HTML
 // until the JS runs. It is their final visual state (plan, global rules): no
@@ -46,13 +45,12 @@ test.each([
 })
 
 // Every page has its H1 in the HTML a visitor without JS gets (spec §6.7; the
-// smoke run checks it in the browser). These three had none on main either:
+// smoke run checks it in the browser). These two had none on main either:
 // until M2 to M4 rebuild them, each names itself in a visually hidden H1,
 // with its name in the menu. (Home, rebuilt, is src/pages/home/home.prerender.test.jsx's.)
 test.each([
   { path: '/projects', Page: Projects, name: 'Продажби' },
   { path: '/blog', Page: Blog, name: 'Обекти' },
-  { path: '/contact', Page: Contact, name: 'Контакти' },
 ])('$path pre-renders one H1, $name', ({ Page, name }) => {
   const headings = [...prerender(Page).matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)]
     .map(([, inner]) => inner.replace(/<[^>]+>/g, '').trim())

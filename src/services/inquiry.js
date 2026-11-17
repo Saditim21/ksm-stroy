@@ -1,6 +1,7 @@
-// An inquiry from the site's own forms (spec §10): one lead, sent the way the
-// Contact page sends its form (src/pages/Contact.jsx), to EmailJS and to the
-// CRM through the lead proxy (api/odoo-lead.js), in parallel.
+// An inquiry from the site's own forms (spec §10): one lead, sent the way
+// production's contact page sent its form (main's src/pages/Contact.jsx), to
+// EmailJS and to the CRM through the lead proxy (api/odoo-lead.js), in
+// parallel.
 //
 // The proxy reads exactly six fields and drops a lead without a trace when
 // its name is under 2 characters, its email does not match its pattern or
@@ -24,8 +25,9 @@ export { EMAIL_PATTERN } from './emailPattern'
 // The proxy's shortest message.
 const MIN_MESSAGE = 10
 
-// Contact's EmailJS service, template and public key: values of the client
-// bundle, which the template on emailjs.com reads by these variable names.
+// Production's contact form's EmailJS service, template and public key:
+// values of the client bundle, which the template on emailjs.com reads by
+// these variable names.
 const EMAILJS_SERVICE_ID = 'service_qdte1vp'
 const EMAILJS_TEMPLATE_ID = 'template_zsun0cc'
 const EMAILJS_PUBLIC_KEY = 'iDCcC1JI_k69MIid0'
@@ -36,17 +38,24 @@ const TEST_MARK = '[ТЕСТ] '
 /**
  * The lead the form's fields make: the proxy's six fields and the email's
  * template variables.
- * - projectType: the option's subject, then the apartments picked after
- *   „ – “ („Golden Residence – А 301, А 302“); outside production „[ТЕСТ] “
- *   first. It is also the lead's title in Odoo.
- * - budget: none.
+ * - projectType: the option's subject, then after „ – “ the construction
+ *   subject's kind („Строителство или ремонт – Ремонти и реновации“, Контакти's
+ *   „Тип проект“, M3/M4 spec §8) or the apartments picked („Golden Residence –
+ *   А 301, А 302“); outside production „[ТЕСТ] “ first. It is also the
+ *   lead's title in Odoo.
+ * - budget: the construction subject's range, production's own string
+ *   („50,000 - 100,000 лв“), so the CRM's values stay as they were; else none
+ *   („Не е посочен“ in the email).
  * - message: the visitor's text, trimmed; under 10 characters it gains the
  *   line „Запитване за: {projectType}“.
- * @param {{ name: string, email: string, phone: string, subject: string, picks: string[], message: string }} fields
+ * `kind` and `budget` are optional: only Контакти's construction subject
+ * sends them.
+ * @param {{ name: string, email: string, phone: string, subject: string, picks: string[], message: string, kind?: string, budget?: string }} fields
  * @param {{ production: boolean }} build
  */
-export function buildLead({ name, email, phone, subject, picks, message }, { production }) {
-  const about = picks.length > 0 ? `${subject} – ${picks.join(', ')}` : subject
+export function buildLead({ name, email, phone, subject, picks, message, kind, budget = '' }, { production }) {
+  const detail = kind || picks.join(', ')
+  const about = detail ? `${subject} – ${detail}` : subject
   const projectType = production ? about : `${TEST_MARK}${about}`
   const text = (message ?? '').trim()
   const line = `Запитване за: ${projectType}`
@@ -54,14 +63,14 @@ export function buildLead({ name, email, phone, subject, picks, message }, { pro
   if (text.length < MIN_MESSAGE) body = text ? `${text}\n${line}` : line
   const lead = { name: name.trim(), email: email.trim(), phone: phone.trim() }
   return {
-    odoo: { ...lead, projectType, budget: '', message: body },
+    odoo: { ...lead, projectType, budget, message: body },
     emailParams: {
       from_name: lead.name,
       from_email: lead.email,
       reply_to: lead.email,
       phone: lead.phone || NOT_GIVEN,
       project_type: projectType,
-      budget: NOT_GIVEN,
+      budget: budget || NOT_GIVEN,
       message: body,
       to_email: TO_EMAIL,
     },

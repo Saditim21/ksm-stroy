@@ -1,0 +1,663 @@
+/* Контакти (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §7.3; Diptych §5.5, §11), ported from the concept's css/kontakti.css
+   (:104-152 the opening, :154-222 the inquiry, :224-241 the offices and the
+   closing, :243-300 their phones) with the tokens of src/index.css,
+   --screen-h for vh, and the system's type: the H1 at Home's slogan size,
+   the cities no larger than their section's h2 (M3/M4 §4.1). The shell, the
+   seam, the section's padding, the hinge, the actions and the ways are the
+   site's (src/shell, src/styles/diptych.css, src/components/ui/ways.css),
+   and the form's fields the form's (src/components/inquiry/inquiry.css).
+
+   The page's own stylesheet (src/routes/contact.jsx), after the site's:
+   plain CSS, in no Tailwind layer.
+
+   The opening moves by CSS from first paint (Diptych §5.5), only under the
+   motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes, held by a `both`
+   fill; every entrance waits --arrive (src/styles/motion.css). So do the
+   subject's picture opening from the seam, the mark drawing itself and the
+   construction group folding. Hover effects only where a pointer hovers
+   (spec §2.2). */
+
+/* ---------- 1. #top, the question | the answer (spec §7.3) ---------- */
+/* A full screen under the header, split on the seam: the question on onyx,
+   ending at the seam; the answer on umber. */
+.reach {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(var(--screen-h) - var(--header-h));
+}
+.reach > .seam { z-index: 4; }
+.reach__q {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: clamp(22px, calc(var(--screen-h) * .032), 34px);
+  padding: clamp(56px, calc(var(--screen-h) * .09), 112px) clamp(28px, 4vw, 80px) clamp(56px, calc(var(--screen-h) * .09), 112px) var(--gut);
+  background: var(--onyx);
+  text-align: right;
+}
+.reach__h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -.012em;
+}
+.reach__h1 em { color: var(--brass-l); }
+.reach__h1 .split-line { display: block; }
+.reach__ln--1 { --n: 1; }
+.reach__ln--2 { --n: 2; }
+.reach__lead { max-width: 23em; }
+.reach__a {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: clamp(26px, calc(var(--screen-h) * .042), 46px);
+  padding: clamp(56px, calc(var(--screen-h) * .09), 112px) var(--gut) clamp(56px, calc(var(--screen-h) * .09), 112px) clamp(28px, 4vw, 80px);
+  background: var(--umber);
+}
+.reach__a > :nth-child(2) { --i: 1; }
+.reach__a > :nth-child(3) { --i: 2; }
+.reach__a > :nth-child(4) { --i: 3; }
+.reach__g {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+.reach__k {
+  margin-bottom: 8px;
+  color: var(--stone);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+/* The phones in the serif, their figures tabular (.tab). */
+.reach__tel {
+  font-family: var(--serif);
+  font-size: clamp(36px, 3.5vw, 58px);
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+  transition: color .25s;
+}
+.reach__hours {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  gap: 2px 30px;
+}
+.reach__hours div { display: contents; }
+.reach__hours dt {
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+.reach__hours dd {
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(22px, 1.8vw, 28px);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.reach__mail {
+  font-family: var(--serif);
+  font-size: clamp(28px, 2.5vw, 40px);
+  font-weight: 500;
+  line-height: 1.1;
+  transition: color .25s;
+}
+.reach__go { margin-top: -4px; }
+@media (hover: hover) and (pointer: fine) {
+  .reach__tel:hover,
+  .reach__mail:hover { color: var(--brass-l); }
+}
+
+/* ---------- 2. #zapitvane, what you ask about | who you are ---------- */
+/* One form across both halves: the heading over the fields on the right, the
+   subjects over their picture on the left, sticky where motion is allowed
+   (Diptych §5.8: no sticky media without it). */
+.ask {
+  position: relative;
+  background: var(--onyx);
+}
+.ask__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+}
+.ask__grid > .seam { z-index: 4; }
+/* The heading clears the whole header when the form is landed on. */
+.ask__head {
+  grid-column: 2;
+  grid-row: 1;
+  padding: calc(var(--header-h) + clamp(24px, calc(var(--screen-h) * .05), 64px)) var(--gut) 0 clamp(28px, 4vw, 80px);
+}
+.ask__media {
+  position: relative;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  height: var(--screen-h);
+}
+/* The picture starts below the bar, below the whole header while a landing
+   holds the EU row (src/shell/landingHold.js), and follows the row up. */
+.ask__frame {
+  position: absolute;
+  inset: var(--bar-h) 0 0;
+  overflow: hidden;
+  background: var(--umber);
+  transition: top .5s var(--e-out);
+}
+/* The scrim under the subjects. */
+.ask__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(14, 13, 11, .34) 0%, rgba(14, 13, 11, 0) 18%, rgba(14, 13, 11, 0) 34%, rgba(14, 13, 11, .72) 58%, rgba(14, 13, 11, .95) 100%);
+  pointer-events: none;
+}
+.ask__plates {
+  position: absolute;
+  inset: 0;
+}
+/* Each subject's picture; the chosen one shows, over the one it opens from. */
+.plate {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.plate.is-on,
+.plate.is-under { visibility: visible; }
+.plate.is-on { z-index: 1; }
+.plate picture,
+.plate img {
+  width: 100%;
+  height: 100%;
+}
+.plate img { object-fit: cover; }
+.plate--golden-residence img { object-position: 80% 60%; }
+.plate--mnogofamilna img { object-position: 66% 56%; }
+/* Construction or renovation: Home's three service stills, a strip each. */
+.plate--build {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+.strip {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+.strip + .strip { border-top: 1px solid var(--brass); }
+.strip img { filter: brightness(.74); }
+.strip--svc-renovation img { object-position: 40% 42%; }
+.strip--svc-commercial img { object-position: 50% 38%; }
+.strip figcaption {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: var(--gut);
+  color: var(--ivory);
+  font-size: 13px;
+  letter-spacing: .02em;
+  text-shadow: 0 1px 12px rgba(14, 13, 11, .8);
+}
+/* Anything else: the KSM mark on umber, lit from the seam as the doors are. */
+.plate--other {
+  display: grid;
+  place-items: start center;
+  padding-top: 16%;
+  background: radial-gradient(90% 60% at 100% 40%, rgba(184, 149, 74, .1), transparent 64%), var(--umber);
+}
+.plate--other svg {
+  width: clamp(110px, 11vw, 170px);
+  height: auto;
+  overflow: visible;
+  color: var(--brass);
+  stroke-width: 2.6;
+}
+
+/* The four subjects, set like the menu's pages over the picture's foot:
+   serif names against the seam, the chosen one ivory with the menu's brass
+   dash, the others stone. One tab stop; the ring on the whole row. */
+.subj {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  justify-items: end;
+  min-width: 0;
+  margin: 0;
+  padding: 0 clamp(28px, 4vw, 80px) clamp(30px, calc(var(--screen-h) * .056), 64px) var(--gut);
+  border: 0;
+  text-align: right;
+}
+.subj__legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 0;
+  color: var(--stone);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+.subj__opt {
+  position: relative;
+  display: grid;
+  justify-items: end;
+  padding: 6px 0 7px;
+  cursor: pointer;
+}
+.subj__name {
+  position: relative;
+  color: var(--stone);
+  font-family: var(--serif);
+  font-size: clamp(28px, 2.5vw, 42px);
+  font-weight: 500;
+  line-height: 1.06;
+  transition: color .25s;
+}
+.subj__name::before {
+  content: '';
+  position: absolute;
+  top: 56%;
+  right: calc(100% + 18px);
+  width: 34px;
+  height: 1px;
+  background: var(--brass);
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+  transition: transform .5s var(--e-out);
+}
+.subj__meta {
+  margin-top: 2px;
+  color: var(--stone);
+  font-size: 13px;
+  line-height: 1.45;
+  transition: color .25s;
+}
+.subj__opt.is-chosen .subj__name { color: var(--ivory); }
+.subj__opt.is-chosen .subj__name::before { transform: none; }
+.subj__opt.is-chosen .subj__meta { color: var(--ivory-2); }
+/* The radio itself is visually hidden: its row carries the site's ring
+   (spec §11), as the keyboard reaches it. */
+.subj__opt:has(:focus-visible) {
+  outline: 2px solid var(--ivory);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+@media (forced-colors: active) {
+  .subj__opt:has(:focus-visible) { outline-color: Highlight; }
+}
+.subj:disabled .subj__opt { cursor: default; }
+@media (hover: hover) and (pointer: fine) {
+  .subj:not(:disabled) .subj__opt:hover .subj__name { color: var(--ivory); }
+}
+
+/* The form's half: the fields, the construction group, the thank-you. */
+.ask__fields {
+  grid-column: 2;
+  grid-row: 2;
+  padding: clamp(32px, calc(var(--screen-h) * .05), 52px) var(--gut) clamp(96px, calc(var(--screen-h) * .15), 168px) clamp(28px, 4vw, 80px);
+}
+.ask__fields > * { max-width: 560px; }
+.ask .form__ok { max-width: 30em; }
+/* The construction group, which folds open and closed (ContactInquiry.jsx's
+   Fold): a one-row grid whose row grows from nothing. */
+.fold {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.fold__in { min-height: 0; }
+
+@media (min-width: 901px) {
+  :root[data-eu-hold] .ask__frame { top: var(--header-h); }
+}
+
+/* ---------- 3. #ofisi, the two doors (spec §7.3) ---------- */
+.offices {
+  padding-bottom: 0;
+  background: var(--onyx);
+}
+.doorway {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: clamp(400px, calc(var(--screen-h) * .56), 560px);
+  border-top: 1px solid var(--hair-2);
+  border-bottom: 1px solid var(--hair-2);
+}
+.doorway > .seam { z-index: 2; }
+/* The KSM mark on the seam, where the transition doors meet. */
+.doorway__node {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 92px;
+  height: 105px;
+  margin: -52px 0 0 -46px;
+  color: var(--brass);
+  pointer-events: none;
+}
+.doorway__node svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke-width: 2.6;
+}
+.office {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  padding: clamp(48px, calc(var(--screen-h) * .08), 88px) clamp(92px, 8.4vw, 140px) clamp(48px, calc(var(--screen-h) * .08), 88px) var(--gut);
+}
+.office--l {
+  justify-items: end;
+  background: radial-gradient(120% 70% at 100% 50%, rgba(184, 149, 74, .07), transparent 60%);
+  text-align: right;
+}
+.office--r {
+  justify-items: start;
+  padding-right: var(--gut);
+  padding-left: clamp(92px, 8.4vw, 140px);
+  background: radial-gradient(120% 70% at 0% 50%, rgba(184, 149, 74, .07), transparent 60%);
+}
+/* The cities read across the seam, at the section's h2 size: no heading
+   outsizes its section's h2 (M3/M4 §4.1). */
+.office__city {
+  grid-row: 2;
+  font-family: var(--serif);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.012em;
+  white-space: nowrap;
+}
+.office__more {
+  grid-row: 3;
+  align-self: start;
+  display: grid;
+  justify-items: inherit;
+  gap: 16px;
+  padding-top: 22px;
+}
+.office__addr {
+  max-width: 20em;
+  color: var(--ivory-2);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ---------- 4. the closing (spec §7.3) ---------- */
+/* Both ways on one line at 1440. */
+.closing {
+  padding-bottom: clamp(72px, calc(var(--screen-h) * .11), 128px);
+  background: var(--onyx);
+}
+.closing .ways { margin-top: 0; }
+.closing .ways .serif { font-size: clamp(32px, 3.2vw, 52px); }
+.closing .ways .small { font-size: 14px; }
+
+/* ---------- phones: the halves stack, the seams hide, the second half takes
+   the brass rule (M3/M4 §4.1) ---------- */
+@media (max-width: 900px) {
+  .reach {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .reach > .seam { display: none; }
+  .reach__q {
+    justify-items: start;
+    gap: 20px;
+    padding: 40px var(--gut) 44px;
+    text-align: left;
+  }
+  .reach__h1 { font-size: clamp(38px, 11.4vw, 60px); }
+  .reach__a {
+    gap: 30px;
+    padding: 36px var(--gut) 48px;
+    border-top: 1px solid var(--brass);
+  }
+  .reach__tel { font-size: clamp(32px, 9.2vw, 44px); }
+  .reach__hours { gap: 2px 22px; }
+  .reach__hours dt { font-size: 14px; }
+  .reach__mail { font-size: clamp(26px, 7.6vw, 34px); }
+
+  /* The heading, then the picture as a 4:3 band over a brass rule, then the
+     subjects in a list with the dash on the left, then the fields under a
+     brass rule. */
+  .ask__grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+  .ask__grid > .seam { display: none; }
+  .ask__head {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 88px var(--gut) 28px;
+  }
+  .ask__media {
+    grid-column: 1;
+    grid-row: 2;
+    height: auto;
+  }
+  .ask__frame {
+    position: relative;
+    inset: auto;
+    overflow: visible;
+    background: transparent;
+  }
+  .ask__frame::after { display: none; }
+  .ask__plates {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--umber);
+  }
+  .ask__plates::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    height: 1px;
+    background: var(--brass);
+  }
+  .strip figcaption {
+    top: 10px;
+    font-size: 12px;
+  }
+  .plate--other {
+    place-items: center;
+    padding-top: 0;
+  }
+  .subj {
+    position: relative;
+    justify-items: start;
+    padding: 26px var(--gut) 8px;
+    text-align: left;
+  }
+  .subj__opt {
+    justify-items: start;
+    padding: 7px 0 8px 34px;
+  }
+  .subj__name { font-size: clamp(26px, 7.4vw, 32px); }
+  .subj__name::before {
+    right: auto;
+    left: -34px;
+    width: 22px;
+    transform-origin: 0 50%;
+  }
+  .ask__fields {
+    grid-column: 1;
+    grid-row: 3;
+    margin: 28px var(--gut) 0;
+    padding: 36px 0 88px;
+    border-top: 1px solid var(--brass);
+  }
+
+  /* София, then a brass rule with the mark in it, then Гоце Делчев. */
+  .doorway {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .doorway > .seam { display: none; }
+  .office,
+  .office--l,
+  .office--r {
+    grid-template-rows: auto;
+    justify-items: start;
+    padding: 52px var(--gut) 56px;
+    background: none;
+    text-align: left;
+  }
+  .office--l {
+    order: 1;
+    padding-bottom: 64px;
+  }
+  .doorway__node {
+    position: relative;
+    top: auto;
+    left: auto;
+    order: 2;
+    display: grid;
+    grid-template-columns: 1fr 64px 1fr;
+    align-items: center;
+    gap: 14px;
+    width: auto;
+    height: 74px;
+    margin: 0 var(--gut);
+  }
+  .doorway__node::before,
+  .doorway__node::after {
+    content: '';
+    height: 1px;
+    background: var(--brass);
+  }
+  .doorway__node svg {
+    grid-column: 2;
+    grid-row: 1;
+    width: 64px;
+    height: 74px;
+  }
+  .office--r {
+    order: 3;
+    padding-top: 64px;
+  }
+  .office__city {
+    grid-row: auto;
+    white-space: normal;
+  }
+  .office__more {
+    grid-row: auto;
+    padding-top: 18px;
+  }
+  .office__addr { font-size: 15px; }
+}
+
+/* The smallest phones. */
+@media (max-width: 360px) {
+  .reach__h1 { letter-spacing: -.02em; }
+  .reach__hours {
+    grid-template-columns: auto;
+    gap: 0;
+  }
+  .reach__hours dd { margin-bottom: 6px; }
+  .subj__opt { padding-left: 28px; }
+  .subj__name::before {
+    left: -28px;
+    width: 18px;
+  }
+}
+
+/* ---------- motion (Diptych §5.5, §5.7; spec §7.3) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The opening's one moment: the seam draws down, the H1's lines rise
+     from their masks, 0.1 s apart (a mask clips only while its line rises),
+     and the answer follows down the seam, 0.09 s apart. */
+  :root.js .reach > .seam {
+    animation: contact-draw 1.3s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .reach__h1 .line-mask {
+    animation: contact-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + .12s + var(--n, 0) * .1s);
+  }
+  :root.js .reach__h1 .split-line {
+    animation: contact-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .12s + var(--n, 0) * .1s);
+  }
+  :root.js .reach__lead {
+    animation: contact-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .69s);
+  }
+  :root.js .reach__a > * {
+    animation: contact-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .42s + var(--i, 0) * .09s);
+  }
+
+  /* With motion the subjects' picture stays while the fields scroll by. */
+  @media (min-width: 901px) {
+    :root.js .ask__media {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  /* The visitor's subject opens its picture from the seam, 1 s, the picture
+     settling from 1.08; „Друго“ draws its mark again. On a phone the band
+     opens from its foot, the brass rule's side. */
+  :root.js .plate.is-opening { animation: contact-open 1s var(--e-io) both; }
+  :root.js .plate.is-opening img { animation: contact-settle 1.4s var(--e-out) both; }
+  :root.js .plate--other.is-opening path { animation: contact-stroke 1s var(--e-io) both; }
+  :root.js .plate--other.is-opening .tower { animation-delay: .07s; }
+  :root.js .plate--other.is-opening .rung { animation-delay: .14s; }
+  :root.js .plate--other.is-opening .sun { animation-delay: .24s; }
+  :root.js .plate--other.is-opening .bird { animation-delay: .3s; }
+  :root.js .plate--other.is-opening .cloud { animation-delay: .36s; }
+  @media (max-width: 900px) {
+    :root.js .plate.is-opening { animation-name: contact-open-up; }
+  }
+
+  /* The construction group folds open, 0.55 s, and closed, its words fading
+     first; it clips only while it folds. */
+  :root.js .fold.is-opening { animation: contact-fold-open .55s var(--e-out) both; }
+  :root.js .fold.is-closing { animation: contact-fold-close .55s var(--e-out) forwards; }
+  :root.js .fold.is-opening > .fold__in,
+  :root.js .fold.is-closing > .fold__in { overflow: hidden; }
+}
+
+@keyframes contact-draw { from { transform: scaleY(0); } }
+@keyframes contact-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its line rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes contact-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes contact-up { from { opacity: 0; transform: translateY(18px); } }
+/* Both ends inset(): clip-path interpolates between shapes, never to none. */
+@keyframes contact-open {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes contact-open-up {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes contact-settle { from { transform: scale(1.08); } }
+@keyframes contact-stroke { from { stroke-dasharray: 1 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1 1; stroke-dashoffset: 0; } }
+/* The form's 22 px gap closes with the group. */
+@keyframes contact-fold-open { from { grid-template-rows: 0fr; margin-top: -22px; opacity: 0; } }
+@keyframes contact-fold-close {
+  45% { opacity: 0; }
+  to { grid-template-rows: 0fr; margin-top: -22px; opacity: 0; }
+}

@@ -95,12 +95,13 @@ describe('the header', () => {
     }
   })
 
-  // Home, the Golden Residence page and its block pages, and Многофамилна's
-  // page and its block pages have an inquiry of their own (their handle's
-  // `inquiry`); a page without one takes „Запитване“ to the contact page's
-  // form (M3/M4 spec §8).
+  // Home, the Golden Residence page and its block pages, Многофамилна's page
+  // and its block pages, and Контакти have an inquiry of their own (their
+  // handle's `inquiry`); a page without one takes „Запитване“ to the contact
+  // page's form (M3/M4 spec §8).
   it.each([
     ['/', '#zapitvane'],
+    ['/contact', '#zapitvane'],
     ['/about', '/contact#zapitvane'],
     ['/eu-proekt', '/contact#zapitvane'],
     ['/nope', '/contact#zapitvane'],
@@ -219,10 +220,10 @@ describe('the header as the page scrolls', () => {
 // How each page of src/routes.js frames the shell: its module's `handle`
 // (src/shell/handle.js), read from the real modules. Home and the Golden
 // Residence page, rebuilt in Diptych, run under the see-through header, each
-// with an inquiry of its own, as the Golden Residence block pages and
-// Многофамилна's page and block pages (rebuilt in M3) have too under the
-// solid header. Every other page is solid. The pages not yet rebuilt are
-// legacy: they keep production's light look.
+// with an inquiry of its own, as the Golden Residence block pages,
+// Многофамилна's page and block pages (rebuilt in M3) and Контакти (M4) have
+// too under the solid header. Every other page is solid. The pages not yet
+// rebuilt are legacy: they keep production's light look.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
@@ -237,7 +238,7 @@ const HANDLES = {
   '/projects/mnogofamilna-sgrada/block-b': { header: 'solid', ...MNOGOFAMILNA, inquiry: true },
   // A redirect to /projects, which shows nothing of its own.
   '/projects/:id': undefined,
-  '/contact': { header: 'solid', legacy: true },
+  '/contact': { header: 'solid', inquiry: true },
   '/blog': { header: 'solid', legacy: true },
   '/eu-proekt': { header: 'solid' },
   '/*': { header: 'solid' },

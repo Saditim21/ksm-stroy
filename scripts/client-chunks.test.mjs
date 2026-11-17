@@ -4,8 +4,9 @@ import { clientChunks, GROUPS, pinnedChunks } from './client-chunks.mjs'
 
 // The browser's chunks (see client-chunks.mjs), on a small module graph built
 // as React Router's client build names its modules: the client entry, the
-// root route, and four pages, Home, a project page, a block page and a page
-// with neither a facade nor an explorer.
+// root route, and five pages, Home, a project page, a block page, the contact
+// page, which has the inquiry form and waits for hydration but has neither a
+// facade nor an explorer, and a page with none of them.
 
 const ROUTE = '?__react-router-build-client-route'
 const id = {
@@ -25,6 +26,12 @@ const id = {
   projectRoute: `/repo/src/routes/golden-residence.jsx${ROUTE}`,
   blockRoute: `/repo/src/routes/mnogofamilna-block.jsx${ROUTE}`,
   euRoute: `/repo/src/routes/eu-proekt.jsx${ROUTE}`,
+  contactRoute: `/repo/src/routes/contact.jsx${ROUTE}`,
+  form: '/repo/src/components/inquiry/useInquiryForm.jsx',
+  inquiry: '/repo/src/components/inquiry/InquirySection.jsx',
+  counts: '/repo/src/components/ui/StatusCount.jsx',
+  hydrated: '/repo/src/hooks/useHydrated.js',
+  hold: '/repo/src/shell/landingHold.js',
   facade: '/repo/src/explorer/Facade.jsx',
   model: '/repo/src/explorer/model.js',
   status: '/repo/src/components/ui/status.js',
@@ -58,12 +65,18 @@ const GRAPH = {
   [id.scroll]: { imports: [] },
   [id.format]: { imports: [] },
   [id.homeRoute]: { entry: true, imports: [id.home] },
-  [id.home]: { imports: [id.react, id.helper, id.button, id.teaser, id.facade, id.rolling, id.stale, id.dims] },
+  [id.home]: { imports: [id.react, id.helper, id.button, id.teaser, id.facade, id.rolling, id.stale, id.dims, id.inquiry] },
   [id.teaser]: { imports: [id.react] },
-  [id.projectRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.section, id.rolling, id.dims] },
-  [id.blockRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.captions] },
+  [id.projectRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.section, id.rolling, id.dims, id.inquiry] },
+  [id.blockRoute]: { entry: true, imports: [id.react, id.facade, id.context, id.captions, id.inquiry] },
   [id.euRoute]: { entry: true, imports: [id.react, id.button, id.status, id.digits, id.dims] },
-  [id.facade]: { imports: [id.react, id.model, id.status, id.loadSurfaces] },
+  [id.contactRoute]: { entry: true, imports: [id.react, id.form, id.rolling, id.hydrated, id.hold] },
+  [id.inquiry]: { imports: [id.react, id.form] },
+  [id.form]: { imports: [id.react] },
+  [id.hydrated]: { imports: [id.react] },
+  [id.hold]: { imports: [] },
+  [id.facade]: { imports: [id.react, id.model, id.status, id.loadSurfaces, id.counts] },
+  [id.counts]: { imports: [id.react, id.status] },
   [id.model]: { imports: [] },
   [id.status]: { imports: [] },
   [id.loadSurfaces]: { imports: [] },
@@ -73,8 +86,8 @@ const GRAPH = {
   [id.digits]: { imports: [] },
   [id.dims]: { imports: [] },
   [id.stale]: { imports: [id.react] },
-  [id.context]: { imports: [id.react, id.state, id.model, id.loadSurfaces] },
-  [id.state]: { imports: [] },
+  [id.context]: { imports: [id.react, id.state, id.model, id.loadSurfaces, id.hold] },
+  [id.state]: { imports: [id.hydrated] },
   [id.captions]: { imports: [id.useExplorer] },
   [id.useExplorer]: { imports: [id.react] },
   [id.section]: { imports: [id.react, id.tabs, id.listLoader, id.stale, id.rolling, id.captions] },
@@ -101,20 +114,26 @@ describe('pinnedChunks', () => {
 
   it('leaves in its entry\'s chunk what only that entry needs, and never pins an entry', () => {
     for (const own of [id.domClient, id.root, id.menu, id.teaser]) expect(pinned.has(own)).toBe(false)
-    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.blockRoute, id.euRoute]) expect(pinned.has(entry)).toBe(false)
+    for (const entry of [id.client, id.rootRoute, id.homeRoute, id.projectRoute, id.blockRoute, id.euRoute, id.contactRoute]) expect(pinned.has(entry)).toBe(false)
   })
 
   it('makes a group of what every page with its head needs, and of its riders', () => {
-    // The facade's pages are Home, the project page and the block page.
-    expect(pinned.get(id.facade)).toBe('facade')
-    expect(pinned.get(id.model)).toBe('facade')
-    expect(pinned.get(id.loadSurfaces)).toBe('facade')
+    // The facade's group is the inquiry form's: its pages are Home, the
+    // project page, the block page and the contact page, which all need the
+    // form.
+    expect(pinned.get(id.form)).toBe('facade')
+    // Riders, which the contact page doesn't need, with what they import: the
+    // facade, the closing inquiry and the status counts.
+    for (const member of [id.facade, id.model, id.loadSurfaces, id.inquiry, id.counts]) expect(pinned.get(member)).toBe('facade')
     // Riders, which Home and the project page need and the block page doesn't,
     // with what they import.
     expect(pinned.get(id.rolling)).toBe('facade')
     expect(pinned.get(id.roll)).toBe('facade')
     expect(pinned.get(id.stale)).toBe('facade')
-    // The explorer's pages are the project page and the block page.
+    // The explorer's group is the hydration hook's: its pages are the project
+    // page, the block page and the contact page, which all need the hook and
+    // the landing hold; the explorer itself rides along.
+    for (const member of [id.hydrated, id.hold]) expect(pinned.get(member)).toBe('explorer')
     for (const member of [id.context, id.state, id.captions, id.useExplorer]) expect(pinned.get(member)).toBe('explorer')
     expect(pinned.get(id.listLoader)).toBe('explorer')
   })
@@ -149,6 +168,8 @@ describe('pinnedChunks', () => {
 
   it('fails when a rider is needed by a page that doesn\'t import the group\'s head', () => {
     expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/components/ui/status.js'] }])).toThrow(/status\.js cannot ride with facade/)
+    // The contact page needs the number that rolls in, and has no facade.
+    expect(() => pin(GRAPH, [{ name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/components/ui/RollingNumber.jsx'] }])).toThrow(/RollingNumber\.jsx cannot ride with facade/)
   })
 })
 

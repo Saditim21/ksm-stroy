@@ -53,6 +53,39 @@ describe('buildLead', () => {
   // loads this module on its first use), so the pattern is a module of its
   // own, which this one hands on to its importers.
   it("EMAIL_PATTERN is the proxy's pattern, from emailPattern.js", () => expect(EMAIL_PATTERN).toBe(OWN_PATTERN))
+
+  // Spec M3/M4 §7.3, §8: Контакти's construction subject sends its „Тип
+  // проект“ after the subject, and its „Бюджет“ as production's range string
+  // (the form shows „50 000 – 100 000 лв.“ and sends „50,000 - 100,000 лв“),
+  // in the same six fields, so the CRM's values stay as they were.
+  describe('the construction subject', () => {
+    const build = { ...fields, subject: 'Строителство или ремонт', picks: [], message: 'Ремонт на апартамент от 80 кв.м.' }
+
+    it('sends „Строителство или ремонт – {Тип проект}“ and the range’s production string, in exactly six fields, „[ТЕСТ] “ first', () => {
+      const { odoo, emailParams } = buildLead({ ...build, kind: 'Ремонти и реновации', budget: '50,000 - 100,000 лв' }, { production: false })
+      expect(Object.keys(odoo).sort()).toEqual(['budget', 'email', 'message', 'name', 'phone', 'projectType'])
+      expect(odoo.projectType).toBe('[ТЕСТ] Строителство или ремонт – Ремонти и реновации')
+      expect(odoo.budget).toBe('50,000 - 100,000 лв')
+      expect(emailParams.project_type).toBe('[ТЕСТ] Строителство или ремонт – Ремонти и реновации')
+      expect(emailParams.budget).toBe('50,000 - 100,000 лв')
+    })
+
+    it('in production, carries no mark', () => {
+      const { odoo } = buildLead({ ...build, kind: 'Жилищно строителство', budget: 'Над 1,000,000 лв' }, { production: true })
+      expect(odoo).toMatchObject({ projectType: 'Строителство или ремонт – Жилищно строителство', budget: 'Над 1,000,000 лв' })
+    })
+
+    it('sends the bare subject without a kind, and no budget without a range', () => {
+      const { odoo, emailParams } = buildLead({ ...build, kind: '', budget: '' }, { production: true })
+      expect(odoo).toMatchObject({ projectType: 'Строителство или ремонт', budget: '' })
+      expect(emailParams.budget).toBe('Не е посочен')
+    })
+
+    it('tops a short message up with the subject and its kind', () => {
+      expect(buildLead({ ...build, kind: 'Комерсиални проекти', budget: '', message: 'Оферта' }, { production: true }).odoo.message)
+        .toBe('Оферта\nЗапитване за: Строителство или ремонт – Комерсиални проекти')
+    })
+  })
 })
 
 // sendInquiry: EmailJS and the CRM in parallel, as the Contact page sends

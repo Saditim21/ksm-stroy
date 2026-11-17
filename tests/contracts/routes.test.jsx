@@ -34,7 +34,7 @@ it('/contact renders the inquiry form', async () => {
   renderSiteAt('/contact')
 
   expect(await screen.findByRole('textbox', { name: /съобщение/i }, { timeout: 15000 })).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: /изпрати/i })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Изпратете запитване' })).toBeInTheDocument()
   expect(window.location.pathname).toBe('/contact')
 }, 30000)
 

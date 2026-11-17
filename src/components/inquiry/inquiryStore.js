@@ -3,12 +3,12 @@ import { scrollLocked } from '../../utils/lenis'
 import { scrollToId } from '../../utils/scroll'
 
 // The inquiry's shared state (spec §10; M3 §8): the option the form's select
-// shows and the apartments sent to the form, each a pick of its project's
-// ({ project, label }: „А 501“ of Golden Residence, „А-101“ of
-// Многофамилна). A module-scope store, so any action on the page can preset
-// the form without a provider: the Многофамилна half of Home's opening, the
-// explorer's units, the parking actions. The prerender and the hydration see
-// it empty.
+// (or Контакти's subjects) shows and the apartments sent to the form, each a
+// pick of its project's ({ project, label }: „А 501“ of Golden Residence,
+// „А-101“ of Многофамилна). A module-scope store, so any action on the page
+// can preset the form without a provider: the Многофамилна half of Home's
+// opening, the explorer's units, the parking actions, a link's prefill on
+// Контакти. The prerender and the hydration see it empty.
 //
 // A preset glides the page to the form (spec §5.3): in the first animation
 // frame in which no scroll lock is held, because Lenis ignores scrollTo while
@@ -118,20 +118,29 @@ function glideToInquiry() {
 const samePick = (a) => (b) => a.project === b.project && a.label === b.label
 
 /**
- * Presets the form and glides the page to it. Merges into the store: the
- * option, when given, replaces the one chosen; a pick joins the picks once,
- * as its project and its label.
+ * Presets the form where it is, with no glide and no focus: what a link to
+ * Контакти's form asks for, once the page has hydrated (M3/M4 spec §7.3,
+ * src/pages/contact/ContactInquiry.jsx). Merges into the store: the option,
+ * when given, replaces the one chosen (null: the form's own first); each
+ * pick joins the picks once, as its project and its label.
+ * @param {{ option?: string | null, picks?: Array<{ project: string, label: string }> }} preset
+ */
+export function seedInquiry({ option = state.option, picks = [] } = {}) {
+  update({ option, picks: [...state.picks, ...picks.filter((pick) => !state.picks.some(samePick(pick)))] })
+}
+
+/**
+ * Presets the form, as seedInquiry() does, and glides the page to it. With
+ * nothing to preset it only glides, and the form's first field takes the
+ * focus once the glide is under way.
  * @param {{ option?: string, pick?: { project: string, label: string } }} preset
  */
-export function presetInquiry({ option: chosen, pick } = {}) {
-  let next = state
-  if (chosen !== undefined && chosen !== next.option) next = { ...next, option: chosen }
-  if (pick !== undefined && !next.picks.some(samePick(pick))) next = { ...next, picks: [...next.picks, pick] }
-  update(next)
+export function presetInquiry({ option, pick } = {}) {
+  seedInquiry({ option, picks: pick ? [pick] : [] })
   glideToInquiry()
 }
 
-// The visitor's own choice in the select.
+// The visitor's own choice in the select, or among Контакти's subjects.
 export function chooseInquiryOption(chosen) {
   if (chosen !== state.option) update({ ...state, option: chosen })
 }

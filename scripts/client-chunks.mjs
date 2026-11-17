@@ -35,20 +35,29 @@
 const CLIENT_ENTRY = /[\\/]entry\.client\.[jt]sx?$/
 const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 
-// The explorer's groups, each by its head and its riders.
+// The explorer's groups, each by its head and its riders. Контакти (M4 Task
+// 2) shares the inquiry form, the reveals, the landing hold and the
+// hydration hook with the pages of the facade and the explorer: each group
+// takes it in, so those pages keep their chunks as they were, and Контакти
+// loads the facade's and the explorer's code with them, unused, rather than
+// cost each of those pages a chunk more (about 600 B for the form's alone,
+// measured in M4 Task 2).
 export const GROUPS = [
-  // On every page with the facade: Home, both projects' pages and their block
-  // pages. The facade, the inquiry and what they share, with two riders that
-  // only some of those pages show: the number that rolls in (not on a
-  // Многофамилна block page) and the stale-data notice (only on Home and
-  // Golden Residence's pages). A Многофамилна page loads them unused, as it
-  // did before; without them, Home and Golden Residence, whose first load M4
-  // caps, would load more.
-  { name: 'facade', head: 'src/explorer/Facade.jsx', riders: ['src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx'] },
-  // On every page of a project: the explorer's provider, its state and the
-  // facade's captions, with one rider, the list's loader, which a
-  // Многофамилна block page doesn't use.
-  { name: 'explorer', head: 'src/explorer/ExplorerContext.jsx', riders: ['src/explorer/loadUnitList.js'] },
+  // On every page with the inquiry form: Home, both projects' pages and their
+  // block pages, and Контакти. The form, the facade and what they share,
+  // with riders that only some of those pages show: the facade itself, the
+  // closing inquiry's section and the status counts (not on Контакти), the
+  // number that rolls in (not on a Многофамилна block page) and the
+  // stale-data notice (only on Home and Golden Residence's pages). A page
+  // loads them unused, as a Многофамилна page did before; without them,
+  // Home and Golden Residence, whose first load M4 caps, would load more.
+  { name: 'facade', head: 'src/components/inquiry/useInquiryForm.jsx', riders: ['src/explorer/Facade.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx'] },
+  // On every page that waits for hydration: every page of a project, and
+  // Контакти, whose prefill and landing do. The hydration hook and the
+  // landing hold, with the explorer's provider, its state and the facade's
+  // captions, which Контакти doesn't use, and the list's loader, which a
+  // Многофамилна block page doesn't use either.
+  { name: 'explorer', head: 'src/hooks/useHydrated.js', riders: ['src/explorer/ExplorerContext.jsx', 'src/explorer/captions.jsx', 'src/explorer/loadUnitList.js'] },
 ]
 
 // A source file's module id, by its path from the repository.

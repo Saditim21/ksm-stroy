@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline } from '../../tests/contracts/site'
 import Blog from './Blog'
-import Contact from './Contact'
 import Projects from './Projects'
 
 // A focus ring takes the colour of its ground's text (src/index.css; spec
@@ -58,13 +57,4 @@ it('/blog: the closing call to action and the project viewer are on dusk; the fi
   // The close button, the two arrows and the seven thumbnails.
   expect(controls).toHaveLength(10)
   for (const control of controls) expect(onDusk(control)).toBe(true)
-})
-
-it('/contact: the closing band is on dusk; the form is not', () => {
-  renderPage(Contact)
-
-  for (const name of ['Отиди до формата за безплатна оферта', 'Обади се на +359 887 886 166']) {
-    expect(onDusk(screen.getByRole('link', { name })), name).toBe(true)
-  }
-  expect(onDusk(screen.getByRole('button', { name: /Изпрати съобщение/ }))).toBe(false)
 })

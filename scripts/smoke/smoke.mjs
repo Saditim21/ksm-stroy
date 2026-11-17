@@ -41,7 +41,9 @@
 //     (its visit's `lands`: Многофамилна's ?view=list, M3 §6.2 #3) jumps
 //     there instead, with no dialog: the section must be at the top of the
 //     screen, under the header, and the EU line in view all the same, which
-//     the landing keeps until the visitor first moves the page (M3 §8).
+//     the landing keeps until the visitor first moves the page (M3 §8). So
+//     do the links that land on Контакти's form (`lands`: ?apartment=,
+//     ?project= or #zapitvane, M3/M4 §7.3, §8).
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -54,9 +56,9 @@
 // turn, and each shows a solid 2 px ring of its colour. On /, the EU row's
 // „За проекта“, the header's „Запитване“ and the Golden Residence half, whose
 // ring rides on an inset overlay (its ::after), all ivory on the dark site;
-// on /contact, the legacy form's „Изпрати съобщение“, onyx on production's
-// light ground (.on-light, src/index.css). jsdom cannot compute a ring's
-// colour; Chrome can.
+// on /contact, „Изпратете запитване“ twice: the answer's link to the form, on
+// umber, then the form's own action, both ivory. jsdom cannot compute a
+// ring's colour; Chrome can.
 //
 // And the phone opening (spec §6.7): on / at real phone screens under the EU
 // row (PHONE_HERO), once its entrance has settled, the H1 sits on two lines,
@@ -171,7 +173,12 @@ const VISITS = [
   { path: '/projects/mnogofamilna-sgrada?view=list', lands: 'spisak' },
   // A block page's floor, written bare (spec M3 §6.5): floor 7 of block А.
   { path: '/projects/mnogofamilna-sgrada/block-a?floor=7', dialog: 'Блок А · Етаж 7' },
-  { path: '/contact?apartment=%D0%90%20301' },
+  // Links that land on Контакти's form (M3/M4 §7.3, §8): an apartment, a
+  // subject with the form's hash, and the hash alone. Each lands on
+  // #zapitvane with the EU row in view and no dialog.
+  { path: '/contact?apartment=%D0%90%20301', lands: 'zapitvane' },
+  { path: '/contact?project=stroitelstvo#zapitvane', lands: 'zapitvane' },
+  { path: '/contact#zapitvane', lands: 'zapitvane' },
   { path: '/about/', redirect: { status: 308, to: '/about' } },
   { path: '/projects/1', redirect: { to: '/projects' } },
   { path: '/nope', status: 404, text: NOT_FOUND_TEXT },
@@ -215,7 +222,8 @@ const FOCUS_RING = [
   {
     path: '/contact',
     stops: [
-      { text: 'Изпрати съобщение', ring: 'rgb(14, 13, 11)', ground: 'the legacy form on production’s light ground: onyx' },
+      { text: 'Изпратете запитване', ring: 'rgb(239, 233, 221)', ground: 'the answer’s link to the form, on umber: ivory' },
+      { text: 'Изпратете запитване', ring: 'rgb(239, 233, 221)', ground: 'the form’s action, on onyx: ivory' },
     ],
   },
 ]
@@ -513,8 +521,10 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       await delay(Math.max(0, loadedAt + UNUSED_PRELOAD_WINDOW_MS - Date.now()))
 
       problems.push(...await page.evaluate(appTrees))
+      // The address the page ends at, against the one the visit asked for,
+      // each without its hash (a landing's #zapitvane).
       const finalPath = relative(page.url())
-      const expectedPath = redirect?.to ?? pathname
+      const expectedPath = redirect?.to ?? relative(documentUrl)
       if (finalPath !== expectedPath) problems.push(`ended at ${finalPath}, expected ${expectedPath}`)
       if (text) {
         const shown = await page.evaluate(() => document.getElementById('main')?.textContent.replace(/\s+/g, ' ') ?? '')
