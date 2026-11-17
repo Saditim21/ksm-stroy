@@ -318,7 +318,8 @@ it('opens with the halves parting from the seam over 0.7 s, the panel fading in 
 // own (src/constants/apartmentImages.js, less А-858 and А-864) offers it
 // beside the floor's: „План на етажа / План на апартамента“, the own plan
 // whole on a light plate, the caption changing with it. An apartment with
-// none offers no switch.
+// none offers no switch, and neither does А-802, whose file is block Б's
+// drawing, labelled „Б58“ (ruling FW3).
 describe('the own-plan switch only for mapped ids', () => {
   const MN_MODEL = buildModel(MN_SNAPSHOT_DATA, MN_PROJECT)
   let MN_PLANS
@@ -327,29 +328,41 @@ describe('the own-plan switch only for mapped ids', () => {
   })
   const renderMn = (unitId) => render(<UnitPanel plans={MN_PLANS} dated="01.12.2025" model={MN_MODEL} unitId={unitId} onClose={vi.fn()} onStep={vi.fn()} onInquire={vi.fn()} />)
 
-  it('switches А-802 between the floor’s plan and its own, the caption with it', () => {
-    renderMn('А-802')
-    const dialog = panel('А-802')
+  it('switches А-808 between the floor’s plan and its own, the caption with it', () => {
+    renderMn('А-808')
+    const dialog = panel('А-808')
     const views = within(dialog).getByRole('group', { name: 'План' })
     const floorView = within(views).getByRole('button', { name: 'План на етажа' })
     const ownView = within(views).getByRole('button', { name: 'План на апартамента' })
 
     expect(floorView).toHaveAttribute('aria-pressed', 'true')
     expect(ownView).toHaveAttribute('aria-pressed', 'false')
-    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-802 е очертан.')
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-808 е очертан.')
     expect(dialog.querySelector('.up__own')).toBeNull()
 
     fireEvent.click(ownView)
     expect(ownView).toHaveAttribute('aria-pressed', 'true')
     expect(floorView).toHaveAttribute('aria-pressed', 'false')
-    expect(text(dialog.querySelector('.up__cap'))).toBe('План на апартамент А-802.')
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на апартамент А-808.')
     const own = dialog.querySelector('.up__own img')
-    expect(own).toHaveAttribute('alt', 'План на апартамент А-802: стаите и площите им')
-    expect(own.getAttribute('src')).toMatch(/^\/img\/mn-apt-a802-\d+\.webp$/)
+    expect(own).toHaveAttribute('alt', 'План на апартамент А-808: стаите и площите им')
+    expect(own.getAttribute('src')).toMatch(/^\/img\/mn-apt-a808-\d+\.webp$/)
 
     fireEvent.click(floorView)
-    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-802 е очертан.')
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-808 е очертан.')
     expect(dialog.querySelector('.up__own')).toBeNull()
+  })
+
+  // Ruling FW3: production maps А-802 to apartment-a58-floor8, which is block
+  // Б's drawing, labelled „Б58“, the mirror of А-102's „А2“. Until KSM sends
+  // block А's, А-802 shows its floor's plan alone.
+  it('offers А-802, whose file is block Б’s drawing, no switch', () => {
+    renderMn('А-802')
+    const dialog = panel('А-802')
+
+    expect(within(dialog).queryByRole('group', { name: 'План' })).toBeNull()
+    expect(text(dialog.querySelector('.up__cap'))).toBe('План на етаж 9, блок А. А-802 е очертан.')
+    expect(MN_PLANS['А'].own['А-802']).toBeUndefined()
   })
 
   // Ruling PF14: Б-202 and Б-206 show Б-102's and Б-106's plans.

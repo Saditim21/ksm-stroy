@@ -161,13 +161,22 @@ it('?floor=А-10 says „тавански етаж“', async () => {
   expect(text(stage.querySelector('.ps__meta'))).toBe('тавански етаж · 8 апартамента · 0 свободни · по данни към 01.12.2025')
 }, 30000)
 
-// Spec M3 §6.4: a unit's deep link opens its panel; А-802 has a plan of its
-// own (src/constants/apartmentImages.js), so the panel offers it.
-it('?unit=А-802 opens А-802’s panel, with its own plan', async () => {
+// Spec M3 §6.4: a unit's deep link opens its panel; А-808 has a plan of its
+// own (src/constants/apartmentImages.js), so the panel offers it. А-802's
+// file is block Б's drawing, „Б58“ (ruling FW3): its panel offers none.
+it('?unit=А-808 opens А-808’s panel, with its own plan', async () => {
+  renderSiteAt(`${PATH}?unit=${encodeURIComponent('А-808')}`)
+
+  const panel = await screen.findByRole('dialog', { name: 'А-808' }, { timeout: 15000 })
+  expect(within(panel).getByRole('button', { name: 'План на апартамента' })).toBeInTheDocument()
+  expect(text(panel.querySelector('.up__date'))).toBe('По данни към 01.12.2025.')
+}, 30000)
+
+it('?unit=А-802 opens А-802’s panel, with its floor’s plan alone', async () => {
   renderSiteAt(`${PATH}?unit=${encodeURIComponent('А-802')}`)
 
   const panel = await screen.findByRole('dialog', { name: 'А-802' }, { timeout: 15000 })
-  expect(within(panel).getByRole('button', { name: 'План на апартамента' })).toBeInTheDocument()
+  expect(within(panel).queryByRole('button', { name: 'План на апартамента' })).toBeNull()
   expect(text(panel.querySelector('.up__date'))).toBe('По данни към 01.12.2025.')
 }, 30000)
 
