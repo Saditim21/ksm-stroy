@@ -77,12 +77,14 @@
 //     polygon shows aside.fxp--a, titled „Блок А · Етаж 5“, within 600 ms;
 //     a click opens the dialog of that name, and Escape closes it;
 //   - keyboard, the same page at 1440×900: Tab from the top reaches a rail,
-//     whose floor's panel shows, and the rail carries its solid 2 px ring;
+//     whose floor's panel shows, the keyboard's dashed lens on its floor,
+//     and the rail carries its solid 2 px ring;
 //   - phone, the same page at 390×844 with touch: a tap on floor А-3 shows
 //     the sheet, titled „Блок А · Етаж 3“, and only that; a second tap
 //     opens the dialog of that name;
 //   - deep link, /projects/golden-residence/block-a?floor=3 at 1440×900:
-//     the dialog „Блок А · Етаж 3“ once the page has hydrated;
+//     the dialog „Блок А · Етаж 3“ once the page has hydrated, and the EU
+//     line's „За проекта“ in view over it (spec §7.10 with §1.9);
 //   - text spacing, the Golden Residence page at 320×568 with TEXT_SPACING:
 //     no visible text in #explorer runs past the screen's edge, where the
 //     section's clip would cut it (the page's width cannot tell: the clip
@@ -90,7 +92,17 @@
 //   - deep link at 320×568 and at 390×844, as it lands and then with
 //     TEXT_SPACING: the plan stage, its close and its stepper's ▲ and ▼
 //     wholly within the screen (spec §11, WCAG 1.4.10 and 1.4.12: the stage
-//     is fixed and the page locked, so nothing past the edge can be reached).
+//     is fixed and the page locked, so nothing past the edge can be reached);
+//     and on a screen of 360×640 or smaller, the stage's side column (the
+//     counts, the key, the table) at least as tall with the spacing as
+//     without it (FR8, M3 §11).
+// Then Многофамилна's (M3 §12), the same steps on its building
+// (/projects/mnogofamilna-sgrada, MN_EXPLORER): the mouse over Б-9; Tab to
+// the first rail, А-10, then ↓ to А-9 and → to Б-9, each rail's panel
+// showing and the dashed lens on its floor; on the phone, a tap on А-9's
+// rail once it has risen into view, then a second; the deep link ?floor=А-9
+// at 1440×900, the EU line in view over its dialog; and that deep link at
+// 320×568, with and without text spacing.
 // No step may log a console error or warning, or a page error.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
@@ -234,14 +246,30 @@ const titleOf = (key) => {
 }
 const EXPLORER = {
   path: '/projects/golden-residence',
-  // The floor the mouse points at, and the one a finger taps.
+  // The floor the mouse points at, and the one a finger taps, on its
+  // polygon.
   mouseFloor: 'А-5',
-  tapFloor: 'А-3',
+  tap: { floor: 'А-3', on: 'floor' },
   deepLink: { path: '/projects/golden-residence/block-a?floor=3', floor: 'А-3' },
   // How soon the edge panel must show once the mouse is over its floor.
   panelWithinMs: 600,
   // The rails' focus ring (spec §11): its style and width.
   ring: 'solid 2px',
+}
+// Многофамилна's explorer (spec M3 §6.3, §6.4, §12), the same engine on its
+// own building, its steps mirroring Golden Residence's: the mouse over Б-9;
+// the keyboard's first rail (А-10, the attic), then the arrow keys from rail
+// to rail, the dashed lens following (`arrows`: each key and the floor whose
+// rail it focuses); a finger on a rail, block А's on a phone; and a deep
+// link to А-9, landing with the EU row in view, as every deep link does.
+const MN_EXPLORER = {
+  path: '/projects/mnogofamilna-sgrada',
+  mouseFloor: 'Б-9',
+  arrows: [['ArrowDown', 'А-9'], ['ArrowRight', 'Б-9']],
+  tap: { floor: 'А-9', on: 'rail' },
+  deepLink: { path: '/projects/mnogofamilna-sgrada?floor=%D0%90-9', floor: 'А-9' },
+  panelWithinMs: EXPLORER.panelWithinMs,
+  ring: EXPLORER.ring,
 }
 
 // The availability API, which the static server runs over the saved sheets:
@@ -831,8 +859,9 @@ async function phoneHero(browser, userAgents) {
   return problems
 }
 
-// The explorer (spec §7.2–7.6, §7.10): its four steps, each in a fresh
-// profile, each failing with its name.
+// The explorer (spec §7.2–7.6, §7.10; M3 §12): its steps, each in a fresh
+// profile, each failing with its name, each on a project's page and its
+// configuration (EXPLORER, MN_EXPLORER).
 
 // Whether the page shows the surface `selector` (an edge panel, the sheet)
 // open with the title `title` (its `titleSelector`): a box of its own on the
@@ -849,17 +878,36 @@ function surfaceShows(selector, titleSelector, title) {
   return { shows, state }
 }
 
-// In the page: the centre of a floor's polygon on the facade, and what the
-// pointer would land on there.
-function floorCentre(key) {
-  const floor = document.querySelector(`.fx__floor[data-k="${key}"]`)
-  if (!floor) return null
-  const { left, top, width, height } = floor.getBoundingClientRect()
+// A floor's target on the facade: its polygon, or (`on` 'rail') its rail.
+const targetOf = (key, on = 'floor') => (on === 'rail' ? `.fx__cnt[data-k="${key}"]` : `.fx__floor[data-k="${key}"]`)
+
+// In the page: the centre of a floor's target on the facade (targetOf()),
+// and what the pointer would land on there: the target, or a part of it.
+function targetCentre(selector) {
+  const target = document.querySelector(selector)
+  if (!target) return null
+  const { left, top, width, height } = target.getBoundingClientRect()
   const x = left + width / 2
   const y = top + height / 2
   const there = document.elementFromPoint(x, y)
   const onScreen = x > 0 && y > 0 && x < innerWidth && y < innerHeight
-  return { x, y, onScreen, hits: there === floor, there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
+  return { x, y, onScreen, hits: Boolean(there && target.contains(there)), there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
+}
+
+// In the page: whether the facade's lens lies on floor `key`, dashed, as the
+// keyboard draws it, and showing (its box within a pixel of the floor's).
+function lensOn(key) {
+  const floor = document.querySelector(`.fx__floor[data-k="${key}"]`)
+  const lens = document.querySelector('.fx__hl')
+  if (!floor || !lens) return { shows: false, state: `no ${floor ? 'lens' : `floor ${key}`} in the page` }
+  const [want, got] = [floor.getBoundingClientRect(), lens.getBoundingClientRect()]
+  const off = Math.max(...['left', 'top', 'right', 'bottom'].map((side) => Math.abs(want[side] - got[side])))
+  const { strokeDasharray, opacity } = getComputedStyle(lens)
+  const dashed = strokeDasharray !== 'none'
+  return {
+    shows: off <= 1 && dashed && Number(opacity) === 1,
+    state: `${Math.round(off)} px off the floor, ${dashed ? 'dashed' : 'solid'}, opacity ${opacity}`,
+  }
 }
 
 // Waits until the page's scroll has held still for 300 ms (Lenis glides).
@@ -925,21 +973,22 @@ async function explorerPage(context, userAgents, size, problems, path = EXPLORER
 const panelOf = (key) => `aside.fxp--${key.startsWith('А') ? 'a' : 'b'}`
 const openNames = async (page) => (await page.evaluate(openDialogs)).map((name) => `„${name}“`).join(', ') || 'none'
 
-// Desktop mouse: #explorer in view, a real mouse over the centre of floor
-// А-5's polygon shows block А's edge panel within 600 ms; a click opens the
-// floor's plan stage, and Escape closes it.
-async function explorerMouse(page, problems) {
-  const key = EXPLORER.mouseFloor
+// Desktop mouse: #explorer in view, a real mouse over the centre of the
+// floor's polygon (Golden Residence's А-5, Многофамилна's Б-9) shows its
+// block's edge panel within 600 ms; a click opens the floor's plan stage,
+// and Escape closes it.
+async function explorerMouse(page, problems, explorer) {
+  const key = explorer.mouseFloor
   const panelSelector = panelOf(key)
   await page.evaluate(() => document.getElementById('explorer').scrollIntoView({ block: 'start' }))
   await settled(page)
   // The facade loads its panels as it nears the screen.
   await page.waitForSelector(panelSelector, { timeout: 10000 })
-  let floor = await page.evaluate(floorCentre, key)
+  let floor = await page.evaluate(targetCentre, targetOf(key))
   if (floor && !floor.onScreen) {
     await page.evaluate((y) => window.scrollBy(0, y - innerHeight / 2), floor.y)
     await settled(page)
-    floor = await page.evaluate(floorCentre, key)
+    floor = await page.evaluate(targetCentre, targetOf(key))
   }
   if (!floor?.onScreen || !floor.hits) {
     problems.push(`floor ${key}'s polygon cannot be pointed at: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
@@ -947,8 +996,8 @@ async function explorerMouse(page, problems) {
   }
   await page.mouse.move(floor.x - 40, floor.y, { steps: 2 })
   await page.mouse.move(floor.x, floor.y, { steps: 4 })
-  const panel = await within(page, EXPLORER.panelWithinMs, surfaceShows, panelSelector, '.fxp__title', titleOf(key))
-  if (!panel.shows) problems.push(`${panelSelector} does not show „${titleOf(key)}“ within ${EXPLORER.panelWithinMs} ms of the hover (${panel.state})`)
+  const panel = await within(page, explorer.panelWithinMs, surfaceShows, panelSelector, '.fxp__title', titleOf(key))
+  if (!panel.shows) problems.push(`${panelSelector} does not show „${titleOf(key)}“ within ${explorer.panelWithinMs} ms of the hover (${panel.state})`)
 
   await page.mouse.click(floor.x, floor.y)
   if (!(await dialogOpens(page, titleOf(key), 5000))) {
@@ -964,67 +1013,105 @@ async function explorerMouse(page, problems) {
   }
 }
 
-// Keyboard: Tab from the top reaches a rail; its floor's edge panel shows, and
-// the rail carries the solid 2 px ring (spec §11; ruling T6a: the panel lies
-// over its own rail while it is open, and the dashed lens shows the focus).
-async function explorerKeyboard(page, problems) {
+// The focused rail's floor, or null when the focus is not on a rail.
+const focusedRail = () => (document.activeElement?.matches('.fx__cnt') ? document.activeElement.dataset.k : null)
+
+// Keyboard: Tab from the top reaches a rail; its floor's edge panel shows,
+// the dashed lens lies on its floor, and the rail carries the solid 2 px
+// ring (spec §11; ruling T6a: the panel lies over its own rail while it is
+// open, and the dashed lens shows the focus). Then each of the project's
+// `arrows`: its key takes the focus to its floor's rail, whose panel shows,
+// and the lens follows onto that floor.
+async function explorerKeyboard(page, problems, explorer) {
   let rail = null
   for (let tabs = 0; tabs < MAX_TABS && !rail; tabs += 1) {
     await page.keyboard.press('Tab')
-    rail = await page.evaluate(() => (document.activeElement?.matches('.fx__cnt') ? document.activeElement.dataset.k : null))
+    rail = await page.evaluate(focusedRail)
   }
   if (!rail) {
     problems.push(`${MAX_TABS} Tabs never reached a rail (focus on „${await page.evaluate(focusedText)}“)`)
     return
   }
-  const panel = await within(page, EXPLORER.panelWithinMs, surfaceShows, panelOf(rail), '.fxp__title', titleOf(rail))
+  const panel = await within(page, explorer.panelWithinMs, surfaceShows, panelOf(rail), '.fxp__title', titleOf(rail))
   if (!panel.shows) problems.push(`the first rail, ${rail}, has the focus, but ${panelOf(rail)} does not show „${titleOf(rail)}“ (${panel.state})`)
+  const lens = await within(page, 1000, lensOn, rail)
+  if (!lens.shows) problems.push(`the first rail, ${rail}, has the focus, but the keyboard's dashed lens is not on its floor (${lens.state})`)
   const focused = await page.evaluate(focusedRing)
   if (!focused.visible) problems.push(`the rail ${rail} has the focus without :focus-visible`)
-  if (!focused.ring.startsWith(`${EXPLORER.ring} `)) problems.push(`the rail ${rail} shows a ${focused.ring} ring, not ${EXPLORER.ring}`)
+  if (!focused.ring.startsWith(`${explorer.ring} `)) problems.push(`the rail ${rail} shows a ${focused.ring} ring, not ${explorer.ring}`)
+
+  for (const [key, floor] of explorer.arrows ?? []) {
+    await page.keyboard.press(key)
+    const now = await page.evaluate(focusedRail)
+    if (now !== floor) {
+      problems.push(`${key} on the rail ${rail} takes the focus to ${now ? `the rail ${now}` : `„${await page.evaluate(focusedText)}“`}, not to the rail ${floor}`)
+      return
+    }
+    const shown = await within(page, explorer.panelWithinMs, surfaceShows, panelOf(floor), '.fxp__title', titleOf(floor))
+    if (!shown.shows) problems.push(`${key} to the rail ${floor}: ${panelOf(floor)} does not show „${titleOf(floor)}“ (${shown.state})`)
+    // The lens glides there over 0.25 s.
+    const moved = await within(page, 1000, lensOn, floor)
+    if (!moved.shows) problems.push(`${key} to the rail ${floor}: the keyboard's dashed lens is not on its floor (${moved.state})`)
+    rail = floor
+  }
 }
 
-// Phone: a tap on floor А-3 shows the sheet, titled „Блок А · Етаж 3“, and
-// opens nothing; a second tap on it opens its plan stage.
-async function explorerPhone(page, problems) {
-  const key = EXPLORER.tapFloor
-  await page.evaluate((k) => document.querySelector(`.fx__floor[data-k="${k}"]`).scrollIntoView({ block: 'center' }), key)
+// Phone: a tap on the floor's target (Golden Residence's polygon of А-3,
+// Многофамилна's rail of А-9) shows the sheet, titled with the floor
+// („Блок А · Етаж 3“), and opens nothing; a second tap on it opens its plan
+// stage.
+async function explorerPhone(page, problems, explorer) {
+  const { floor: key, on } = explorer.tap
+  const target = targetOf(key, on)
+  const what = on === 'rail' ? `the rail ${key}` : `floor ${key}'s polygon`
+  await page.evaluate((selector) => document.querySelector(selector).scrollIntoView({ block: 'center' }), target)
   await settled(page)
   await page.waitForNetworkIdle({ idleTime: 300, timeout: 5000 }).catch(() => {})
-  let floor = await page.evaluate(floorCentre, key)
-  if (!floor?.onScreen || !floor.hits) {
-    problems.push(`floor ${key}'s polygon cannot be tapped: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
+  // A finger taps what it sees: Многофамилна's rails rise into view after
+  // the opening's name (CSS, mn-facade.css), unseen until then, and Chrome
+  // gives a tap on an unseen rail to its column.
+  await page.evaluate((selector) => Promise.all(document.querySelector(selector).getAnimations().map((animation) => animation.finished.catch(() => {}))), target)
+  let point = await page.evaluate(targetCentre, target)
+  if (!point?.onScreen || !point.hits) {
+    problems.push(`${what} cannot be tapped: ${point ? `its centre lands on ${point.there}` : 'not in the page'}`)
     return
   }
-  await page.touchscreen.tap(floor.x, floor.y)
+  await page.touchscreen.tap(point.x, point.y)
   const sheet = await within(page, 1500, surfaceShows, '.sheet', '.sheet__title', titleOf(key))
-  if (!sheet.shows) problems.push(`the first tap on floor ${key} shows no sheet with „${titleOf(key)}“ (${sheet.state})`)
+  if (!sheet.shows) problems.push(`the first tap on ${what} shows no sheet with „${titleOf(key)}“ (${sheet.state})`)
   if ((await page.evaluate(openDialogs)).length > 0) {
-    problems.push(`the first tap on floor ${key} opened ${await openNames(page)} instead of previewing it`)
+    problems.push(`the first tap on ${what} opened ${await openNames(page)} instead of previewing it`)
     return
   }
 
   // The page makes room for the sheet under the facade.
   await settled(page)
-  floor = await page.evaluate(floorCentre, key)
-  if (!floor?.onScreen || !floor.hits) {
-    problems.push(`with the sheet up, floor ${key}'s polygon cannot be tapped again: ${floor ? `its centre lands on ${floor.there}` : 'no polygon'}`)
+  point = await page.evaluate(targetCentre, target)
+  if (!point?.onScreen || !point.hits) {
+    problems.push(`with the sheet up, ${what} cannot be tapped again: ${point ? `its centre lands on ${point.there}` : 'not in the page'}`)
     return
   }
-  await page.touchscreen.tap(floor.x, floor.y)
+  await page.touchscreen.tap(point.x, point.y)
   if (!(await dialogOpens(page, titleOf(key), 5000))) {
-    problems.push(`a second tap on floor ${key} opens no dialog „${titleOf(key)}“ (open: ${await openNames(page)})`)
+    problems.push(`a second tap on ${what} opens no dialog „${titleOf(key)}“ (open: ${await openNames(page)})`)
   }
 }
 
-// Deep link: the floor's plan stage, once the page has hydrated.
-async function explorerDeepLink(page, problems) {
-  const dialog = titleOf(EXPLORER.deepLink.floor)
+// Deep link: the floor's plan stage, once the page has hydrated, and the EU
+// line's „За проекта“ in view over it, which the landing keeps (spec §7.10
+// with §1.9, §14.1; ruling T7a).
+async function explorerDeepLink(page, problems, explorer) {
+  const dialog = titleOf(explorer.deepLink.floor)
   if (!(await dialogOpens(page, dialog, 10000))) {
     problems.push(`no dialog „${dialog}“ after hydration (open: ${await openNames(page)})`)
+    return
   }
   // Time for a late error to show.
   await delay(1000)
+  const eu = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: true })
+  if (!eu.some(({ issues }) => issues.length === 0)) {
+    problems.push(`„За проекта“ is not in view over the dialog: ${eu.length === 0 ? 'no link to /eu-proekt' : eu[0].issues.join(', ')}`)
+  }
 }
 
 // In the page: the visible text inside `selector` that runs past the
@@ -1083,10 +1170,15 @@ async function explorerSpaced(page, problems) {
   for (const text of await page.evaluate(textPastScreen, '#explorer')) problems.push(`with text spacing, ${text} runs past the screen's edge`)
 }
 
+// In the page: the height of the stage's side column (the counts, the key,
+// the table and the hint).
+const sideHeight = () => document.querySelector('.ps__side')?.getBoundingClientRect().height ?? 0
+
 // A deep link on a phone: the stage as it lands, then with text spacing,
-// within the screen.
-async function explorerStageNarrow(page, problems) {
-  const dialog = titleOf(EXPLORER.deepLink.floor)
+// within the screen. On a screen of 360×640 or smaller, the side column must
+// keep its height with the spacing (FR8, M3 §11: the plan gives way).
+async function explorerStageNarrow(page, problems, explorer) {
+  const dialog = titleOf(explorer.deepLink.floor)
   if (!(await dialogOpens(page, dialog, 10000))) {
     problems.push(`no dialog „${dialog}“ after hydration (open: ${await openNames(page)})`)
     return
@@ -1094,28 +1186,39 @@ async function explorerStageNarrow(page, problems) {
   // The stage's opening.
   await delay(1200)
   for (const problem of await page.evaluate(stagePastScreen)) problems.push(problem)
+  const side = await page.evaluate(sideHeight)
   await page.addStyleTag({ content: TEXT_SPACING })
   await delay(300)
   for (const problem of await page.evaluate(stagePastScreen)) problems.push(`with text spacing, ${problem}`)
+  const { width, height } = page.viewport()
+  const spaced = await page.evaluate(sideHeight)
+  if (width <= 360 && height <= 640 && spaced < side - 1) {
+    problems.push(`with text spacing, the stage's side column is ${Math.round(spaced)} px tall, against ${Math.round(side)} px without it`)
+  }
 }
 
 const EXPLORER_STEPS = [
-  { name: 'desktop mouse', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerMouse },
-  { name: 'keyboard', size: VIEWPORTS[0], path: EXPLORER.path, run: explorerKeyboard },
-  { name: 'phone', size: VIEWPORTS[1], path: EXPLORER.path, run: explorerPhone },
-  { name: 'deep link', size: VIEWPORTS[0], path: EXPLORER.deepLink.path, run: explorerDeepLink },
-  { name: 'text spacing', size: NARROW, path: EXPLORER.path, run: explorerSpaced },
-  { name: 'deep link on a phone, with and without text spacing', size: NARROW, path: EXPLORER.deepLink.path, run: explorerStageNarrow },
-  { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], path: EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'desktop mouse', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerMouse },
+  { name: 'keyboard', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.path, run: explorerKeyboard },
+  { name: 'phone', size: VIEWPORTS[1], explorer: EXPLORER, path: EXPLORER.path, run: explorerPhone },
+  { name: 'deep link', size: VIEWPORTS[0], explorer: EXPLORER, path: EXPLORER.deepLink.path, run: explorerDeepLink },
+  { name: 'text spacing', size: NARROW, explorer: EXPLORER, path: EXPLORER.path, run: explorerSpaced },
+  { name: 'deep link on a phone, with and without text spacing', size: NARROW, explorer: EXPLORER, path: EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], explorer: EXPLORER, path: EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'desktop mouse', size: VIEWPORTS[0], explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerMouse },
+  { name: 'keyboard', size: VIEWPORTS[0], explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerKeyboard },
+  { name: 'phone', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerPhone },
+  { name: 'deep link', size: VIEWPORTS[0], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerDeepLink },
+  { name: 'deep link on a phone, with and without text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
 ]
 
 // One step of the explorer's, in a fresh profile: its problems.
-async function explorerStep(browser, userAgents, { size, path: pathname, run }) {
+async function explorerStep(browser, userAgents, { size, explorer, path: pathname, run }) {
   const problems = []
   const context = await browser.createBrowserContext()
   try {
     const page = await explorerPage(context, userAgents, size, problems, pathname)
-    await run(page, problems)
+    await run(page, problems, explorer)
   } catch (error) {
     problems.push(`the step stopped: ${error.message.split('\n')[0]}`)
   } finally {

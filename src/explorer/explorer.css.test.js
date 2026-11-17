@@ -225,6 +225,32 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
     expect(declaredFor('.ps__step output', [NARROW])).toEqual({ 'min-width': '56px' })
     expect(declaredFor('.sheet__open', [NARROW])).toEqual({ 'padding-inline': '12px' })
   })
+
+  // FR8 (M3 §11): with a reader's text spacing (WCAG 1.4.12) on a phone of
+  // 360 × 640 or smaller, the stage's bar takes a row more and its hint
+  // grows, and the plan's 250 px floor left the side column (the counts, the
+  // key, the table) no height. There, and only with that spacing, the plan
+  // gives way: two fifths of the body at most, the side column the rest. The
+  // spacing shows in the body's own line height: a reader's sets every line
+  // height to 1.5, important, so the body's 1lh leaves the 1.6em it declares
+  // and --spaced grows from 0 past any screen. At the site's own spacing
+  // --spaced is 0, and the rows are everyone else's: the plan's max(250 px,
+  // .44 of the screen), the side column the rest.
+  it('gives the side column the room a reader’s text spacing takes, on a phone of 360 × 640 or smaller, and only then (FR8)', () => {
+    const SPACED = ['@supports (height: 1lh)', '@media (max-width: 360px) and (max-height: 640px)']
+    expect(declaredFor('.ps__body', [PHONE])['grid-template-rows']).toBe('minmax(250px, calc(var(--screen-h) * .44)) minmax(0, 1fr)')
+    expect(declaredFor('.ps__body', SPACED)).toEqual({
+      '--spaced': 'calc(max(0px, 1.57em - 1lh, 1lh - 1.63em) * 100000)',
+      '--plan-h': 'max(250px, calc(var(--screen-h) * .44))',
+      'line-height': '1.6',
+      'grid-template-rows': 'minmax(max(0px, 250px - var(--spaced)), min(var(--plan-h), max(40%, var(--plan-h) - var(--spaced)))) minmax(0, 1fr)',
+    })
+    // The line height the body declares is the one it inherits, the page's
+    // (the stage is a portal at the foot of <body>): at the site's own
+    // spacing nothing in the stage reads differently.
+    const page = rulesOf('src/index.css').filter((rule) => rule.selectors.includes('body') && valueOf(rule, 'line-height'))
+    expect(page.map((rule) => valueOf(rule, 'line-height'))).toEqual(['1.6'])
+  })
 })
 
 // Ruling C8.4: on a phone the counts, the key and the table scroll together,

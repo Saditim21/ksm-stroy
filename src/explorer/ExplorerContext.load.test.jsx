@@ -10,7 +10,8 @@ import useExplorer from './useExplorer'
 // request): the provider says so on the console, ends a deep link's landing
 // (the EU row's hold goes), and shows nothing. A later open asks for the
 // chunk again (loadSurfaces lets a failed load be tried again), so the next
-// floor or unit opens its dialog, not only after a reload.
+// floor or unit opens its dialog, the same floor again included (FR9), not
+// only after a reload.
 //
 // Here the chunk's load fails once, then loads a stand-in for the dialogs
 // that names the floor and the unit the address asks for.
@@ -31,6 +32,7 @@ function Probe() {
   const { search } = useLocation()
   return (
     <>
+      <button type="button" onClick={() => explorer.openFloor('А', 5)}>А-5</button>
       <button type="button" onClick={() => explorer.openFloor('А', 6)}>А-6</button>
       <button type="button" onClick={() => explorer.openUnit('Б 204')}>Б 204</button>
       <output data-testid="where">{decodeURIComponent(search)}</output>
@@ -84,6 +86,20 @@ describe('a dialogs chunk that failed to load', () => {
     expect(screen.getByTestId('where')).toHaveTextContent('?floor=А-6')
     expect(load).toHaveBeenCalledTimes(2)
     expect(dialogs()).toHaveTextContent('А-6')
+  })
+
+  // FR9 (M3 §11): the address already says ?floor=А-5, so opening А-5 again
+  // changes nothing in it, and only a new ask can load the chunk.
+  it('re-opening the same floor retries a failed surfaces load', async () => {
+    renderAt('/projects/golden-residence?floor=А-5')
+    await settle()
+    expect(dialogs()).toBeNull()
+
+    press('А-5')
+    await settle()
+    expect(screen.getByTestId('where')).toHaveTextContent('?floor=А-5')
+    expect(load).toHaveBeenCalledTimes(2)
+    expect(dialogs()).toHaveTextContent('А-5')
   })
 
   it('is asked for again by the next unit opened, whose panel then shows', async () => {

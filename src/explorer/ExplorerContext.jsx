@@ -117,10 +117,22 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
     }
   }, [landing])
 
+  // The opening: where the stage grows from and what opened it, a new object
+  // at every floor opened, with or without either; and what opened the unit
+  // panel.
+  const [opening, setOpening] = useState(null)
+  const unitOpener = useRef(null)
+  const unitTimer = useRef(0)
+  useEffect(() => () => clearTimeout(unitTimer.current), [])
+
   // The dialogs' chunk, once the address asks for a dialog, and again at each
-  // new ask while it is not in: a failed load may be tried again
-  // (loadSurfaces.js), so the next floor or unit opened after one failed
-  // still opens; one in flight is shared.
+  // floor or unit opened while it is not in: a failed load may be tried again
+  // (loadSurfaces.js), so the next one opened after one failed still opens.
+  // Each floor opened is a new opening, the same floor again included, whose
+  // address stays as it was (FR9). While the chunk is not in, only openFloor
+  // can change the floor: the stage's own controls are in the chunk, and the
+  // explorer never adds to the history (useExplorerState.js). One load in
+  // flight is shared.
   const [surfaces, setSurfaces] = useState(() => loadedSurfaces(project))
   const wanted = arrived && Boolean(stage || unitId)
   useEffect(() => {
@@ -138,18 +150,11 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
     return () => {
       live = false
     }
-  }, [wanted, surfaces, stage, unitId, project])
-
-  // The opening: where the stage grows from and what opened it; and what
-  // opened the unit panel.
-  const [opening, setOpening] = useState(null)
-  const unitOpener = useRef(null)
-  const unitTimer = useRef(0)
-  useEffect(() => () => clearTimeout(unitTimer.current), [])
+  }, [wanted, surfaces, unitId, project, opening])
 
   const openFloor = useCallback((block, floor, unitLabel, meta) => {
     clearTimeout(unitTimer.current)
-    setOpening(meta ?? null)
+    setOpening({ ...meta })
     unitOpener.current = null
     if (unitLabel && motionNow()) {
       latest.current.openFloor(block, floor)

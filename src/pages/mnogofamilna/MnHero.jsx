@@ -3,6 +3,10 @@ import Button from '../../components/ui/Button'
 import RollingNumber from '../../components/ui/RollingNumber'
 import Seam from '../../components/ui/Seam'
 import { MN_FACTS } from '../../data/mnogofamilna/facts'
+// Load-bearing (ruling T6a): an import from ExplorerSection.jsx, whose
+// section this page never renders, keeps the explorer's shared chunks whole.
+// Without one they split, and Golden Residence passes its first-load cap and
+// this page 160 KiB (measured in Task 6's fix round).
 import { Dated, FacadeCaption } from '../../explorer/ExplorerSection'
 import Facade from '../../explorer/Facade'
 import useExplorer from '../../explorer/useExplorer'
