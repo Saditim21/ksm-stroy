@@ -54,9 +54,12 @@ it('does not load the send service before the form is used', async () => {
   expect(service.loads).toBe(1)
 })
 
-// A load that failed (offline, or a new deploy replaced the chunk) is not
-// kept: the send says it failed, as one EmailJS refused, and the next send
-// loads the path again. The load that starts on focus fails quietly.
+// A load that failed (offline, a dropped request) is not kept: the send says
+// it failed, as one EmailJS refused, and the next send loads the path again.
+// The load that starts on focus fails quietly. A retry asks for the same
+// file, so it cannot help a tab opened before a deploy that removed the
+// chunk: that case is the launch's, Vercel's Skew Protection or M4's idle
+// preload (ruling FW4).
 it('says an inquiry whose send path did not load was not sent, and loads it again for the next send', async () => {
   const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
   // A fresh form, whose send path's chunk (sendPath.js, what the form

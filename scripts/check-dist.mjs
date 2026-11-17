@@ -13,17 +13,19 @@
 //    information only.
 // 4. Prints, for every prerendered page (each index.html), its first-load JS:
 //    every module script and modulepreload the page names, gzipped (spec §12,
-//    at most 160 KiB). A route is legacy when its first-load JS carries
-//    framer-motion or swiper (LEGACY_LIBRARIES): over budget, it gets a WARN
-//    line, until M2 to M4 replace it (Ruling R2). Any other route fails over
-//    budget. A route in MUST_BE_V2 has been rebuilt and fails if it carries a
-//    legacy library at all, so it can never slip into a WARN.
+//    at most 160 KiB), in KiB and in exact bytes. A route is legacy when its
+//    first-load JS carries framer-motion or swiper (LEGACY_LIBRARIES): over
+//    budget, it gets a WARN line, until M2 to M4 replace it (Ruling R2). Any
+//    other route fails over budget. A route in MUST_BE_V2 has been rebuilt and
+//    fails if it carries a legacy library at all, so it can never slip into a
+//    WARN. A route in CAPS also fails above its own cap, a figure under the
+//    budget that a ruling holds it to.
 // 5. Fails when the first-load JS of any route carries GSAP, ScrollTrigger,
 //    SplitText, Lenis or Flip. They load after the page (spec §5.1).
 // 6. Prints the motion chunk's gzip size, failing above 60 KiB (spec §12).
 // 7. Prints the Flip chunk's gzip size, failing above 10 KiB, or when Flip is
 //    in more than one chunk (spec §12); until a page loads Flip, a note.
-// Before it reads build/client/, it checks its first-load and library
+// Before it reads build/client/, it checks its first-load, library and cap
 // verdicts against planted pages and scripts (PLANTED_PAGE, PLANTED_SCRIPTS).
 //
 // 160 kB, 60 kB and 10 kB in the spec are read as KiB, as the plan reads its
@@ -77,6 +79,14 @@ const KIB = 1024
 const FIRST_LOAD_BUDGET = 160 * KIB
 const MOTION_BUDGET = 60 * KIB
 const FLIP_BUDGET = 10 * KIB
+
+// The routes held under the budget to a figure of their own, in gzip bytes of
+// first-load JS: Golden Residence's page at its M3 Task 0 figure (ruling T0a;
+// spec M3 §4.4, §10: its first-load bytes do not grow through M3 and M4).
+// M4 Task 0 revises the caps.
+const CAPS = {
+  '/projects/golden-residence': 162_682,
+}
 
 // The routes rebuilt for v2. Each must carry no legacy library in its
 // first-load JS, so the budget always holds for it: a shared module that
@@ -159,6 +169,9 @@ function formatKiB(bytes) {
   return `${(bytes / KIB).toFixed(1)} KiB`
 }
 
+// 162682 as „162,682 B“.
+const formatBytes = (bytes) => `${bytes.toLocaleString('en-US')} B`
+
 function decode(name, bytes) {
   return bytes.toString(TEXT_FILE.test(name) ? 'utf8' : 'latin1')
 }
@@ -221,6 +234,7 @@ function judgeRoute(route, scripts) {
   }
   const legacy = [...new Set(scripts.flatMap((script) => script.legacy))]
   const rebuilt = MUST_BE_V2.includes(route)
+  const cap = CAPS[route]
   let status = 'OK'
   let warned = false
   if (rebuilt && legacy.length > 0) {
@@ -233,8 +247,13 @@ function judgeRoute(route, scripts) {
   } else if (total > FIRST_LOAD_BUDGET) {
     status = 'FAIL, over budget'
     failures.push(`${route}: first-load JS ${formatKiB(total)} gzip, over the ${formatKiB(FIRST_LOAD_BUDGET)} budget`)
+  } else if (cap !== undefined && total > cap) {
+    status = `FAIL, ${formatBytes(total - cap)} over its cap of ${formatBytes(cap)}`
+    failures.push(`${route}: first-load JS ${formatBytes(total)} gzip, over its cap of ${formatBytes(cap)}`)
   } else if (legacy.length > 0) {
     status = `OK (legacy: ${legacy.join(', ')})`
+  } else if (cap !== undefined) {
+    status = `OK, ${formatBytes(cap - total)} under its cap of ${formatBytes(cap)}`
   }
   return { total, legacy, status, warned, failures }
 }
@@ -260,15 +279,29 @@ if (plantedScripts.join(' ') !== PLANTED_PAGE.scripts.join(' ')) {
 
 // A planted framer-motion script is legacy, a planted Flip script is Flip,
 // and a rebuilt route whose first-load JS carries the planted framer-motion
-// script fails.
+// script fails. Each capped route fails one byte over its cap, under the
+// budget, and passes at its cap: planted first-load scripts of those sizes,
+// as inspect() reads a script, with no library in them.
 const plantedFramer = inspect(PLANTED_SCRIPTS.framer.name, PLANTED_SCRIPTS.framer.bytes)
 const plantedFlip = inspect(PLANTED_SCRIPTS.flip.name, PLANTED_SCRIPTS.flip.bytes)
 const plantedRoute = judgeRoute(MUST_BE_V2[0], [plantedFramer])
+const plantedOfSize = (gzip) => ({ name: 'assets/planted-cap.js', gzip, motion: [], legacy: [], flip: false })
+const misjudgedCaps = Object.entries(CAPS).flatMap(([route, cap]) => {
+  const over = judgeRoute(route, [plantedOfSize(cap + 1)])
+  const at = judgeRoute(route, [plantedOfSize(cap)])
+  return [
+    (cap + 1 > FIRST_LOAD_BUDGET) && `${route}: its cap of ${formatBytes(cap)} is not under the budget`,
+    (over.failures.length === 0 || !over.status.startsWith('FAIL'))
+      && `${route} one byte over its cap: ${over.status}, not a failure`,
+    (at.failures.length > 0 || !at.status.startsWith('OK')) && `${route} at its cap: ${at.status}, not OK`,
+  ]
+})
 const misjudged = [
   !plantedFramer.legacy.includes('framer-motion') && `${plantedFramer.name}: framer-motion not seen`,
   !plantedFlip.flip && `${plantedFlip.name}: Flip not seen`,
   (plantedRoute.failures.length === 0 || !plantedRoute.status.startsWith('FAIL'))
     && `${MUST_BE_V2[0]} with ${plantedFramer.name} in its first-load JS: ${plantedRoute.status}, not a failure`,
+  ...misjudgedCaps,
 ].filter(Boolean)
 if (misjudged.length > 0) {
   console.error('check:dist: FAILED, the self-check misjudged planted scripts:')
@@ -342,14 +375,15 @@ for (const { name, route } of pages) {
   const verdict = judgeRoute(route, loaded)
   failures.push(...verdict.failures)
   if (verdict.warned) warned += 1
-  rows.push([route, String(urls.length), formatKiB(verdict.total), verdict.status])
+  rows.push([route, String(urls.length), formatKiB(verdict.total), formatBytes(verdict.total), verdict.status])
 }
 
-const widths = [Math.max(5, ...rows.map(([route]) => route.length)), 7, 10]
-const line = ([route, count, size, status]) =>
-  `  ${route.padEnd(widths[0])}  ${count.padStart(widths[1])}  ${size.padStart(widths[2])}  ${status}`
-console.log(`check:dist: first-load JS per route, gzip (budget ${formatKiB(FIRST_LOAD_BUDGET)}; a legacy route, one carrying ${LEGACY_LIBRARIES.map(({ label }) => label).join(' or ')}, only warns; rebuilt: ${MUST_BE_V2.join(', ')}):`)
-console.log(line(['route', 'scripts', 'gzip', '']).trimEnd())
+const widths = [Math.max(5, ...rows.map(([route]) => route.length)), 7, 10, 9]
+const line = ([route, count, size, bytes, status]) =>
+  `  ${route.padEnd(widths[0])}  ${count.padStart(widths[1])}  ${size.padStart(widths[2])}  ${bytes.padStart(widths[3])}  ${status}`
+const capped = Object.entries(CAPS).map(([route, cap]) => `${route} ${formatBytes(cap)}`).join(', ')
+console.log(`check:dist: first-load JS per route, gzip (budget ${formatKiB(FIRST_LOAD_BUDGET)}, ${formatBytes(FIRST_LOAD_BUDGET)}; capped: ${capped}; a legacy route, one carrying ${LEGACY_LIBRARIES.map(({ label }) => label).join(' or ')}, only warns; rebuilt: ${MUST_BE_V2.join(', ')}):`)
+console.log(line(['route', 'scripts', 'gzip', 'bytes', '']).trimEnd())
 for (const row of rows) console.log(line(row))
 for (const route of MUST_BE_V2) {
   if (!pages.some((page) => page.route === route)) console.log(`check:dist: note: ${route} is in MUST_BE_V2 but not prerendered yet`)
@@ -396,4 +430,4 @@ if (failures.length > 0) {
 if (leaks.length > 0 || devCode.length > 0 || failures.length > 0) process.exit(1)
 
 console.log('check:dist: OK, no agency branding and no dev-only code in build/client/')
-console.log(`check:dist: OK, no motion library or Flip in first-load JS; v2 routes, the motion chunk and Flip within budget${warned > 0 ? ` (${warned} legacy routes over budget, warned above)` : ''}`)
+console.log(`check:dist: OK, no motion library or Flip in first-load JS; v2 routes, the motion chunk and Flip within budget, capped routes within their caps${warned > 0 ? ` (${warned} legacy routes over budget, warned above)` : ''}`)

@@ -101,8 +101,12 @@
 // the first rail, А-10, then ↓ to А-9 and → to Б-9, each rail's panel
 // showing and the dashed lens on its floor; on the phone, a tap on А-9's
 // rail once it has risen into view, then a second; the deep link ?floor=А-9
-// at 1440×900, the EU line in view over its dialog; and that deep link at
-// 320×568, with and without text spacing.
+// at 1440×900, the EU line in view over its dialog; text spacing at 320×568
+// (its #explorer holds the H1, the address, the facts, the actions and the
+// facade's caption); and that deep link at 320×568 and at 390×844, with and
+// without text spacing. Then text spacing at 320×568 on its block page
+// (/projects/mnogofamilna-sgrada/block-a), whose #explorer holds the block's
+// facade and its rows of floors (spec §4.5, WCAG 1.4.12).
 // No step may log a console error or warning, or a page error.
 //
 // Visits wait for hydration and then until 4.5 s after the load event, so
@@ -260,10 +264,12 @@ const EXPLORER = {
 // own building, its steps mirroring Golden Residence's: the mouse over Б-9;
 // the keyboard's first rail (А-10, the attic), then the arrow keys from rail
 // to rail, the dashed lens following (`arrows`: each key and the floor whose
-// rail it focuses); a finger on a rail, block А's on a phone; and a deep
-// link to А-9, landing with the EU row in view, as every deep link does.
+// rail it focuses); a finger on a rail, block А's on a phone; a deep link to
+// А-9, landing with the EU row in view, as every deep link does; and block
+// А's page (`blockPath`), for text spacing.
 const MN_EXPLORER = {
   path: '/projects/mnogofamilna-sgrada',
+  blockPath: '/projects/mnogofamilna-sgrada/block-a',
   mouseFloor: 'Б-9',
   arrows: [['ArrowDown', 'А-9'], ['ArrowRight', 'Б-9']],
   tap: { floor: 'А-9', on: 'rail' },
@@ -1209,7 +1215,10 @@ const EXPLORER_STEPS = [
   { name: 'keyboard', size: VIEWPORTS[0], explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerKeyboard },
   { name: 'phone', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerPhone },
   { name: 'deep link', size: VIEWPORTS[0], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerDeepLink },
+  { name: 'text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.path, run: explorerSpaced },
   { name: 'deep link on a phone, with and without text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
+  { name: 'text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.blockPath, run: explorerSpaced },
 ]
 
 // One step of the explorer's, in a fresh profile: its problems.

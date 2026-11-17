@@ -28,9 +28,15 @@
 // lamps in front of the towers are left as they are: they are not windows.
 //
 // The twin is checked by eye (spec §6.3). Run this again only if the lit
-// render changes, then `npm run images -- --force` to rebuild mn-dusk-off's
-// ladder. `--preview <dir>` writes the mask it used over the lit render to
-// <dir>/mask.png.
+// render changes. Then rebuild mn-dusk-off's ladder alone: delete its outputs,
+// public/img/mn-dusk-off-*.avif and public/img/mn-dusk-off-*.webp, and run
+// `npm run images`, which encodes only the outputs that are missing and
+// rewrites the manifests (src/data/images/mn-night.json among them). Not
+// `npm run images -- --force`: that re-encodes every entry of the pipeline,
+// Golden Residence's and Home's pictures included. `--preview <dir>` also
+// writes the mask it used over the lit render to <dir>/mask.png (a bare
+// `--preview`, to ksm-mn-lights-off in the system's temp folder); without
+// it, no mask is written.
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -434,8 +440,9 @@ async function writePreview(dir, { width, height, lit, mask }) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const sources = JSON.parse(fs.readFileSync(path.join(here, 'sources.json'), 'utf8'))
   const src = path.resolve(repoRoot, sources.find((entry) => entry.id === 'mn-dusk').src)
+  // The mask's folder, only when --preview asks for it.
   const at = process.argv.indexOf('--preview')
-  const preview = at > 0 && process.argv[at + 1] ? path.resolve(process.argv[at + 1]) : path.join(os.tmpdir(), 'ksm-mn-lights-off')
+  const preview = at < 0 ? null : process.argv[at + 1] ? path.resolve(process.argv[at + 1]) : path.join(os.tmpdir(), 'ksm-mn-lights-off')
   const result = await makeTwin(src, TWIN)
   // Changed as the test counts it: the luminance moved by more than 8/255.
   let changed = 0
@@ -443,5 +450,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     if (Math.abs(luma(result.twin[i], result.twin[i + 1], result.twin[i + 2]) - luma(result.lit[i], result.lit[i + 1], result.lit[i + 2])) > 8) changed += 1
   }
   console.log(`mn-lights-off: wrote ${path.relative(repoRoot, TWIN)} (${result.width}×${result.height}); ${(100 * changed / (result.width * result.height)).toFixed(1)} % of its pixels changed`)
-  console.log(`mn-lights-off: mask preview ${await writePreview(preview, result)}`)
+  if (preview) console.log(`mn-lights-off: mask preview ${await writePreview(preview, result)}`)
 }
