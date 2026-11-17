@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { Link } from 'react-router'
 import Logo from '../components/brand/Logo'
 import Seam from '../components/ui/Seam'
-import { SITE, mapsUrl } from '../config/site'
+import { SITE, hoursShort, mapsUrl } from '../config/site'
 import { bindAddress } from '../utils/format'
 import EuLine from './EuLine'
 import { NAV } from './nav'
@@ -49,7 +49,7 @@ export default function SiteFooter() {
             </div>
             <div>
               <h2>Работно време</h2>
-              {SITE.hours.map((line) => (
+              {hoursShort().map((line) => (
                 <p key={line}>{line}</p>
               ))}
             </div>

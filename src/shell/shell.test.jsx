@@ -8,7 +8,7 @@ import { SITE, mapsUrl } from '../config/site'
 import App from '../root'
 import routes from '../routes'
 import { bindAddress } from '../utils/format'
-import { inquiryTarget } from './handle'
+import { inquiryHref, inquiryTarget } from './handle'
 import { NAV } from './nav'
 
 // The site's shell in Diptych (spec §6.2–6.5) around every page: the header
@@ -45,7 +45,7 @@ describe('the header', () => {
     expect(within(header).getByRole('link', { name: 'КСМ Строй, начална страница' })).toHaveAttribute('href', '/')
     expect(within(header).getByRole('button', { name: /Меню/ })).toHaveAttribute('aria-expanded', 'false')
     expect(within(header).getByRole('link', { name: '+359 887 886 166' })).toHaveAttribute('href', 'tel:+359887886166')
-    expect(within(header).getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', '/contact')
+    expect(within(header).getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', '/contact#zapitvane')
     expect(within(header).queryByRole('link', { name: 'Продажби' })).toBeNull()
   })
 
@@ -97,10 +97,13 @@ describe('the header', () => {
 
   // Home, the Golden Residence page and its block pages, and Многофамилна's
   // page and its block pages have an inquiry of their own (their handle's
-  // `inquiry`); a page without one takes „Запитване“ to the contact page.
+  // `inquiry`); a page without one takes „Запитване“ to the contact page's
+  // form (M3/M4 spec §8).
   it.each([
     ['/', '#zapitvane'],
-    ['/about', '/contact'],
+    ['/about', '/contact#zapitvane'],
+    ['/eu-proekt', '/contact#zapitvane'],
+    ['/nope', '/contact#zapitvane'],
     ['/projects/golden-residence', '#zapitvane'],
     ['/projects/golden-residence/block-a', '#zapitvane'],
     ['/projects/mnogofamilna-sgrada', '#zapitvane'],
@@ -125,11 +128,19 @@ describe('the header', () => {
     expect(header.getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', '#zapitvane')
   })
 
-  it('inquiryTarget: the page’s own inquiry, else the contact page with the project', () => {
+  it('inquiryTarget: the page’s own inquiry, else the contact page’s form with the project', () => {
     expect(inquiryTarget({ header: 'overlay', inquiry: true })).toBe('#zapitvane')
     expect(inquiryTarget({ header: 'solid', inquiry: true, project: 'golden-residence' })).toBe('#zapitvane')
-    expect(inquiryTarget({ header: 'solid', project: 'golden-residence' })).toBe('/contact?project=golden-residence')
-    expect(inquiryTarget({ header: 'solid' })).toBe('/contact')
+    expect(inquiryTarget({ header: 'solid', project: 'golden-residence' })).toBe('/contact?project=golden-residence#zapitvane')
+    expect(inquiryTarget({ header: 'solid' })).toBe('/contact#zapitvane')
+  })
+
+  // M3/M4 spec §7.1, §7.2, §8: a link to the contact form lands on it, with
+  // the project to choose there, if any.
+  it('inquiryHref: the contact page’s form, with the project', () => {
+    expect(inquiryHref()).toBe('/contact#zapitvane')
+    expect(inquiryHref('golden-residence')).toBe('/contact?project=golden-residence#zapitvane')
+    expect(inquiryHref('stroitelstvo')).toBe('/contact?project=stroitelstvo#zapitvane')
   })
 
   it('lets a keyboard skip straight to the page', async () => {

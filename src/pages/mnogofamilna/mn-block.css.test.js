@@ -155,6 +155,14 @@ describe('the head’s entrance (Diptych §5.5, M3 §4.2)', () => {
   })
 })
 
+// Spec M3 §4.1: from 901 px the head keeps out of the page's gutter, by the
+// site's rule for every hinge (src/styles/diptych.css; M3 ruling T5d), which
+// the page leaves to it.
+it('leaves the head’s gutter to the site’s hinge rule', () => {
+  const own = rules.filter((rule) => rule.selectors.some((selector) => /\.hinge\b/.test(selector)))
+  expect(own.map((rule) => rule.selector)).toEqual([])
+})
+
 // Sizes that set the page's length come from --screen-h (Global
 // Constraints): never vh or svh.
 it('sizes nothing in vh or svh', () => {

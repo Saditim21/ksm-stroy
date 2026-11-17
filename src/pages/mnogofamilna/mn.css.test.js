@@ -232,15 +232,12 @@ describe('the night grade (spec M3 §6.2 #4, #5)', () => {
 })
 
 // Spec M3 §4.1 (the critic's hinge fix): from 901 px no hinge's title or lead
-// on this page runs into the page's gutter. A margin, so a lead keeps its
-// measure where its half has the room (the lead's max-width includes its
-// padding).
-it('keeps the hinges’ titles and leads out of the gutter from 901 px', () => {
-  const WIDE = ['@media (min-width: 901px)']
-  for (const section of ['.mnb', '.mnl', '#galeriya']) {
-    expect(declaredFor(page, `${section} > .hinge > :first-child`, WIDE)['margin-left'], section).toBe('var(--gut)')
-    expect(declaredFor(page, `${section} > .hinge > :nth-child(2)`, WIDE)['margin-right'], section).toBe('var(--gut)')
-  }
+// runs into the page's gutter. That is now the site's rule, for every hinge
+// (src/styles/diptych.css; M3 ruling T5d), so the page sets no margin or
+// padding of its own on a hinge or its halves, which would undo it.
+it('leaves its hinges’ gutter to the site’s rule', () => {
+  const own = page.filter((rule) => rule.selectors.some((selector) => /\.hinge\b/.test(selector)))
+  expect(own.map((rule) => rule.selector)).toEqual([])
 })
 
 // Ruling F9, spec §11: nothing on the page takes the site's focus ring away.

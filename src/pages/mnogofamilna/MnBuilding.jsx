@@ -75,13 +75,8 @@ export default function MnBuilding() {
         />
       </figure>
       <div className="mns__text">
-        {/* Two lines, the second from „и“, which binds to its word (M3
-            §4.5): written in, so the reveal's split lines, which read a
-            no-break space as a space (SplitText), break where the landed
-            heading does, and no word moves as the split is undone. */}
         <h2 className="h2" id="mns-h" data-split="">
-          С&nbsp;магазини <br />
-          и&nbsp;подземни <em>гаражи</em>
+          С&nbsp;магазини и&nbsp;подземни <em>гаражи</em>
         </h2>
         <p className="mns__desc" data-fade="">
           Модерна многофамилна жилищна сграда с&nbsp;два блока (А&nbsp;и&nbsp;Б), гаражи и&nbsp;луксозни апартаменти

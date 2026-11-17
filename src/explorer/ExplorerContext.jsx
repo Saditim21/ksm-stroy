@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useAvailability } from '../data/availability/useAvailability'
 import useHydrated from '../hooks/useHydrated'
 import useMotionNow from '../motion/useMotionNow'
+import { holdEuRow, releaseOnFirstMove } from '../shell/landingHold'
 import { jumpToId } from '../utils/scroll'
 import { loadedSurfaces, loadSurfaces } from './loadSurfaces'
 import { buildModel, findUnit } from './model'
@@ -38,12 +39,12 @@ import useExplorerState from './useExplorerState'
 //   list instead, its dialogs, if any, over it.
 // - Its landing keeps the EU line in view (spec §1.9, §14.1): the jump would
 //   slide the header's EU row away (§6.2), and the dialogs cover the page.
-//   From just before the jump until the landing's dialogs have gone, <html>
-//   carries data-eu-hold: the header keeps its EU row where it is, and the
-//   dialogs leave it its 36 px (src/styles/shell.css, explorer.css). The
-//   landing ends once the address asks for no dialog the page can show: a
-//   close, an inquiry, a unit the sheets do not have, or dialogs whose chunk
-//   did not load. A floor opened in place is no landing.
+//   From just before the jump until the landing's dialogs have gone, the
+//   site's landing hold (src/shell/landingHold.js) holds the header's EU row
+//   where it is, and the dialogs leave it its 36 px. The landing ends once
+//   the address asks for no dialog the page can show: a close, an inquiry, a
+//   unit the sheets do not have, or dialogs whose chunk did not load. A floor
+//   opened in place is no landing.
 // - A landing on the list with no dialog over it holds the row the same way,
 //   from just before its jump until the visitor first moves the page, by a
 //   scroll, the wheel, a touch or a key, 400 ms on (M3 §8, as Контакти's
@@ -55,11 +56,6 @@ import useExplorerState from './useExplorerState'
 //   nothing shows.
 
 const UNIT_AFTER_MS = 820
-const holdEuRow = (on) => document.documentElement.toggleAttribute('data-eu-hold', on)
-// What lets a list's landing go: the visitor's first move of the page, this
-// long after it.
-const MOVES = ['scroll', 'wheel', 'touchmove', 'keydown']
-const LIST_HOLD_MS = 400
 
 export function ExplorerProvider({ project, routeBlock = null, children }) {
   const snapshot = useAvailability()
@@ -107,14 +103,7 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   useLayoutEffect(() => () => holdEuRow(false), [])
   useEffect(() => {
     if (landing !== 'list') return undefined
-    const end = () => setLanding(false)
-    const timer = setTimeout(() => {
-      for (const type of MOVES) window.addEventListener(type, end, { passive: true })
-    }, LIST_HOLD_MS)
-    return () => {
-      clearTimeout(timer)
-      for (const type of MOVES) window.removeEventListener(type, end)
-    }
+    return releaseOnFirstMove(() => setLanding(false))
   }, [landing])
 
   // The opening: where the stage grows from and what opened it, a new object

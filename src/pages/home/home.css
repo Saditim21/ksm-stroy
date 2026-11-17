@@ -4,15 +4,16 @@
    poster, ported from the concept's css/diptych.css (:135-153 the doors,
    :275-319 and :747-771 the hero, :321-335 and :773-776 the company,
    :337-370, :777-786 and :915-922 the services, :372-393 and :787-790 the
-   works, :395-403 and :794-795 the teaser's ways) with the tokens of
-   src/index.css, --screen-h for vh, and the spec's fixes: the seam is the
-   registered number --s, widening and the hero move's growth are CSS, the
-   phone seam drops to --sy, the triad is scoped so it renders at its size,
-   hover effects need a fine pointer, and without motion the services only
-   fade and the works' panel stays in place (spec §5.8). The inquiry's styles
-   are its component's (src/components/inquiry/inquiry.css), the teaser's
-   facade the explorer's (src/explorer/explorer.css), a section's padding the
-   site's (src/styles/diptych.css: .sec).
+   works) with the tokens of src/index.css, --screen-h for vh, and the
+   spec's fixes: the seam is the registered number --s, widening and the
+   hero move's growth are CSS, the phone seam drops to --sy, the triad is
+   scoped so it renders at its size, hover effects need a fine pointer, and
+   without motion the services only fade and the works' panel stays in place
+   (spec §5.8). The inquiry's styles are its component's
+   (src/components/inquiry/inquiry.css), the teaser's facade the explorer's
+   (src/explorer/explorer.css) and its ways their component's
+   (src/components/ui/ways.css), a section's padding the site's
+   (src/styles/diptych.css: .sec).
 
    Home's own stylesheet (src/pages/Home.jsx), after the site's: plain CSS,
    in no Tailwind layer.
@@ -794,52 +795,9 @@
 }
 
 /* ---------- the floor-by-floor teaser (spec §6.11; extract §4.13) ---------- */
+/* Its two ways into the explorer are the site's (src/components/ui/ways.css). */
 .teaser { background: var(--onyx); }
 .teaser__notice { margin-top: 24px; }
-/* The two ways into the explorer, a half each on the seam, between rules. */
-.ways {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-top: clamp(40px, calc(var(--screen-h) * .06), 72px);
-  border-top: 1px solid var(--hair-2);
-  border-bottom: 1px solid var(--hair-2);
-}
-.ways a {
-  position: relative;
-  display: grid;
-  gap: 6px;
-  padding: 36px clamp(28px, 4vw, 80px);
-  transition: background-color .35s var(--e-soft);
-}
-.ways a:first-of-type {
-  justify-items: end;
-  text-align: right;
-}
-.ways .serif {
-  font-size: clamp(40px, 4vw, 64px);
-  line-height: 1;
-  transition: color .25s;
-}
-.ways .small { font-size: 14px; }
-
-@media (hover: hover) and (pointer: fine) {
-  .ways a:hover { background: rgba(184, 149, 74, .06); }
-  .ways a:hover .serif { color: var(--brass-l); }
-}
-
-/* The ways stack on a phone, left-aligned, a brass rule between them. */
-@media (max-width: 900px) {
-  .ways { grid-template-columns: 1fr; }
-  .ways > .seam { display: none; }
-  .ways a,
-  .ways a:first-of-type {
-    justify-items: start;
-    padding: 26px var(--gut);
-    text-align: left;
-  }
-  .ways a + a { border-top: 1px solid var(--brass); }
-}
 
 /* ---------- the EU poster (spec §6.13) ---------- */
 /* The poster on its white plate, against the seam; beside it the project. */

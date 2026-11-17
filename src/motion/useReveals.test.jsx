@@ -105,7 +105,7 @@ it('[data-split] splits into masked lines that rise once, and reverts the split 
   const title = byId('title')
   expect(fakeMotion.SplitText.create).toHaveBeenCalledTimes(1)
   expect(fakeMotion.SplitText.create).toHaveBeenCalledWith(title, {
-    type: 'words,lines', mask: 'lines', linesClass: 'split-line', autoSplit: true, onSplit: expect.any(Function),
+    type: 'words,lines', mask: 'lines', linesClass: 'split-line', autoSplit: true, reduceWhiteSpace: false, onSplit: expect.any(Function),
   })
   const [split] = fakeMotion.splits
   const [, vars] = fromCall(split.lines)
@@ -120,6 +120,33 @@ it('[data-split] splits into masked lines that rise once, and reverts the split 
   expect(split.revert).not.toHaveBeenCalled()
   vars.onComplete()
   expect(split.revert).toHaveBeenCalledTimes(1)
+})
+
+// Spec §3.3, M3/M4 §4.5: a no-break space binds a one-letter word to the next
+// („С&nbsp;магазини“, „и&nbsp;подземни“). SplitText's default reduceWhiteSpace
+// reads it as a space (GSAP 3.15.1 collapses /\s+/, U+00A0 included), so the
+// split lines could break after „и“ and reflow as the split is undone (M3
+// ruling T5d). The options useReveals gives keep each no-break space inside its
+// word, which the real SplitText, given them, shows.
+it('a split heading keeps its no-break spaces', async () => {
+  allowMotion()
+  render(<Section />)
+  await flushIdle()
+
+  const [[, vars]] = fakeMotion.SplitText.create.mock.calls
+  expect(vars.reduceWhiteSpace).toBe(false)
+
+  const { SplitText } = await import('gsap/SplitText')
+  const heading = document.createElement('h2')
+  heading.innerHTML = 'С&nbsp;магазини и&nbsp;подземни <em>гаражи</em>'
+  document.body.append(heading)
+  const split = SplitText.create(heading, { ...vars, onSplit: undefined, autoSplit: false })
+  try {
+    expect(split.words.map((word) => word.textContent)).toEqual(['С\u00A0магазини', 'и\u00A0подземни', 'гаражи'])
+  } finally {
+    split.revert()
+    heading.remove()
+  }
 })
 
 it('[data-fade] fades body copy up 16 px once', async () => {

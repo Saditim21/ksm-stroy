@@ -8,6 +8,7 @@ const rules = rulesOf('src/styles/diptych.css')
 const LAYER = '@layer components'
 const FINE = '@media (hover: hover) and (pointer: fine)'
 const PHONE = '@media (max-width: 900px)'
+const WIDE = '@media (min-width: 901px)'
 
 // The rules for `selector` inside exactly these at-rules.
 const rulesIn = (selector, atRules) => rulesFor(rules, selector).filter((rule) => rule.atRules.join(' / ') === atRules.join(' / '))
@@ -152,6 +153,20 @@ describe('the seam and the halves (spec §4)', () => {
     expect(declared(only('.hinge .lead'))).toEqual({ 'text-wrap': 'pretty' })
   })
 
+  // M3/M4 spec §4.1 (the critic's hinge fix; M3 ruling T5d): from 901 px,
+  // where the halves stand side by side, no hinge's title or lead runs into
+  // the page's gutter, on any page. A margin, not the concepts' padding: a
+  // lead's max-width holds its padding, so it keeps its measure wherever its
+  // half has the room, and only a narrower half gives the gutter up.
+  it('a hinge keeps the gutter from 901 px', () => {
+    expect(declaredFor('.hinge > :first-child', [LAYER, WIDE])).toEqual({ 'margin-left': 'var(--gut)' })
+    expect(declaredFor('.hinge > :nth-child(2)', [LAYER, WIDE])).toEqual({ 'margin-right': 'var(--gut)' })
+    // On a phone the hinge's own padding is the gutter (below).
+    for (const selector of ['.hinge > :first-child', '.hinge > :nth-child(2)']) {
+      expect(Object.keys(declaredFor(selector, [LAYER, PHONE])).filter((prop) => prop.startsWith('margin')), selector).toEqual([])
+    }
+  })
+
   // At 900 px and under the halves stack and the seams hide; the hinge's lead
   // goes under a brass rule, 22 px from each side of it.
   it('stacks on a phone', () => {
@@ -184,4 +199,10 @@ describe('the seam and the halves (spec §4)', () => {
     expect(declared(only('.split-line-mask:not(:last-child)'))).toEqual({ 'margin-bottom': '0' })
     expect(rules.filter((rule) => rule.selectors.some((selector) => /\.line-mask\s*\+/.test(selector)))).toEqual([])
   })
+})
+
+// M3/M4 spec §4.3: the archive photos on Обекти and За нас take one grade, in
+// CSS; the Обекти book shows its photos in true colour.
+it('.grade has the spec’s filter', () => {
+  expect(declared(only('.grade'))).toEqual({ filter: 'saturate(.5) sepia(.2) brightness(.74) contrast(1.08)' })
 })

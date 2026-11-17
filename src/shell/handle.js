@@ -14,9 +14,10 @@ import { useMatches } from 'react-router'
 //   the top of the screen. 'solid' for any other page, which starts below the
 //   header (spec §4, §6.2);
 // - project: the project the page belongs to; „Запитване“ carries it to the
-//   contact form as /contact?project=…;
+//   contact form as /contact?project=…#zapitvane;
 // - inquiry: the page has an inquiry of its own, #zapitvane, where the
-//   header's „Запитване“ goes instead (spec §6.2, §6.12);
+//   header's „Запитване“ goes instead (spec §6.2, §6.12); without one, it
+//   goes to the contact page's form (M3/M4 spec §8);
 // - legacy: a page M2 has not rebuilt yet. It keeps production's light look
 //   inside the dark shell, with no grain over it (src/root.jsx).
 //
@@ -32,12 +33,15 @@ export function useRouteHandle() {
   return DEFAULT_HANDLE
 }
 
+// The contact page's form, #zapitvane, with `project` chosen there, if any
+// (M3/M4 spec §7.1–7.3, §8): the header's „Запитване“ on a page without an
+// inquiry of its own, and the pages' links to the form.
 export function inquiryHref(project) {
-  return project ? `/contact?project=${encodeURIComponent(project)}` : '/contact'
+  return `/contact${project ? `?project=${encodeURIComponent(project)}` : ''}#zapitvane`
 }
 
 // Where the header's „Запитване“ goes: the page's own inquiry, or else the
-// contact page with the page's project.
+// contact page's form with the page's project.
 export function inquiryTarget(handle) {
   return handle.inquiry ? '#zapitvane' : inquiryHref(handle.project)
 }

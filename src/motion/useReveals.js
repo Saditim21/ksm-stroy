@@ -9,7 +9,10 @@ import useMotion from './useMotion'
 //   0.9 s, 0.1 s apart, at `top 88%`. Once they land the split is reverted, so
 //   no mask is left to clip a glyph (spec §3.3). autoSplit splits again if a
 //   font arrives or the width changes before then; the tween goes back to
-//   SplitText, which carries it over.
+//   SplitText, which carries it over. A no-break space stays one (no
+//   reduceWhiteSpace, which reads it as a space), so the split lines break
+//   where the landed heading does, never after a one-letter word (M3 ruling
+//   T5d).
 // - data-fade: body copy fades in from 16 px below, over 1 s, at `top 92%`.
 // - data-draw: a seam (<Seam draw>) draws down over 1.3 s when its section
 //   (the seam's parent) reaches `top 82%`.
@@ -32,6 +35,7 @@ export default function useReveals(scopeRef) {
         mask: 'lines',
         linesClass: 'split-line',
         autoSplit: true,
+        reduceWhiteSpace: false,
         onSplit: (split) => gsap.from(split.lines, {
           yPercent: 112,
           duration: 0.9,

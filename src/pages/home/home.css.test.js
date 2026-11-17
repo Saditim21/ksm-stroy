@@ -466,27 +466,8 @@ describe('the works (spec §6.10; extract §4.12)', () => {
   })
 })
 
-// Spec §6.11; extract §4.13: the teaser's two ways into the explorer, a half
-// each on the seam between hair-2 rules, stacked on a phone under a brass
-// rule.
-describe('the teaser’s ways (spec §6.11)', () => {
-  it('sets the two ways a half each between rules, the first against the seam', () => {
-    expect(declaredFor('.ways')).toMatchObject({ display: 'grid', 'grid-template-columns': '1fr 1fr', 'border-top': '1px solid var(--hair-2)', 'border-bottom': '1px solid var(--hair-2)' })
-    expect(declaredFor('.ways a')).toMatchObject({ padding: '36px clamp(28px, 4vw, 80px)' })
-    expect(declaredFor('.ways a:first-of-type')).toMatchObject({ 'text-align': 'right', 'justify-items': 'end' })
-    expect(declaredFor('.ways .serif')['font-size']).toBe('clamp(40px, 4vw, 64px)')
-  })
-
-  it('stacks them on a phone, left-aligned, a brass rule between, no seam', () => {
-    // After the base rules, which would otherwise win at equal specificity.
-    const at = (selector, atRules) => rules.findIndex((rule) => rule.selectors.includes(selector) && rule.atRules.join(' / ') === atRules.join(' / '))
-    for (const selector of ['.ways', '.ways a:first-of-type']) expect(at(selector, [PHONE]), selector).toBeGreaterThan(at(selector, []))
-    expect(declaredFor('.ways', [PHONE])['grid-template-columns']).toBe('1fr')
-    expect(declaredFor('.ways > .seam', [PHONE]).display).toBe('none')
-    expect(declaredFor('.ways a + a', [PHONE])['border-top']).toBe('1px solid var(--brass)')
-    expect(declaredFor('.ways a:first-of-type', [PHONE])['text-align']).toBe('left')
-  })
-})
+// The teaser's two ways into the explorer are the site's Ways, whose rules
+// src/components/ui/ways.css.test.js reads (M3/M4 spec §4.4).
 
 // Spec §2.2: every :hover rule of Home's needs a pointer that hovers, so a
 // tap never leaves one behind.

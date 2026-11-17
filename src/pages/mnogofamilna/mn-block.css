@@ -21,18 +21,13 @@
 
 /* ---------- the head (spec M3 §6.5) ---------- */
 /* The way back and the H1 against the seam (.bp); after it, the block's
-   facts, its counts by status and the date they are from. */
+   facts, its counts by status and the date they are from. From 901 px it
+   keeps out of the page's gutter, as every hinge does (diptych.css). */
 .mbp .bp__title .split-line { display: block; }
 .mbh {
   display: grid;
   justify-items: start;
   gap: 14px;
-}
-/* From 901 px, where the halves stand side by side, the head keeps out of
-   the page's gutter (spec M3 §4.1). */
-@media (min-width: 901px) {
-  .mbp .bp.hinge > :first-child { margin-left: var(--gut); }
-  .mbp .bp.hinge > :nth-child(2) { margin-right: var(--gut); }
 }
 
 /* ---------- the floors beside the facade (spec M3 §6.5) ---------- */

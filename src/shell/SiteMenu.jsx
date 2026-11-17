@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router'
 import Seam from '../components/ui/Seam'
-import { SITE } from '../config/site'
+import { SITE, hoursShort } from '../config/site'
 import { grFree } from '../data/availability/select'
 import { useAvailability } from '../data/availability/useAvailability'
 import useScrollLock from '../hooks/useScrollLock'
@@ -180,7 +180,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
           </div>
           <div>
             <h2>Работно време</h2>
-            <p>{SITE.hours.join(' · ')}</p>
+            <p>{hoursShort().join(' · ')}</p>
           </div>
           <div>
             <h2>Адреси</h2>

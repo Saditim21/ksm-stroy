@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import Seam from '../../components/ui/Seam'
 import StatusCount from '../../components/ui/StatusCount'
 import { STATUS_ORDER } from '../../components/ui/status'
+import Ways from '../../components/ui/Ways'
 import { GR_FACTS } from '../../config/facts'
 import { useAvailability } from '../../data/availability/useAvailability'
 import Facade from '../../explorer/Facade'
@@ -16,8 +17,9 @@ import useReveals from '../../motion/useReveals'
 // #5; extract §4.13): the hinge, the facade in compact mode, the free
 // apartments of every floor on its block's edge, the stale-data notice when
 // spec §9 calls for it (the teaser speaks for Home), then the two ways into
-// the explorer: „Визуално“ and „По критерии“. The facade, the model and the
-// notice are Golden Residence's (GR_PROJECT), with no explorer around them.
+// the explorer, „Визуално“ and „По критерии“ (Ways). The facade, the model
+// and the notice are Golden Residence's (GR_PROJECT), with no explorer around
+// them.
 // The compact facade's caption is the teaser's own (spec §7.2): a live
 // region that names the floor a pointer, the keyboard or a first tap is on,
 // „Блок А · *етаж 5*“, with its counts, else the hint.
@@ -31,6 +33,16 @@ import useReveals from '../../motion/useReveals'
 // reveal as everywhere (useReveals); the markup is the final state.
 
 const GR = '/projects/golden-residence'
+
+// The two ways into the explorer: the facade, and the list with its filters.
+const WAYS = [
+  { title: 'Визуално', sub: 'Изберете етаж от фасадата', to: `${GR}#explorer` },
+  {
+    title: 'По критерии',
+    sub: <>Всички {GR_FACTS.apartments} апартамента в&nbsp;списък с&nbsp;филтри</>,
+    to: `${GR}?view=list#explorer`,
+  },
+]
 
 // A no-break space after the one-letter „и“ (spec §3.3).
 const HINT = 'Посочете етаж: свободните, резервираните и\u00a0продадените апартаменти на него. Кликнете, за да отворите плана му.'
@@ -76,18 +88,7 @@ export default function TeaserSection() {
       </div>
       <Facade project={GR_PROJECT} model={model} mode="compact" caption={caption} onOpenFloor={openFloor} />
       <StaleNotice project={GR_PROJECT} className="teaser__notice" />
-      <nav className="ways" aria-label="Два начина да изберете апартамент">
-        <Seam />
-        <Link to={`${GR}#explorer`} prefetch="intent">
-          <span className="serif">Визуално</span> <span className="small">Изберете етаж от фасадата</span>
-        </Link>
-        <Link to={`${GR}?view=list#explorer`} prefetch="intent">
-          <span className="serif">По критерии</span>{' '}
-          <span className="small">
-            Всички {GR_FACTS.apartments} апартамента в&nbsp;списък с&nbsp;филтри
-          </span>
-        </Link>
-      </nav>
+      <Ways label="Два начина да изберете апартамент" ways={WAYS} />
     </section>
   )
 }

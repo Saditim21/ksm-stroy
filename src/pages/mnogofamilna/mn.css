@@ -272,21 +272,6 @@
 .mn-night--persp { mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1356' height='826' viewBox='0 0 1356 826'%3E%3Cpath d='M0 826L0 574L17 574L21 522L25 522L26 527L26 565L32 572L54 572L54 567L59 567L61 563L108 568L136 566L138 569L151 572L155 546L156 441L175 434L176 403L260 382L302 390L305 388L305 371L395 347L417 349L435 345L554 381L554 485L556 501L563 502L565 312L574 308L574 301L731 260L740 260L770 273L782 272L809 260L809 240L1093 167L1097 167L1168 241L1168 273L1179 282L1180 502L1183 553L1196 558L1238 557L1253 563L1279 562L1293 556L1296 545L1303 149L1307 140L1318 140L1331 150L1348 151L1348 51L1356 53L1356 826Z'/%3E%3C/svg%3E"); }
 .mn-gal--persp { --at: 58% 50%; }
 
-/* From 901 px, where a hinge's halves stand side by side, its title and its
-   lead wrap short of the page's gutter (spec M3 §4.1, the critic's hinge
-   fix; the concept's mnogofamilna.css:67): on this page's own sections and
-   its gallery (#galeriya). A margin, not the concept's padding, so a lead
-   keeps its full measure wherever its half has the room (1440 px and up),
-   and only a narrower half (1024 px) takes the gutter from it. */
-@media (min-width: 901px) {
-  .mnb > .hinge > :first-child,
-  .mnl > .hinge > :first-child,
-  #galeriya > .hinge > :first-child { margin-left: var(--gut); }
-  .mnb > .hinge > :nth-child(2),
-  .mnl > .hinge > :nth-child(2),
-  #galeriya > .hinge > :nth-child(2) { margin-right: var(--gut); }
-}
-
 /* ---------- phones (spec M3 §4.1: the halves stack) ---------- */
 @media (max-width: 900px) {
   .mnx { padding-top: 22px; }

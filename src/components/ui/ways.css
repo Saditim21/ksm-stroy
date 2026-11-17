@@ -1,0 +1,57 @@
+/* The closing pair of ways (Ways.jsx; M3/M4 spec §4.4; Diptych spec §6.11,
+   extract §4.13), Home's teaser's, ported from the concept's
+   css/diptych.css:397-403, :731-732 and :791-792 with the tokens of
+   src/index.css and --screen-h for vh: a half each on the seam, between
+   hair-2 rules, the first against the seam; stacked on a phone,
+   left-aligned, a brass rule between them. A way is a link or a button, so
+   the rules name the ways by their place, after the <nav>'s seam, and a
+   button reads as a link does, from the start of its line.
+
+   The component's own stylesheet: plain CSS, in no Tailwind layer, on the
+   routes that show the ways. Hover effects only where a pointer hovers
+   (spec §2.2). */
+
+.ways {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: clamp(40px, calc(var(--screen-h) * .06), 72px);
+  border-top: 1px solid var(--hair-2);
+  border-bottom: 1px solid var(--hair-2);
+}
+.ways > :not(.seam) {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 36px clamp(28px, 4vw, 80px);
+  text-align: start;
+  transition: background-color .35s var(--e-soft);
+}
+.ways > .seam + * {
+  justify-items: end;
+  text-align: right;
+}
+.ways .serif {
+  font-size: clamp(40px, 4vw, 64px);
+  line-height: 1;
+  transition: color .25s;
+}
+.ways .small { font-size: 14px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .ways > :not(.seam):hover { background: rgba(184, 149, 74, .06); }
+  .ways > :not(.seam):hover .serif { color: var(--brass-l); }
+}
+
+/* The ways stack on a phone, left-aligned, a brass rule between them. */
+@media (max-width: 900px) {
+  .ways { grid-template-columns: 1fr; }
+  .ways > .seam { display: none; }
+  .ways > :not(.seam),
+  .ways > .seam + * {
+    justify-items: start;
+    padding: 26px var(--gut);
+    text-align: left;
+  }
+  .ways > :not(.seam) + :not(.seam) { border-top: 1px solid var(--brass); }
+}

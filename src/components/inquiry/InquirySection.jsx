@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { SITE } from '../../config/site'
+import { SITE, hoursShort } from '../../config/site'
 import useReveals from '../../motion/useReveals'
 import Seam from '../ui/Seam'
 import InquiryForm from './InquiryForm'
@@ -75,7 +75,7 @@ export default function InquirySection({ page = 'golden-residence', copy = COPY[
           </a>
         ) : null}
         <p className="small" data-fade="">
-          {SITE.hours.join(', ')}
+          {hoursShort().join(', ')}
         </p>
       </div>
       <div className="contact__r">

@@ -1,8 +1,9 @@
 /* Diptych's type roles, the heading's italic word, the actions, the two
-   grounds and the seam's layout primitives (spec
+   grounds, the seam's layout primitives and the archive photos' grade (spec
    docs/superpowers/specs/2026-11-14-ksmstroy-diptych-design.md, §3, §4,
-   §6.1, §11), ported from the concept's css/diptych.css:59-98, :188-195 and
-   :731-735 with the tokens of src/index.css.
+   §6.1, §11; M3/M4 spec §4.1, §4.3), ported from the concept's
+   css/diptych.css:59-98, :188-195 and :731-735 with the tokens of
+   src/index.css.
 
    In Tailwind's components layer: after the base styles, so Preflight's
    `[type='button'] { background-color: transparent }` never beats a solid
@@ -197,6 +198,16 @@
      leaves a long last word alone on a phone, and Firefox any, so the leads
      also bind their last two words, and „КСМ Строй“, with no-break spaces. */
   .hinge .lead { text-wrap: pretty; }
+  /* From 901 px, where the halves stand side by side, a hinge's title and
+     its lead wrap short of the page's gutter, on every page (M3/M4 spec
+     §4.1, the critic's hinge fix; the concepts' hinge rule). A margin, not
+     the concepts' padding: a lead's max-width holds its padding, so it keeps
+     its measure wherever its half has the room (1440 px and up), and only a
+     narrower half (1024 px) gives the gutter up. */
+  @media (min-width: 901px) {
+    .hinge > :first-child { margin-left: var(--gut); }
+    .hinge > :nth-child(2) { margin-right: var(--gut); }
+  }
 
   /* At 900 px and under the halves stack and the seams hide. The hinge's
      lead goes under a brass rule; a section's second half takes its own rule
@@ -229,4 +240,10 @@
      back in one margin, the next one's. */
   .split-line-mask + .split-line-mask { margin-top: -.38em; }
   .split-line-mask:not(:last-child) { margin-bottom: 0; }
+
+  /* ---------- photos (M3/M4 spec §4.3) ---------- */
+  /* The archive photos' one grade, on Обекти and За нас: muted, warmed and
+     darkened toward the site's ground. The Обекти book shows its photos in
+     true colour. */
+  .grade { filter: saturate(.5) sepia(.2) brightness(.74) contrast(1.08); }
 }
