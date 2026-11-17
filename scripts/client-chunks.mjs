@@ -58,7 +58,8 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // the reveals and the preload helpers with them, and the facade's pages
 // have nothing else in common that it lacks (its module graph, read in M4
 // Task 4: the motion hook, the reveals and the two preload helpers), so no
-// head is theirs alone: it takes in the facade's group the same way.
+// head is theirs alone: it takes in the facade's group the same way. So
+// does За нас (M4 Task 5), which shares the same four and nothing more.
 // Those heads are other pages' too: the motion hook is every page's with
 // the system's reveals (useReveals, useWipes), and the hydration hook every
 // page's whose view waits for hydration. Such a page fails the build until
@@ -68,21 +69,21 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // pages, or give the group a head that page doesn't import.
 export const GROUPS = [
   // Its pages, which all have motion: Home, both projects' pages and their
-  // block pages, Контакти, Продажби and Обекти. The form, the facade and
-  // what they share, with riders that only some of those pages show: the
-  // form itself and the closing inquiry's section (not on Продажби or
-  // Обекти), the facade itself (on none of the three), the status counts
-  // (not on Контакти or Обекти), the number that rolls in (not on a
-  // Многофамилна block page or Обекти), the stale-data notice with its
-  // stylesheet (only on Home, Golden Residence's pages, Контакти and
-  // Продажби) and the explorer's context (only on the projects' pages and
-  // Продажби). A page loads them unused, as a Многофамилна page did before;
-  // without them, Home and Golden Residence, whose first load M4 caps, would
-  // load more.
+  // block pages, Контакти, Продажби, Обекти and За нас. The form, the
+  // facade and what they share, with riders that only some of those pages
+  // show: the form itself and the closing inquiry's section (not on
+  // Продажби, Обекти or За нас), the facade itself (on none of the four),
+  // the status counts (not on Контакти, Обекти or За нас), the number that
+  // rolls in (not on a Многофамилна block page, Обекти or За нас), the
+  // stale-data notice with its stylesheet (only on Home, Golden Residence's
+  // pages, Контакти and Продажби) and the explorer's context (only on the
+  // projects' pages and Продажби). A page loads them unused, as a
+  // Многофамилна page did before; without them, Home and Golden Residence,
+  // whose first load M4 caps, would load more.
   {
     name: 'facade',
     head: 'src/motion/useMotion.js',
-    pages: ['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx'],
+    pages: ['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx', 'src/routes/about.jsx'],
     riders: ['src/components/inquiry/useInquiryForm.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/explorer/Facade.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx', 'src/explorer/useExplorer.js'],
   },
   // Its pages, which all wait for hydration: every page of a project, and

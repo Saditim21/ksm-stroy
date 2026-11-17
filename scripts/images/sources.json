@@ -1438,5 +1438,39 @@
       960,
       1400
     ]
+  },
+  {
+    "id": "about-slider-1",
+    "group": "about",
+    "src": "src/assets/images/optimized/slider01.webp",
+    "widths": [
+      480,
+      720,
+      960,
+      1400,
+      2048
+    ]
+  },
+  {
+    "id": "about-slider-2",
+    "group": "about",
+    "src": "src/assets/images/optimized/slider02.webp",
+    "widths": [
+      480,
+      720,
+      960,
+      1400,
+      2000
+    ]
+  },
+  {
+    "id": "about-slider-3",
+    "group": "about",
+    "src": "src/assets/images/slider03.webp",
+    "widths": [
+      480,
+      720,
+      1024
+    ]
   }
 ]

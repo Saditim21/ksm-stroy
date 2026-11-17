@@ -26,7 +26,7 @@ const blockPages = (project, file) => blockPaths(project).map((path) => page(pat
 
 export default [
   index('pages/Home.jsx'),
-  page('about', 'pages/About.jsx'),
+  page('about', 'routes/about.jsx'),
   page('projects', 'routes/projects.jsx'),
   page('projects/golden-residence', 'routes/golden-residence.jsx'),
   ...blockPages('golden-residence', 'routes/golden-residence-block.jsx'),

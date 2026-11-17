@@ -1,0 +1,1028 @@
+/* За нас (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §7.4; Diptych §5.5, §11), ported from the concept's css/za-nas.css
+   (:101-165 the founding, :167-197 the tradition, :205-217 the team,
+   :219-233 the figures, :235-243 the values, :245-259 the offer, :261-273
+   mission and vision, :275-285 the call to action, :287-366 the phones) with
+   the tokens of src/index.css, --screen-h for vh and svh, and the system's
+   type: the H1 at Home's slogan size, the motto at h3 size, and no heading
+   larger than its section's h2, the value words smaller than theirs (M3/M4
+   §4.1). The shell, the seam, the section's padding, the hinge and the
+   actions are the site's (src/shell, src/styles/diptych.css), and so is the
+   photos' one grade (.grade, M3/M4 §4.3).
+
+   The page's own stylesheet (src/routes/about.jsx), after the site's: plain
+   CSS, in no Tailwind layer.
+
+   The founding draws itself by CSS from first paint (Diptych §5.5), only
+   under the motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes, held by a fill;
+   every step waits --arrive (src/styles/motion.css). Below the fold only the
+   system's reveals run (useReveals, useWipes). */
+
+/* A hinged part's gap to the seam, either side (Diptych §2.2, the hinge's).
+   A word too long for its column breaks rather than run off the screen: no
+   word is, at the page's own spacing, but a reader's wider text spacing
+   (WCAG 1.4.12) makes „и електродейности“ wider than a 320 px phone. The
+   phones' single columns may shrink below their longest word for it
+   (minmax(0, 1fr), below), and a box that fits its text (a phone's team
+   sentence) takes the screen's width, not its longest run's: `anywhere`,
+   unlike `break-word`, counts the breaks it allows in that width. */
+.origin,
+.tradition,
+.team,
+.band,
+.values,
+.offer,
+.mv,
+.cta {
+  --hg: clamp(24px, 3vw, 52px);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 1. #top, the founding drawn on the seam (spec §7.4) ---------- */
+/* At least a screen under the header. The title sits a step under the bar,
+   the drawing under it; the space a tall screen has to spare goes above the
+   title, down which the line comes, and under the caption. The title, at the
+   slogan's size (spec §4.1), takes a second line on its right where the
+   concept's took one; the steps above it and under it give that line back
+   (.035 of the screen, the concept's .05), so at 1440 × 900 the founding
+   sentence still ends inside the first viewport. */
+.origin {
+  --pad-t: clamp(30px, calc(var(--screen-h) * .035), 60px);
+  --lens: clamp(124px, 12.6vw, 216px);
+  --lens-h: calc(var(--lens) * 1.72);
+  --name: clamp(56px, 7.4vw, 124px);
+  --node: clamp(16px, 1.6vw, 26px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(var(--screen-h) - var(--header-h));
+  padding-bottom: clamp(40px, calc(var(--screen-h) * .065), 72px);
+}
+.origin::after {
+  content: '';
+  flex: 1 0 0;
+}
+.origin__top {
+  position: relative;
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(var(--pad-t), 1fr) auto auto;
+}
+/* The line, the seam: from under the header down through the title to the
+   father, and again from the lens down to the company. */
+.stem {
+  display: block;
+  width: 1px;
+  background: var(--brass);
+  transform-origin: 50% 0;
+}
+.stem--top {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  justify-self: center;
+  z-index: 1;
+}
+.stem--bot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  margin-left: -.5px;
+}
+/* The title hinged on the seam: „Добре *дошли*“ ends at it, „в КСМ Строй
+   ООД“ starts after it, on the first line's level. At the slogan's size
+   the name is wider than its half up to about 1850 px: its two masks then
+   break as words do, before „ООД“. */
+.origin__h1 {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -.01em;
+}
+.origin__h1 em { color: var(--brass-l); }
+.origin__l {
+  padding: 0 var(--hg) 0 var(--gut);
+  text-align: right;
+}
+.origin__r { padding: 0 var(--gut) 0 var(--hg); }
+.origin__h1 .line-mask,
+.node--bot .line-mask {
+  display: inline-block;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.origin__h1 .split-line,
+.node--bot .split-line { display: block; }
+/* The order the parts rise in: the left part, then the right one's. */
+.origin__r .line-mask { --n: 1; }
+.origin__r .line-mask + .line-mask { --n: 2; }
+
+/* The father, either side of the line: his village and his trade. */
+.node {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.node__l {
+  padding: 0 var(--node) 0 var(--gut);
+  text-align: right;
+}
+.node__r { padding: 0 var(--gut) 0 var(--node); }
+.node--top {
+  grid-column: 1;
+  grid-row: 3;
+  margin-top: clamp(26px, calc(var(--screen-h) * .035), 54px);
+  padding-bottom: clamp(12px, calc(var(--screen-h) * .018), 18px);
+  color: var(--ivory-2);
+  font-family: var(--serif);
+  font-size: clamp(20px, 1.65vw, 28px);
+  font-weight: 500;
+  line-height: 1.15;
+}
+.node--top > .node__r { --n: 1; }
+
+/* The lens: the line opens into two, a brother either side of it, and „и“
+   inside. */
+.lineage { margin: 0; }
+.lens {
+  display: grid;
+  grid-template-columns: 1fr var(--lens) 1fr;
+  align-items: center;
+}
+.lens__arcs {
+  position: relative;
+  height: var(--lens-h);
+}
+.lens__arcs svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.lens__arcs path {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.lens__and {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: var(--brass-l);
+  font-size: calc(var(--name) * .5);
+  line-height: 1;
+  transform: translate(-50%, -54%);
+}
+.lens__name {
+  font-family: var(--serif);
+  font-size: var(--name);
+  font-weight: 500;
+  line-height: .9;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+}
+.lens__name span { display: inline-block; }
+.lens__name--l {
+  justify-self: end;
+  padding-right: calc(var(--name) * .16);
+}
+.lens__name--r {
+  justify-self: start;
+  padding-left: calc(var(--name) * .16);
+}
+
+/* The line closes again at the company: „септември | 2008“. */
+.node--bot {
+  position: relative;
+  padding-top: clamp(14px, calc(var(--screen-h) * .02), 20px);
+  font-family: var(--serif);
+  font-size: clamp(30px, 3vw, 52px);
+  font-weight: 500;
+  line-height: 1;
+}
+.node--bot .node__r { font-weight: 600; }
+.node--bot .node__r .line-mask { --n: 1; }
+.lineage__cap {
+  max-width: 37em;
+  margin: clamp(22px, calc(var(--screen-h) * .034), 34px) auto 0;
+  padding: 0 var(--gut);
+  color: var(--ivory-2);
+  font-size: 16px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* ---------- 2. #traditsiya, the tradition and what the founders promised ---------- */
+.tradition { background: var(--onyx); }
+.tradition__head {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+}
+.tradition__head > .seam {
+  top: -18px;
+  bottom: -18px;
+}
+.tradition__l {
+  display: grid;
+  justify-items: end;
+  padding: 0 var(--hg) 0 var(--gut);
+  text-align: right;
+}
+.tradition__l .h2 { max-width: 8.6em; }
+.tradition__r {
+  display: grid;
+  align-content: start;
+  gap: clamp(26px, calc(var(--screen-h) * .04), 40px);
+  padding: 10px var(--gut) 0 var(--hg);
+}
+/* The motto closes the founders' sentence at h3 size (spec §7.4), the one
+   whole italic run here, in production's quotes. */
+.motto {
+  max-width: 11em;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: var(--fs-h3);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.08;
+}
+.motto .q { color: var(--brass); }
+
+/* What the founders promised: the heading across the seam, the pair outside
+   | inside, then two more, and the client's closing line under a short brass
+   stem. */
+.deeds { margin-top: clamp(112px, calc(var(--screen-h) * .17), 190px); }
+.deeds__body { position: relative; }
+.deeds__body > .seam {
+  top: -18px;
+  bottom: 0;
+  z-index: 4;
+}
+.deeds__h {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  margin-bottom: clamp(40px, calc(var(--screen-h) * .065), 68px);
+  font-family: var(--serif);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -.005em;
+}
+.deeds__hl {
+  padding: 0 var(--hg) 0 var(--gut);
+  text-align: right;
+}
+.deeds__hr { padding: 0 var(--gut) 0 var(--hg); }
+.deeds__pair,
+.deeds__more {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.deed {
+  display: grid;
+  align-content: start;
+}
+.deed--l {
+  justify-items: end;
+  text-align: right;
+}
+.deed__ph {
+  position: relative;
+  justify-self: stretch;
+  height: clamp(360px, calc(var(--screen-h) * .6), 620px);
+  margin: 0;
+  overflow: hidden;
+  background: var(--umber);
+}
+.deed__ph picture,
+.deed__ph img {
+  width: 100%;
+  height: 100%;
+}
+.deed__ph img { object-fit: cover; }
+.deed--r .deed__ph img { object-position: 46% 50%; }
+.deed__ph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 13, 11, 0) 62%, rgba(14, 13, 11, .55) 100%);
+  pointer-events: none;
+}
+.deed__ph figcaption {
+  position: absolute;
+  bottom: 18px;
+  left: var(--gut);
+  z-index: 1;
+  padding: 7px 11px;
+  background: rgba(14, 13, 11, .66);
+  color: var(--ivory-2);
+  font-size: 13px;
+  text-align: left;
+}
+/* The activities' names: at the section's h2 size, never above it. */
+.deed__t {
+  margin-top: clamp(26px, calc(var(--screen-h) * .04), 40px);
+  font-family: var(--serif);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.008em;
+}
+.deed--l .deed__t,
+.deed--l .deed__d { padding: 0 var(--hg) 0 var(--gut); }
+.deed--r .deed__t,
+.deed--r .deed__d { padding: 0 var(--gut) 0 var(--hg); }
+.deed__d {
+  max-width: calc(29em + var(--gut) + var(--hg));
+  margin-top: 18px;
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.deeds__more {
+  margin-top: clamp(64px, calc(var(--screen-h) * .1), 104px);
+  padding-top: clamp(36px, calc(var(--screen-h) * .056), 56px);
+  border-top: 1px solid var(--hair-2);
+}
+.deed--text .deed__t {
+  margin-top: 0;
+  font-size: clamp(32px, 2.8vw, 48px);
+  line-height: 1.05;
+}
+.deeds__close {
+  position: relative;
+  max-width: 24em;
+  margin: clamp(40px, calc(var(--screen-h) * .065), 64px) auto 0;
+  padding: clamp(36px, calc(var(--screen-h) * .06), 60px) var(--gut) 0;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.1vw, 34px);
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+}
+.deeds__close::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: clamp(22px, calc(var(--screen-h) * .036), 36px);
+  background: var(--brass);
+}
+
+/* ---------- 3. #koi-sme-nie, who we are ---------- */
+/* The tradition's foot is its top. */
+.team {
+  padding-top: 0;
+  background: var(--onyx);
+}
+.team .hinge { align-items: start; }
+.team__lead {
+  display: grid;
+  gap: 18px;
+}
+.team__body {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+}
+.team__body > .seam {
+  top: 0;
+  bottom: 0;
+}
+.team__say {
+  justify-self: end;
+  max-width: 15.5em;
+  padding: 0 var(--hg) 0 var(--gut);
+  font-family: var(--serif);
+  font-size: clamp(28px, 2.5vw, 42px);
+  font-weight: 500;
+  line-height: 1.18;
+  letter-spacing: -.006em;
+  text-align: right;
+}
+/* The specialists as a ruled list, as the works list is. */
+.crew { padding: 0 var(--gut) 0 var(--hg); }
+.crew__h {
+  margin-bottom: 14px;
+  color: var(--stone);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+.crew__list {
+  max-width: 34em;
+  border-top: 1px solid var(--hair-2);
+}
+.crew__list li {
+  display: grid;
+  gap: 6px;
+  padding: 18px 0 20px;
+  border-bottom: 1px solid var(--hair-2);
+}
+.crew__t {
+  font-family: var(--serif);
+  font-size: clamp(26px, 2.2vw, 36px);
+  font-weight: 500;
+  line-height: 1.06;
+}
+.crew__d {
+  max-width: 32em;
+  color: var(--ivory-2);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ---------- 4. #opit, the figures at the foot of two aerial photos ---------- */
+.band {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: clamp(460px, calc(var(--screen-h) * .78), 780px);
+  background: var(--umber);
+}
+.band > .seam { z-index: 4; }
+.band__ph {
+  position: relative;
+  overflow: hidden;
+}
+.band__ph picture,
+.band__ph img {
+  width: 100%;
+  height: 100%;
+}
+.band__ph img { object-fit: cover; }
+.band__ph--l img { object-position: 46% 60%; }
+.band__ph--r img { object-position: 40% 50%; }
+/* The shade the figures stand in. */
+.band__ph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 13, 11, .3) 0%, rgba(14, 13, 11, 0) 26%, rgba(14, 13, 11, 0) 42%, rgba(14, 13, 11, .92) 100%);
+  pointer-events: none;
+}
+.band__facts {
+  position: absolute;
+  right: 0;
+  bottom: clamp(36px, calc(var(--screen-h) * .07), 76px);
+  left: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.band__half {
+  display: flex;
+  gap: clamp(30px, 4vw, 72px);
+}
+.band__half--l {
+  justify-content: flex-end;
+  padding: 0 var(--hg) 0 var(--gut);
+}
+.band__half--r { padding: 0 var(--gut) 0 var(--hg); }
+.band__half--l .fig { text-align: right; }
+/* Plain serif text: they never count up (spec §2). */
+.fig dt {
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(56px, 5.4vw, 92px);
+  font-weight: 600;
+  line-height: .9;
+  white-space: nowrap;
+}
+.fig dd {
+  margin-top: 10px;
+  color: var(--ivory-2);
+  font-size: 15px;
+}
+
+/* ---------- 5. #cennosti, the values read across the seam ---------- */
+.values { background: var(--onyx); }
+.values .hinge { margin-bottom: clamp(48px, calc(var(--screen-h) * .08), 88px); }
+.ledger { position: relative; }
+.ledger > .seam {
+  top: 0;
+  bottom: 0;
+}
+.ledger__rows { border-top: 1px solid var(--hair-2); }
+.ledger__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: clamp(28px, calc(var(--screen-h) * .046), 46px) 0;
+  border-bottom: 1px solid var(--hair-2);
+}
+/* Each word ends at the seam, smaller than the section's h2 (spec §4.1). */
+.ledger__k {
+  padding: 0 var(--hg) 0 var(--gut);
+  font-family: var(--serif);
+  font-size: clamp(36px, 3.8vw, 64px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.01em;
+  text-align: right;
+}
+.ledger__d {
+  max-width: calc(30em + var(--gut) + var(--hg));
+  padding: 0 var(--gut) 0 var(--hg);
+  color: var(--ivory-2);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* ---------- 6. #uslugi, what | why ---------- */
+/* The services on onyx face the reasons on umber. */
+.offer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--onyx);
+}
+.offer > .seam { z-index: 4; }
+.offer__l,
+.offer__r {
+  display: grid;
+  align-content: start;
+  gap: clamp(32px, calc(var(--screen-h) * .05), 48px);
+  padding-top: clamp(96px, calc(var(--screen-h) * .15), 168px);
+  padding-bottom: clamp(96px, calc(var(--screen-h) * .15), 168px);
+}
+.offer__l {
+  justify-items: end;
+  padding-right: var(--hg);
+  padding-left: var(--gut);
+  text-align: right;
+}
+.offer__l .h2 { max-width: 8em; }
+.offer__r {
+  padding-right: var(--gut);
+  padding-left: var(--hg);
+  background: var(--umber);
+}
+.offer__r .h3 {
+  max-width: 12em;
+  padding-top: .45em;
+}
+.offer__list,
+.why {
+  width: min(100%, 30em);
+  border-top: 1px solid var(--hair-2);
+}
+.offer__list li {
+  padding: 18px 0 20px;
+  border-bottom: 1px solid var(--hair-2);
+}
+.offer__t {
+  font-family: var(--serif);
+  font-size: clamp(26px, 2.2vw, 38px);
+  font-weight: 500;
+  line-height: 1.08;
+}
+.offer__list p {
+  margin-top: 6px;
+  color: var(--stone);
+  font-size: 15px;
+  line-height: 1.6;
+}
+/* The reasons, each after a brass dash. */
+.why li {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 18px 0 19px;
+  border-bottom: 1px solid var(--hair-2);
+  color: var(--ivory);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.why li::before {
+  content: '';
+  flex: none;
+  width: 22px;
+  height: 1px;
+  background: var(--brass);
+  transform: translateY(-.32em);
+}
+
+/* ---------- 7. #misiya, mission | vision ---------- */
+/* The heading read across the seam, which runs on into the two texts. */
+.mv { background: var(--onyx); }
+.mv__body { position: relative; }
+.mv__body > .seam {
+  top: -18px;
+  bottom: 0;
+}
+.mv__h,
+.mv__pair {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.mv__h {
+  align-items: end;
+  margin-bottom: clamp(48px, calc(var(--screen-h) * .08), 88px);
+}
+.mv__hl {
+  padding: 0 var(--hg) 0 var(--gut);
+  text-align: right;
+}
+.mv__hr { padding: 0 var(--gut) 0 var(--hg); }
+.mv__half {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+.mv__half--l {
+  justify-items: end;
+  padding: 0 var(--hg) 0 var(--gut);
+  text-align: right;
+}
+.mv__half--r { padding: 0 var(--gut) 0 var(--hg); }
+.mv__k {
+  color: var(--stone);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+.mv__t {
+  max-width: 19em;
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.1vw, 34px);
+  font-weight: 500;
+  line-height: 1.32;
+}
+
+/* ---------- 8. #rabota, the call to action beside a finished project ---------- */
+.cta {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: clamp(540px, calc(var(--screen-h) * .82), 820px);
+  border-top: 1px solid var(--hair-2);
+  background: var(--onyx);
+}
+.cta > .seam { z-index: 4; }
+.cta__l {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 26px;
+  padding: clamp(96px, calc(var(--screen-h) * .14), 160px) var(--hg) clamp(96px, calc(var(--screen-h) * .14), 160px) var(--gut);
+  text-align: right;
+}
+.cta__l .h2 { max-width: 8.4em; }
+.cta__l .lead { max-width: 26em; }
+.cta__acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+}
+.cta__ph {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: var(--umber);
+}
+.cta__ph picture,
+.cta__ph img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cta__ph img {
+  object-fit: cover;
+  object-position: 62% 50%;
+}
+.cta__ph::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(14, 13, 11, 0) 55%, rgba(14, 13, 11, .7) 100%);
+  pointer-events: none;
+}
+
+/* ---------- phones: the halves stack, images first, the seams hide and the
+   second half takes the brass rule (M3/M4 §4.1). The founding keeps its
+   vertical line: it is a figure, not a split. ---------- */
+@media (max-width: 900px) {
+  /* The drawing at a phone's scale. The section still fills the screen, its
+     spare room under the caption, so the page's reveals begin below the
+     fold. */
+  .origin {
+    --pad-t: clamp(30px, calc(var(--screen-h) * .05), 60px);
+    --lens: clamp(76px, 23vw, 120px);
+    --lens-h: calc(var(--lens) * 2.1);
+    --name: clamp(32px, 10.4vw, 58px);
+    --node: 12px;
+    padding-top: 34px;
+  }
+  .origin__top { flex-grow: 0; }
+  .origin__h1 {
+    grid-template-columns: minmax(0, 1fr);
+    font-size: clamp(31px, 9.6vw, 52px);
+    line-height: 1.08;
+    text-align: center;
+  }
+  .origin__l,
+  .origin__r {
+    padding: 0 var(--gut);
+    text-align: center;
+  }
+  .stem--top { grid-row: 3 / 4; }
+  .node--top {
+    margin-top: 14px;
+    font-size: clamp(16px, 4.4vw, 20px);
+  }
+  .node--bot { font-size: clamp(26px, 7.6vw, 36px); }
+  .lineage__cap {
+    font-size: 15px;
+    text-align: left;
+  }
+
+  .tradition__head { grid-template-columns: minmax(0, 1fr); }
+  .tradition__head > .seam,
+  .deeds__body > .seam,
+  .team__body > .seam,
+  .ledger > .seam,
+  .offer > .seam,
+  .mv__body > .seam,
+  .cta > .seam { display: none; }
+  .tradition__l {
+    justify-items: start;
+    padding: 0 var(--gut);
+    text-align: left;
+  }
+  .tradition__r {
+    margin: 36px var(--gut) 0;
+    padding: 30px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .deeds__h {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 var(--gut);
+  }
+  .deeds__hl,
+  .deeds__hr {
+    padding: 0;
+    text-align: left;
+  }
+  .deeds__pair,
+  .deeds__more { grid-template-columns: minmax(0, 1fr); }
+  .deed,
+  .deed--l {
+    justify-items: start;
+    text-align: left;
+  }
+  .deed__ph {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .deed--r .deed__ph { border-top: 1px solid var(--brass); }
+  .deed--l .deed__t,
+  .deed--l .deed__d,
+  .deed--r .deed__t,
+  .deed--r .deed__d { padding: 0 var(--gut); }
+  .deed--l { padding-bottom: 56px; }
+  .deeds__more {
+    gap: 36px;
+    margin-top: 56px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .deed--text.deed--l { padding-bottom: 0; }
+  .deed--text.deed--r {
+    margin: 0 var(--gut);
+    padding-top: 30px;
+    border-top: 1px solid var(--brass);
+  }
+  .deed--text.deed--r .deed__t,
+  .deed--text.deed--r .deed__d { padding: 0; }
+  .deeds__close {
+    margin: 48px var(--gut) 0;
+    padding: 36px 0 0;
+    text-align: left;
+  }
+  .deeds__close::before {
+    left: 0;
+    width: 56px;
+    height: 1px;
+  }
+
+  .team__body { grid-template-columns: minmax(0, 1fr); }
+  .team__say {
+    justify-self: start;
+    max-width: none;
+    padding: 0 var(--gut);
+    font-size: clamp(28px, 7.6vw, 38px);
+    text-align: left;
+  }
+  .crew {
+    margin: 40px var(--gut) 0;
+    padding: 34px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+
+  /* The two photos stay side by side, the figures under them, two a row. */
+  .band { height: auto; }
+  .band__ph { aspect-ratio: 3 / 4; }
+  .band__ph::after { background: linear-gradient(180deg, rgba(14, 13, 11, 0) 60%, rgba(14, 13, 11, .5) 100%); }
+  .band__facts {
+    position: relative;
+    bottom: auto;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 36px var(--gut) 44px;
+    background: var(--onyx);
+  }
+  .band__half,
+  .band__half--l,
+  .band__half--r {
+    justify-content: space-between;
+    padding: 0;
+  }
+  .band__half--l .fig { text-align: left; }
+  .fig { flex: 1 1 0; }
+  .fig dt { font-size: clamp(46px, 13vw, 64px); }
+  .fig dd { font-size: 14px; }
+
+  .ledger__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 26px var(--gut);
+  }
+  .ledger__k {
+    padding: 0;
+    font-size: clamp(30px, 8.6vw, 36px);
+    text-align: left;
+  }
+  .ledger__d {
+    padding: 0;
+    font-size: 16px;
+  }
+
+  .offer { grid-template-columns: minmax(0, 1fr); }
+  .offer__l {
+    justify-items: start;
+    padding: 88px var(--gut) 64px;
+    text-align: left;
+  }
+  .offer__r {
+    padding: 64px var(--gut) 88px;
+    border-top: 1px solid var(--brass);
+  }
+  .offer__r .h3 { padding-top: 0; }
+  .offer__list,
+  .why { width: 100%; }
+
+  /* „Мисия“ over „и *визия*“. */
+  .mv__h,
+  .mv__pair { grid-template-columns: minmax(0, 1fr); }
+  .mv__h { padding: 0 var(--gut); }
+  .mv__hl,
+  .mv__hr {
+    padding: 0;
+    text-align: left;
+  }
+  .mv__half--l {
+    justify-items: start;
+    padding: 0 var(--gut) 48px;
+    text-align: left;
+  }
+  .mv__half--r {
+    margin: 0 var(--gut);
+    padding: 40px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+  .mv__t { font-size: clamp(23px, 6.4vw, 30px); }
+
+  /* The photo first, over a brass rule. */
+  .cta {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .cta__ph {
+    order: -1;
+    aspect-ratio: 4 / 3;
+    border-bottom: 1px solid var(--brass);
+  }
+  .cta__l {
+    justify-items: start;
+    padding: 56px var(--gut) 88px;
+    text-align: left;
+  }
+  .cta__acts {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+/* The smallest phones. */
+@media (max-width: 360px) {
+  .origin { --node: 10px; }
+  .band__half { gap: 18px; }
+}
+
+/* ---------- motion (Diptych §5.5; spec §7.4) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The page's one moment, about 2.4 s: the H1's parts rise from their masks
+     (a mask clips only while its part rises) as the line draws down; the
+     father's village and trade come up beside it; the lens opens from the
+     top down; the brothers' names unveil outward from the seam; the „и“
+     fades in, the line draws on and the date rises; then the caption. */
+  :root.js .origin__h1 .line-mask {
+    animation: about-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .origin__h1 .split-line {
+    animation: about-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .stem--top {
+    animation: about-draw .8s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .05s);
+  }
+  :root.js .node--top > span {
+    animation: about-up .8s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .4s + var(--n, 0) * .08s);
+  }
+  :root.js .lens__arcs svg {
+    animation: about-lens 1.15s var(--e-io) backwards;
+    animation-delay: calc(var(--arrive) + .5s);
+  }
+  :root.js .lens__name--l span {
+    animation: about-unveil-l .95s var(--e-out) backwards;
+    animation-delay: calc(var(--arrive) + 1s);
+  }
+  :root.js .lens__name--r span {
+    animation: about-unveil-r .95s var(--e-out) backwards;
+    animation-delay: calc(var(--arrive) + 1s);
+  }
+  :root.js .lens__and {
+    animation: about-fade .7s var(--e-soft) both;
+    animation-delay: calc(var(--arrive) + 1.12s);
+  }
+  :root.js .stem--bot {
+    animation: about-draw .45s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + 1.42s);
+  }
+  :root.js .node--bot .line-mask {
+    animation: about-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + 1.48s + var(--n, 0) * .08s);
+  }
+  :root.js .node--bot .split-line {
+    animation: about-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + 1.48s + var(--n, 0) * .08s);
+  }
+  :root.js .lineage__cap {
+    animation: about-up-far .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + 1.6s);
+  }
+}
+
+@keyframes about-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its part rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes about-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes about-draw { from { transform: scaleY(0); } }
+@keyframes about-up { from { opacity: 0; transform: translateY(10px); } }
+@keyframes about-up-far { from { opacity: 0; transform: translateY(14px); } }
+@keyframes about-fade { from { opacity: 0; } }
+/* Both ends of each clip are shapes, so the clip moves (clip-path cannot
+   interpolate to none: it would flip half-way); the clip goes with the
+   animation. The lens's reaches 2 px past the box, so the 1 px arcs on its
+   sides are whole. */
+@keyframes about-lens {
+  from { clip-path: inset(-2px -2px 100% -2px); }
+  to { clip-path: inset(-2px); }
+}
+@keyframes about-unveil-l {
+  from { clip-path: inset(-.2em 0 -.3em 100%); }
+  to { clip-path: inset(-.2em 0 -.3em 0); }
+}
+@keyframes about-unveil-r {
+  from { clip-path: inset(-.2em 100% -.3em 0); }
+  to { clip-path: inset(-.2em 0 -.3em 0); }
+}

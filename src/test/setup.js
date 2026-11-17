@@ -24,7 +24,7 @@ for (const name of [
 //
 // Server-side suites (// @vitest-environment node) have no window.
 if (typeof window !== 'undefined') {
-  // framer-motion's whileInView and OptimizedImage's lazy loading observe
+  // The video band, the facade and Многофамилна's list observe
   // intersections.
   if (typeof globalThis.IntersectionObserver === 'undefined') {
     class NoopIntersectionObserver {

@@ -1,0 +1,39 @@
+{
+  "about-slider-1": {
+    "path": "/img/about-slider-1",
+    "w": 2048,
+    "h": 1365,
+    "widths": [
+      480,
+      720,
+      960,
+      1400,
+      2048
+    ],
+    "color": "#5F8196"
+  },
+  "about-slider-2": {
+    "path": "/img/about-slider-2",
+    "w": 2000,
+    "h": 1500,
+    "widths": [
+      480,
+      720,
+      960,
+      1400,
+      2000
+    ],
+    "color": "#757466"
+  },
+  "about-slider-3": {
+    "path": "/img/about-slider-3",
+    "w": 1024,
+    "h": 683,
+    "widths": [
+      480,
+      720,
+      1024
+    ],
+    "color": "#4B5245"
+  }
+}

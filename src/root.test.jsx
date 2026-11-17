@@ -476,12 +476,18 @@ describe('arrival and focus', () => {
 // its doors run half a gutter off the page's, and a ground there showed past
 // the page's door as a light band. Without the doors <main> paints it too, so
 // the crossfade keeps the ground light. Never a utility of <main>'s own, which
-// would paint under the doors as well.
+// would paint under the doors as well. No page the site serves is legacy any
+// more (M4 Task 5 rebuilt the last, За нас), so a page of the test's own asks
+// for it with its handle, until the legacy removal takes it away (M4 Task 7).
 describe('the legacy ground', () => {
   it('is painted by the page’s frame, and by <main> only through .legacy-ground', async () => {
     goOffline()
-    renderSiteAt('/about')
-    await screen.findByText(/основана през месец септември 2008/)
+    const router = createMemoryRouter(
+      [{ path: '/', Component: App, children: [{ index: true, Component: () => <p>Стара страница</p>, handle: { header: 'solid', legacy: true } }] }],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+    await screen.findByText('Стара страница')
 
     const main = document.getElementById('main')
     expect(main).toHaveClass('on-light', 'legacy-ground')

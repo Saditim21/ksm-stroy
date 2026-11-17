@@ -103,10 +103,11 @@ const CAPS = {
 // WARN. M2 adds each route it rebuilds: Task 3 `/`, Task 5
 // `/projects/golden-residence`, Task 7 both Golden Residence block routes; M3
 // Task 4 `/projects/mnogofamilna-sgrada`, Task 6 both Многофамилна block
-// routes; M4 Task 2 `/contact`, Task 3 `/projects`, Task 4 `/blog`. A route
-// listed here before it is prerendered gets a note.
+// routes; M4 Task 2 `/contact`, Task 3 `/projects`, Task 4 `/blog`, Task 5
+// `/about`. A route listed here before it is prerendered gets a note.
 const MUST_BE_V2 = [
   '/',
+  '/about',
   '/projects',
   '/projects/golden-residence',
   '/projects/golden-residence/block-a',

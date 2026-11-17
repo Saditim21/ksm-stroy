@@ -225,14 +225,14 @@ describe('the header as the page scrolls', () => {
 // Residence page, rebuilt in Diptych, run under the see-through header, each
 // with an inquiry of its own, as the Golden Residence block pages,
 // Многофамилна's page and block pages (rebuilt in M3) and Контакти (M4) have
-// too under the solid header. Every other page is solid, Продажби and
-// Обекти (M4) among them. The pages not yet rebuilt are legacy: they keep
-// production's light look.
+// too under the solid header. Every other page is solid, Продажби, Обекти
+// and За нас (M4) among them. No page is legacy any more: За нас, the last
+// one, was rebuilt in M4 Task 5.
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
   '/': { header: 'overlay', inquiry: true },
-  '/about': { header: 'solid', legacy: true },
+  '/about': { header: 'solid' },
   '/projects': { header: 'solid' },
   '/projects/golden-residence': { header: 'overlay', ...GOLDEN_RESIDENCE, inquiry: true },
   '/projects/golden-residence/block-a': { header: 'solid', ...GOLDEN_RESIDENCE, inquiry: true },
@@ -266,14 +266,31 @@ describe('each page’s handle', () => {
 
 // The ground the shell gives a page (src/root.jsx): dark by default, with the
 // grain over it, and production's light ground on a legacy page, where focus
-// rings turn onyx (.on-light, src/index.css) and no grain lies over it.
+// rings turn onyx (.on-light, src/index.css) and no grain lies over it. No
+// page the site serves is legacy any more (M4 Task 5 rebuilt the last, За
+// нас), so a page of the test's own asks for it with its handle, until the
+// legacy removal takes the light ground away (M4 Task 7).
 describe('the page’s ground', () => {
   it('is production’s light ground on a legacy page, with no grain', async () => {
-    renderSiteAt('/about')
-    await screen.findByText(/основана през месец септември 2008/)
+    goOffline()
+    const router = createMemoryRouter(
+      [{ path: '/', Component: App, children: [{ index: true, Component: () => <p>Стара страница</p>, handle: { header: 'solid', legacy: true } }] }],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+    await screen.findByText('Стара страница')
 
     expect(document.getElementById('main')).toHaveClass('on-light', 'legacy-ground')
     expect(document.querySelector('.grain')).toBeNull()
+  })
+
+  it('is the dark ground on За нас, rebuilt, under the grain', async () => {
+    renderSiteAt('/about')
+    await screen.findByText(/основана през месец септември 2008/)
+
+    expect(document.getElementById('main')).not.toHaveClass('on-light')
+    expect(document.getElementById('main')).not.toHaveClass('legacy-ground')
+    expect(document.querySelector('.grain')).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('is the dark ground on a rebuilt page, under the grain', async () => {

@@ -86,7 +86,7 @@ it('prerenders every section, the first work in the panel and the inquiry’s fo
 
 // What an entrance's first frame would write, kept out of the page: an
 // element faded out, collapsed, moved away, clipped or hidden (the check the
-// legacy pages get, src/pages/legacy.prerender.test.jsx).
+// legacy pages had, each rebuilt page's prerender test now).
 it('starts nothing hidden, faded, moved or clipped', () => {
   const html = prerender()
   const styles = [...html.matchAll(/\sstyle="([^"]*)"/g)].map(([, style]) => style)
