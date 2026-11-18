@@ -662,4 +662,16 @@ describe('block mode, its hot floor the page’s (spec M3 §6.5)', () => {
     fireEvent.click(rail('А', 3))
     expect(onOpenFloor.mock.calls[0].slice(0, 2)).toEqual(['А', 3])
   })
+
+  // Block mode shares compact mode's want of panels, not Home's look: the
+  // root carries no fx--compact, so a rule written for Home's teaser never
+  // reaches a block page, and the caption, which the block page leaves out
+  // (its words are under the facade, mn-block.css), is no live region (M3's
+  // deferred minor, Facade.jsx:91,333; M4 Task 7).
+  it('takes neither Home’s compact class nor its live caption', () => {
+    render(<Page seen={{ current: null }} onOpenFloor={() => {}} />)
+
+    expect(document.querySelector('.fx')).not.toHaveClass('fx--compact')
+    expect(document.querySelector('.fx__cap')).not.toHaveAttribute('aria-live')
+  })
 })

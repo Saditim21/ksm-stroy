@@ -21,12 +21,13 @@ import './explorer.css'
 // floor, unitLabel?, { fromRect, opener })`); a touch or pen tap on a floor
 // that is not hot only previews it, and the second tap opens it. Compact
 // mode (Home) has no panel and no sheet, and neither has block mode, a block
-// page's facade of one block (blockFacade.jsx), whose rows show its floors.
-// The caption under the facade is its
-// page's (`caption(floor)`, of the hot floor or null): the explorer's
-// (ExplorerSection.jsx), Многофамилна's opening's, or Home's teaser's, a
-// live region in compact mode; so each page's words stay out of the code the
-// others load.
+// page's facade of one block (blockFacade.jsx), whose rows show its floors;
+// only compact mode takes Home's look (fx--compact). The caption under the
+// facade is its page's (`caption(floor)`, of the hot floor or null): the
+// explorer's (ExplorerSection.jsx), Многофамилна's opening's, or Home's
+// teaser's, a live region in compact mode; so each page's words stay out of
+// the code the others load. A block page sets its own words under its
+// facade, and leaves the caption out (mn-block.css).
 //
 // `project` is the building's (projects/gr.js, projects/mn.js; useExplorer.js
 // gives its shape), a prop because Home's teaser has no explorer around its
@@ -88,7 +89,10 @@ const readLens = (node) => node && Object.fromEntries(['x', 'y', 'width', 'heigh
 const floorOf = (model, facade, key) => model?.floors.get(key) ?? facade.placeholders.get(key)
 
 export default function Facade({ project, model, mode = 'full', caption, initialBlock = 'А', active = true, focusRail = null, hotState, onOpenFloor, onRailFocused }) {
-  const compact = mode !== 'full'
+  // The panels and the sheet are full mode's alone; Home's look and its live
+  // caption, compact mode's.
+  const bare = mode !== 'full'
+  const compact = mode === 'compact'
   const { map, picture, priority, sizes, alt, className, seam, Lights, namesApart } = project.facade
   const { min, max } = project.floors
   const facade = facadeOf(map)
@@ -102,7 +106,7 @@ export default function Facade({ project, model, mode = 'full', caption, initial
   const motionNow = useMotionNow()
   const [phoneBlock, setPhoneBlock] = useState(initialBlock === 'Б' ? 'Б' : 'А')
   const isFloor = useCallback((key) => facade.shape.has(key), [facade])
-  const own = useHotFloor({ compact, isFloor })
+  const own = useHotFloor({ compact: bare, isFloor })
   const { hot, lens, setHot, clearHot, scheduleClose, cancelClose, giveWay } = hotState ?? own
 
   // Hidden, the facade lets its hot floor go.
@@ -141,10 +145,10 @@ export default function Facade({ project, model, mode = 'full', caption, initial
   // The panels and the sheet, once their chunk and the project's plans are
   // in. Never at the first render of the prerendered page: nothing has
   // loaded them before it hydrates.
-  const [surfaces, setSurfaces] = useState(() => (compact ? null : loadedSurfaces(project)))
+  const [surfaces, setSurfaces] = useState(() => (bare ? null : loadedSurfaces(project)))
   const mounted = useRef(true)
   const needSurfaces = useCallback(() => {
-    if (compact || surfaces) return
+    if (bare || surfaces) return
     loadSurfaces(project).then((module) => {
       if (mounted.current) setSurfaces(module)
     }, (error) => {
@@ -153,7 +157,7 @@ export default function Facade({ project, model, mode = 'full', caption, initial
       // and the console says why (ruling C7.6).
       console.error('[explorer] the facade’s panels did not load:', error)
     })
-  }, [compact, surfaces, project])
+  }, [bare, surfaces, project])
 
   useEffect(() => {
     mounted.current = true
@@ -164,13 +168,13 @@ export default function Facade({ project, model, mode = 'full', caption, initial
 
   // The surfaces load as the facade nears the screen.
   useEffect(() => {
-    if (compact || surfaces) return undefined
+    if (bare || surfaces) return undefined
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) needSurfaces()
     }, { rootMargin: NEAR })
     observer.observe(rootRef.current)
     return () => observer.disconnect()
-  }, [compact, surfaces, needSurfaces])
+  }, [bare, surfaces, needSurfaces])
 
   // The lens: from floor to floor over 0.25 s power2.out, from where it is,
   // and at once onto the first hot floor; its tint fades over 0.2 s.
