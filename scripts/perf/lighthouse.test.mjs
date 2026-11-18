@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { lighthouseArgs, median, medians, metricsOf, parseArgs, summary, urlOf } from './lighthouse.mjs'
+import { lighthouseArgs, median, medians, metricsOf, parseArgs, selfSigned, summary, urlOf } from './lighthouse.mjs'
 
 // A recorded report, cut down to what metricsOf reads: Lighthouse 13.6.0 on
 // / (the preview-stage build of the M2 results, run 1, served on
@@ -140,23 +140,33 @@ it('urlOf: a path on the served build, a full URL as it is', () => {
 })
 
 // The figures stay comparable from run to run only with one Lighthouse
-// (spec §10). Over HTTP/2 the build's server has a self-signed certificate,
-// which Chrome is told to accept.
+// (spec §10). Over HTTP/2 the build's own server has a self-signed
+// certificate, which Chrome is told to accept, and for that server alone: a
+// page given by its full URL (a preview, the live site) keeps Chrome's
+// certificate checks (M3 platform minor, lighthouse.mjs:161).
 describe('lighthouseArgs', () => {
   const url = 'https://127.0.0.1:61234/'
   const chromeFlags = (args) => args.find((arg) => arg.startsWith('--chrome-flags='))
 
   it('runs Lighthouse 13.6.0, pinned, on the page, into the report, in the categories asked for', () => {
-    const args = lighthouseArgs(url, 'C:/reports/home-1.json', ['performance', 'seo'], { h1: false })
+    const args = lighthouseArgs(url, 'C:/reports/home-1.json', ['performance', 'seo'], { selfSigned: true })
     expect(args).toContain('lighthouse@13.6.0')
     expect(args).toContain(url)
     expect(args).toContain('--output-path=C:/reports/home-1.json')
     expect(args).toContain('--only-categories=performance,seo')
   })
 
-  it('starts Chrome with --ignore-certificate-errors over HTTP/2 only', () => {
-    expect(chromeFlags(lighthouseArgs(url, 'r.json', ['performance'], { h1: false }))).toContain('--ignore-certificate-errors')
-    expect(chromeFlags(lighthouseArgs('http://127.0.0.1:61234/', 'r.json', ['performance'], { h1: true }))).not.toContain('--ignore-certificate-errors')
+  it('starts Chrome with --ignore-certificate-errors for the build’s own HTTP/2 server only', () => {
+    expect(chromeFlags(lighthouseArgs(url, 'r.json', ['performance'], { selfSigned: true }))).toContain('--ignore-certificate-errors')
+    expect(chromeFlags(lighthouseArgs('http://127.0.0.1:61234/', 'r.json', ['performance'], { selfSigned: false }))).not.toContain('--ignore-certificate-errors')
+    expect(chromeFlags(lighthouseArgs('https://preview.example.invalid/', 'r.json', ['performance'], { selfSigned: false }))).not.toContain('--ignore-certificate-errors')
+  })
+
+  // Which runs measure that server: a page given by its path, over HTTP/2.
+  it('trusts no certificate but the build server’s', () => {
+    expect(selfSigned('/', { h1: false })).toBe(true)
+    expect(selfSigned('/', { h1: true })).toBe(false)
+    expect(selfSigned('https://preview.example.invalid/', { h1: false })).toBe(false)
   })
 })
 

@@ -1312,8 +1312,9 @@ async function explorerSpaced(page, problems) {
 }
 
 // In the page: the height of the stage's side column (the counts, the key,
-// the table and the hint).
-const sideHeight = () => document.querySelector('.ps__side')?.getBoundingClientRect().height ?? 0
+// the table and the hint), or null where the stage has none, which the step
+// reports rather than measure nothing.
+const sideHeight = () => document.querySelector('.ps__side')?.getBoundingClientRect().height ?? null
 
 // A deep link on a phone: the stage as it lands, then with text spacing,
 // within the screen. On a screen of 360×640 or smaller, the side column must
@@ -1333,7 +1334,9 @@ async function explorerStageNarrow(page, problems, explorer) {
   for (const problem of await page.evaluate(stagePastScreen)) problems.push(`with text spacing, ${problem}`)
   const { width, height } = page.viewport()
   const spaced = await page.evaluate(sideHeight)
-  if (width <= 360 && height <= 640 && spaced < side - 1) {
+  if (side === null || spaced === null) {
+    problems.push('the stage has no side column (.ps__side) to measure')
+  } else if (width <= 360 && height <= 640 && spaced < side - 1) {
     problems.push(`with text spacing, the stage's side column is ${Math.round(spaced)} px tall, against ${Math.round(side)} px without it`)
   }
 }

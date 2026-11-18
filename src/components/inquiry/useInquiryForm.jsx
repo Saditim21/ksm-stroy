@@ -102,7 +102,9 @@ const BLANK = { name: '', phone: '', email: '', message: '', consent: false }
 export default function useInquiryForm(options, details) {
   const { option, picks } = useInquiryState()
   const chosen = options.some(({ value }) => value === option) ? option : options[0].value
-  const shown = picks.filter((pick) => pick.project === OPTION_PROJECT[chosen])
+  // A subject of no project („Друго“, construction) shows none, even a pick
+  // that names no project of its own.
+  const shown = OPTION_PROJECT[chosen] ? picks.filter((pick) => pick.project === OPTION_PROJECT[chosen]) : []
   const [values, setValues] = useState(BLANK)
   // Once a send has been tried, each field's problem shows, and follows the
   // typing until it is fixed.

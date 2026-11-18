@@ -254,6 +254,19 @@ describe('sending', () => {
       expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ picks: ['А-802'] }))
       expect(lastLead().projectType).not.toMatch(/А 301/)
     })
+
+    // M3 platform minor (useInquiryForm.jsx): a subject of no project,
+    // „Друго“ or construction, shows no pick and sends none, even one that
+    // names no project of its own (no caller hands one over today).
+    it('shows and sends no pick under a subject of no project, even one that names no project', async () => {
+      render(<InquiryForm options={MN_INQUIRY.options} />)
+      act(() => presetInquiry({ option: 'other', pick: { label: 'А 999' } }))
+      expect(screen.queryByText('Апартамент А 999')).toBeNull()
+      expect(screen.queryByRole('list', { name: 'Избрани апартаменти' })).toBeNull()
+      await fill(user)
+      await user.click(submit())
+      expect(send).toHaveBeenLastCalledWith(expect.objectContaining({ picks: [] }))
+    })
   })
 
   it('brings the apartments picked back with Golden Residence chosen again', async () => {

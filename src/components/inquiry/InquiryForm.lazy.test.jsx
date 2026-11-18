@@ -10,13 +10,12 @@ import InquiryForm from './InquiryForm'
 // waits for it. These cases have a file of their own (ruling PF12), so no
 // other case has loaded the send path before them.
 
-// The send path's stand-in: it counts its loads, and fails to load, as a
-// chunk that never arrives, while `failing` is set.
+// The send service's stand-in, which counts its loads. (The case of a send
+// path that fails to load mocks the chunk itself, with vi.doMock, below.)
 const service = vi.hoisted(() => {
-  const stub = { loads: 0, failing: false, sendInquiry: vi.fn(async () => ({ ok: true })) }
+  const stub = { loads: 0, sendInquiry: vi.fn(async () => ({ ok: true })) }
   stub.load = () => {
     stub.loads += 1
-    if (stub.failing) throw new Error('Failed to fetch dynamically imported module')
     return { sendInquiry: stub.sendInquiry }
   }
   return stub

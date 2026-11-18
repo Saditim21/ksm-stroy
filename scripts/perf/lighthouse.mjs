@@ -154,11 +154,17 @@ export const summary = ({ lcp, cls, tbt, bytesBeforeLcp, scores }) => [
 // argument is quoted for that shell.
 const quote = (arg) => (process.platform === 'win32' ? `"${arg.replace(/"/g, '""')}"` : `'${arg.replace(/'/g, "'\\''")}'`)
 
+/** Whether a run on `page` measures the build's own server over HTTP/2, whose
+ * certificate is self-signed: a page given by its path, unless the run is
+ * over HTTP/1.1 (`h1`). A page given by its full URL keeps Chrome's
+ * certificate checks. */
+export const selfSigned = (page, { h1 }) => isPath(page) && !h1
+
 /** npx's arguments for one Lighthouse run on `url`, its JSON report to
- * `output`: Lighthouse 13.6.0, with Chrome told to accept the build server's
- * self-signed certificate unless the run is over HTTP/1.1 (`h1`). */
-export function lighthouseArgs(url, output, categories, { h1 }) {
-  const chrome = ['--headless=new', '--no-first-run', '--no-default-browser-check', ...(h1 ? [] : ['--ignore-certificate-errors'])]
+ * `output`: Lighthouse 13.6.0, with Chrome told to accept the certificate
+ * only of the build's own HTTP/2 server (`selfSigned`). */
+export function lighthouseArgs(url, output, categories, { selfSigned: trusted }) {
+  const chrome = ['--headless=new', '--no-first-run', '--no-default-browser-check', ...(trusted ? ['--ignore-certificate-errors'] : [])]
   return [
     '--yes', LIGHTHOUSE, url,
     '--output=json', `--output-path=${output}`,
@@ -251,7 +257,7 @@ async function main(args) {
       for (let run = 1; run <= RUNS; run += 1) {
         const output = path.join(REPORTS, `${slug}-${run}.json`)
         fs.rmSync(output, { force: true })
-        await lighthouse(url, output, categories, { h1 })
+        await lighthouse(url, output, categories, { selfSigned: selfSigned(page, { h1 }) })
         const report = JSON.parse(fs.readFileSync(output, 'utf8'))
         version = report.lighthouseVersion
         const metrics = metricsOf(report, categories)
