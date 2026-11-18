@@ -527,8 +527,11 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
   // Home's facade intro on the way to the poster, collects garbage within it.
   const loaded = new Set()
   const aborted = []
-  // The availability API's requests on their way (the store's fetch, the
-  // document's preload), with when each went out.
+  // The availability API's requests on their way that carry the store's data
+  // (the document's preload, which the store's fetch takes, or the fetch
+  // itself), with when each went out. Not Chrome's own background
+  // revalidation (initiator "other", excusedAbort()), whose end Puppeteer
+  // never reports: waiting on it held every visit to the store's timeout.
   const availability = new Map()
   const context = await browser.createBrowserContext()
   try {
@@ -548,7 +551,7 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
     })
     page.on('pageerror', (error) => report(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
     page.on('request', (request) => {
-      if (sameOrigin(request.url()) && new URL(request.url()).pathname === '/api/availability') availability.set(request, Date.now())
+      if (sameOrigin(request.url()) && new URL(request.url()).pathname === '/api/availability' && request.initiator()?.type !== 'other') availability.set(request, Date.now())
     })
     page.on('requestfinished', (request) => {
       availability.delete(request)
