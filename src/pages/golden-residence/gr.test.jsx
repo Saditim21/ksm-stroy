@@ -312,6 +312,24 @@ describe('the garages and parking places (spec §6.18)', () => {
     expect(fireEvent.click(link)).toBe(false)
     expect(screen.getByLabelText('Интересувам се от')).toHaveValue('garage')
   })
+
+  // Gr minor 4: a click that opens a tab or a window, a modifier key's or a
+  // button other than the main one, stays the browser's: it follows the link
+  // to #zapitvane, and the form's subject stays as it was.
+  it.each([
+    ['Ctrl', { ctrlKey: true }],
+    ['⌘', { metaKey: true }],
+    ['Shift', { shiftKey: true }],
+    ['Alt', { altKey: true }],
+    ['the middle button', { button: 1 }],
+  ])('leaves a click with %s to the browser', (_, click) => {
+    const link = within(section('garazhi')).getByRole('link', { name: 'Запитване за гараж' })
+    const subject = screen.getByLabelText('Интересувам се от')
+    expect(subject).toHaveValue('golden-residence')
+
+    expect(fireEvent.click(link, click)).toBe(true)
+    expect(subject).toHaveValue('golden-residence')
+  })
 })
 
 describe('the inquiry (spec §6.12, decision A1)', () => {

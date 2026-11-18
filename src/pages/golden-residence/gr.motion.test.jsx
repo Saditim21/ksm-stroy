@@ -1,4 +1,4 @@
-import { act, fireEvent, render, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { recordingMotion, stubIdle } from '../../test/gsap'
@@ -175,6 +175,69 @@ describe('the gallery’s openings', () => {
     act(() => recorder.timelines[1].vars.onComplete())
     expect(shown()).toEqual([['0', '2']])
     expect(text(gallery.querySelector('.gal__n'))).toBe('01 / 03')
+  })
+
+  // Gr minor 4: the paths that cut an opening short. A show the stack has
+  // dropped (a later opening ended first) has its opening stopped; so has
+  // every opening when motion has gone by the next change, which shows its
+  // spread at once and takes off what the openings set; and the page going
+  // stops what is under way.
+  it('stops the opening of a show that a later opening has dropped from the stack', () => {
+    const { next, shown } = renderGallery()
+    next()
+    next()
+    const [first, second] = recorder.timelines
+
+    act(() => second.vars.onComplete())
+    expect(shown()).toEqual([['2', '2']])
+    expect(first.kill).toHaveBeenCalledTimes(1)
+    expect(second.kill).not.toHaveBeenCalled()
+  })
+
+  it('shows the next spread at once once motion has gone, stopping the opening under way', () => {
+    const { gallery, next, shown, layersOf } = renderGallery()
+    next()
+    const [opening] = recorder.timelines
+    layersOf(1).forEach((layer) => {
+      layer.style.clipPath = 'inset(0% 0% 0% 40%)'
+    })
+
+    engine.motion = null
+    try {
+      next()
+    } finally {
+      engine.motion = recorder.motion
+    }
+    expect(opening.kill).toHaveBeenCalledTimes(1)
+    expect(recorder.timelines).toHaveLength(1)
+    expect(shown()).toEqual([['2', '2']])
+    expect([...gallery.querySelectorAll('.gal__img')].filter((layer) => layer.style.clipPath)).toEqual([])
+    expect(text(gallery.querySelector('.gal__n'))).toBe('03 / 03')
+  })
+
+  // Motion that goes between the change and its render: the opening never
+  // starts, and the spread changes at once.
+  it('changes the spread at once when motion goes between the change and its render', () => {
+    const { next, shown } = renderGallery()
+    let asked = 0
+    Object.defineProperty(engine, 'motion', { configurable: true, get: () => (asked++ === 0 ? recorder.motion : null) })
+    try {
+      next()
+    } finally {
+      Object.defineProperty(engine, 'motion', { configurable: true, writable: true, value: recorder.motion })
+    }
+    expect(asked).toBe(2)
+    expect(recorder.timelines).toHaveLength(0)
+    expect(shown()).toEqual([['1', '2']])
+  })
+
+  it('stops the opening under way when the page goes', () => {
+    const { next } = renderGallery()
+    next()
+    const [opening] = recorder.timelines
+
+    cleanup()
+    expect(opening.kill).toHaveBeenCalledTimes(1)
   })
 
   it('opens the stage’s halves from the seam once, over 1.2 s, as it reaches 80 % of the screen', async () => {
