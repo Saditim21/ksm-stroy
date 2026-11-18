@@ -77,6 +77,7 @@ The user's decisions are binding:
 - **Page titles use the system's two title sizes only.**
   - `--fs-slogan`, Home's H1, is for the H1s that read across the seam: Многофамилна, Контакти, За нас, ЕС проект and 404.
   - `--fs-title`, the Golden Residence H1, is for the big single-word titles: Продажби and Обекти.
+  - One exception (ruling T5a, M4 Task 5, amended at the end of M4): above 900 px, За нас's H1 takes the approved concept's `clamp(40px, 4.3vw, 72px)`, so „в КСМ Строй ООД“ stays on one line and the founding caption stays in the first screen. Below 900 px it keeps `--fs-slogan`'s phone sizes. The H1 is part of the lineage figure's composition, which the user approved by eye.
   - Block pages use Golden Residence's block-page head (`.bp`).
   - A heading never outsizes its section's h2. For example, За нас's value words are smaller than „Какво ни прави различни“.
 - **No text sits in the page gutter** at 1440, 1024, 390, 360 or 320 px, the hinge's lead included (the critic's hinge fix). No page scrolls sideways.
