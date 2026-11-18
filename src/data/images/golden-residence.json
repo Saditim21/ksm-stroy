@@ -7,7 +7,8 @@
       1200,
       2400
     ],
-    "color": "#A7A59C"
+    "color": "#A7A59C",
+    "og": "/img/facade-cut-og.jpg"
   },
   "gr-balconies": {
     "path": "/img/gr-balconies",
@@ -51,7 +52,8 @@
       900,
       1600
     ],
-    "color": "#5B5647"
+    "color": "#5B5647",
+    "og": "/img/gr-corner-og.jpg"
   },
   "gr-cornerView": {
     "path": "/img/gr-cornerView",
@@ -77,7 +79,8 @@
       1920,
       2400
     ],
-    "color": "#433C30"
+    "color": "#433C30",
+    "og": "/img/gr-dusk-og.jpg"
   },
   "gr-end-towers": {
     "path": "/img/gr-end-towers",

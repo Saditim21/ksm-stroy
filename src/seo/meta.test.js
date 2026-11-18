@@ -16,6 +16,13 @@ it('shares the 1200 × 630 dusk image by default', () => {
   expect(m).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/og/ksm-stroy-1200x630.jpg' })
 })
 
+// Spec M3/M4 §11: a page that names its own picture, a 1200 × 630 file of the
+// image pipeline, shares it instead, root-relative on the live domain.
+it('shares the page’s own picture when it names one', () => {
+  const m = pageMeta({ title: 'Обекти', description: 'd', path: '/blog', image: '/img/work-chitalishte-3-og.jpg' })
+  expect(m.filter((tag) => tag.property === 'og:image')).toEqual([{ property: 'og:image', content: 'https://www.ksmstroy.com/img/work-chitalishte-3-og.jpg' }])
+})
+
 it('never appends the brand twice', () => {
   const m = pageMeta({ title: 'КСМ Строй', description: 'd', path: '/' })
   expect(m.find((x) => x.title).title).toBe('КСМ Строй')

@@ -124,4 +124,5 @@ it('keeps the page’s head', () => {
     content: 'КСМ СТРОЙ ООД изпълнява проект № BG16RFPR001-1.012-1485-C01 „Дигитализация на предприятията“ по Програма „Конкурентоспособност и иновации в предприятията“ 2021-2027, съфинансирана от Европейския съюз.',
   })
   expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/eu-proekt' })
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/og/ksm-stroy-1200x630.jpg' })
 })

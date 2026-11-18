@@ -350,4 +350,6 @@ it('keeps the head M1 gave the page', () => {
     name: 'description',
     content: 'Golden Residence в жк Левски Г, ул. Ген. Климент Бояджиев, гр. София: блок А и блок Б, по 96 апартамента на 8 етажа.',
   })
+  // Spec M3/M4 §11: its hero, the building at dusk, is its share image.
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/gr-dusk-og.jpg' })
 })

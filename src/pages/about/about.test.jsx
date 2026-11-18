@@ -49,8 +49,9 @@ it('is a solid page that sends „Запитване“ to the contact form, on 
   expect(document.head.querySelectorAll('link[rel="preload"]')).toHaveLength(0)
 })
 
-// Production's head (its src/utils/seo.js `about`). Its share image is the
-// site's for now (spec §11: the rebuilt pages' own come with M4's pass).
+// Production's head (its src/utils/seo.js `about`), and its share image
+// (spec M3/M4 §11): the page's first photo wide enough for 1200 × 630, the
+// aerial of Хотел Парадайс under the figures.
 it('keeps production’s head', () => {
   const head = aboutModule.meta()
 
@@ -60,6 +61,7 @@ it('keeps production’s head', () => {
     content: 'Научете повече за екипа на KSM Stroy - експерти в строителството с над 15 години опит, 200+ завършени проекта и 50+ доволни клиенти в София и цяла България.',
   })
   expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/about' })
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/about-slider-2-og.jpg' })
 })
 
 // Spec §7.4: the call to action's two ways, to Контакти and to Обекти.

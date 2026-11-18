@@ -3,6 +3,7 @@ import { availabilityPreload } from '../data/availability/useAvailability'
 import { ExplorerProvider } from '../explorer/ExplorerContext'
 import ExplorerSection from '../explorer/ExplorerSection'
 import { GR_PROJECT } from '../explorer/projects/gr'
+import grImages from '../data/images/golden-residence.json'
 import BlocksSection from '../pages/golden-residence/BlocksSection'
 import GallerySection from '../pages/golden-residence/GallerySection'
 import GrHero from '../pages/golden-residence/GrHero'
@@ -34,11 +35,13 @@ export const handle = { header: 'overlay', project: 'golden-residence', inquiry:
 // src/utils/documentPreloads.js).
 const PRELOADS = [availabilityPreload, ...DISPLAY_FONT_PRELOADS]
 
-// The page's head (root.jsx <Meta/>), as M1 set it.
+// The page's head (root.jsx <Meta/>), as M1 set it. Its share image is its
+// hero, the building at dusk (spec M3/M4 §11; gr-dusk's og).
 export const meta = () => pageMeta({
   title: 'Golden Residence - KSM Stroy',
   description: 'Golden Residence в жк Левски Г, ул. Ген. Климент Бояджиев, гр. София: блок А и блок Б, по 96 апартамента на 8 етажа.',
   path: '/projects/golden-residence',
+  image: grImages['gr-dusk'].og,
 })
 
 export default function GoldenResidence() {

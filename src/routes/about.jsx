@@ -6,6 +6,7 @@ import Team from '../pages/about/Team'
 import Tradition from '../pages/about/Tradition'
 import Values from '../pages/about/Values'
 import Work from '../pages/about/Work'
+import { PHOTOS } from '../pages/about/photos'
 import { pageMeta } from '../seo/meta'
 import { preloadWithDocument } from '../utils/documentPreloads'
 import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
@@ -36,11 +37,13 @@ export const handle = { header: 'solid' }
 const PRELOADS = DISPLAY_FONT_PRELOADS
 
 // Production's head (its src/utils/seo.js `about`). Its share image is the
-// site's for now (spec §11: the rebuilt pages' own come with M4's pass).
+// page's first photo wide enough for 1200 × 630, the aerial of Хотел
+// Парадайс under the figures (spec M3/M4 §11; about-slider-2's og).
 export const meta = () => pageMeta({
   title: 'За нас - KSM Stroy | 15+ години опит в строителството',
   description: 'Научете повече за екипа на KSM Stroy - експерти в строителството с над 15 години опит, 200+ завършени проекта и 50+ доволни клиенти в София и цяла България.',
   path: '/about',
+  image: PHOTOS.aerial.og,
 })
 
 export default function About() {

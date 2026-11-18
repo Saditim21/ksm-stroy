@@ -2,6 +2,7 @@ import InquirySection from '../components/inquiry/InquirySection'
 import { availabilityPreload } from '../data/availability/useAvailability'
 import { ExplorerProvider } from '../explorer/ExplorerContext'
 import { MN_PROJECT } from '../explorer/projects/mn'
+import mnNight from '../data/images/mn-night.json'
 import { MN_INQUIRY } from '../pages/mnogofamilna/inquiry'
 import MnBlocks from '../pages/mnogofamilna/MnBlocks'
 import MnBuilding from '../pages/mnogofamilna/MnBuilding'
@@ -40,11 +41,13 @@ export const handle = { header: 'solid', project: 'mnogofamilna-sgrada', inquiry
 const PRELOADS = [availabilityPreload, ...DISPLAY_FONT_PRELOADS]
 
 // The page's head (root.jsx <Meta/>): production's title and description
-// (spec M3 §6.1). Its share image is the site's for now (ruling PF18).
+// (spec M3 §6.1). Its share image is its first picture, the building lit at
+// night (spec M3/M4 §11, ruling PF18; mn-dusk's og).
 export const meta = () => pageMeta({
   title: 'Многофамилна жилищна сграда - KSM Stroy',
   description: 'Многофамилна жилищна сграда в ж.к. Връбница-1, гр. София: блок А и блок Б, по 72 апартамента на 9 етажа.',
   path: '/projects/mnogofamilna-sgrada',
+  image: mnNight['mn-dusk'].og,
 })
 
 export default function Mnogofamilna() {

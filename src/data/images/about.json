@@ -23,7 +23,8 @@
       1400,
       2000
     ],
-    "color": "#757466"
+    "color": "#757466",
+    "og": "/img/about-slider-2-og.jpg"
   },
   "about-slider-3": {
     "path": "/img/about-slider-3",

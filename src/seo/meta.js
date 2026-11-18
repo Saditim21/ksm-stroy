@@ -12,9 +12,12 @@ export function robotsMeta(production = IS_PRODUCTION_BUILD) {
   return { name: 'robots', content: production ? 'index, follow' : 'noindex, nofollow' }
 }
 
-// The share image of every page that names none (v2 spec §6.7): 1200 × 630,
-// cut once from the Golden Residence dusk render (scripts/images/sources.json,
-// gr-dusk) as the hero frames it, 50 % across and 62 % down.
+// The share image of a page that names none of its own (v2 spec §6.7): 1200 ×
+// 630, cut once from the Golden Residence dusk render (scripts/images/
+// sources.json, gr-dusk) as the hero frames it, 50 % across and 62 % down.
+// Each page with a photo of its own shares that instead, its image entry's
+// `og` (spec M3/M4 §11); /eu-proekt, whose picture stays on Home, keeps this
+// one (ruling M4-PF6), and the 404 shares none (src/routes/notFoundMeta.js).
 const DEFAULT_IMAGE = '/og/ksm-stroy-1200x630.jpg'
 
 // The head of one page, for its route module's `meta` export. root.jsx renders

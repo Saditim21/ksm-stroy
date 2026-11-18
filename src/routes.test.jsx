@@ -69,15 +69,18 @@ function headAt(module, pathname, { caseSensitive } = {}) {
 // path, whether the path ends in a slash (the prerender asks for /…/block-b/)
 // or not (the browser).
 it.each([
-  [goldenResidenceBlock, '/projects/golden-residence/block-a', 'Golden Residence, блок А - KSM Stroy'],
-  [goldenResidenceBlock, '/projects/golden-residence/block-b/', 'Golden Residence, блок Б - KSM Stroy'],
-  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-a/', 'Многофамилна сграда, блок А - KSM Stroy'],
-  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-b', 'Многофамилна сграда, блок Б - KSM Stroy'],
-])('the head of %#: %s', (module, pathname, title) => {
+  [goldenResidenceBlock, '/projects/golden-residence/block-a', 'Golden Residence, блок А - KSM Stroy', 'facade-cut-og.jpg'],
+  [goldenResidenceBlock, '/projects/golden-residence/block-b/', 'Golden Residence, блок Б - KSM Stroy', 'facade-cut-og.jpg'],
+  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-a/', 'Многофамилна сграда, блок А - KSM Stroy', 'mn-dusk-og.jpg'],
+  [mnogofamilnaBlock, '/projects/mnogofamilna-sgrada/block-b', 'Многофамилна сграда, блок Б - KSM Stroy', 'mn-dusk-og.jpg'],
+])('the head of %#: %s', (module, pathname, title, share) => {
   const head = headAt(module, pathname)
 
   expect(head).toContainEqual({ title })
   expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: `https://www.ksmstroy.com${pathname.replace(/\/$/, '')}` })
+  // Spec M3/M4 §11: the block's own picture to share, the facade its page
+  // opens on (Golden Residence's on onyx, Многофамилна's lit at night).
+  expect(head).toContainEqual({ property: 'og:image', content: `https://www.ksmstroy.com/img/${share}` })
 })
 
 // The dev server's router matches without regard to case (src/routes.js), so

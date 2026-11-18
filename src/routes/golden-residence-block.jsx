@@ -1,4 +1,5 @@
 import { matchedBlock } from '../config/blocks'
+import grImages from '../data/images/golden-residence.json'
 import BlockPage from '../explorer/BlockPage'
 import { pageMeta } from '../seo/meta'
 import BlockRoute from './BlockRoute'
@@ -16,7 +17,9 @@ const PROJECT = 'golden-residence'
 // goes to.
 export const handle = { header: 'solid', project: PROJECT, inquiry: true }
 
-// The page's head (root.jsx <Meta/>), as M1 set it.
+// The page's head (root.jsx <Meta/>), as M1 set it. Its share image is the
+// facade its explorer opens on, on the site's onyx (spec M3/M4 §11;
+// facade-cut's og).
 export const meta = ({ matches }) => {
   const block = matchedBlock(PROJECT, matches)
   if (!block) return notFoundMeta()
@@ -25,6 +28,7 @@ export const meta = ({ matches }) => {
     title: `Golden Residence, блок ${letter} - KSM Stroy`,
     description: `Етажите и апартаментите на Golden Residence, блок ${letter}: 96 апартамента на 8 етажа в жк Левски Г, гр. София.`,
     path: `/projects/${PROJECT}/${id}`,
+    image: grImages['facade-cut'].og,
   })
 }
 

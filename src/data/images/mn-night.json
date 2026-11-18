@@ -10,7 +10,8 @@
       1920,
       2400
     ],
-    "color": "#3C3729"
+    "color": "#3C3729",
+    "og": "/img/mn-dusk-og.jpg"
   },
   "mn-dusk-off": {
     "path": "/img/mn-dusk-off",

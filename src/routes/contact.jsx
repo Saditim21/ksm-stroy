@@ -3,6 +3,7 @@ import Seam from '../components/ui/Seam'
 import Ways from '../components/ui/Ways.jsx?contact'
 import { PRIMARY_PHONE, SITE } from '../config/site'
 import { availabilityPreload } from '../data/availability/useAvailability'
+import grImages from '../data/images/golden-residence.json'
 import useReveals from '../motion/useReveals'
 import ContactInquiry from '../pages/contact/ContactInquiry'
 import ContactReach from '../pages/contact/ContactReach'
@@ -38,8 +39,9 @@ const PRELOADS = [availabilityPreload, ...DISPLAY_FONT_PRELOADS]
 
 // Production's head (its src/utils/seo.js `contact`), the hours of its
 // description from the one hours source (ruling M4-PF4) in production's own
-// words: „Пн-Пт 8:00-18:00“. Its share image is the site's for now (spec
-// §11: the rebuilt pages' own come with M4's pass).
+// words: „Пн-Пт 8:00-18:00“. Its share image is the page's first picture,
+// the form's Golden Residence at dusk, its first subject (spec M3/M4 §11;
+// gr-dusk's og).
 const [WEEKDAYS] = SITE.hours
 const HOURS = `${WEEKDAYS.short} ${WEEKDAYS.from}-${WEEKDAYS.to}`.replaceAll('–', '-')
 
@@ -47,6 +49,7 @@ export const meta = () => pageMeta({
   title: 'Контакти - KSM Stroy | Свържете се с нас за оферта',
   description: `Свържете се с KSM Stroy за безплатна консултация и оферта. Офис в София, телефон: ${PRIMARY_PHONE.tel}, имейл: ${SITE.email}. Работно време: ${HOURS}.`,
   path: '/contact',
+  image: grImages['gr-dusk'].og,
 })
 
 // The closing's two ways (spec §7.3): the form, which the way brings up and

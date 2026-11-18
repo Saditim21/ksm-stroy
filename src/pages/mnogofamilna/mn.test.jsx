@@ -344,4 +344,7 @@ it('keeps production’s head', () => {
     name: 'description',
     content: 'Многофамилна жилищна сграда в ж.к. Връбница-1, гр. София: блок А и блок Б, по 72 апартамента на 9 етажа.',
   })
+  // Spec M3/M4 §11, ruling PF18: its first picture, the building lit at
+  // night, is its share image.
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/mn-dusk-og.jpg' })
 })

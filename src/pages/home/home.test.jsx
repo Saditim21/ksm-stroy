@@ -116,6 +116,14 @@ it('runs the opening, the company, the services, the works, the teaser, the inqu
 // home.prerender.test.jsx): a route `links` export would put them in the head
 // again on every client-side return to Home, where they only warn "preloaded
 // but not used". So a render in the browser adds none.
+// Production's head, and its share image (spec M3/M4 §11): the opening's
+// Golden Residence at dusk, framed as the hero frames it.
+it('keeps production’s head and shares its opening’s picture', () => {
+  const head = homeModule.meta()
+  expect(head).toContainEqual({ title: 'KSM Stroy - Строителна компания в София | Качествено строителство' })
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/gr-dusk-og.jpg' })
+})
+
 it('is an overlay page with an inquiry of its own, and adds no preload in the browser', () => {
   expect(homeModule.handle).toEqual({ header: 'overlay', inquiry: true })
   expect('links' in homeModule).toBe(false)

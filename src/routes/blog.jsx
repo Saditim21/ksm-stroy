@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import Seam from '../components/ui/Seam'
 import Ways from '../components/ui/Ways.jsx?blog'
 import { PRIMARY_PHONE, SITE } from '../config/site'
+import worksImages from '../data/images/works.json'
 import useReveals from '../motion/useReveals'
 import Register from '../pages/works/Register'
 import { pageMeta } from '../seo/meta'
@@ -32,12 +33,15 @@ export const handle = { header: 'solid' }
 // (ruling C5.4, src/utils/documentPreloads.js).
 const PRELOADS = [DISPLAY_FONT_PRELOADS[0]]
 
-// Production's head (its Blog.jsx). Its share image is the site's for now
-// (spec §11: the rebuilt pages' own come with M4's pass).
+// Production's head (its Blog.jsx). Its share image is one of the works the
+// page shows, the Читалище „Асен Златаров“ finished, the one work whose
+// photos are wide enough for 1200 × 630 (spec M3/M4 §11;
+// work-chitalishte-3's og).
 export const meta = () => pageMeta({
   title: 'Обекти - KSM Stroy',
   description: 'Разгледайте нашите успешно реализирани строителни проекти - жилищни комплекси, хотелски комплекси и санирания.',
   path: '/blog',
+  image: worksImages['work-chitalishte-3'].og,
 })
 
 // The closing's two ways (spec §7.2): the contact page, with the phone and

@@ -25,6 +25,8 @@ it.each([true, false])('is noindex with no canonical link (production build: %s)
   expect(head).toContainEqual({ title: 'Страницата не е намерена - KSM Stroy' })
   expect(head).toContainEqual({ name: 'robots', content: 'noindex, nofollow' })
   expect(head.filter((tag) => tag.rel === 'canonical' || tag.property === 'og:url')).toEqual([])
+  // Spec M3/M4 §11: the 404 has no picture to share.
+  expect(head.filter((tag) => tag.property === 'og:image')).toEqual([])
 })
 
 // Then the page, opened as a visitor opens an address with no page

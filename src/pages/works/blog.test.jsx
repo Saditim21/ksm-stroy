@@ -2,6 +2,7 @@ import { fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../../tests/contracts/site'
 import { loadFlip } from '../../motion/flip'
+import { meta } from '../../routes/blog'
 import { WORKS } from './works'
 
 // Обекти (spec M3/M4 §7.2), opened as a visitor opens it
@@ -69,4 +70,14 @@ it('sends the header’s „Запитване“ to the contact form, on the da
   expect(within(document.querySelector('header')).getByRole('link', { name: 'Запитване' })).toHaveAttribute('href', '/contact#zapitvane')
   expect(document.getElementById('main')).not.toHaveClass('legacy-ground')
   expect(document.querySelector('.grain')).not.toBeNull()
+})
+
+// Production's head (its Blog.jsx), and its share image (spec M3/M4 §11): a
+// work the page shows, the Читалище „Асен Златаров“ finished, the one work
+// whose photos are wide enough for 1200 × 630.
+it('keeps production’s head and shares a finished work', () => {
+  const head = meta()
+  expect(head).toContainEqual({ title: 'Обекти - KSM Stroy' })
+  expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/blog' })
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/work-chitalishte-3-og.jpg' })
 })

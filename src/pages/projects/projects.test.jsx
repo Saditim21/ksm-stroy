@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../../tests/contracts/site'
 import { MN_PROJECT } from '../../explorer/projects/mn'
 import { MN_UNITS } from '../../explorer/projects/mn.units'
-import Projects from '../../routes/projects'
+import Projects, { meta } from '../../routes/projects'
 import { recordingMotion, stubIdle } from '../../test/gsap'
 import { mockMatchMedia } from '../../test/media'
 import { mouseClick, tap } from '../../test/pointer'
@@ -203,3 +203,13 @@ it('hides no square at scroll 0 with motion on', async () => {
     restore()
   }
 }, 30000)
+
+// Production's head (its Projects.jsx), and its share image (spec M3/M4 §11):
+// the page's first picture, Golden Residence's render over the buildings'
+// rows.
+it('keeps production’s head and shares Golden Residence’s render', () => {
+  const head = meta()
+  expect(head).toContainEqual({ title: 'Продажби - KSM Stroy' })
+  expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/projects' })
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/gr-corner-og.jpg' })
+})

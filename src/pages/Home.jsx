@@ -2,6 +2,7 @@ import InquirySection from '../components/inquiry/InquirySection'
 import { availabilityPreload } from '../data/availability/useAvailability'
 import { pageMeta } from '../seo/meta'
 import { preloadWithDocument } from '../utils/documentPreloads'
+import grImages from '../data/images/golden-residence.json'
 import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
 import { seoData } from '../utils/seo'
 import CompanySection from './home/CompanySection'
@@ -30,12 +31,14 @@ export const handle = { header: 'overlay', inquiry: true }
 // (src/utils/documentPreloads.js).
 const PRELOADS = [availabilityPreload, ...DISPLAY_FONT_PRELOADS]
 
-// The page's head (root.jsx <Meta/>), with the site's share image
-// (src/seo/meta.js).
+// The page's head (root.jsx <Meta/>). Its share image is its opening's
+// Golden Residence at dusk, framed as the hero frames it (spec M3/M4 §11;
+// scripts/images/sources.json, gr-dusk's og).
 export const meta = () => pageMeta({
   title: seoData.home.title,
   description: seoData.home.description,
   path: '/',
+  image: grImages['gr-dusk'].og,
 })
 
 export default function Home() {

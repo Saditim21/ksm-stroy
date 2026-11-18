@@ -1,4 +1,5 @@
 import { matchedBlock } from '../config/blocks'
+import mnNight from '../data/images/mn-night.json'
 import MnBlockPage from '../pages/mnogofamilna/MnBlockPage'
 import { pageMeta } from '../seo/meta'
 import BlockRoute from './BlockRoute'
@@ -18,8 +19,8 @@ const PROJECT = 'mnogofamilna-sgrada'
 export const handle = { header: 'solid', project: PROJECT, inquiry: true }
 
 // The page's head (root.jsx <Meta/>): the block's title (spec M3 §6.5), and
-// production's description pattern. Its share image is the site's for now
-// (ruling PF18).
+// production's description pattern. Its share image is the building lit at
+// night, as its facade shows it (spec M3/M4 §11, ruling PF18; mn-dusk's og).
 export const meta = ({ matches }) => {
   const block = matchedBlock(PROJECT, matches)
   if (!block) return notFoundMeta()
@@ -28,6 +29,7 @@ export const meta = ({ matches }) => {
     title: `Многофамилна сграда, блок ${letter} - KSM Stroy`,
     description: `Етажите и апартаментите на многофамилната жилищна сграда в ж.к. Връбница-1, гр. София, блок ${letter}: 72 апартамента на 9 етажа.`,
     path: `/projects/${PROJECT}/${id}`,
+    image: mnNight['mn-dusk'].og,
   })
 }
 

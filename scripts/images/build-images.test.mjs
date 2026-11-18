@@ -75,3 +75,69 @@ describe('build-images', () => {
     expect(manifest.cp.color).toMatch(/^#[0-9A-F]{6}$/)
   })
 })
+
+// Spec M3/M4 §11, ruling M4-PF6: a page's share image is its own photo's
+// entry with an `og` crop, a 40:21 window of the entry's picture (after its
+// own crop), rendered as one more file of that entry, 1200 × 630 JPEG, which
+// every crawler reads; the manifest entry records it. Still one entry per
+// source.
+describe('the share image (og)', () => {
+  // As the fixture, red on the left and blue on the right, each half 1300 px
+  // wide, so a half holds a window larger than 1200 × 630.
+  beforeAll(async () => {
+    const left = await sharp({ create: { width: 1300, height: 1400, channels: 3, background: '#ff0000' } }).png().toBuffer()
+    await sharp({ create: { width: 2600, height: 1400, channels: 3, background: '#0000ff' } })
+      .composite([{ input: left, left: 0, top: 0 }])
+      .png()
+      .toFile(path.join(tmp, 'wide.png'))
+  })
+  // A 1240 × 651 window inside the blue half.
+  const BLUE = { left: 1330, top: 100, width: 1240, height: 651 }
+
+  it('renders the og window as a 1200 × 630 JPEG, recorded in the same entry', async () => {
+    await run([{ id: 'sh', group: 's', src: 'wide.png', widths: [640], og: BLUE }])
+    const manifest = JSON.parse(fs.readFileSync(path.join(manifestDir, 's.json'), 'utf8'))
+    expect(Object.keys(manifest)).toEqual(['sh'])
+    expect(manifest.sh).toMatchObject({ path: '/img/sh', w: 2600, h: 1400, widths: [640], og: '/img/sh-og.jpg' })
+    const og = fs.readFileSync(path.join(outDir, 'sh-og.jpg'))
+    const meta = await sharp(og).metadata()
+    expect([meta.format, meta.width, meta.height]).toEqual(['jpeg', 1200, 630])
+    const { dominant } = await sharp(og).stats()
+    expect(dominant.b).toBeGreaterThan(200)
+    expect(dominant.r).toBeLessThan(60)
+  })
+
+  it('takes the window after the entry’s own crop', async () => {
+    // The crop keeps the red left half, and the window, in the cropped
+    // picture's pixels, lies inside it.
+    await run([{ id: 'sc', group: 's2', src: 'wide.png', crop: { left: 0, top: 0, width: 1300, height: 1400 }, widths: [500], og: { left: 30, top: 100, width: 1240, height: 651 } }])
+    const { dominant } = await sharp(fs.readFileSync(path.join(outDir, 'sc-og.jpg'))).stats()
+    expect(dominant.r).toBeGreaterThan(200)
+    expect(dominant.b).toBeLessThan(60)
+  })
+
+  it('skips an existing share image unless forced', async () => {
+    const file = path.join(outDir, 'sh-og.jpg')
+    const before = fs.statSync(file).mtimeMs
+    await new Promise((r) => setTimeout(r, 20))
+    const entry = { id: 'sh', group: 's', src: 'wide.png', widths: [640], og: BLUE }
+    await run([entry])
+    expect(fs.statSync(file).mtimeMs).toBe(before)
+    await run([entry], { force: true })
+    expect(fs.statSync(file).mtimeMs).toBeGreaterThan(before)
+  })
+
+  it('refuses a window that is not 40:21, smaller than 1200 × 630, or outside the picture', async () => {
+    const bad = (og) => run([{ id: 'bad', group: 'b', src: 'wide.png', widths: [640], og }])
+    await expect(bad({ left: 0, top: 0, width: 1200, height: 900 })).rejects.toThrow(/bad: og window .* not 1200:630/)
+    await expect(bad({ left: 0, top: 0, width: 800, height: 420 })).rejects.toThrow(/bad: og window .* under 1200 × 630/)
+    await expect(bad({ left: 1500, top: 800, width: 1200, height: 630 })).rejects.toThrow(/bad: og window .* outside the 2600 × 1400 picture/)
+    await expect(run([{ id: 'cpo', group: 'b', kind: 'copy', src: 'pre/p-{w}', widths: [300], og: BLUE }])).rejects.toThrow(/cpo: an og window needs an encoded entry/)
+  })
+
+  it('makes none for an entry without an og window', async () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(manifestDir, 'g.json'), 'utf8'))
+    expect(manifest.fx).not.toHaveProperty('og')
+    expect(fs.existsSync(path.join(outDir, 'fx-og.jpg'))).toBe(false)
+  })
+})

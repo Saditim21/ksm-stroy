@@ -3,6 +3,7 @@ import Seam from '../components/ui/Seam'
 import Ways from '../components/ui/Ways.jsx?projects'
 import { PRIMARY_PHONE } from '../config/site'
 import { availabilityPreload } from '../data/availability/useAvailability'
+import grImages from '../data/images/golden-residence.json'
 import useReveals from '../motion/useReveals'
 import BuildingRows from '../pages/projects/BuildingRows'
 import SalesBoard from '../pages/projects/SalesBoard'
@@ -36,12 +37,14 @@ export const handle = { header: 'solid' }
 // (ruling C5.4, src/utils/documentPreloads.js).
 const PRELOADS = [availabilityPreload, DISPLAY_FONT_PRELOADS[0]]
 
-// Production's head (its Projects.jsx). Its share image is the site's for
-// now (spec §11: the rebuilt pages' own come with M4's pass).
+// Production's head (its Projects.jsx). Its share image is the page's first
+// picture, Golden Residence's render over the buildings' rows (spec M3/M4
+// §11; gr-corner's og).
 export const meta = () => pageMeta({
   title: 'Продажби - KSM Stroy',
   description: 'Открийте нашите атрактивни обекти за продажба - модерни апартаменти и жилищни сгради в престижни райони на София.',
   path: '/projects',
+  image: grImages['gr-corner'].og,
 })
 
 // The closing's two ways (spec §7.1): the contact page's form, to ask the

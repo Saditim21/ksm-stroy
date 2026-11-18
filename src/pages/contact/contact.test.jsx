@@ -102,6 +102,9 @@ it('keeps production’s head, its hours from the hours source', () => {
     content: 'Свържете се с KSM Stroy за безплатна консултация и оферта. Офис в София, телефон: +359887886166, имейл: ksm_str@abv.bg. Работно време: Пн-Пт 8:00-18:00.',
   })
   expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/contact' })
+  // Spec M3/M4 §11: the page's first picture, the form's first subject's,
+  // Golden Residence at dusk, is its share image.
+  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/gr-dusk-og.jpg' })
 })
 
 describe('the subject', () => {
