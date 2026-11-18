@@ -263,6 +263,35 @@ describe('each page’s handle', () => {
   })
 })
 
+// Shell minor 7 (M3/M4 spec §8): a page whose handle says it has an inquiry
+// of its own has it, #zapitvane, where the header's „Запитване“ goes; without
+// it, the link would lead nowhere.
+describe('a page with an inquiry of its own', () => {
+  const withInquiry = Object.entries(HANDLES).filter(([, handle]) => handle?.inquiry).map(([path]) => path)
+
+  it('is every page the handles name so', () => {
+    expect(withInquiry).toEqual([
+      '/',
+      '/projects/golden-residence',
+      '/projects/golden-residence/block-a',
+      '/projects/golden-residence/block-b',
+      '/projects/mnogofamilna-sgrada',
+      '/projects/mnogofamilna-sgrada/block-a',
+      '/projects/mnogofamilna-sgrada/block-b',
+      '/contact',
+    ])
+  })
+
+  it.each(withInquiry)('%s has #zapitvane', async (path) => {
+    goOffline()
+    renderSiteAt(path)
+    await siteHeader()
+
+    await waitFor(() => expect(document.getElementById('zapitvane')).not.toBeNull())
+    expect(document.querySelectorAll('#zapitvane')).toHaveLength(1)
+  }, 30000)
+})
+
 // The ground the shell gives a page (src/root.jsx): dark, with the grain over
 // it, on every page. The legacy pages' light ground left with them (M3/M4
 // spec §9): a handle that still says `legacy` changes nothing.
