@@ -26,7 +26,7 @@ import StaleNotice from '../../explorer/StaleNotice'
 import useHydrated from '../../hooks/useHydrated'
 import useMotionAllowed from '../../hooks/useMotionAllowed'
 import useReveals from '../../motion/useReveals'
-import { holdEuRow, releaseOnFirstMove } from '../../shell/landingHold'
+import { holdEuRow, releaseOnFirstMove, useFreshArrival } from '../../shell/landingHold'
 import { plural } from '../../utils/format'
 import { getLenis } from '../../utils/lenis'
 import { Mark } from './Offices'
@@ -63,8 +63,10 @@ import '../../components/inquiry/inquiry.css'
 // seeded again, so what the visitor changes meanwhile, a chip taken away,
 // stays changed. With ?project=, ?apartment= or #zapitvane the page then
 // lands on the form, once the prefill has rendered, the header's EU row held
-// (src/shell/landingHold.js) until the visitor first moves the page. A send
-// is never re-seeded.
+// (src/shell/landingHold.js) until the visitor first moves the page. Only an
+// arrival afresh lands (useFreshArrival): Back, Forward and a reload bring the
+// visitor back to the place they left, which the page keeps, holding
+// nothing. A send is never re-seeded.
 //
 // The store outlives the page (inquiryStore.js), so the section clears the
 // option it leaves (ruling C5.1), as InquirySection does.
@@ -181,6 +183,7 @@ export default function ContactInquiry() {
   useEffect(() => clearInquiryOption, [])
   const motion = useMotionAllowed()
   const hydrated = useHydrated()
+  const fresh = useFreshArrival()
   const { search, hash } = useLocation()
   const snapshot = useAvailability()
   const free = grFree(snapshot)
@@ -250,14 +253,14 @@ export default function ContactInquiry() {
 
   // The landing: the EU row held from the moment the page knows it lands
   // until the visitor first moves the page after the jump; a send before
-  // the jump ends it there.
+  // the jump ends it there. None where the visitor came back.
   const key = search + hash
   const [landing, setLanding] = useState({ key: null, phase: 'done' })
   useEffect(() => {
-    if (!hydrated || !landsOnForm(search, hash)) return
+    if (!hydrated || !fresh || !landsOnForm(search, hash)) return
     holdEuRow(true)
     setLanding({ key: search + hash, phase: 'waiting' })
-  }, [hydrated, search, hash])
+  }, [hydrated, fresh, search, hash])
   useEffect(() => {
     if (landing.key !== key || landing.phase !== 'waiting') return
     if (busy) {

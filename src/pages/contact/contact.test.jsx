@@ -1,12 +1,13 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useSyncExternalStore } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { mainText, renderSiteAt } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
 import { grFree } from '../../data/availability/select'
 import { IDLE, LOADING, named, snapshotAvailability } from '../../explorer/testing'
 import * as contactModule from '../../routes/contact'
+import { loadedBy, pageOf, renderPagesAt } from '../../test/arrivals'
 import { setLenis } from '../../utils/lenis'
 
 // Контакти (spec M3/M4 §7.3, §8), opened as a visitor opens it
@@ -382,6 +383,46 @@ describe('a link’s landing', () => {
     await wait(50)
 
     expect(jumps).toEqual([])
+    expect(held()).toBe(false)
+  })
+
+  // Only an arrival afresh lands (src/shell/landingHold.js:
+  // useFreshArrival). A document the browser reloaded or brought back opens
+  // where the visitor left it, as ScrollRestoration restores it: the page
+  // neither jumps nor holds the row. The address still seeds the form.
+  it.each(['reload', 'back_forward'])('stays where a %s leaves the page, and holds nothing, its prefill seeded all the same', async (type) => {
+    onTestFinished(loadedBy(type))
+    const jumps = landingAt(3000)
+    renderSiteAt('/contact?project=mn#zapitvane')
+    await waitFor(() => expect(subject('Многофамилна сграда')).toBeChecked())
+    await wait(50)
+
+    expect(jumps).toEqual([])
+    expect(held()).toBe(false)
+  })
+
+  // Back to a link's address on Контакти, after another page: the visitor is
+  // where they left it (ScrollRestoration's), and the page holds nothing.
+  it('stays where Back brings the visitor to a link’s address, and holds nothing', async () => {
+    const jumps = landingAt(3000)
+    const { router } = renderPagesAt('/about', [
+      { path: 'about', Component: () => <p>Страница за нас</p>, handle: { header: 'solid' } },
+      pageOf('contact', contactModule),
+    ])
+    await screen.findByText('Страница за нас')
+    await act(() => router.navigate('/contact?project=mn#zapitvane'))
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true, chosen: 'mnogofamilna' }]))
+    await wait(450)
+    fireEvent.wheel(window, { deltaY: 120 })
+    expect(held()).toBe(false)
+
+    await act(() => router.navigate('/about'))
+    await screen.findByText('Страница за нас')
+    await act(() => router.navigate(-1))
+    await waitFor(() => expect(subject('Многофамилна сграда')).toBeChecked())
+    await wait(50)
+
+    expect(jumps).toHaveLength(1)
     expect(held()).toBe(false)
   })
 

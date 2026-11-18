@@ -1,12 +1,14 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { goOffline, mainText, renderSiteAt } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
 import { loadSurfaces } from '../../explorer/loadSurfaces'
 import { MN_PROJECT } from '../../explorer/projects/mn'
 import { named } from '../../explorer/testing'
+import * as grModule from '../../routes/golden-residence'
 import * as mnModule from '../../routes/mnogofamilna'
+import { loadedBy, pageOf, renderPagesAt } from '../../test/arrivals'
 import { mockMatchMedia } from '../../test/media'
 import { setLenis } from '../../utils/lenis'
 import { EXPO_IN_OUT } from '../../utils/motion'
@@ -370,6 +372,60 @@ describe('?view=list lands on #spisak with the EU row in view', () => {
     expect(held()).toBe(true)
     await wait(450)
     fireEvent.keyDown(document.body, { key: 'ArrowDown' })
+    expect(held()).toBe(false)
+  }, 30000)
+
+  // Only an arrival afresh lands (src/shell/landingHold.js:
+  // useFreshArrival). A document the browser reloaded or brought back opens
+  // where the reader left it, as ScrollRestoration restores it: the page
+  // neither jumps nor holds the row (M4 Task 7's review: F5 took the reader
+  // back to the explorer).
+  it.each([
+    ['reload', `${PATH}?view=list`, 'spisak'],
+    ['back_forward', `${PATH}?view=list`, 'spisak'],
+    ['reload', '/projects/golden-residence#explorer', 'explorer'],
+    ['back_forward', '/projects/golden-residence?view=list#explorer', 'explorer'],
+  ])('stays where a %s leaves %s, and holds nothing', async (type, path, id) => {
+    onTestFinished(loadedBy(type))
+    const jumps = landingAt(3000, id)
+    renderSiteAt(path)
+    await waitFor(() => expect(section(id)).not.toBeNull(), { timeout: 15000 })
+    await wait(100)
+
+    expect(jumps).toEqual([])
+    expect(held()).toBe(false)
+  }, 30000)
+
+  // The review's case (M4 Task 7): Home's „Визуално“ to #explorer, a read
+  // down to the gallery, another page from the menu, and Back. React
+  // Router's ScrollRestoration has put the reader back at the gallery: the
+  // page stays there and holds nothing. So does Back to Многофамилна's list.
+  it.each([
+    ['/projects/golden-residence#explorer', 'explorer'],
+    [`${PATH}?view=list`, 'spisak'],
+  ])('stays where Back brings the reader to %s, and holds nothing', async (path, id) => {
+    const jumps = landingAt(3000, id)
+    const { router } = renderPagesAt('/about', [
+      { path: 'about', Component: () => <p>Страница за нас</p>, handle: { header: 'solid' } },
+      pageOf('projects/golden-residence', grModule),
+      pageOf('projects/mnogofamilna-sgrada', mnModule),
+    ])
+    await screen.findByText('Страница за нас')
+    await act(() => router.navigate(path))
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true }]), { timeout: 15000 })
+    await wait(450)
+    fireEvent.wheel(window, { deltaY: 120 })
+    expect(held()).toBe(false)
+
+    await act(() => router.navigate('/about'))
+    await screen.findByText('Страница за нас')
+    expect(section(id)).toBeNull()
+    await act(() => router.navigate(-1))
+    await waitFor(() => expect(section(id)).not.toBeNull(), { timeout: 15000 })
+    await wait(100)
+
+    expect(address()).toBe(path)
+    expect(jumps).toHaveLength(1)
     expect(held()).toBe(false)
   }, 30000)
 })

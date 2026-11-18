@@ -4,6 +4,7 @@ import LenisScrollSync from './motion/LenisScrollSync'
 import SmoothScroll from './motion/SmoothScroll'
 import { organizationJsonLd } from './seo/jsonLd'
 import { robotsMeta } from './seo/meta'
+import { Arrival } from './shell/arrival'
 import SiteFooter from './shell/SiteFooter'
 import SiteHeader from './shell/SiteHeader'
 import { useRouteHandle } from './shell/handle'
@@ -175,6 +176,10 @@ function RouteTransition() {
 // page: in a view transition, before the browser sets up the doors. The hero
 // move's target and a page Back or Forward brings keep theirs.
 //
+// The page reads its arrival too (Arrival, src/shell/arrival.js): it lands on
+// a deep link or on its form only where the visitor came afresh, never where
+// Back, Forward or a reload brought it (src/shell/landingHold.js).
+//
 // The frame is the page's snapshot in the doors.
 function PageFrame({ arrive: arrival }) {
   const [arrive] = useState(arrival)
@@ -188,7 +193,9 @@ function PageFrame({ arrive: arrival }) {
   }, [arrive])
   return (
     <div className="page-frame" data-arrive={arrive}>
-      <Outlet />
+      <Arrival value={arrive}>
+        <Outlet />
+      </Arrival>
     </div>
   )
 }

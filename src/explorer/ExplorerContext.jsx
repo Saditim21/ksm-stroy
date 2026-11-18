@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useAvailability } from '../data/availability/useAvailability'
 import useHydrated from '../hooks/useHydrated'
 import useMotionNow from '../motion/useMotionNow'
-import { holdEuRow, releaseOnFirstMove } from '../shell/landingHold'
+import { holdEuRow, releaseOnFirstMove, useFreshArrival } from '../shell/landingHold'
 import { jumpToId } from '../utils/scroll'
 import { loadedSurfaces, loadSurfaces } from './loadSurfaces'
 import { buildModel, findUnit } from './model'
@@ -55,6 +55,11 @@ import useExplorerState from './useExplorerState'
 //   jumps itself: the page jumps there again, with room for the whole header
 //   the landing holds (ruling T4b). Golden Residence's list is a tab of its
 //   explorer, so ?view=list alone shows it where it is, with no landing.
+// - Only an arrival afresh lands: a link followed or an address typed
+//   (useFreshArrival, src/shell/landingHold.js). Back, Forward and a reload
+//   bring the reader back to the place they left, which React Router has
+//   restored: the page stays there and holds nothing, and the dialogs the
+//   address asks for open over it, as a floor opened in place does.
 // - The dialogs are the surfaces' chunk (surfaces.js), loaded with the
 //   project's plans when the address asks for one; the full facade has
 //   usually loaded both before, as it neared the screen. Until they are in,
@@ -70,6 +75,7 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   const state = useExplorerState({ routeBlock, floors: project.floors })
   const { stage, unitId, view } = state
   const hydrated = useHydrated()
+  const fresh = useFreshArrival()
   const motionNow = useMotionNow()
   // The address's state at its latest, for what runs after a delay.
   const latest = useRef(state)
@@ -81,19 +87,20 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   // EU row is held before the jump's scroll can reach the header. The
   // landing is 'dialog', a deep link's dialogs over the page, or 'list', a
   // list of its own section or the explorer the address names, with none
-  // over it; false once it has ended.
+  // over it; false once it has ended, and from the start where the reader
+  // came back (`fresh`).
   const [arrived, setArrived] = useState(false)
   const [landing, setLanding] = useState(false)
   useEffect(() => {
     if (!hydrated || arrived) return
     const list = view === 'list' && Boolean(document.getElementById('spisak'))
-    if (stage || unitId || list || window.location.hash === '#explorer') {
+    if (fresh && (stage || unitId || list || window.location.hash === '#explorer')) {
       holdEuRow(true)
       setLanding(stage || unitId ? 'dialog' : 'list')
       jumpToId(list ? 'spisak' : 'explorer')
     }
     setArrived(true)
-  }, [hydrated, arrived, stage, unitId, view])
+  }, [hydrated, arrived, fresh, stage, unitId, view])
 
   // A dialog's landing lasts while the address asks for a dialog the page can
   // show: the stage, or a unit the model has (or may have, until the data is
