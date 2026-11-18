@@ -133,7 +133,9 @@ describe('the register', () => {
     for (const path of shown) expect(path).toMatch(/^\/img\/work-/)
     const [first, ...rest] = rows()
     const loading = (row) => [...row.querySelectorAll('img')].map((img) => [img.getAttribute('loading'), img.getAttribute('fetchpriority')])
-    expect(loading(first)).toEqual([['eager', 'high'], ['eager', null], ['eager', null]])
+    // Its two smaller plates at once too, at the lowest priority, after the
+    // cover and the page's code (spec M3/M4 §10, step 3).
+    expect(loading(first)).toEqual([['eager', 'high'], ['eager', 'low'], ['eager', 'low']])
     for (const row of rest) expect(loading(row), row.id).toEqual([['lazy', null], ['lazy', null], ['lazy', null]])
   })
 

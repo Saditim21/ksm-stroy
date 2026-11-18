@@ -70,6 +70,18 @@ it('prerenders the Golden Residence count as —, and names the half without it'
     .toBe('Блок А, етаж 5. Enter отваря плана.')
 })
 
+// The Golden Residence half's picture is the page's LCP image, fetched first;
+// the Многофамилна half's is in the first screen too, at once but at the
+// lowest priority, after it and the page's code (spec M3/M4 §10, Home's
+// step 3).
+it('fetches the Golden Residence half’s picture first and the Многофамилна half’s at the lowest priority', () => {
+  const doc = parse(prerender())
+  const img = (half) => doc.querySelector(`section.hero a.half--${half} img`)
+
+  expect(['loading', 'fetchpriority'].map((name) => img('gr').getAttribute(name))).toEqual(['eager', 'high'])
+  expect(['loading', 'fetchpriority'].map((name) => img('mn').getAttribute(name))).toEqual(['eager', 'low'])
+})
+
 it('prerenders every section, the first work in the panel and the inquiry’s form ready to fill', () => {
   const doc = parse(prerender())
 

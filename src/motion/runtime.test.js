@@ -54,6 +54,92 @@ describe('loadMotion', () => {
   })
 })
 
+// It waits for the page's largest paint too (spec M3/M4 §10, Home's step 1):
+// its request starts once the browser has reported the page's
+// largest-contentful-paint, so nothing of it is in the paint's way.
+describe('loadMotion after the largest paint', () => {
+  // A stand-in for the browser's PerformanceObserver, which reports
+  // largest-contentful-paint entries when the test says so.
+  let observers
+  const report = () => {
+    for (const observer of observers.filter((each) => each.type)) {
+      observer.callback({ getEntries: () => [{ entryType: 'largest-contentful-paint' }] })
+    }
+  }
+  beforeEach(() => {
+    observers = []
+    vi.stubGlobal('PerformanceObserver', class {
+      static supportedEntryTypes = ['largest-contentful-paint', 'paint']
+      constructor(callback) {
+        this.callback = callback
+        this.type = null
+        observers.push(this)
+      }
+      observe({ type, buffered }) {
+        this.type = type
+        this.buffered = buffered
+      }
+      disconnect() {
+        this.type = null
+      }
+    })
+  })
+
+  const settled = () => new Promise((resolve) => setTimeout(resolve, 20))
+
+  test('waits for the largest paint after the load event', async () => {
+    let loaded = false
+    const load = runtime.loadMotion().then(() => { loaded = true })
+    await settled()
+    expect(loaded).toBe(false)
+    expect(runtime.getMotion()).toBeNull()
+    expect(observers.map(({ type, buffered }) => [type, buffered])).toEqual([['largest-contentful-paint', true]])
+
+    report()
+    await load
+    expect(runtime.getMotion()).toBe(fakeMotion)
+    // One report is enough: the observer lets go.
+    expect(observers.every(({ type }) => type === null)).toBe(true)
+  })
+
+  // Buffered: a paint the browser reported before the load event counts,
+  // once the load event has come.
+  test('waits for the load event before it looks for the paint', async () => {
+    Object.defineProperty(document, 'readyState', { configurable: true, get: () => 'loading' })
+    let loaded = false
+    const load = runtime.loadMotion().then(() => { loaded = true })
+    await settled()
+    expect(observers).toEqual([])
+
+    delete document.readyState
+    window.dispatchEvent(new Event('load'))
+    await settled()
+    expect(loaded).toBe(false)
+    report()
+    await load
+    expect(runtime.getMotion()).toBe(fakeMotion)
+  })
+
+  // A page loaded in a hidden tab, or a visitor's input before the first
+  // paint, gets no report: the engine comes all the same, a little later.
+  test('without a report, two seconds after the load event', async () => {
+    vi.useFakeTimers()
+    let loaded = false
+    runtime.loadMotion().then(() => { loaded = true })
+    await vi.advanceTimersByTimeAsync(1999)
+    expect(loaded).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
+    await vi.waitFor(() => expect(loaded).toBe(true))
+    expect(observers.every(({ type }) => type === null)).toBe(true)
+  })
+
+  test('a browser that reports no largest paint loads it at the load event', async () => {
+    PerformanceObserver.supportedEntryTypes = ['paint']
+    await expect(runtime.loadMotion()).resolves.toBe(fakeMotion)
+    expect(observers).toEqual([])
+  })
+})
+
 describe('scheduleInit', () => {
   test('runs one task per idle callback, in order, then refreshes ScrollTrigger once', async () => {
     await runtime.loadMotion()

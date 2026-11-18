@@ -181,7 +181,7 @@ export default function SplitHero() {
 
       <Link to="/projects/mnogofamilna-sgrada" prefetch="intent" className="half half--mn" aria-label={MN_NAME}>
         <div className="half__media">
-          <ResponsivePicture image={mnNight['mn-dusk']} alt="" sizes="100vw" eager />
+          <ResponsivePicture image={mnNight['mn-dusk']} alt="" sizes="100vw" eager fetchPriority="low" />
         </div>
         <div className="half__shade" />
         <div className="half__info">

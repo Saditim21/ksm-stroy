@@ -1,0 +1,78 @@
+/* What Многофамилна's dialogs add (spec M3 §6.4): its quieter drawing and its
+   apartments' own plans. Imported by its plans (mn.plans.js), which every
+   opening of its dialogs loads with them, so the dialogs keep their look
+   whatever becomes of the facade's lights (M3's deferred minor; M4 Task 8),
+   and none of it is in a page's first load. Plain CSS, in no Tailwind
+   layer, as explorer.css is; each rule outweighs the dialogs' own by a
+   class, wherever the two load in the page. The tokens of src/index.css,
+   and the system's focus ring: no outline of its own. */
+
+/* Its drawing, the walls of a furnished plan, heavier than Golden
+   Residence's line drawing: quieter, .42 in the plan stage and .55 in the
+   unit panel's crop (ruling PF5), under its plans' class (mn.plans.js). The
+   stage's opening reads --drawing for the opacity its drawing comes to
+   (PlanStage.jsx). */
+.plan.plan--mn { --drawing: .42; }
+.plan--mn.plan--crop { --drawing: .55; }
+.plan.plan--mn .drawing[data-loaded] { opacity: var(--drawing); }
+/* An apartment's own plan, where production has one (UnitPanel.jsx): the
+   switch over the left half, the plan whole on a light plate, and the
+   floor's plan below the switch. */
+.up__views {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 3;
+}
+.up__l.up__l--own > svg {
+  top: 72px;
+  height: calc(100% - 118px);
+}
+.up__own {
+  position: absolute;
+  inset: 72px 28px 46px;
+  z-index: 2;
+  overflow: hidden;
+  background: var(--ivory);
+}
+.up__own picture,
+.up__own img {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  max-width: none;
+  object-fit: contain;
+}
+.up__own img { inset: 0; width: 100%; height: 100%; }
+@media (max-width: 900px) {
+  .up__views {
+    top: 10px;
+    left: 10px;
+  }
+  .up__l.up__l--own > svg {
+    top: 54px;
+    height: calc(100% - 64px);
+  }
+  .up__own { inset: 54px 10px 10px; }
+}
+/* The switch's two words keep inside a phone's panel, and on the narrowest,
+   clear of its close, each on two lines if it must (a reader's text spacing
+   too). */
+@media (max-width: 560px) {
+  .seg.up__views button {
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+}
+@media (max-width: 374px) {
+  .seg.up__views { max-width: calc(100% - 74px); }
+  .seg.up__views button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: auto;
+    min-height: 40px;
+    padding: 4px 8px;
+    line-height: 1.2;
+  }
+}

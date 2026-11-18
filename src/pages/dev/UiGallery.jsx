@@ -50,7 +50,7 @@ export const meta = () => pageMeta({
 
 function Specimen({ name, children }) {
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <p className="text-label text-stone">{name}</p>
       {children}
     </div>
@@ -63,7 +63,7 @@ function Specimens({ ground, count }) {
   const freeLabel = plural(count, 'свободен апартамент', 'свободни апартамента')
   return (
     <section aria-label={`On ${ground}`} className={GROUNDS[ground]}>
-      <div className="mx-auto max-w-[1440px] space-y-16 px-5 py-16 md:px-12">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-16 px-5 py-16 md:px-12">
         <Specimen name="HeroTitle (as h2)">
           <HeroTitle as="h2" lines={['Създаваме пространства', 'за мечтания живот']} />
         </Specimen>
@@ -91,7 +91,7 @@ function Specimens({ ground, count }) {
         </Specimen>
 
         <Specimen name="ElevationMark">
-          <ul className="space-y-2 text-small">
+          <ul className="grid gap-2 text-small">
             <li><ElevationMark floor={8} /></li>
             <li><ElevationMark floor={2} /></li>
             <li><ElevationMark floor={1} elevation={3.06} /></li>
@@ -138,7 +138,7 @@ export default function UiGallery() {
     <div className="font-text">
       <header className="bg-onyx text-ivory">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-6 px-5 pt-12 md:px-12">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <h1 className="font-display text-h2">UI primitives</h1>
             <p className="text-small text-stone">src/components/ui on onyx and on umber. Dev server only.</p>
           </div>

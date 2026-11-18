@@ -15,7 +15,7 @@
 //   for, an image by the unit's label (Многофамилна's; the unit panel's
 //   switch, UnitPanel.jsx), or undefined;
 // - `className`, the class the plan's own look hangs on (Многофамилна's
-//   quieter drawing, src/explorer/mn-facade.css), or undefined.
+//   quieter drawing, src/explorer/projects/mn.plans.css), or undefined.
 //
 // The project hands them over as data (project.plans), there at once, as a
 // chunk of its own (project.loadPlans()), or both: its data at once, whole

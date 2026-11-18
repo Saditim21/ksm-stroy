@@ -105,7 +105,7 @@ it('[data-split] splits into masked lines that rise once, and reverts the split 
   const title = byId('title')
   expect(fakeMotion.SplitText.create).toHaveBeenCalledTimes(1)
   expect(fakeMotion.SplitText.create).toHaveBeenCalledWith(title, {
-    type: 'words,lines', mask: 'lines', linesClass: 'split-line', autoSplit: true, reduceWhiteSpace: false, onSplit: expect.any(Function),
+    type: 'words,lines', mask: 'lines', linesClass: 'split-line', autoSplit: true, reduceWhiteSpace: false, aria: 'none', onSplit: expect.any(Function),
   })
   const [split] = fakeMotion.splits
   const [, vars] = fromCall(split.lines)
@@ -146,6 +146,33 @@ it('a split heading keeps its no-break spaces', async () => {
   } finally {
     split.revert()
     heading.remove()
+  }
+})
+
+// Spec M3/M4 §4.5 (Lighthouse a11y ≥ 98): a split into words and lines
+// leaves the text where it was, readable as it is, so the split names
+// nothing. SplitText's default would label the split element and hide its
+// words, and a label is prohibited on a span with no role, which За нас's
+// heading halves are (Mission.jsx, Tradition.jsx; Lighthouse's
+// aria-prohibited-attr, M4 Task 8).
+it('a split names nothing and hides no word', async () => {
+  allowMotion()
+  render(<Section />)
+  await flushIdle()
+
+  const [[, vars]] = fakeMotion.SplitText.create.mock.calls
+  const { SplitText } = await import('gsap/SplitText')
+  const half = document.createElement('span')
+  half.textContent = 'Обещани дейности'
+  document.body.append(half)
+  const split = SplitText.create(half, { ...vars, onSplit: undefined, autoSplit: false })
+  try {
+    expect(half.hasAttribute('aria-label')).toBe(false)
+    expect(half.querySelectorAll('[aria-hidden]')).toHaveLength(0)
+    expect(split.words.map((word) => word.textContent)).toEqual(['Обещани', 'дейности'])
+  } finally {
+    split.revert()
+    half.remove()
   }
 })
 

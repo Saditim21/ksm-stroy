@@ -42,7 +42,9 @@ describe('FacadeLights', () => {
 
   // The snapshot of 01.12.2025: А-2, А-9 and Б-2–5, Б-7–9 have a free
   // apartment, each floor's band holding the lit render, which the browser
-  // picks from its srcset and fetches with the page.
+  // picks from its srcset and fetches with the page, at its lowest priority:
+  // the first paint is the twin's, and the floors light 0.95 s on (spec M3/M4
+  // §10, step 3).
   it('lights the snapshot’s nine floors, each band holding the lit render', () => {
     const { container } = render(<FacadeLights model={buildModel(MN_SNAPSHOT_DATA, MN_PROJECT)} project={MN_PROJECT} />)
 
@@ -51,6 +53,7 @@ describe('FacadeLights', () => {
       const img = floor.querySelector('picture img')
       expect(img.getAttribute('src')).toMatch(/^\/img\/mn-dusk-\d+\.webp$/)
       expect(img.getAttribute('loading')).toBe('eager')
+      expect(img.getAttribute('fetchpriority')).toBe('low')
       expect(floor.querySelector('source[type="image/avif"]').getAttribute('srcset')).toMatch(/\/img\/mn-dusk-800\.avif 800w/)
     }
   })

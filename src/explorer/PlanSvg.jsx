@@ -33,7 +33,7 @@ import './explorer.css'
 // The drawing is the plan's own (plan.drawing), where its project has one.
 // It fades in once it has loaded (explorer.css), to the opacity its
 // project's look gives it, under the plan's own class where it has one
-// (plan.className: Многофамилна's quieter line art, mn-facade.css). Its area
+// (plan.className: Многофамилна's quieter line art, mn.plans.css). Its area
 // is the plan's box's: whatever holds the plan clips it (extract §8.3.4).
 //
 // `hot` (a suffix) is the unit a pointer, the keyboard or the stage's table

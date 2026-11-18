@@ -71,6 +71,9 @@ it('prerenders the explorer at rest', () => {
 
   expect(explorer.querySelectorAll('.fx__floor')).toHaveLength(16)
   expect(explorer.querySelector('.fx picture img').getAttribute('loading')).toBe('lazy')
+  // Its picture's whole ladder for every screen: Многофамилна's phone cap
+  // (projects/mn.js) is that project's alone.
+  expect([...explorer.querySelectorAll('.fx picture source')].map((source) => source.getAttribute('media'))).toEqual([null, null])
   expect(explorer.querySelector('.fx').getAttribute('data-block')).toBe('А')
   expect(doc.querySelectorAll('.fxp, .sheet')).toHaveLength(0)
   expect(explorer.textContent).not.toMatch(/Наличността не се зареди/)

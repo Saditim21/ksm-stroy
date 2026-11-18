@@ -12,7 +12,10 @@ import useMotion from './useMotion'
 //   SplitText, which carries it over. A no-break space stays one (no
 //   reduceWhiteSpace, which reads it as a space), so the split lines break
 //   where the landed heading does, never after a one-letter word (M3 ruling
-//   T5d).
+//   T5d). A split into words and lines leaves the text readable where it is,
+//   so it names nothing (`aria: 'none'`): SplitText's own label would be
+//   prohibited on a span with no role, as За нас's heading halves are
+//   (spec M3/M4 §4.5: Lighthouse a11y ≥ 98; M4 Task 8).
 // - data-fade: body copy fades in from 16 px below, over 1 s, at `top 92%`.
 // - data-draw: a seam (<Seam draw>) draws down over 1.3 s when its section
 //   (the seam's parent) reaches `top 82%`.
@@ -36,6 +39,7 @@ export default function useReveals(scopeRef) {
         linesClass: 'split-line',
         autoSplit: true,
         reduceWhiteSpace: false,
+        aria: 'none',
         onSplit: (split) => gsap.from(split.lines, {
           yPercent: 112,
           duration: 0.9,

@@ -125,7 +125,7 @@ export default function TracerPage() {
         {!imgSrc && <div className="p-10 text-neutral-400">Изберете изображение от панела →</div>}
       </div>
 
-      <div className="w-80 shrink-0 space-y-3 overflow-y-auto border-l border-neutral-700 p-4 text-sm">
+      <div className="flex w-80 shrink-0 flex-col gap-3 overflow-y-auto border-l border-neutral-700 p-4 text-sm">
         <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && loadFile(e.target.files[0])} />
         <div className="flex gap-1">
           {['draw', 'edit', 'band'].map((m) => (
@@ -160,7 +160,7 @@ export default function TracerPage() {
             <label>Първи <input type="number" value={band.startFloor} onChange={(e) => setBand({ ...band, startFloor: Number(e.target.value) })} className="w-14 bg-neutral-800 p-1" /></label>
           </div>
         )}
-        <div className="max-h-48 space-y-1 overflow-y-auto">
+        <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
           {shapes.map((sh, i) => (
             <div key={i} className={`flex justify-between rounded px-2 py-1 ${selected === i ? 'bg-amber-500/20' : 'bg-neutral-800'}`}>
               <button onClick={() => setSelected(i)}>

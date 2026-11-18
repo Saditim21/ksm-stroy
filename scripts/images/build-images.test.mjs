@@ -74,6 +74,31 @@ describe('build-images', () => {
     expect(manifest.cp).toMatchObject({ path: '/img/cp', w: 600, h: 300, widths: [300, 600] })
     expect(manifest.cp.color).toMatch(/^#[0-9A-F]{6}$/)
   })
+
+  // M4 Task 8 (M3's deferred minor): a PNG source whose alpha is opaque
+  // everywhere (Многофамилна's photos and drawings) gives files with no alpha
+  // plane, which an AVIF would otherwise keep (about 0.3 KB a file); a source
+  // with see-through pixels keeps its alpha.
+  it('drops an alpha that is opaque everywhere, and keeps one that is not', async () => {
+    await sharp({ create: { width: 600, height: 400, channels: 4, background: { r: 40, g: 90, b: 160, alpha: 1 } } }).png().toFile(path.join(tmp, 'opaque.png'))
+    const hole = await sharp({ create: { width: 100, height: 100, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } } }).png().toBuffer()
+    await sharp({ create: { width: 600, height: 400, channels: 4, background: { r: 40, g: 90, b: 160, alpha: 1 } } })
+      .composite([{ input: hole, left: 0, top: 0, blend: 'dest-out' }])
+      .png()
+      .toFile(path.join(tmp, 'holed.png'))
+    expect((await sharp(path.join(tmp, 'opaque.png')).metadata()).hasAlpha).toBe(true)
+    expect((await sharp(path.join(tmp, 'holed.png')).stats()).isOpaque).toBe(false)
+
+    await run([
+      { id: 'op', group: 'a', src: 'opaque.png', widths: [300] },
+      { id: 'ho', group: 'a', src: 'holed.png', widths: [300] },
+    ])
+    const alphaOf = async (file) => (await sharp(fs.readFileSync(path.join(outDir, file))).metadata()).hasAlpha
+    expect(await alphaOf('op-300.avif')).toBe(false)
+    expect(await alphaOf('op-300.webp')).toBe(false)
+    expect(await alphaOf('ho-300.avif')).toBe(true)
+    expect(await alphaOf('ho-300.webp')).toBe(true)
+  })
 })
 
 // Spec M3/M4 §11, ruling M4-PF6: a page's share image is its own photo's

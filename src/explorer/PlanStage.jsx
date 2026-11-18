@@ -95,7 +95,7 @@ function fitted(rect, box) {
 // to this (fit={false}).
 //
 // The drawing comes up to the opacity its project gives it (--drawing on the
-// plan: Многофамилна's .42, mn-facade.css), else Golden Residence's .6.
+// plan: Многофамилна's .42, projects/mn.plans.css), else Golden Residence's .6.
 function morph(gsap, { root, svg, ghost, plan, fromRect, onDone }) {
   const mini = planBox(plan, MINI_PAD)
   const full = planBox(plan, STAGE_PAD)

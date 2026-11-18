@@ -33,8 +33,8 @@ import { stepUnit } from './surfaceModel'
 // plans.js: Многофамилна's, M3 §2, §6.4), a switch over the left half,
 // „План на етажа / План на апартамента“, shows that plan whole on a light
 // plate instead of the floor's, and the caption says which plan it is
-// (mn-facade.css). It starts on the floor's; a step to an apartment with no
-// plan of its own goes back to it.
+// (projects/mn.plans.css). It starts on the floor's; a step to an
+// apartment with no plan of its own goes back to it.
 //
 // - available: solid „Изпратете запитване“; reserved, and a status the rules
 //   do not know: „Попитайте за апартамента“. Either hands the unit to

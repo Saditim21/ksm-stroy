@@ -2,7 +2,6 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { cwd } from 'node:process'
 import { describe, expect, it } from 'vitest'
-import * as renders from './constants/buildingRenders'
 
 // The public images and the site's references to them (spec M3/M4 §9, the M4
 // plan's Review Focus 5): the legacy removal deletes no image a page uses,
@@ -16,9 +15,16 @@ import * as renders from './constants/buildingRenders'
 // - in an image manifest (src/data/images/*.json, scripts/images/
 //   build-images.mjs): each rung of an entry's ladder, `${path}-${w}.avif`
 //   and `.webp` (src/components/ui/ResponsivePicture.jsx), and its share
-//   image, `og` (src/seo/meta.js);
-// - built by src/constants/buildingRenders.js: each render's src and srcSet.
-// Tests are left out: they name files a page never asks for.
+//   image, `og` (src/seo/meta.js).
+// Tests are left out: they name files a page never asks for. The two
+// building renders that no page names are KEPT, below, by name.
+
+// Kept though no page names them (spec M3/M4 §9, ruling T7d): production's
+// building renders with their widths, Golden Residence's building-2 and
+// Многофамилна's sgrada1, which outside links may name
+// (scripts/generate-srcset.mjs makes the widths).
+const KEPT = ['/images/golden-residence/building-2', '/images/mnogofamilna/sgrada1']
+  .flatMap((stem) => ['', '-640', '-1024'].map((width) => `${stem}${width}.webp`))
 
 const ROOT = cwd()
 const PUBLIC = join(ROOT, 'public')
@@ -65,17 +71,6 @@ function inManifests() {
   return named
 }
 
-// Every file the building renders name: each src and each srcSet candidate.
-function inRenders() {
-  const named = new Map()
-  for (const [name, render] of Object.entries(renders)) {
-    if (typeof render !== 'object' || !render.src) continue
-    const candidates = render.srcSet.split(',').map((candidate) => candidate.trim().split(/\s+/)[0])
-    for (const file of [render.src, ...candidates]) named.set(file, `buildingRenders.js: ${name}`)
-  }
-  return named
-}
-
 const missing = (named) => [...named].filter(([file]) => !existsSync(join(PUBLIC, file))).map(([file, by]) => `${file} (${by})`)
 
 describe('every public image a page names', () => {
@@ -92,22 +87,24 @@ describe('every public image a page names', () => {
     expect(missing(named)).toEqual([])
   })
 
-  it('is in public/, as a building render names it', () => {
-    const named = inRenders()
-    expect(named.size).toBeGreaterThan(0)
-    expect(missing(named)).toEqual([])
-  })
+})
+
+it('keeps the building renders spec §9 keeps, which no page names', () => {
+  expect(KEPT).toHaveLength(6)
+  expect(missing(new Map(KEPT.map((file) => [file, 'kept'])))).toEqual([])
+  const named = new Set([...[...writtenOut().keys()].flatMap(filesOf), ...inManifests().keys()])
+  expect(KEPT.filter((file) => named.has(file))).toEqual([])
 })
 
 // The other way: each image in public/images, public/img and public/og is
-// one a page names, so none is left that only the legacy pages used (the
-// floor hover renders, building-2.png and golden-residence.jpg went with
-// them), and none that a pipeline entry no longer makes.
+// one a page names, or one KEPT, so none is left that only the legacy pages
+// used (the floor hover renders, building-2.png and golden-residence.jpg
+// went with them), and none that a pipeline entry no longer makes.
 it('leaves no public image that no page names', () => {
   const named = new Set([
     ...[...writtenOut().keys()].flatMap(filesOf),
     ...inManifests().keys(),
-    ...inRenders().keys(),
+    ...KEPT,
   ])
   const images = ['images', 'img', 'og'].flatMap((dir) => filesUnder(join(PUBLIC, dir))).map(sitePathOf)
   expect(images.length).toBeGreaterThan(0)

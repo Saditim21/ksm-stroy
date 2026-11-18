@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-// Generates the responsive variants behind src/constants/buildingRenders.js.
+// Generates the widths of production's two building renders, which
+// public/images keeps though no page of the site names them (spec M3/M4 §9,
+// ruling T7d; src/assets.test.js lists them, KEPT): outside links may name
+// either.
 //
 //   node scripts/generate-srcset.mjs
 //
-// Every entry is served from /public (not bundled) so a plain <img srcSet>
-// can name it by URL. The two building renders' master files are copied
-// through untouched: the explorer's polygon maps in src/data/maps/*.json are
-// pinned to their exact pixel size, so the full-width candidate must stay
-// byte-identical.
+// Every entry is served from /public (not bundled), so an address can name
+// it. The two building renders' master files are copied through untouched:
+// the explorer's polygon maps in src/data/maps/*.json are pinned to their
+// exact pixel size, so the full-width candidate must stay byte-identical.
 //
 // Re-runnable: it overwrites its outputs and never edits the masters.
 import { mkdir, copyFile } from 'node:fs/promises'

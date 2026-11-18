@@ -144,9 +144,13 @@
    from 1024 px, two rows of filters), over its table's box, .68 of the
    screen or 720 px at most (--list-table), .64 of it on a phone
    (explorer.css). Once in, the table's box fills what its bar leaves of the
-   room, so a bar on fewer rows leaves no gap under the list. */
+   room, so a bar on fewer rows leaves no gap under the list. A jump to the
+   list (a ?view=list landing, „По критерии“) leaves its heading 28 px clear
+   of the header, as Контакти's landing leaves its own (ContactInquiry.jsx,
+   CLEAR; src/utils/scroll.js honours the margin). */
 .mnl {
   --list-table: min(calc(var(--screen-h) * .68), 720px);
+  scroll-margin-top: 28px;
   background: var(--onyx);
 }
 .sec + .mnl { padding-top: 0; }

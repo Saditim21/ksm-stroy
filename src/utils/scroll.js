@@ -18,7 +18,8 @@ const pageTop = (el) => el.getBoundingClientRect().top + window.scrollY
 // Where the page comes to rest: the element's top less the gap the page leaves
 // under a fixed top bar (`scroll-padding-top` on <html>, 0 where none is set,
 // which `scrollIntoView` honours itself, and Lenis too, but only for an
-// element).
+// element), and less the element's own `scroll-margin-top`, as the browser's
+// own jump leaves it (Многофамилна's list, mn.css).
 // With `reveal`, an element inside it, the page goes further down when that
 // element would otherwise end below the fold, just far enough to show it, and
 // never so far that it goes under the bar: on a phone, a form field that a
@@ -32,7 +33,8 @@ const pageTop = (el) => el.getBoundingClientRect().top + window.scrollY
 function restingTop(el, reveal) {
   const parsed = Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)
   const padding = Number.isNaN(parsed) ? 0 : parsed
-  let top = pageTop(el) - padding
+  const margin = Number.parseFloat(getComputedStyle(el).scrollMarginTop) || 0
+  let top = pageTop(el) - padding - margin
   if (reveal) {
     const shown = reveal.getBoundingClientRect().bottom + window.scrollY + REVEAL_GAP - window.innerHeight
     top = Math.max(top, Math.min(shown, pageTop(reveal) - padding))

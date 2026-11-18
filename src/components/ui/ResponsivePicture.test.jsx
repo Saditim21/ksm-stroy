@@ -46,6 +46,16 @@ test('eager: loaded at once, with no fetch priority', () => {
   expect(img).not.toHaveAttribute('fetchpriority')
 })
 
+// A first-screen picture that is no page's LCP image (spec M3/M4 §10, Home's
+// step 3): in the page from the start, fetched at the browser's lowest
+// priority, after the LCP image and the page's code.
+test('eager with fetchPriority low: loaded at once, at the lowest priority', () => {
+  const { container } = render(<ResponsivePicture image={IMAGE} alt="" sizes="100vw" eager fetchPriority="low" />)
+  const { img } = parts(container)
+  expect(img).toHaveAttribute('loading', 'eager')
+  expect(img).toHaveAttribute('fetchpriority', 'low')
+})
+
 test('otherwise lazy, with no fetch priority', () => {
   const { container } = render(<ResponsivePicture image={IMAGE} alt="" sizes="100vw" />)
   const { img } = parts(container)

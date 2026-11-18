@@ -78,8 +78,14 @@ async function buildEncoded(entry, { root, outDir, force, log }) {
     const { left, top, width, height } = entry.crop
     base = base.extract({ left, top, width, height })
   }
-  // Materialise the crop once so every rung resizes from the same pixels.
-  const { data, info } = await base.png().toBuffer({ resolveWithObject: true })
+  // Materialise the crop once so every rung resizes from the same pixels,
+  // without an alpha that is opaque everywhere: an AVIF would keep it as a
+  // plane of its own, about 0.3 KB a file (the PNG sources' alpha is; M4
+  // Task 8). A see-through picture keeps its alpha.
+  let { data, info } = await base.png().toBuffer({ resolveWithObject: true })
+  if (info.channels === 4 && (await sharp(data).stats()).isOpaque) {
+    ({ data, info } = await sharp(data).removeAlpha().png().toBuffer({ resolveWithObject: true }))
+  }
   const w = info.width
   const h = info.height
   let widths = [...new Set(entry.widths)].sort((a, b) => a - b).filter((x) => x <= w)

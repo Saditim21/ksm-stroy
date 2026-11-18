@@ -150,6 +150,12 @@ describe.each([
     expect([...facade.querySelectorAll('[data-lit]')].map((floor) => floor.getAttribute('data-lit')).sort()).toEqual(lit)
     expect(facade.querySelector('.fx__lights').getAttribute('aria-hidden')).toBe('true')
     expect(facade.querySelector('picture.fx__pic img').getAttribute('src')).toMatch(/^\/img\/mn-dusk-off-\d+\.webp$/)
+    // A phone is offered its twin and lit render at 800 and 1400 px alone, as
+    // on the main page (spec M3/M4 §10).
+    for (const picture of facade.querySelectorAll('.fx__pic, .fx__lit picture')) {
+      const phone = [...picture.querySelectorAll('source[media="(max-width: 900px)"]')]
+      expect(phone.map((source) => source.getAttribute('srcset').match(/\d+w/g))).toEqual([['800w', '1400w'], ['800w', '1400w']])
+    }
     // Its rail: the block's nine floors, each its free count.
     const rails = [...facade.querySelectorAll(`.fx__rail--${letter === 'А' ? 'a' : 'b'} .fx__cnt`)]
     expect(rails.map((rail) => rail.getAttribute('data-k'))).toEqual([10, 9, 8, 7, 6, 5, 4, 3, 2].map((floor) => `${letter}-${floor}`))

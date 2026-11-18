@@ -28,16 +28,18 @@ import { createContext, useContext } from 'react'
 //     dated(snapshot) → string | null,                the date of numbers that are not live
 //     types: string[],                                the list's Вид options
 //     exposureNote: string | null,                    the list's footnote on the exposures
-//     facade: { map, picture, priority?, sizes, alt, className?, seam: { x, top, bottom }, Lights?, namesApart? },
+//     facade: { map, picture, art?, priority?, sizes, alt, className?, seam: { x, top, bottom }, Lights?, namesApart? },
 //     plans: Plans, or loadPlans() → Promise<Plans> }
 //   Plans = { floors, drawings?,
 //     unitNumber(unit) → string,                      what a plan draws: '501', '101'
 //     floorMeta({ block, floor }) → string | null,    'кота +3,06' on А-1, 'тавански етаж' on 10
 //     floorWord?({ block, floor }) → string | null }  after a unit's floor: 'тавански' on 10
 // `facade.map` is its building map; `picture` and `sizes` the facade's
-// picture; `alt` its name; `className` the class under which the project's
-// stylesheet sets its facade's geometry (explorer.css's own is Golden
-// Residence's); `seam` the brass line between its blocks, on the map's grid.
+// picture, and `art` its other sources for a media query (ResponsivePicture's:
+// Многофамилна's phone files); `alt` its name; `className` the class under
+// which the project's stylesheet sets its facade's geometry (explorer.css's
+// own is Golden Residence's); `seam` the brass line between its blocks, on
+// the map's grid.
 // Its plans are what only an opened floor's surfaces, and mini plans, read:
 // its floor plans (a floors map), the dark drawing under each block's (an
 // image), the number an apartment shows on them and the project's word on a

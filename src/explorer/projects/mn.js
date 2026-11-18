@@ -42,6 +42,23 @@ const map = Object.freeze({
   }),
 })
 
+// The twin and the lit render, each on the page's ground: their skies are
+// the render's own.
+const twin = Object.freeze({ ...mnNight['mn-dusk-off'], color: 'transparent' })
+const litRender = Object.freeze({ ...mnNight['mn-dusk'], color: 'transparent' })
+
+// A phone shows one block's crop of a render, and its files up to 1400 px
+// are enough there at any density (the concept's mnogofamilna.js:413-414,
+// its phone up to 900 px): its own sources of each render, without the
+// larger rungs, keep a phone's LCP image, the twin, within the 60 kB mobile
+// budget at any density (spec M3/M4 §10: the 1400 px AVIF is 55 kB, the
+// 1600 px 66 kB). `sizes` still says the slot's width, so the browser picks
+// between the two. A desktop keeps the whole ladder.
+const onPhones = (image) => Object.freeze({
+  media: '(max-width: 900px)',
+  image: Object.freeze({ ...image, widths: image.widths.filter((width) => width <= 1400) }),
+})
+
 export const MN_PROJECT = Object.freeze({
   ...MN_UNITS,
   types: Object.freeze(Object.keys(MN_FACTS.types).sort()),
@@ -49,11 +66,13 @@ export const MN_PROJECT = Object.freeze({
   facade: Object.freeze({
     map,
     // The twin, the page's first picture (its LCP): fetched first and at
-    // once. Its sky is the render's own, so it waits on the page's ground.
-    picture: Object.freeze({ ...mnNight['mn-dusk-off'], color: 'transparent' }),
+    // once.
+    picture: twin,
+    art: onPhones(twin),
     priority: true,
     // The lit render, which the lit floors show (FacadeLights.jsx).
-    lit: Object.freeze({ ...mnNight['mn-dusk'], color: 'transparent' }),
+    lit: litRender,
+    litArt: onPhones(litRender),
     // The picture's width, the grid's: the stage's on a desktop (860 px up
     // to a 1365 px screen, then about .66 of it), 1200 / 652 of the stage on
     // a phone, which shows one block's crop (mn-facade.css).

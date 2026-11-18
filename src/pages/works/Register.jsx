@@ -43,7 +43,8 @@ import { lineOf, photoOf, WORKS } from './works'
 //   the scope of its own, so that no motion's scope takes in the opening
 //   (spec M3/M4 §4.2: useMotion is never used above the fold). A row's
 //   plates' photos are the only ones of the work the page asks for (the
-//   first row's at once, its cover first), the rest coming with the book.
+//   first row's at once, its cover first, its two smaller plates at the
+//   lowest priority: spec M3/M4 §10, step 3), the rest coming with the book.
 
 const loadBook = () => import('./Book')
 // Flip (src/motion/flip.js), through a chunk of its own, not in the page's
@@ -100,6 +101,7 @@ function Row({ ref, work, first, hidden, onOpen }) {
                 sizes={place === 0 ? COVER_SIZES : MINOR_SIZES}
                 priority={first && place === 0}
                 eager={first && place > 0}
+                fetchPriority={first && place > 0 ? 'low' : undefined}
                 className="grade wk__pic"
               />
             </button>

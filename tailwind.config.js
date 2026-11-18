@@ -14,6 +14,17 @@ export default {
   future: {
     hoverOnlyWhenSupported: true,
   },
+  // The defaults of Tailwind's transform, filter, ring and touch utilities
+  // (its --tw-* properties) go on those utilities' own selectors, not on
+  // every element and both its pseudo-elements (`*, ::before, ::after`),
+  // where every style recalculation computed about thirty custom properties
+  // three times an element. Продажби, with its board of 336 squares, blocked
+  // for a median of 65 ms with this and 97 ms without, over six runs each
+  // (spec M3/M4 §10, M4 Task 8). No markup uses those utilities, and ten
+  // pages' captures are the same pixels with it.
+  experimental: {
+    optimizeUniversalDefaults: true,
+  },
   theme: {
     // Tailwind's screens, plus `split`: from 901 px a section's two halves sit
     // side by side; below that they stack (spec §2.2).

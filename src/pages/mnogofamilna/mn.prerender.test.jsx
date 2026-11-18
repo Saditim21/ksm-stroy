@@ -114,6 +114,28 @@ it('prerenders the facade at rest, its night picture first to load', () => {
   expect(caption.querySelector('.cap-phone')).not.toBeNull()
 })
 
+// The phone's renders (spec M3/M4 §10; the concept's mnogofamilna.js:413-414):
+// a phone shows one block's crop, and 1400 px of a render are enough there,
+// so a phone of any density is offered the 800 and 1400 px files alone, its
+// LCP image within the 60 kB mobile budget (the 1400 px twin is 55 kB, the
+// 1600 px 66 kB); a desktop keeps the whole ladder. The twin and every lit
+// floor alike.
+it('offers a phone the twin and the lit render at 800 and 1400 px alone', () => {
+  const doc = parse(prerender())
+  const pictures = [...doc.querySelectorAll('#explorer .fx__pic, #explorer .fx__lit picture')]
+  expect(pictures).toHaveLength(10)
+  for (const picture of pictures) {
+    const sources = [...picture.querySelectorAll('source')]
+    const phone = sources.filter((source) => source.getAttribute('media') === '(max-width: 900px)')
+    expect(phone.map((source) => source.getAttribute('type'))).toEqual(['image/avif', 'image/webp'])
+    for (const source of phone) {
+      expect(source.getAttribute('srcset').split(', ').map((candidate) => candidate.split(' ')[1])).toEqual(['800w', '1400w'])
+    }
+    const rest = sources.filter((source) => !source.hasAttribute('media'))
+    expect(rest.map((source) => source.getAttribute('srcset').split(', ').length)).toEqual([5, 5])
+  }
+})
+
 // Spec M3 §6.2: the opening is the explorer, then both blocks apartment by
 // apartment, the list, the building, the gallery, and the inquiry, whose
 // #zapitvane is inside #kontakti.

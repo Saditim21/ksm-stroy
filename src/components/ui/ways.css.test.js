@@ -38,7 +38,9 @@ it('stacks them on a phone, left-aligned, a brass rule between, no seam', () => 
   expect(declaredFor('.ways', [PHONE])['grid-template-columns']).toBe('1fr')
   expect(declaredFor('.ways > .seam', [PHONE]).display).toBe('none')
   expect(declaredFor(FIRST, [PHONE])).toMatchObject({ 'justify-items': 'start', padding: '26px var(--gut)', 'text-align': 'left' })
-  expect(declaredFor(`${WAY} + :not(.seam)`, [PHONE])['border-top']).toBe('1px solid var(--brass)')
+  // The brass rule on each way after the first: the <nav> holds its seam,
+  // then the ways (Ways.jsx), so the second way on is its third child on.
+  expect(declaredFor('.ways > :nth-child(n + 3)', [PHONE])['border-top']).toBe('1px solid var(--brass)')
 })
 
 // Spec §2.2: a hover needs a pointer that hovers, so a tap never leaves one

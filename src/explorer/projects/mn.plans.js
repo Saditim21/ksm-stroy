@@ -3,11 +3,13 @@
 // MN_PROJECT.loadPlans() hands over, beside its plans' data (mn.js): the dark
 // line art under its typical floor (mn-plan-line, at twice the plan's grid;
 // ruling PF4), quieter than Golden Residence's under the class its stylesheet
-// gives it (plan--mn, src/explorer/mn-facade.css; ruling PF5), and the plans
-// production has of single apartments, shown whole in the unit panel (M3
-// §2, §6.4). A chunk of its own, loaded with the surfaces, so none of it is
-// in a route's first-load JS, nor on Golden Residence's pages (ruling PF3).
+// gives it (plan--mn, mn.plans.css; ruling PF5), and the plans production
+// has of single apartments, shown whole in the unit panel (M3 §2, §6.4). A
+// chunk of its own, loaded with the surfaces, so none of it is in a route's
+// first-load JS, nor on Golden Residence's pages (ruling PF3). Its
+// stylesheet comes with it, the dialogs' own look (M4 Task 8).
 import mnPlans from '../../data/images/mn-plans.json'
+import './mn.plans.css'
 
 const LINE = mnPlans['mn-plan-line']
 export const drawings = { 'А': LINE, 'Б': LINE }

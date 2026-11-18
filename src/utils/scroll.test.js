@@ -282,4 +282,19 @@ describe('jumpToId', () => {
     expect(() => jumpToId('missing')).not.toThrow()
     expect(native).toHaveBeenCalledTimes(1)
   })
+
+  // A section's own scroll-margin-top keeps it that much further below the
+  // bar, as the browser's own jump to it does: Многофамилна's list lands its
+  // heading 28 px clear of the header (M4 Task 8, mn.css).
+  test('leaves the section its own scroll margin too', () => {
+    setup(1000)
+    document.getElementById('explorer').style.scrollMarginTop = '28px'
+    const native = vi.spyOn(window, 'scrollTo')
+    const lenis = { scrollTo: vi.fn(), dimensions: { resize: vi.fn() } }
+    setLenis(lenis)
+
+    jumpToId('explorer')
+    expect(native).toHaveBeenCalledWith(0, 896)
+    expect(lenis.scrollTo).toHaveBeenCalledWith(896, { immediate: true, force: true })
+  })
 })

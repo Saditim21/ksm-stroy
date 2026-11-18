@@ -93,7 +93,7 @@ export default function Facade({ project, model, mode = 'full', caption, initial
   // caption, compact mode's.
   const bare = mode !== 'full'
   const compact = mode === 'compact'
-  const { map, picture, priority, sizes, alt, className, seam, Lights, namesApart } = project.facade
+  const { map, picture, art, priority, sizes, alt, className, seam, Lights, namesApart } = project.facade
   const { min, max } = project.floors
   const facade = facadeOf(map)
   const rootRef = useRef(null)
@@ -372,7 +372,7 @@ export default function Facade({ project, model, mode = 'full', caption, initial
           <p className="fx__bname fx__bname--b">Блок&nbsp;Б</p>
           <div className="fx__clip" aria-hidden="true">
             <div className="fx__frame">
-              <ResponsivePicture image={picture} alt="" sizes={sizes} className="fx__pic" priority={priority} />
+              <ResponsivePicture image={picture} art={art} alt="" sizes={sizes} className="fx__pic" priority={priority} />
               {Lights && <Lights model={model} project={project} />}
               <svg className="fx__svg" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" focusable="false">
                 <defs>

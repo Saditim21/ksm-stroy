@@ -1,8 +1,8 @@
 // The motion runtime (spec §5.1). The engine, GSAP and Lenis (engine.js), is
-// a deferred chunk: it loads once the page has, and never sits in a route's
-// first-load JS. Components queue their motion through useMotion, and the
-// setups run from an idle queue, one per idle period, with one
-// ScrollTrigger.refresh() when the queue drains.
+// a deferred chunk: it loads once the page has loaded and painted its largest
+// paint, and never sits in a route's first-load JS. Components queue their
+// motion through useMotion, and the setups run from an idle queue, one per
+// idle period, with one ScrollTrigger.refresh() when the queue drains.
 
 /** @typedef {typeof import('./engine.js').default} Motion */
 
@@ -17,13 +17,40 @@ function pageLoaded() {
   return new Promise((resolve) => window.addEventListener('load', resolve, { once: true }))
 }
 
+// How long after `load` the engine waits at most for the browser's report of
+// the largest paint.
+const PAINT_WAIT_MS = 2000
+
+// Resolves once the page's largest paint is on the screen (spec M3/M4 §10,
+// Home's step 1): at the browser's first largest-contentful-paint report
+// after `load` (buffered: a paint before it counts). Every page's first
+// viewport paints in one frame, so that is its largest paint (measured in
+// M4 Task 8). At `load` where the browser makes no such report, and two
+// seconds after it at the latest: a page loaded in a hidden tab gets none.
+function largestPaint() {
+  const LCP = 'largest-contentful-paint'
+  if (!globalThis.PerformanceObserver?.supportedEntryTypes?.includes(LCP)) return Promise.resolve()
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer)
+      observer.disconnect()
+      resolve()
+    }
+    const timer = setTimeout(done, PAINT_WAIT_MS)
+    const observer = new PerformanceObserver(done)
+    observer.observe({ type: LCP, buffered: true })
+  })
+}
+
 // Loads the engine, once. The first caller is the first useMotion or
-// SmoothScroll effect after hydration; if the page has not loaded by then, the
-// import waits for the window's `load` event.
+// SmoothScroll effect after hydration; the import waits for the window's
+// `load` event, then for the page's largest paint, so its request never
+// competes with what the page paints first.
 /** @returns {Promise<Motion>} */
 export function loadMotion() {
   if (!loading) {
     loading = pageLoaded()
+      .then(largestPaint)
       .then(() => import('./engine.js'))
       .then((module) => {
         motion = module.default

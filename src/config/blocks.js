@@ -1,8 +1,8 @@
 // Each project's blocks: the one list the block pages' routes (src/routes.js),
-// the prerendered paths (react-router.config.js) and the project data
-// (src/config/projects.js) read. It imports nothing, because React Router
-// loads src/routes.js and react-router.config.js at build time, and the smoke
-// run and scripts/postbuild.mjs import react-router.config.js in plain Node.
+// the prerendered paths (react-router.config.js), the availability store and
+// the explorer's model read. It imports nothing, because React Router loads
+// src/routes.js and react-router.config.js at build time, and the smoke run
+// and scripts/postbuild.mjs import react-router.config.js in plain Node.
 export const PROJECT_BLOCKS = {
   'golden-residence': [
     { id: 'block-a', letter: 'А', label: 'Блок А' },

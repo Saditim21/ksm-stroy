@@ -1,16 +1,23 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { cwd } from 'node:process'
 import mnImages from '../../data/images/mnogofamilna.json'
 import { firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
 
 // src/pages/mnogofamilna/mn.css, the Многофамилна page's own (its opening, the
-// list's section), and src/explorer/mn-facade.css, Многофамилна's facade
-// (spec M3 §6.2, §6.3; Diptych §5.5): its geometry on the building map's
-// grid, its crops, its lights and their entrance, and its dialogs' drawing.
-// jsdom applies no CSS, so these read the rules (src/test/css.js).
+// list's section), src/explorer/mn-facade.css, Многофамилна's facade (spec
+// M3 §6.2, §6.3; Diptych §5.5): its geometry on the building map's grid,
+// its crops, its lights and their entrance, and
+// src/explorer/projects/mn.plans.css, what its dialogs add: its drawing and
+// its apartments' own plans. jsdom applies no CSS, so these read the rules
+// (src/test/css.js).
 
 const PAGE = 'src/pages/mnogofamilna/mn.css'
 const FACADE = 'src/explorer/mn-facade.css'
+const DIALOGS = 'src/explorer/projects/mn.plans.css'
 const page = rulesOf(PAGE)
 const facade = rulesOf(FACADE)
+const dialogs = rulesOf(DIALOGS)
 const PHONE = '@media (max-width: 900px)'
 
 // What the rules for `selector` inside exactly these at-rules declare,
@@ -135,9 +142,21 @@ describe('the facade’s geometry', () => {
 // Ruling PF5: Многофамилна's drawing is quieter, .42 in the plan stage and
 // .55 in the unit panel's crop, under its plans' class.
 it('draws Многофамилна’s plan drawing at .42 in the stage and .55 in the crop', () => {
-  expect(declaredFor(facade, '.plan.plan--mn')['--drawing']).toBe('.42')
-  expect(declaredFor(facade, '.plan--mn.plan--crop')['--drawing']).toBe('.55')
-  expect(declaredFor(facade, '.plan.plan--mn .drawing[data-loaded]').opacity).toBe('var(--drawing)')
+  expect(declaredFor(dialogs, '.plan.plan--mn')['--drawing']).toBe('.42')
+  expect(declaredFor(dialogs, '.plan--mn.plan--crop')['--drawing']).toBe('.55')
+  expect(declaredFor(dialogs, '.plan.plan--mn .drawing[data-loaded]').opacity).toBe('var(--drawing)')
+})
+
+// What Многофамилна's dialogs add, its quieter drawing and its apartments'
+// own plans (the unit panel's switch and plate), comes with its plans
+// (mn.plans.js, which every opening of the dialogs loads), not with the
+// facade's lights, so the dialogs keep their look whatever becomes of the
+// lights (M3's deferred minor; M4 Task 8).
+it('styles the dialogs with the plans, not with the lights', () => {
+  const plansModule = readFileSync(join(cwd(), 'src/explorer/projects/mn.plans.js'), 'utf8')
+  expect(plansModule).toMatch(/^import '\.\/mn\.plans\.css'$/m)
+  expect(dialogs.flatMap((rule) => rule.selectors).filter((selector) => /\.up__|\.plan--mn/.test(selector)).length).toBeGreaterThan(0)
+  expect(facade.flatMap((rule) => rule.selectors).filter((selector) => /\.up__|\.plan/.test(selector))).toEqual([])
 })
 
 // Spec M3 §6.2 #3: the list loads lazily, and the room it takes is kept
@@ -147,6 +166,15 @@ it('keeps the list’s room before it loads', () => {
   expect(declaredFor(page, '.mnl')['--list-table']).toMatch(/var\(--screen-h\)/)
   expect(declaredFor(page, '.mnl__list')['min-height']).toMatch(/^calc\(var\(--list-table\) \+ \d+px\)$/)
   expect(declaredFor(page, '.mnl .lv__table')).toMatchObject({ height: 'var(--list-table)', flex: '1 0 auto' })
+})
+
+// A jump to the list, a ?view=list landing's or „По критерии“'s, leaves its
+// heading 28 px clear of the header, as Контакти's landing leaves its own
+// (src/pages/contact/ContactInquiry.jsx, CLEAR): the section has no padding
+// of its own above its heading (M4 Task 8; src/utils/scroll.js honours it).
+it('lands the list’s heading 28 px clear of the header', () => {
+  expect(declaredFor(page, '.sec + .mnl')['padding-top']).toBe('0')
+  expect(declaredFor(page, '.mnl')['scroll-margin-top']).toBe('28px')
 })
 
 // Spec M3 §6.2 #2 (the concept's mnogofamilna.css:147-149): a block in

@@ -43,7 +43,11 @@
   .ways > :not(.seam):hover .serif { color: var(--brass-l); }
 }
 
-/* The ways stack on a phone, left-aligned, a brass rule between them. */
+/* The ways stack on a phone, left-aligned, a brass rule between them: on
+   each way after the first, by its place after the <nav>'s seam and the
+   first way. A sibling after a compound that names nothing (`:not(.seam) +
+   :not(.seam)`) would restyle a page's whole body at every node it gains
+   (src/styles/siblings.test.js). */
 @media (max-width: 900px) {
   .ways { grid-template-columns: 1fr; }
   .ways > .seam { display: none; }
@@ -53,5 +57,5 @@
     padding: 26px var(--gut);
     text-align: left;
   }
-  .ways > :not(.seam) + :not(.seam) { border-top: 1px solid var(--brass); }
+  .ways > :nth-child(n + 3) { border-top: 1px solid var(--brass); }
 }
