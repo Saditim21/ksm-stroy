@@ -107,6 +107,45 @@ export const GROUPS = [
   },
 ]
 
+// Copies (M4 Tasks 2–6), the one other way a page keeps what it shares out
+// of the shared chunks. A page that needs a little of a module other pages
+// share, where sharing it would split it out of their chunks into a chunk
+// of its own or grow a first load that M4 caps (Home's), imports it under a
+// query of its own, its page's name: `home.json?contact`. Vite takes
+// `module?query` for a module of its own, so the build gives that page its
+// own copy of what it reads, and the module stays in the other pages'
+// chunks as it was (ruling M4-PF3). The copy's bytes are that page's alone.
+// COPIES lists each one: its importer, the module, and the query, which
+// names the importer's page (its folder under src/pages/, or its route
+// module under src/routes/). scripts/client-chunks.test.mjs fails on a query
+// import COPIES does not list, on one it lists that has gone, and on a query
+// that names another page. Each importer says why at its import.
+export const COPIES = [
+  // Контакти (Task 2): the service stills under the construction subject,
+  // and Многофамилна's dated apartments, which its prefill checks.
+  { by: 'src/pages/contact/ContactInquiry.jsx', module: 'src/data/images/home.json', query: 'contact' },
+  { by: 'src/pages/contact/ContactInquiry.jsx', module: 'src/data/mnogofamilna/snapshot.js', query: 'contact' },
+  // The closing ways of Контакти, Продажби and Обекти (Tasks 2–4), which
+  // would otherwise share a chunk with Home's teaser and add 220–260 B to
+  // Home's first load.
+  { by: 'src/routes/contact.jsx', module: 'src/components/ui/Ways.jsx', query: 'contact' },
+  { by: 'src/routes/projects.jsx', module: 'src/components/ui/Ways.jsx', query: 'projects' },
+  { by: 'src/routes/blog.jsx', module: 'src/components/ui/Ways.jsx', query: 'blog' },
+  // Обекти's works (Task 4), which reuse Home's six photos (ruling M4-PF5).
+  { by: 'src/pages/works/works.js', module: 'src/data/images/home.json', query: 'works' },
+  // За нас's photos (Task 5), two of them Home's and Обекти's.
+  { by: 'src/pages/about/photos.js', module: 'src/data/images/home.json', query: 'about' },
+  { by: 'src/pages/about/photos.js', module: 'src/data/images/works.json', query: 'about' },
+]
+// The 404 page (Task 6) copies by hand instead: it must import no module a
+// group's chunk holds, so it states the few values it needs itself, and a
+// test holds each to its source: the display face's preload
+// (src/routes/not-found.jsx, as src/utils/documentPreloads.js and
+// fontLinks.js give it), and plan А's drawing and block А's outlines
+// (src/pages/notfound/LostPlan.jsx, as Golden Residence's floors map gives
+// them).
+export const HAND_COPIES = ['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx']
+
 // A source file's module id, by its path from the repository.
 function moduleOf(ids, file) {
   const id = ids.find((each) => each.replace(/\\/g, '/').endsWith(`/${file}`))

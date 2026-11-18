@@ -1,6 +1,9 @@
 // @vitest-environment node
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { clientChunks, GROUPS, pinnedChunks } from './client-chunks.mjs'
+import { clientChunks, COPIES, GROUPS, HAND_COPIES, pinnedChunks } from './client-chunks.mjs'
 
 // The browser's chunks (see client-chunks.mjs), on a small module graph built
 // as React Router's client build names its modules: the client entry, the
@@ -263,5 +266,42 @@ describe('the plugin', () => {
     }
     expect(output.manualChunks(id.button, api(rootOnly))).toBeUndefined()
     expect(output.manualChunks(id.button, pass)).toBe('site')
+  })
+})
+
+// Copies (client-chunks.mjs: COPIES): a page's own copy of a shared module,
+// imported under a query that names the page. Every such import in src/ is
+// listed, every listed one is in src/, and each query is its importer's
+// page, so a new copy is documented where the build's chunks are, or the
+// suite fails (M4 Task 2's minor, routed through Task 7).
+describe('copies', () => {
+  const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+  // Vite's own queries, which are no copies.
+  const VITE = new Set(['url', 'raw', 'inline', 'worker', 'sharedworker', 'init', 'react-router-build-client-route'])
+  const sources = (dir) => fs.readdirSync(path.join(repo, dir), { withFileTypes: true }).flatMap((entry) => {
+    const file = `${dir}/${entry.name}`
+    if (entry.isDirectory()) return sources(file)
+    return /\.(jsx?|mjs)$/.test(entry.name) && !/\.test\./.test(entry.name) ? [file] : []
+  })
+  const found = sources('src').flatMap((by) => [...fs.readFileSync(path.join(repo, by), 'utf8').matchAll(/\bfrom\s+'([^'?]+)\?([\w-]+)'/g)]
+    .filter(([, , query]) => !VITE.has(query))
+    .map(([, spec, query]) => ({ by, module: path.posix.join(path.posix.dirname(by), spec), query })))
+  const key = ({ by, module, query }) => `${by} imports ${module}?${query}`
+
+  it('lists every query import in src/, and only those', () => {
+    expect(found.map(key).sort()).toEqual(COPIES.map(key).sort())
+  })
+
+  it('names the importer’s page in each query', () => {
+    for (const { by, module, query } of COPIES) {
+      const page = by.match(/^src\/pages\/([^/]+)\//)?.[1] ?? by.match(/^src\/routes\/([^/.]+)\.jsx$/)?.[1]
+      expect(query, by).toBe(page)
+      expect(fs.existsSync(path.join(repo, module)), module).toBe(true)
+    }
+  })
+
+  it('lists the 404 page’s copies by hand, whose files are there', () => {
+    expect(HAND_COPIES).toEqual(['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx'])
+    for (const file of HAND_COPIES) expect(fs.existsSync(path.join(repo, file)), file).toBe(true)
   })
 })
