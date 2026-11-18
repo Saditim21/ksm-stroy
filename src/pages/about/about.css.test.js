@@ -2,9 +2,9 @@ import { firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf 
 
 // src/pages/about/about.css, За нас's own (spec M3/M4 §7.4, §4.1, §4.3;
 // Diptych §5.5, §11): the founding drawing itself once, in CSS, under the
-// motion gate; the type held to the system's sizes; the photos left to the
-// archive's one grade. jsdom applies no CSS, so these read the rules
-// (src/test/css.js).
+// motion gate; the type held to the system's sizes, but for the H1's ruled
+// exception (T5a); the photos left to the archive's one grade. jsdom applies
+// no CSS, so these read the rules (src/test/css.js).
 
 const PAGE = 'src/pages/about/about.css'
 const rules = rulesOf(PAGE)
@@ -104,10 +104,15 @@ describe('the founding draws itself once, in CSS (Diptych §5.5, M3/M4 §4.2, §
   })
 })
 
-// Spec §4.1: the H1 reads across the seam at Home's slogan size; the motto
-// closes its sentence at h3 size, not as a display quote (§7.4).
-it('sets the H1 at the slogan’s size and the motto at h3 size', () => {
-  expect(declaredFor('.origin__h1')['font-size']).toBe('var(--fs-slogan)')
+// Ruling T5a, an exception to spec §4.1's two title sizes: above 900 px the
+// H1 keeps the approved concept's size, at which „в КСМ Строй ООД“ holds one
+// line in its half and the founding caption stays in the first screen (the
+// slogan's size broke the name before „ООД“ up to about 1850 px). Phones keep
+// the H1's own size, as Контакти's and Многофамилна's do. The motto closes
+// its sentence at h3 size, not as a display quote (§7.4).
+it('sets the H1 at the concept’s size above 900 px and its own below, the motto at h3 size', () => {
+  expect(declaredFor('.origin__h1')['font-size']).toBe('clamp(40px, 4.3vw, 72px)')
+  expect(declaredFor('.origin__h1', [PHONE])['font-size']).toBe('clamp(31px, 9.6vw, 52px)')
   expect(declaredFor('.motto')['font-size']).toBe('var(--fs-h3)')
 })
 

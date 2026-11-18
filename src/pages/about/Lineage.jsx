@@ -8,9 +8,10 @@
 //
 // - The H1, „Добре *дошли* | в КСМ Строй ООД“, hinges on the seam, each part
 //   in a mask authored by hand (spec §4.2: never split by script above the
-//   fold). The right part's two masks flow as words do, so where the half is
-//   too narrow for the whole name at the slogan's size, it breaks before
-//   „ООД“, never inside „КСМ Строй“ or after „в“.
+//   fold). At its size (about.css, ruling T5a) the name holds one line in its
+//   half. The right part's two masks flow as words do, so should the half be
+//   too narrow for the whole name (a reader's wider text spacing), it breaks
+//   before „ООД“, never inside „КСМ Строй“ or after „в“.
 // - The drawing is the founding sentence of the legacy page (About.jsx:422-423;
 //   src/assets/for-us/content.txt:1) set as a figure. The sentence itself is
 //   the figure's caption, one element, so a screen reader hears it once, and

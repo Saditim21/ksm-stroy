@@ -4,9 +4,10 @@
    :219-233 the figures, :235-243 the values, :245-259 the offer, :261-273
    mission and vision, :275-285 the call to action, :287-366 the phones) with
    the tokens of src/index.css, --screen-h for vh and svh, and the system's
-   type: the H1 at Home's slogan size, the motto at h3 size, and no heading
-   larger than its section's h2, the value words smaller than theirs (M3/M4
-   §4.1). The shell, the seam, the section's padding, the hinge and the
+   type: the motto at h3 size, and no heading larger than its section's h2,
+   the value words smaller than theirs (M3/M4 §4.1). The H1 alone keeps the
+   concept's size above 900 px (ruling T5a, an exception to §4.1's two title
+   sizes). The shell, the seam, the section's padding, the hinge and the
    actions are the site's (src/shell, src/styles/diptych.css), and so is the
    photos' one grade (.grade, M3/M4 §4.3).
 
@@ -42,11 +43,11 @@
 /* ---------- 1. #top, the founding drawn on the seam (spec §7.4) ---------- */
 /* At least a screen under the header. The title sits a step under the bar,
    the drawing under it; the space a tall screen has to spare goes above the
-   title, down which the line comes, and under the caption. The title, at the
-   slogan's size (spec §4.1), takes a second line on its right where the
-   concept's took one; the steps above it and under it give that line back
-   (.035 of the screen, the concept's .05), so at 1440 × 900 the founding
-   sentence still ends inside the first viewport. */
+   title, down which the line comes, and under the caption. The steps above
+   the title and under it are .035 of the screen, a little under the
+   concept's .05, so the founding sentence ends inside the first viewport
+   with room to spare on the common laptop windows (1366 × 768, 1536 × 864)
+   as well as at 1440 × 900. */
 .origin {
   --pad-t: clamp(30px, calc(var(--screen-h) * .035), 60px);
   --lens: clamp(124px, 12.6vw, 216px);
@@ -92,9 +93,13 @@
   margin-left: -.5px;
 }
 /* The title hinged on the seam: „Добре *дошли*“ ends at it, „в КСМ Строй
-   ООД“ starts after it, on the first line's level. At the slogan's size
-   the name is wider than its half up to about 1850 px: its two masks then
-   break as words do, before „ООД“. */
+   ООД“ starts after it, on the first line's level. Above 900 px it keeps
+   the approved concept's size (ruling T5a, an exception to spec §4.1's two
+   title sizes: the title is part of the drawing's composition), at which
+   the name holds one line in its half; at the slogan's size it broke before
+   „ООД“ up to about 1850 px and pushed the caption below the fold. Should a
+   reader's wider text spacing overfill the half, the two masks still break
+   as words do, before „ООД“. Phones keep the title's own size (below). */
 .origin__h1 {
   grid-column: 1;
   grid-row: 2;
@@ -102,7 +107,7 @@
   grid-template-columns: 1fr 1fr;
   align-items: start;
   font-family: var(--serif);
-  font-size: var(--fs-slogan);
+  font-size: clamp(40px, 4.3vw, 72px);
   font-weight: 500;
   line-height: 1.04;
   letter-spacing: -.01em;
