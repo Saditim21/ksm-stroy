@@ -308,10 +308,17 @@
 .bd--mn .bd__blk:last-child .blk__grid > button { --x: calc(8 + var(--col, 0)); }
 
 /* The hot floor (SalesBoard.jsx): every square of the building dims but the
-   hot block's floor, --hot (its row): 1 there, .26 elsewhere. Over the
-   squares' entrance (BlockGrid's) and the opacity a focus within the grid
-   keeps (blockGrid.css), so the keyboard lights its floor too. */
+   hot block's floor, --hot (its row): 1 there, .26 elsewhere. A plain
+   declaration, so a square still in its entrance keeps it (an animation
+   outranks it) and lands on its look, as its backwards fill hands it over,
+   rather than showing early, shrunk and dimmed. Where the focus is within
+   the grid, important and weightier than the opacity that focus keeps
+   (blockGrid.css's, over BlockGrid's own entrance), so the keyboard lights
+   its floor too. */
 .bd__plot[data-hot] .blk__grid > button {
+  opacity: calc(.26 + .74 * clamp(0, 1 - (var(--row, 0) - var(--hot, -9)) * (var(--row, 0) - var(--hot, -9)), 1));
+}
+.bd__plot[data-hot] .blk__grid:focus-within > button {
   opacity: calc(.26 + .74 * clamp(0, 1 - (var(--row, 0) - var(--hot, -9)) * (var(--row, 0) - var(--hot, -9)), 1)) !important;
 }
 /* Its floor's number in brass, on the building's outer side (data-row). */

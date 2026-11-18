@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { NO_PREFERENCE, firstViewportMotionProblems } from './css'
+import { NO_PREFERENCE, firstViewportMotionProblems, outweighs, specificity } from './css'
 import { mockMatchMedia } from './media'
 import { mouseClick, tap } from './pointer'
 
@@ -220,5 +220,30 @@ describe('firstViewportMotionProblems', () => {
       .door__mark { transform: translateX(var(--xg)); translate: none; }
       .hero__tag { translate: 0; transform: translate(0, 0); }
     `)).toEqual([])
+  })
+})
+
+// src/test/css.js's specificity: the cascade's weights of a plain selector,
+// for a rule that must win over another stylesheet's whatever their order.
+describe('specificity', () => {
+  it('counts ids, classes (attributes and pseudo-classes with them) and types', () => {
+    expect(specificity('.stale')).toEqual([0, 1, 0])
+    expect(specificity('.teaser .teaser__notice')).toEqual([0, 2, 0])
+    expect(specificity('.blk__grid:focus-within button')).toEqual([0, 2, 1])
+    expect(specificity('.bd__plot[data-hot] .blk__grid:focus-within > button')).toEqual([0, 4, 1])
+    expect(specificity('#main a.btn')).toEqual([1, 1, 1])
+    expect(specificity('ul > li + li')).toEqual([0, 0, 3])
+  })
+
+  it('tells which of two outweighs the other, a tie neither', () => {
+    expect(outweighs('.teaser .teaser__notice', '.stale')).toBe(true)
+    expect(outweighs('.stale', '.teaser .teaser__notice')).toBe(false)
+    expect(outweighs('.teaser__notice', '.stale')).toBe(false)
+    expect(outweighs('.a', 'b c d e')).toBe(true)
+  })
+
+  it('takes plain selectors only', () => {
+    expect(() => specificity('.a:not(.b)')).toThrow(/plain selectors only/)
+    expect(() => specificity('.a::after')).toThrow(/plain selectors only/)
   })
 })

@@ -73,6 +73,26 @@ export function rulesFor(rules, selector) {
   return rules.filter((rule) => rule.selectors.includes(selector))
 }
 
+// A plain selector's specificity as [ids, classes, types], the cascade's
+// weights: its classes count its attributes and pseudo-classes, its types its
+// element names. For two stylesheets' rules that meet on one element, where
+// the later sheet would win a tie. Plain selectors only: one with :is(),
+// :not(), :where() or :has(), or a pseudo-element, throws.
+export function specificity(selector) {
+  if (/:(is|not|where|has)\(|::/.test(selector)) throw new Error(`specificity() takes plain selectors only: ${selector}`)
+  const ids = selector.match(/#[\w-]+/g) ?? []
+  const classes = selector.match(/\.[\w-]+|\[[^\]]*\]|:[\w-]+(\([^)]*\))?/g) ?? []
+  const types = selector.replace(/\[[^\]]*\]|\([^)]*\)/g, '').match(/(^|[\s>+~])[a-z][\w-]*/gi) ?? []
+  return [ids.length, classes.length, types.length]
+}
+
+// Whether specificity a outweighs b.
+export function outweighs(a, b) {
+  const [x, y] = [specificity(a), specificity(b)]
+  const i = x.findIndex((weight, at) => weight !== y[at])
+  return i >= 0 && x[i] > y[i]
+}
+
 export const NO_PREFERENCE = '@media (prefers-reduced-motion: no-preference)'
 
 // Whether a translation's amounts (`0 22px`, `-50%, -54%`) move the box by a

@@ -1,6 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme'
 import tailwindConfig from '../../../tailwind.config.js'
-import { atRulesOf, firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
+import { atRulesOf, firstViewportMotionProblems, NO_PREFERENCE, outweighs, rulesFor, rulesOf, valueOf } from '../../test/css'
 
 // src/pages/home/home.css: Home's opening, company section, services, works,
 // the teaser's ways and the EU poster (spec §5.5, §5.8, §6.7–6.11, §6.13).
@@ -468,6 +468,19 @@ describe('the works (spec §6.10; extract §4.12)', () => {
 
 // The teaser's two ways into the explorer are the site's Ways, whose rules
 // src/components/ui/ways.css.test.js reads (M3/M4 spec §4.4).
+
+// Spec §6.11: the stale-data notice keeps 24 px under the facade's caption.
+// Its own stylesheet (src/explorer/staleNotice.css, with the facade's
+// chunk) loads after Home's and sets the notice's margin whole, so the
+// teaser's rule outweighs it, as Продажби's and Контакти's do (final review,
+// W5).
+it('keeps the teaser’s stale-data notice 24 px under the facade, over the notice’s own margin', () => {
+  expect(declaredFor('.teaser .teaser__notice')['margin-top']).toBe('24px')
+  expect(rulesFor(rules, '.teaser__notice')).toEqual([])
+  const own = rulesFor(rulesOf('src/explorer/staleNotice.css'), '.stale').filter((rule) => valueOf(rule, 'margin') !== undefined)
+  expect(own.map((rule) => valueOf(rule, 'margin'))).toEqual(['0 auto 18px'])
+  expect(outweighs('.teaser .teaser__notice', '.stale')).toBe(true)
+})
 
 // Spec §2.2: every :hover rule of Home's needs a pointer that hovers, so a
 // tap never leaves one behind.

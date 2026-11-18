@@ -797,7 +797,10 @@
 /* ---------- the floor-by-floor teaser (spec §6.11; extract §4.13) ---------- */
 /* Its two ways into the explorer are the site's (src/components/ui/ways.css). */
 .teaser { background: var(--onyx); }
-.teaser__notice { margin-top: 24px; }
+/* The stale-data notice 24 px under the facade's caption, over its own
+   stylesheet's margin (src/explorer/staleNotice.css, which loads after this
+   one, with the facade's). */
+.teaser .teaser__notice { margin-top: 24px; }
 
 /* ---------- the EU poster (spec §6.13) ---------- */
 /* The poster on its white plate, against the seam; beside it the project. */

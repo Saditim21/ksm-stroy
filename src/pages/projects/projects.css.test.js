@@ -1,4 +1,4 @@
-import { firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
+import { firstViewportMotionProblems, NO_PREFERENCE, outweighs, rulesFor, rulesOf, valueOf } from '../../test/css'
 
 // src/pages/projects/projects.css, Продажби's own (spec M3/M4 §7.1; Diptych
 // §5.5, §11): the sales board, its opening, its hot floor and square, the
@@ -86,10 +86,32 @@ it('sets the H1 at the system’s title size', () => {
 // square itself grows, ringed in brass, and the keyboard's ring stays the
 // site's (spec §11, ruling F9).
 describe('the hot floor and square', () => {
-  it('dims every square but the hot floor’s, over the entrance’s and the focus’s own opacity', () => {
-    const dim = rulesFor(rules, '.bd__plot[data-hot] .blk__grid > button')[0]
-    expect(valueOf(dim, 'opacity')).toBe('calc(.26 + .74 * clamp(0, 1 - (var(--row, 0) - var(--hot, -9)) * (var(--row, 0) - var(--hot, -9)), 1))')
-    expect(dim.declarations.find(({ prop }) => prop === 'opacity').important).toBe(true)
+  const DIM = 'calc(.26 + .74 * clamp(0, 1 - (var(--row, 0) - var(--hot, -9)) * (var(--row, 0) - var(--hot, -9)), 1))'
+  const opacityOf = (rule) => rule.declarations.find(({ prop }) => prop === 'opacity')
+
+  // A pointer's hot floor is a plain declaration: a square still in its
+  // entrance (an animation, which outranks it) keeps its entrance and lands
+  // on its dimmed or lit look, never showing early, shrunk and low, as an
+  // important one would have it (final review, W2). The entrance fills
+  // backwards only, so once a square has landed nothing holds it, and the
+  // dimming takes over (ruling FWc).
+  it('dims every square but the hot floor’s, a square still rising left to its entrance', () => {
+    const [dim, ...more] = rulesFor(rules, '.bd__plot[data-hot] .blk__grid > button')
+    expect(more).toEqual([])
+    expect(opacityOf(dim)).toEqual({ prop: 'opacity', value: DIM, important: false })
+    expect(valueOf(animationOf(':root.js .bd .blk__grid > button'), 'animation')).toMatch(/ backwards$/)
+  })
+
+  // The keyboard's: the focus within a grid keeps every square at opacity 1,
+  // important (blockGrid.css, over BlockGrid's own entrance), so the hot
+  // floor's dimming is important there, and weightier, whichever stylesheet
+  // comes last.
+  it('dims them for the keyboard too, over the focus’s own opacity', () => {
+    const [own] = rulesFor(rulesOf('src/explorer/blockGrid.css'), '.blk__grid:focus-within button')
+    expect(opacityOf(own)).toEqual({ prop: 'opacity', value: '1', important: true })
+    const [keyboard] = rulesFor(rules, '.bd__plot[data-hot] .blk__grid:focus-within > button')
+    expect(opacityOf(keyboard)).toEqual({ prop: 'opacity', value: DIM, important: true })
+    expect(outweighs('.bd__plot[data-hot] .blk__grid:focus-within > button', '.blk__grid:focus-within button')).toBe(true)
   })
 
   // The ring marks it everywhere; it grows only where motion is welcome
