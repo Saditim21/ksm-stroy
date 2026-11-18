@@ -195,6 +195,9 @@ it('closes on the hinge and the two ways: the contact page, and the form for con
     ['Свържете се с нас', '+359 887 886 166 · ksm_str@abv.bg', '/contact'],
     ['Поръчайте оферта', 'Строителство или ремонт', '/contact?project=stroitelstvo#zapitvane'],
   ])
+  // Spec §4.5: the one-letter „с“ bound to „нас“, as typed (textOf folds
+  // U+00A0 into a space; final review, W1).
+  expect(ways[0].querySelector('.serif').textContent).toBe('Свържете се с нас')
 })
 
 // What an entrance's first frame would write, kept out of the opening: an

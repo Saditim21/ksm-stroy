@@ -46,9 +46,10 @@ export const meta = () => pageMeta({
 
 // The closing's two ways (spec §7.2): the contact page, with the phone and
 // the email under it, and the contact form with „Строителство или ремонт“
-// chosen (its ?project=stroitelstvo, src/pages/contact/prefill.js).
+// chosen (its ?project=stroitelstvo, src/pages/contact/prefill.js). A
+// no-break space after the one-letter „с“ (spec §4.5).
 const WAYS = [
-  { title: 'Свържете се с нас', sub: `${PRIMARY_PHONE.label} · ${SITE.email}`, to: '/contact' },
+  { title: 'Свържете се с нас', sub:`${PRIMARY_PHONE.label} · ${SITE.email}`, to: '/contact' },
   { title: 'Поръчайте оферта', sub: 'Строителство или ремонт', to: inquiryHref('stroitelstvo') },
 ]
 

@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, configure, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useSyncExternalStore } from 'react'
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
@@ -8,6 +8,7 @@ import { grFree } from '../../data/availability/select'
 import { IDLE, LOADING, named, snapshotAvailability } from '../../explorer/testing'
 import * as contactModule from '../../routes/contact'
 import { loadedBy, pageOf, renderPagesAt } from '../../test/arrivals'
+import { mockMatchMedia } from '../../test/media'
 import { setLenis } from '../../utils/lenis'
 
 // Контакти (spec M3/M4 §7.3, §8), opened as a visitor opens it
@@ -51,6 +52,9 @@ const subjects = () => screen.getByRole('group', { name: 'Интересувам
 const subject = (name) => within(subjects()).getByRole('radio', { name })
 const send = () => screen.getByRole('button', { name: 'Изпратете запитване' })
 const leads = () => fetchMock.mock.calls.filter(([url]) => url === '/api/odoo-lead').map(([, init]) => JSON.parse(init.body))
+// A CSS animation's end, as React hears it here: jsdom knows no
+// AnimationEvent, so React listens for its WebKit name.
+const animationEnd = (element) => fireEvent(element, new Event('webkitAnimationEnd', { bubbles: true }))
 
 let fetchMock
 let user
@@ -175,6 +179,54 @@ describe('the subject', () => {
     expect(subject('Многофамилна сграда')).toBeChecked()
     expect(subject('Многофамилна сграда')).toHaveFocus()
   })
+
+  // Spec §7.3: where the page's motion runs (the head's gate marked <html>
+  // .js, and motion is allowed), the construction group folds open and
+  // closed, inert as it closes, and goes once its fold has played; the
+  // picture before stays under the new one until that has opened.
+  it('folds the group open and closed where the page’s motion runs, and lets it go once its fold has played', async () => {
+    onTestFinished(mockMatchMedia({ fine: true }))
+    document.documentElement.classList.add('js')
+    onTestFinished(() => document.documentElement.classList.remove('js'))
+    renderSiteAt('/contact')
+    await screen.findByRole('group', { name: 'Интересувам се от' })
+
+    await user.click(subject('Строителство или ремонт'))
+    const fold = document.querySelector('.fold')
+    expect(fold).toHaveClass('is-opening')
+    animationEnd(fold)
+    expect(fold).toHaveAttribute('class', 'fold')
+
+    await user.click(subject('Друго'))
+    const closing = document.querySelector('.fold.is-closing')
+    expect(closing).toHaveAttribute('inert')
+    expect(document.querySelector('.plate.is-under')).toHaveAttribute('data-plate', 'build')
+    animationEnd(closing)
+    expect(document.querySelector('.fold')).toBeNull()
+    expect(screen.queryByLabelText('Тип проект')).toBeNull()
+    animationEnd(document.querySelector('.plate.is-opening'))
+    expect(document.querySelector('.plate.is-under')).toBeNull()
+  })
+
+  // The stylesheet plays the folds and the pictures' openings only under the
+  // head's gate, which marks <html> .js once, as the page loads. A visitor
+  // who loaded it with reduced motion (or data saver) and turned it off
+  // since has motion allowed and no .js: the group comes and goes at once,
+  // never left on the page, inert, under another subject (final review, W6).
+  it('changes the group at once where the page’s motion does not run, though motion is allowed now', async () => {
+    onTestFinished(mockMatchMedia({ fine: true }))
+    expect(document.documentElement).not.toHaveClass('js')
+    renderSiteAt('/contact')
+    await screen.findByRole('group', { name: 'Интересувам се от' })
+
+    await user.click(subject('Строителство или ремонт'))
+    expect(document.querySelector('.fold')).toHaveAttribute('class', 'fold')
+    await user.click(subject('Друго'))
+    expect(document.querySelector('.fold')).toBeNull()
+    expect(screen.queryByLabelText('Тип проект')).toBeNull()
+    expect(document.querySelector('.plate.is-opening, .plate.is-under')).toBeNull()
+    expect(document.querySelector('.plate.is-on')).toHaveAttribute('data-plate', 'other')
+  })
 })
 
 describe('sending', () => {
@@ -295,6 +347,19 @@ describe('a link’s landing', () => {
     renderSiteAt('/contact?project=stroitelstvo#zapitvane')
 
     await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true, chosen: 'build' }]))
+    expect(screen.getByLabelText('Тип проект')).toBeInTheDocument()
+  })
+
+  // React's StrictMode (in development) mounts the page, unmounts it and
+  // mounts it again: the unmount clears the inquiry's subject, and the
+  // remount seeds the link's prefill again (final review, W6).
+  it('seeds the link’s prefill again when the page mounts again, as StrictMode does', async () => {
+    landingAt(3000)
+    configure({ reactStrictMode: true })
+    onTestFinished(() => configure({ reactStrictMode: false }))
+    renderSiteAt('/contact?project=stroitelstvo#zapitvane')
+
+    await waitFor(() => expect(subject('Строителство или ремонт')).toBeChecked())
     expect(screen.getByLabelText('Тип проект')).toBeInTheDocument()
   })
 

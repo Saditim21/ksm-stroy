@@ -48,10 +48,11 @@ export const meta = () => pageMeta({
 })
 
 // The closing's two ways (spec §7.1): the contact page's form, to ask the
-// prices, and the contact page, with the phone under it (ruling M4-PF14).
+// prices, and the contact page, with the phone under it (ruling M4-PF14). A
+// no-break space after the one-letter „с“ (spec §4.5).
 const WAYS = [
   { title: 'Попитайте за цени', sub: 'Към запитването', to: '/contact#zapitvane' },
-  { title: 'Свържете се с нас', sub: PRIMARY_PHONE.label, to: '/contact' },
+  { title: 'Свържете се с нас', sub: PRIMARY_PHONE.label, to: '/contact' },
 ]
 
 // The closing: production's „Търсите нов *дом*?“ and its line, as a hinge,

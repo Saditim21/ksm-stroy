@@ -180,7 +180,6 @@ function Fold({ open, animate, children }) {
 export default function ContactInquiry() {
   const ref = useRef(null)
   useReveals(ref)
-  useEffect(() => clearInquiryOption, [])
   const motion = useMotionAllowed()
   const hydrated = useHydrated()
   const fresh = useFreshArrival()
@@ -202,12 +201,16 @@ export default function ContactInquiry() {
   // The subject the page shows: the chosen one, held while an inquiry is on
   // its way and after it is sent (the store is cleared then). The visitor's
   // choice opens its picture over the one before (`under`), and folds the
-  // construction group, where motion is allowed; anything else changes at
-  // once.
+  // construction group, where the page's motion runs: motion is allowed, and
+  // the head's gate marked <html> .js as the page loaded, without which the
+  // stylesheet plays neither (a page loaded under reduced motion, allowed
+  // since). Anything else changes at once. Read as the visitor chooses,
+  // never in a render.
   const [view, setView] = useState({ subject: chosen, under: null, animate: false })
   if (!busy && view.subject !== chosen) setView({ subject: chosen, under: null, animate: false })
   const choose = (value) => {
-    if (value !== view.subject) setView({ subject: value, under: motion ? view.subject : null, animate: motion })
+    const animate = motion && document.documentElement.classList.contains('js')
+    if (value !== view.subject) setView({ subject: value, under: animate ? view.subject : null, animate })
     chooseInquiryOption(value)
   }
   // The pictures not chosen load once the visitor reaches for the subjects.
@@ -222,6 +225,13 @@ export default function ContactInquiry() {
   // seeds nothing else: what the first gave is the visitor's to change.
   // `prefilled` is the address whose prefill has rendered, for the landing.
   const seeded = useRef({ search: null, pending: false })
+  // The subject and the picks are the inquiry store's, which outlives the
+  // page: they go as the page does, and the seed with them, so a page that
+  // mounts again (as React's StrictMode has it, in development) seeds again.
+  useEffect(() => () => {
+    clearInquiryOption()
+    seeded.current = { search: null, pending: false }
+  }, [])
   const [prefilled, setPrefilled] = useState(null)
   const [waited, setWaited] = useState(false)
   useEffect(() => {

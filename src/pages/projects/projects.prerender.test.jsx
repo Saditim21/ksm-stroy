@@ -196,7 +196,8 @@ describe('#sgradite, the two buildings row by row', () => {
   // Spec §2, §7.1: the data's floors, never production's „10 етажа“.
   it('gives Многофамилна 2 blocks of 9 residential floors, and never „10 етажа“', () => {
     expect(values('Блокове и етажи')).toEqual(['Блок А и блок Б, по 8 етажа', '2 блока, 9 жилищни етажа (2–10)'])
-    expect(row('Блокове и етажи').textContent).toContain('Блок А и блок Б')
+    // Spec §4.5, M3 ruling T5b: „А“ and „и“ bound as well (final review, W4).
+    expect(row('Блокове и етажи').textContent).toContain('Блок\u00a0А\u00a0и\u00a0блок\u00a0Б')
     const main = textOf(parse(prerender()).querySelector('main'))
     expect(main).not.toMatch(/10 етажа/)
     expect(main).not.toMatch(/9 етажа/)
@@ -214,6 +215,11 @@ describe('#sgradite, the two buildings row by row', () => {
       '— в момента: — в блок А и — в блок Б',
       '16 по данни към 01.12.2025: 4 в блок А и 12 в блок Б',
     ])
+    // Spec §4.5: „блок А“ and the one-letter „и“ bound, as typed (textOf
+    // folds U+00A0 into a space; final review, W4).
+    for (const cell of row('Свободни').querySelectorAll('[role="cell"]')) {
+      expect(cell.textContent).toMatch(/ в\u00a0блок\u00a0А\u00a0и\u00a0\S+ в\u00a0блок\u00a0Б$/)
+    }
   })
 
   // Spec §7.1: Многофамилна's garages row is production's „Подземни гаражи“.
@@ -273,6 +279,9 @@ it('closes on the hinge and the two ways: the form, and the contact page with th
     ['Попитайте за цени', 'Към запитването', '/contact#zapitvane'],
     ['Свържете се с нас', '+359 887 886 166', '/contact'],
   ])
+  // Spec §4.5: the one-letter „с“ bound to „нас“, as typed (textOf folds
+  // U+00A0 into a space; final review, W1).
+  expect(ways[1].querySelector('.serif').textContent).toBe('Свържете се с нас')
 })
 
 // What an entrance's first frame would write, kept out of the opening: an

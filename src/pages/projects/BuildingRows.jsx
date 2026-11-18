@@ -76,7 +76,7 @@ function Free({ model, dated }) {
       <span className="fig">
         <RollingNumber value={model ? model.totals.available : null} />
       </span>{' '}
-      {dated ? `по данни към ${dated}` : 'в момента'}: {block('А')} в&nbsp;блок&nbsp;А и&nbsp;{block('Б')} в&nbsp;блок&nbsp;Б
+      {dated ? `по данни към ${dated}` : 'в момента'}: {block('А')} в&nbsp;блок&nbsp;А&nbsp;и&nbsp;{block('Б')} в&nbsp;блок&nbsp;Б
     </p>
   )
 }
@@ -117,7 +117,7 @@ function rowsOf({ gr, mn, data }) {
     ['Адрес', <p>{BUILDINGS[0].address}</p>, <p>{BUILDINGS[1].address}</p>],
     [
       'Блокове и етажи',
-      <p>Блок&nbsp;А и&nbsp;блок&nbsp;Б, по {GR_FACTS.floors} етажа</p>,
+      <p>Блок&nbsp;А&nbsp;и&nbsp;блок&nbsp;Б, по {GR_FACTS.floors} етажа</p>,
       <p>
         {MN_FACTS.blocks} блока, {MN_FACTS.residentialFloors} жилищни етажа ({MN_FACTS.floors.min}–{MN_FACTS.floors.max})
       </p>,
