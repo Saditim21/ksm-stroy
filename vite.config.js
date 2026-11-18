@@ -126,7 +126,7 @@ export default defineConfig({
   // that reload mixes two copies of React ("Invalid hook call").
   optimizeDeps: {
     include: [
-      'framer-motion', '@emailjs/browser',
+      '@emailjs/browser',
       'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
     ],
   },

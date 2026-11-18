@@ -9,7 +9,7 @@ import mnImages from '../../data/images/mnogofamilna.json'
 // (photo-3, photo-4), the front with the perspective (photo-1, photo-2),
 // then the drawings, the typical floor and the garages, each whole on the
 // umber, never cropped, under production's own title
-// (src/pages/Projects.jsx:872 and :662, in sentence case). The photos take
+// (its src/pages/Projects.jsx:872 and :662, in sentence case). The photos take
 // the page's night grade, each its own sky cut, and their framing from its
 // stylesheet (mn.css: mn-night, mn-night--*, mn-gal--persp); they are
 // decoration, the caption says what they show. The drawings' plates show

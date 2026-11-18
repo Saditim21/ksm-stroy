@@ -23,8 +23,8 @@ function declaredFor(selector, atRules = [LAYER], from = rules) {
   return Object.assign({}, ...found.map((rule) => Object.fromEntries(rule.declarations.map(({ prop, value }) => [prop, value]))))
 }
 
-// Spec §2.2: the concept's order, scaled so the legacy modals (z-50) still
-// sit above the header.
+// Spec §2.2: the concept's order, scaled so a z-50 layer (the legacy pages'
+// modals, once) sits above the header.
 it('stacks the header, the menu, the grain and the skip link as spec §2.2 orders them', () => {
   expect(declaredFor('.hdr')['z-index']).toBe('40')
   expect(declaredFor('.menu')['z-index']).toBe('60')
@@ -147,12 +147,12 @@ describe('the EU line (spec §6.3)', () => {
 describe('text spacing (spec §11, WCAG 1.4.12)', () => {
   // `anywhere`, not `break-word`, so the word's grid or flex track stays as
   // wide as the screen too. Phones only: a wider screen's narrowing column
-  // (the services' widening) keeps its words whole. Not on the legacy pages,
-  // whose layout stays as it was.
-  it('breaks a heading’s word too wide for a phone’s line, outside the legacy pages', () => {
-    expect(declaredFor(':where(h1, h2, h3):not(.legacy-ground *)', ['@layer base', PHONE], indexRules)).toEqual({ 'overflow-wrap': 'anywhere' })
+  // (the services' widening) keeps its words whole. Every page's headings,
+  // as no legacy page is left to keep its own layout (spec M3/M4 §9).
+  it('breaks a heading’s word too wide for a phone’s line, on every page', () => {
+    expect(declaredFor(':where(h1, h2, h3)', ['@layer base', PHONE], indexRules)).toEqual({ 'overflow-wrap': 'anywhere' })
     const wrapping = [...indexRules, ...rules].filter((rule) => valueOf(rule, 'overflow-wrap') || valueOf(rule, 'word-break'))
-    expect(wrapping.map((rule) => [rule.selector, rule.atRules])).toEqual([[':where(h1, h2, h3):not(.legacy-ground *)', ['@layer base', PHONE]]])
+    expect(wrapping.map((rule) => [rule.selector, rule.atRules])).toEqual([[':where(h1, h2, h3)', ['@layer base', PHONE]]])
   })
 
   // The logos keep their proportions (the base layer's img max-width: 100%

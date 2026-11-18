@@ -5,7 +5,8 @@ import { vi } from 'vitest'
 // Residence landing (src/test/setup.js @944bb03).
 
 // Tests never read the developer's .env: blank the sheet URLs so no suite
-// reaches Google Sheets and ApartmentContext falls back to the built-in data.
+// reaches Google Sheets and the availability store falls back to the built-in
+// data.
 // Suites that need a URL stub their own.
 for (const name of [
   'VITE_GOOGLE_SHEET_BLOCK_A', 'VITE_GOOGLE_SHEET_BLOCK_B',

@@ -34,17 +34,16 @@ test('a pinch is the browser\'s, from its second finger until the last one lifts
   expect(lenisTakes(touch('touchstart', 1))).toBe(true)
 })
 
-// The legacy /blog and /projects modals hold the page still with body overflow
-// hidden. That stops the wheel and the finger, but not a script, and Lenis
-// scrolls the page by script.
-test('while a page holds itself still with body overflow hidden, every gesture is the browser\'s', () => {
+// The legacy /blog and /projects modals held the page still with body
+// overflow hidden, which the filter honoured. They left with the legacy pages
+// (spec M3/M4 §9), and an overlay takes a scroll lock, which stops Lenis
+// itself (useScrollLock): body overflow is no signal any more.
+test('body overflow hidden is no hold: the gestures stay Lenis\'', () => {
   const lenisTakes = createGestureFilter(() => 1)
   try {
     document.body.style.overflow = 'hidden'
-    expect(lenisTakes(wheel())).toBe(false)
-    expect(lenisTakes(touch('touchmove', 1))).toBe(false)
-    document.body.style.overflow = 'unset'
     expect(lenisTakes(wheel())).toBe(true)
+    expect(lenisTakes(touch('touchmove', 1))).toBe(true)
   } finally {
     document.body.style.overflow = ''
   }

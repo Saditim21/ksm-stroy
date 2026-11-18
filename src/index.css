@@ -91,12 +91,11 @@
   }
 
   /* The focus ring (spec §11): 2 px, 3 px off the element, in the text colour
-     of the ground it sits on. The site is dark, so it is ivory. Inside
-     .on-light, a light plate or the legacy pages' light ground (src/root.jsx),
-     it is onyx, and a dark region of a legacy page (.on-dusk) gives ivory
-     back. Never currentColor: a filled button's label is the ground's own
-     colour, and its ring would vanish into it. Under forced colours the ring
-     is the system's Highlight. */
+     of the ground it sits on. The site is dark, so it is ivory; inside
+     .on-light, a light plate (src/styles/diptych.css), it is onyx. Never
+     currentColor: a filled button's label is the ground's own colour, and its
+     ring would vanish into it. Under forced colours the ring is the system's
+     Highlight. */
   :focus-visible {
     outline: 2px solid var(--ivory);
     outline-offset: 3px;
@@ -106,22 +105,18 @@
     outline-color: var(--onyx);
   }
 
-  .on-light .on-dusk :focus-visible {
-    outline-color: var(--ivory);
-  }
-
   @media (forced-colors: active) {
     :focus-visible,
-    .on-light :focus-visible,
-    .on-light .on-dusk :focus-visible {
+    .on-light :focus-visible {
       outline-color: Highlight;
     }
   }
 
   /* The ring's corners, the one radius Diptych draws (spec §2.2): 1 px, which
-     the offset rounds out. Not on the legacy pages, whose controls keep the
-     radii they have; a light plate on a Diptych page keeps it. */
-  :focus-visible:not(.legacy-ground *) {
+     the offset rounds out, on every ground, a light plate's too. `:root`
+     keeps the weight the rule has always had (a class's), so a control whose
+     own radius one class sets (VideoBand's rounded-ui) still takes it. */
+  :root :focus-visible {
     border-radius: 1px;
   }
 
@@ -134,10 +129,9 @@
      track as wide as the screen. At the site's own spacing every heading's
      words fit their lines, so nothing changes. Phones only: on a wider
      screen a heading may stand in a narrowing column (the services'
-     widening), where its words hold still. Not on the legacy pages, whose
-     layout stays as it was. */
+     widening), where its words hold still. */
   @media (max-width: 900px) {
-    :where(h1, h2, h3):not(.legacy-ground *) {
+    :where(h1, h2, h3) {
       overflow-wrap: anywhere;
     }
   }
@@ -218,56 +212,11 @@
   }
 }
 
-/* Custom scrollbar utilities for mobile responsiveness */
+/* The site's own utilities: lining, tabular figures, and text for screen
+   readers only. */
 @layer utilities {
   .nums {
     font-variant-numeric: lining-nums tabular-nums;
-  }
-
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* Internet Explorer 10+ */
-    scrollbar-width: none;  /* Firefox */
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Safari and Chrome */
-  }
-
-  /* Smooth scrolling for touch devices */
-  .scroll-smooth-touch {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-
-  /* Better touch interaction - 48px minimum touch target */
-  .touch-target {
-    min-height: 48px;
-    min-width: 48px;
-  }
-
-  /* Text balance for better readability on mobile */
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* Mobile-optimized line clamp */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Better focus styles for accessibility */
-  .focus-visible-ring:focus-visible {
-    outline: 2px solid theme('colors.gold.500');
-    outline-offset: 2px;
   }
 
   /* Screen reader only text */
@@ -314,15 +263,6 @@ html {
   from { opacity: 0; }
 }
 
-/* Safe-area aware horizontal + bottom padding helpers */
-.safe-x {
-  padding-left: max(1rem, env(safe-area-inset-left));
-  padding-right: max(1rem, env(safe-area-inset-right));
-}
-.safe-b {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
-
 /* html and body are as tall as their content, never `height: 100%`. With
    that height, once useScrollLock hid <html>'s overflow, the body became a
    scroller one screen tall, the page lost its length and jumped to the top:
@@ -335,16 +275,6 @@ html {
    the page still. */
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
-
-/* Enhanced smooth zoom animation - more noticeable */
-@keyframes smoothZoom {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.12);
-  }
-}
 
 /* The route change (the doors, or a 200 ms crossfade) and the entrance
    delay are src/styles/motion.css's. */

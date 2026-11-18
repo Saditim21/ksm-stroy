@@ -183,7 +183,7 @@ it('?floor=А-10 says „тавански етаж“', async () => {
 }, 30000)
 
 // Spec M3 §6.4: a unit's deep link opens its panel; А-808 has a plan of its
-// own (src/constants/apartmentImages.js), so the panel offers it. А-802's
+// own (production's src/constants/apartmentImages.js), so the panel offers it. А-802's
 // file is block Б's drawing, „Б58“ (ruling FW3): its panel offers none.
 it('?unit=А-808 opens А-808’s panel, with its own plan', async () => {
   renderSiteAt(`${PATH}?unit=${encodeURIComponent('А-808')}`)

@@ -175,8 +175,7 @@ function RouteTransition() {
 // page: in a view transition, before the browser sets up the doors. The hero
 // move's target and a page Back or Forward brings keep theirs.
 //
-// The frame is the page's snapshot in the doors. On a legacy page it paints
-// the light ground (.page-frame, src/styles/diptych.css).
+// The frame is the page's snapshot in the doors.
 function PageFrame({ arrive: arrival }) {
   const [arrive] = useState(arrival)
   // The hash the page arrived with.
@@ -201,15 +200,7 @@ function PageFrame({ arrive: arrival }) {
 // the see-through header (spec §4). The shell is at least one screen tall.
 //
 // The site is dark (spec §2.1), with a breath of grain over every page
-// (.grain, src/styles/shell.css). A page M2 has not rebuilt yet (its handle's
-// `legacy`) keeps production's light ground inside the dark shell, with no
-// grain: its <main> is .legacy-ground, and .on-light turns its focus rings
-// onyx (src/styles/diptych.css, src/index.css). The page's frame paints that
-// ground, so the doors carry it with the page. <main> paints it too, under the
-// frame, except where the doors run: then the root snapshot holds none, and
-// without the doors it keeps the crossfade light (src/styles/diptych.css).
-// Both start below the header: the room under the header keeps the site's
-// onyx, so the solid header, onyx at 86 %, reads onyx there too.
+// (.grain, src/styles/shell.css).
 //
 // SmoothScroll runs Lenis once the motion engine has loaded, after the page
 // has (src/motion/runtime.js); until then, and without motion, the page
@@ -221,11 +212,9 @@ function PageFrame({ arrive: arrival }) {
 // the pointer: jsdom, in the tests.
 //
 // Live availability is the platform store's (src/data/availability), which
-// needs no provider. No page the site serves reads the legacy
-// ApartmentProvider any more; /projects still imports a component that would
-// (GoldenResidenceFloorMap, on a branch it never takes) until M4.
+// needs no provider.
 export default function App() {
-  const { header, legacy } = useRouteHandle()
+  const { header } = useRouteHandle()
   useEffect(() => (typeof window.matchMedia === 'function' ? trackScreenHeight() : undefined), [])
   return (
     <>
@@ -235,12 +224,12 @@ export default function App() {
           <main
             id="main"
             tabIndex={-1}
-            className={`flex-1 overscroll-none focus:outline-none${legacy ? ' on-light legacy-ground' : ''}${header === 'overlay' ? '' : ' pt-[var(--header-h)]'}`}
+            className={`flex-1 overscroll-none focus:outline-none${header === 'overlay' ? '' : ' pt-[var(--header-h)]'}`}
           >
             <RouteTransition />
           </main>
           <SiteFooter />
-          {legacy ? null : <div className="grain" aria-hidden="true" />}
+          <div className="grain" aria-hidden="true" />
         </div>
       </SmoothScroll>
       <ConditionalAnalytics />

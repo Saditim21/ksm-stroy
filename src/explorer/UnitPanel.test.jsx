@@ -315,7 +315,7 @@ it('opens with the halves parting from the seam over 0.7 s, the panel fading in 
 })
 
 // Spec M3 §6.4: on Многофамилна, an apartment production has a plan of its
-// own (src/constants/apartmentImages.js, less А-858 and А-864) offers it
+// own (production's src/constants/apartmentImages.js, less А-858 and А-864) offers it
 // beside the floor's: „План на етажа / План на апартамента“, the own plan
 // whole on a light plate, the caption changing with it. An apartment with
 // none offers no switch, and neither does А-802, whose file is block Б's

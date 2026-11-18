@@ -226,8 +226,7 @@ describe('the header as the page scrolls', () => {
 // with an inquiry of its own, as the Golden Residence block pages,
 // Многофамилна's page and block pages (rebuilt in M3) and Контакти (M4) have
 // too under the solid header. Every other page is solid, Продажби, Обекти
-// and За нас (M4) among them. No page is legacy any more: За нас, the last
-// one, was rebuilt in M4 Task 5.
+// and За нас (M4) among them. No page is legacy any more (M3/M4 spec §9).
 const GOLDEN_RESIDENCE = { project: 'golden-residence' }
 const MNOGOFAMILNA = { project: 'mnogofamilna-sgrada' }
 const HANDLES = {
@@ -264,14 +263,11 @@ describe('each page’s handle', () => {
   })
 })
 
-// The ground the shell gives a page (src/root.jsx): dark by default, with the
-// grain over it, and production's light ground on a legacy page, where focus
-// rings turn onyx (.on-light, src/index.css) and no grain lies over it. No
-// page the site serves is legacy any more (M4 Task 5 rebuilt the last, За
-// нас), so a page of the test's own asks for it with its handle, until the
-// legacy removal takes the light ground away (M4 Task 7).
+// The ground the shell gives a page (src/root.jsx): dark, with the grain over
+// it, on every page. The legacy pages' light ground left with them (M3/M4
+// spec §9): a handle that still says `legacy` changes nothing.
 describe('the page’s ground', () => {
-  it('is production’s light ground on a legacy page, with no grain', async () => {
+  it('is the dark ground under the grain, whatever the handle says', async () => {
     goOffline()
     const router = createMemoryRouter(
       [{ path: '/', Component: App, children: [{ index: true, Component: () => <p>Стара страница</p>, handle: { header: 'solid', legacy: true } }] }],
@@ -280,8 +276,9 @@ describe('the page’s ground', () => {
     render(<RouterProvider router={router} />)
     await screen.findByText('Стара страница')
 
-    expect(document.getElementById('main')).toHaveClass('on-light', 'legacy-ground')
-    expect(document.querySelector('.grain')).toBeNull()
+    expect(document.getElementById('main')).not.toHaveClass('on-light')
+    expect(document.getElementById('main')).not.toHaveClass('legacy-ground')
+    expect(document.querySelector('.grain')).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('is the dark ground on За нас, rebuilt, under the grain', async () => {

@@ -14,8 +14,8 @@ export const drawings = { 'А': LINE, 'Б': LINE }
 
 export const className = 'plan--mn'
 
-// Every real apartment src/constants/apartmentImages.js maps to a plan of its
-// own, by the file it uses (ruling PF14): А-858 and А-864 do not exist, and
+// Every real apartment production's src/constants/apartmentImages.js (on
+// main) maps to a plan of its own, by the file it uses (ruling PF14): А-858 and А-864 do not exist, and
 // Б-202 and Б-206 have Б-102's and Б-106's plans. Each drawing's corner label
 // names the apartment it is offered on (А2 on А-102, Б23 on Б-307), but for
 // А-802: production's apartment-a58-floor8 is block Б's drawing, labelled

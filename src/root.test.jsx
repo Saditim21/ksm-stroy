@@ -468,19 +468,14 @@ describe('arrival and focus', () => {
   })
 })
 
-// A legacy page's light ground travels with the page through the doors: the
-// page's frame, the snapshot the doors open and close on the seam, paints it
-// (.legacy-ground > .page-frame, src/styles/diptych.css). <main>, which the
-// root snapshot holds, paints it only through .legacy-ground, which leaves it
-// bare where the doors run: that snapshot spans the scrollbar's gutter too, so
-// its doors run half a gutter off the page's, and a ground there showed past
-// the page's door as a light band. Without the doors <main> paints it too, so
-// the crossfade keeps the ground light. Never a utility of <main>'s own, which
-// would paint under the doors as well. No page the site serves is legacy any
-// more (M4 Task 5 rebuilt the last, За нас), so a page of the test's own asks
-// for it with its handle, until the legacy removal takes it away (M4 Task 7).
-describe('the legacy ground', () => {
-  it('is painted by the page’s frame, and by <main> only through .legacy-ground', async () => {
+// The page's ground: the root snapshot's dark one, with the page in its one
+// frame, the snapshot the doors open and close on the seam. No page is legacy
+// any more (spec M3/M4 §9): the legacy pages' light ground, which <main>
+// carried as .legacy-ground, left with them, and a handle that still says
+// `legacy` changes nothing. Never a utility of <main>'s own, which would
+// paint under the doors.
+describe('the page’s ground', () => {
+  it('is the dark one under every page, whatever its handle says, with the page in its frame', async () => {
     goOffline()
     const router = createMemoryRouter(
       [{ path: '/', Component: App, children: [{ index: true, Component: () => <p>Стара страница</p>, handle: { header: 'solid', legacy: true } }] }],
@@ -490,19 +485,22 @@ describe('the legacy ground', () => {
     await screen.findByText('Стара страница')
 
     const main = document.getElementById('main')
-    expect(main).toHaveClass('on-light', 'legacy-ground')
+    expect(main).not.toHaveClass('on-light')
+    expect(main).not.toHaveClass('legacy-ground')
     expect(main.className).not.toMatch(/(^|\s)bg-/)
     expect(main.children).toHaveLength(1)
     expect(main.firstElementChild).toHaveClass('page-frame')
+    expect(document.querySelector('.grain')).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('is not on a rebuilt page, whose frame is the same', async () => {
+  it('frames a rebuilt page the same way', async () => {
     goOffline()
     renderSiteAt('/eu-proekt')
     await screen.findByRole('heading', { level: 1, name: 'Дигитализация на предприятията' })
 
     const main = document.getElementById('main')
     expect(main).not.toHaveClass('legacy-ground')
+    expect(main.children).toHaveLength(1)
     expect(main.firstElementChild).toHaveClass('page-frame')
   })
 })

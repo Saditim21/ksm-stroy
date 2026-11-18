@@ -6,7 +6,6 @@ import { useMatches } from 'react-router'
 //     header: 'overlay' | 'solid',
 //     project?: 'golden-residence' | 'mnogofamilna-sgrada',
 //     inquiry?: true,
-//     legacy?: true,
 //   }
 //
 // - header: 'overlay' for a page whose hero runs under the header, which stays
@@ -17,9 +16,11 @@ import { useMatches } from 'react-router'
 //   contact form as /contact?project=…#zapitvane;
 // - inquiry: the page has an inquiry of its own, #zapitvane, where the
 //   header's „Запитване“ goes instead (spec §6.2, §6.12); without one, it
-//   goes to the contact page's form (M3/M4 spec §8);
-// - legacy: a page M2 has not rebuilt yet. It keeps production's light look
-//   inside the dark shell, with no grain over it (src/root.jsx).
+//   goes to the contact page's form (M3/M4 spec §8).
+//
+// Every page is Diptych's, on the dark ground under the grain (src/root.jsx):
+// the legacy pages' `legacy`, and their light ground with it, left with them
+// (M3/M4 spec §9).
 //
 // The shell reads the deepest route's handle. A route without one is solid.
 const DEFAULT_HANDLE = Object.freeze({ header: 'solid' })

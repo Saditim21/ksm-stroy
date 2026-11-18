@@ -3,10 +3,11 @@
 //
 // HISTORICAL — kept for provenance only. Its output was finalised by hand
 // afterwards; the resulting maps live in src/data/maps/*.json and are the
-// source of truth now. Its inputs (the building-2-blog-*.{png,webp} and
-// building-{A,B}-floor-*.webp hover renders) still exist while the current
-// project pages use them, so a run would overwrite the finalised maps with
-// raw ones: it refuses unless --overwrite-maps is passed.
+// source of truth now. Golden Residence's inputs, the legacy pages' hover
+// renders (public/images/golden-residence/building-2-blog-*.{png,webp}), left
+// with those pages (spec M3/M4 §9) and are in the git history only, so it can
+// no longer run for Golden Residence. A run would overwrite the finalised
+// maps with raw ones: it refuses unless --overwrite-maps is passed.
 import sharp from 'sharp'
 import { writeFileSync, mkdirSync } from 'node:fs'
 

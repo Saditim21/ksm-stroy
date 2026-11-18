@@ -14,7 +14,7 @@ import { TypeCounts } from './MnBlocks'
 // page's stylesheet (mn.css: its sky cut away, the umber behind it for the
 // night); on the right the brochure's own line, „С
 // магазини и подземни *гаражи*“, production's description
-// (src/constants/properties.js:29) without its floors' sentence, which the
+// (its src/constants/properties.js:29) without its floors' sentence, which the
 // data contradicts (spec M3 §2), the УПИ address, and the building's facts,
 // derived from the dated snapshot (MN_FACTS, spec M3 §5.4): its blocks, its
 // floors with apartments, its apartments and how many a floor, with the

@@ -71,7 +71,8 @@ describe('summarizeFloor', () => {
     expect(s).toEqual({ total: 6, available: 2, reserved: 1, sold: 1, blocked: 1, color: STATUS.AVAILABLE })
   })
   test('agrees with the production counts in summarizeStatuses', () => {
-    // The same rows the production pages count (src/services/googleSheets.js calculateStats).
+    // The same rows the production pages count (production's calculateStats,
+    // src/services/googleSheets.js on main).
     const s = summarizeFloor(['Свободен', '', 'Резервиран', 'Продаден', 'Продадени', 'Блокиран', 'Свободен - блокиран'].map(apt))
     expect(s).toMatchObject({ total: 7, available: 2, reserved: 1, sold: 2, blocked: 2 })
   })

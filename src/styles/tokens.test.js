@@ -43,10 +43,29 @@ it('carries the Diptych palette', () => {
     'status-sold': '#D4574E', 'status-blocked': '#8A867D',
   })
   expect(Object.isFrozen(PALETTE)).toBe(true)
-  expect(c.onyx).toBe('#0E0D0B')
-  expect(c.ivory).toMatchObject({ DEFAULT: '#EFE9DD', 50: '#f8f8f6' })
+  // Tailwind's colours are the palette alone (spec M3/M4 §9: the legacy
+  // palettes left with the legacy pages, ivory's shades with them).
+  expect(c).toEqual({ ...PALETTE })
   for (const gone of ['paper', 'ink', 'dusk', 'light', 'gold-ink', 'graphite', 'rule', 'bronze-ink', 'status-free-deep'])
     expect(c[gone]).toBeUndefined()
+})
+
+// Spec M3/M4 §9: the legacy theme went with the legacy pages: the Inter and
+// Playfair stacks, the hero and display-1/2/3 sizes, the luxury and gold-glow
+// shadows, the 18/88/128 spacing, the luxury radii, the entrance animations
+// and the .container widths, with the content glob of an index.html the site
+// has no more. What stays is Diptych's.
+it('keeps no legacy theme', () => {
+  const t = config.theme.extend
+  expect(config.content).toEqual(['./src/**/*.{js,jsx,ts,tsx}'])
+  expect(config.theme.container).toBeUndefined()
+  expect(Object.keys(t.fontFamily)).toEqual(['display', 'text'])
+  expect(Object.keys(t.fontSize)).toEqual(['body', 'small', 'label', 'h3', 'h2', 'display', 'count'])
+  expect(t.boxShadow).toBeUndefined()
+  expect(t.spacing).toBeUndefined()
+  expect(t.borderRadius).toEqual({ ui: '2px' })
+  expect(Object.keys(t.animation)).toEqual(['hero-rise'])
+  expect(Object.keys(t.keyframes)).toEqual(['hero-rise'])
 })
 
 it('writes every palette value as a :root custom property', () => {

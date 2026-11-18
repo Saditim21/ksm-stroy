@@ -9,7 +9,7 @@ HTML at build time (`react-router.config.js`); the routes are in
 `src/routes.js` and the document and site shell in `src/root.jsx`.
 
 - Apartment availability is read live from published Google Sheets
-  (`src/services/googleSheets.js`, `src/context/ApartmentContext.jsx`). See
+  (`src/services/googleSheets.js`, `src/data/availability/`). See
   [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md).
 - The contact form sends each inquiry by EmailJS, and through the Vercel
   function `api/odoo-lead.js` to Odoo CRM.
@@ -51,8 +51,8 @@ sitemap.
 
 Motion is GSAP 3 (ScrollTrigger and SplitText, under GSAP's standard no-charge
 licence), with Lenis for smooth scrolling, driven by GSAP's ticker. It comes
-from the Golden Residence landing (golden-residence @944bb03). The current
-pages still animate with framer-motion; Lenis runs on every page.
+from the Golden Residence landing (golden-residence @944bb03). Every page
+moves with it, and Lenis runs on every page.
 
 - GSAP and Lenis are one deferred chunk. `src/motion/engine.js` is the only
   module that imports `gsap`, `gsap/*` or `lenis`, and only
@@ -93,12 +93,12 @@ pages still animate with framer-motion; Lenis runs on every page.
   `<style id="screen-h">` before first paint. From app start (`src/root.jsx`),
   `trackScreenHeight()` keeps that element up to date, changing it only when
   ScrollTrigger re-measures too.
-- Lenis' settings live in `src/utils/smoothScroll.js`: a slower wheel (lerp
-  0.07, 80% per notch), and touch scrolling left to the browser
-  (`syncTouch: false`). A panel that scrolls on its own keeps the wheel while
-  it can scroll (`allowNestedScroll`). A pinch, and any gesture while the page
-  is zoomed in or held still with `body { overflow: hidden }` (the legacy
-  modals), stays the browser's.
+- Lenis' settings live in `src/utils/smoothScroll.js`: the concept's wheel
+  (lerp 0.1, the full distance per notch), and touch scrolling left to the
+  browser (`syncTouch: false`). A panel that scrolls on its own keeps the
+  wheel while it can scroll (`allowNestedScroll`). A pinch, and any gesture
+  while the page is zoomed in, stays the browser's; an overlay holds the page
+  still with a scroll lock (`useScrollLock()`), which stops Lenis.
 - `src/motion/SmoothScroll.jsx` runs Lenis around the site shell
   (`src/root.jsx`) once the engine has loaded; content that grows re-measures
   Lenis and ScrollTrigger. On a route change React Router's

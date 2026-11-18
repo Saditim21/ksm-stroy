@@ -31,22 +31,9 @@ const RENDERS = [
     outDir: 'public/images/mnogofamilna',
     name: 'sgrada1',
   },
-  {
-    // Home's hero slide 1 (the redesign's CineSlider). Imported from src/assets
-    // it ships fixed-size with no srcset, so phones download the full
-    // 2006x1202/215KB frame — this generates the same 640/1024/1600 ladder as
-    // the other renders. The src/assets master is left in place as the input.
-    master: 'src/assets/home/optimized/photo-4.webp',
-    outDir: 'public/images/home',
-    name: 'photo-4',
-  },
-  {
-    // Home's hero slide 2. Same story as photo-4: 2452x1410/172KB with no
-    // srcset.
-    master: 'src/assets/home/optimized/001.webp',
-    outDir: 'public/images/home',
-    name: '001',
-  },
+  // Home's two legacy hero slides (photo-4 and 001) left with the legacy
+  // pages (spec M3/M4 §9); Home's pictures are the image pipeline's
+  // (scripts/images/build-images.mjs).
 ]
 
 // Browsers never upscale a srcset candidate, so any width >= the master's is

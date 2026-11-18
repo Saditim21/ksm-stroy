@@ -14,7 +14,7 @@
 // 'built-in', or null where there are none.
 // - Golden Residence's counts arrive at hydration, so each of its slots has
 //   rows: a tab the read had none for (the API or its fetcher could not read
-//   it) shows the built-in rows, as ApartmentContext shows them, marked
+//   it) shows the built-in rows, as production's ApartmentContext showed them, marked
 //   'built-in' so the page can show them as dated.
 // - A Многофамилна block without a live sheet has no rows after a live read:
 //   its dated data is static and prerendered (spec §6.4). Only the fallback
@@ -25,7 +25,7 @@
 // had no reader (it hears no tab switch then) and what it shows is that old;
 // never on a timer. A refresh never shows 'loading', never falls back to the
 // built-in data wholesale, and keeps a tab's last live rows when only that tab
-// fails, as ApartmentContext does.
+// fails, as production's ApartmentContext did.
 
 import { normalizeStatus } from '../../utils/propertyStatus'
 

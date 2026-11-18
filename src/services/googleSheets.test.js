@@ -53,7 +53,8 @@ test('a sheet drops floor 0', () => {
 })
 
 // The Многофамилна data built into the site goes through the same step as a
-// sheet's rows (ApartmentContext), so both read the same way.
+// sheet's rows (as in production's ApartmentContext), so both read the same
+// way.
 test('normalizeFloorData drops floor 0 and normalises every status', () => {
   const fallback = {
     0: [{ apartment: 'Гараж А-1', status: 'Свободен' }],

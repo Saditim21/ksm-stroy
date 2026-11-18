@@ -236,7 +236,8 @@ describe('the first load', () => {
 
   // Golden Residence's counts arrive at hydration (spec §6.4), so each of its
   // slots shows rows: those built into the site where the read had none,
-  // marked so the page can show them as dated, as ApartmentContext fills them.
+  // marked so the page can show them as dated, as production's ApartmentContext
+  // filled them.
   it('shows the built-in rows, marked built-in, for a Golden Residence tab the API could not read', async () => {
     vi.stubGlobal('fetch', api(API_NO_BLOCK_B))
 
