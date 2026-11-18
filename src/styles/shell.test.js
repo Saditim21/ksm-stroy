@@ -220,6 +220,26 @@ describe('the menu (spec §6.4)', () => {
     })
     expect(declaredFor(':root:has(.hdr:not([data-scrolled])) .menu__close::before', [LAYER, PHONE]).top).toBe('calc(-1 * var(--eu-h))')
   })
+
+  // FR10: on a phone on its side the strip, which reaches the EU row's foot
+  // until the page has scrolled (36 + 64 = 100 px), lay over „Начало“'s top
+  // 12–14 px, where the pages' room for the bar ended (64 px and 6 % of the
+  // screen, 87 px on a 390 px tall one): a tap there closed the menu. The
+  // pages start below the strip at every height from 320 px, and from 600 px
+  // tall, where the room was already enough, nothing moves.
+  it('starts the pages below „Затвори“’s strip on a short phone screen', () => {
+    const unscrolled = declaredFor(':root:has(.hdr:not([data-scrolled])) .menu__half--l', [LAYER, PHONE])['padding-top']
+    const room = /^calc\((?:[^()]|\([^()]*\))*\)/.exec(declaredFor('.menu__half').padding)[0]
+    // A length the rule declares, in px, on a phone `screen` px tall.
+    const at = (expression, screen) => Function(`return ${expression
+      .replaceAll('var(--header-h)', 'var(--eu-h) + var(--bar-h)')
+      .replaceAll('var(--eu-h)', '36').replaceAll('var(--bar-h)', '64').replaceAll('var(--screen-h)', String(screen))
+      .replaceAll('calc(', '(').replaceAll('max(', 'Math.max(')}`)()
+    for (let screen = 320; screen <= 1200; screen += 10) {
+      expect(at(unscrolled, screen), `${screen} px tall`).toBeGreaterThanOrEqual(100)
+      if (screen >= 600) expect(at(unscrolled, screen), `${screen} px tall`).toBe(at(room, screen))
+    }
+  })
 })
 
 describe('the footer (spec §6.5)', () => {

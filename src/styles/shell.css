@@ -590,6 +590,14 @@
       background: var(--onyx);
     }
     :root:has(.hdr:not([data-scrolled])) .menu__close::before { top: calc(-1 * var(--eu-h)); }
+    /* Until the page has scrolled, that strip reaches the EU row's foot, the
+       header's height, past the pages' room for the bar on a short screen (a
+       phone on its side: 87 px of room on a 390 px tall one), where a tap on
+       „Начало“'s top closed the menu (FR10). The pages start below it there;
+       from 600 px tall the room is more than the strip already. */
+    :root:has(.hdr:not([data-scrolled])) .menu__half--l {
+      padding-top: max(calc(var(--bar-h) + var(--screen-h) * .06), var(--header-h));
+    }
 
     .ftr__grid { grid-template-columns: 1fr; }
     .ftr__grid > .seam { display: none; }
