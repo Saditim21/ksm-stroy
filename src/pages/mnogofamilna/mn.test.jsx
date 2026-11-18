@@ -3,8 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, mainText, renderSiteAt } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
+import { loadSurfaces } from '../../explorer/loadSurfaces'
+import { MN_PROJECT } from '../../explorer/projects/mn'
 import { named } from '../../explorer/testing'
 import * as mnModule from '../../routes/mnogofamilna'
+import { mockMatchMedia } from '../../test/media'
 import { setLenis } from '../../utils/lenis'
 import { EXPO_IN_OUT } from '../../utils/motion'
 
@@ -227,6 +230,35 @@ it('?view=list&floor=Б-5 gives the stage’s focus back to #spisak’s list', a
   fireEvent.keyDown(document.activeElement, { key: 'Escape' })
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   expect(document.activeElement).toBe(section('spisak').querySelector('.lv button'))
+}, 30000)
+
+// Ruling FW5: after a ?view=list arrival, a floor opened in place from the
+// facade's panel gives the focus back to its own rail as it closes, as on any
+// other address. Its opener, the panel's „Отворете плана“, has gone inert
+// with the panel, which closes 320 ms after the pointer leaves the facade for
+// the stage. Only a stage with no opener, which the address opened (above),
+// falls back to the list's first control.
+it('?view=list, then a floor opened from the facade’s panel: its rail takes the focus back', async () => {
+  await loadSurfaces(MN_PROJECT)
+  const restore = mockMatchMedia({ reduce: true, fine: true })
+  try {
+    renderSiteAt(`${PATH}?view=list`)
+    await waitFor(() => expect(section('spisak').querySelector('.lv__meta')).not.toBeNull(), { timeout: 15000 })
+    const rail = screen.getByRole('button', { name: /^Блок А, етаж 5[:.]/ })
+
+    fireEvent.pointerOver(rail, { pointerType: 'mouse' })
+    const open = await waitFor(() => within(document.querySelector('.fxp--a')).getByRole('button', { name: 'Отворете плана' }))
+    fireEvent.click(open)
+    await screen.findByRole('dialog', { name: named('Блок А · Етаж 5') }, { timeout: 15000 })
+    fireEvent.pointerLeave(rail.closest('.fx__stage'), { pointerType: 'mouse' })
+    await waitFor(() => expect(open.closest('.fxp')).toHaveAttribute('inert'))
+
+    fireEvent.keyDown(document.activeElement, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.activeElement).toBe(rail)
+  } finally {
+    restore()
+  }
 }, 30000)
 
 // Spec §1.9 (ruling T7a), M3 §6.4, §8: a landing on the list keeps the EU

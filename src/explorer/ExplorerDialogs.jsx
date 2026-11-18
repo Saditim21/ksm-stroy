@@ -33,7 +33,9 @@ import UnitPanel from './UnitPanel'
 //   (?view=list, which lands the page on it), a unit's row takes the focus
 //   before its rail, far up the page (ruling PF11, M3 §6.4), and a stage's
 //   floor, or a row the filters leave out, gives it to the list's first
-//   control, on the screen the page shows. An inquiry's close gives the
+//   control, on the screen the page shows; a stage opened in place, from the
+//   facade's panel, has had an opener, and goes back to its rail (ruling
+//   FW5), its opener having gone with the panel. An inquiry's close gives the
 //   focus to nothing: the inquiry focuses the form's first field once its
 //   glide ends (spec §7.7).
 // - An inquiry closes both dialogs in one replace (closeStage drops ?floor
@@ -156,7 +158,7 @@ export default function ExplorerDialogs({ project, dated, model, state, opening,
     }
     if (was.unit && !showUnit) unitOpener.current = null
     if (was.stage && !showStage) {
-      if (!focusInto(opening?.opener) && was.at) focusRailOf(was.at, focusRail, list)
+      if (!focusInto(opening?.opener) && was.at) focusRailOf(was.at, focusRail, list && !opening?.opener)
       setOpening(null)
     }
   }, [showStage, showUnit, stage, unit, opening, setOpening, unitOpener, focusRail, list])
