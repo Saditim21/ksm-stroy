@@ -257,6 +257,14 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* While a landing holds the EU row (src/shell/landingHold.js) the whole
+   header stays, so its jump (src/utils/scroll.js reads this) leaves room for
+   all of it: the list's section (?view=list on Многофамилна) lands with its
+   heading below the row, as Контакти's landing lands its own (ruling T4b). */
+html[data-eu-hold] {
+  scroll-padding-top: var(--header-h);
+}
+
 /* The menu's fade without motion (the rule is in the base layer, after the
    reduced-motion clamp). */
 @keyframes menu-fade {

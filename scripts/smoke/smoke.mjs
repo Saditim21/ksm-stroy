@@ -36,12 +36,15 @@
 //     the dialog lies over the page. Its visit must show that dialog, open
 //     and named, and the EU line all the same (spec §1.9, §14.1: in view on
 //     landing), which the landing keeps above its dialogs
-//     (src/explorer/ExplorerContext.jsx). There the page has scrolled, by
-//     the jump, and must have. A link that shows a list of its own section
-//     (its visit's `lands`: Многофамилна's ?view=list, M3 §6.2 #3) jumps
-//     there instead, with no dialog: the section must be at the top of the
-//     screen, under the header, and the EU line in view all the same, which
-//     the landing keeps until the visitor first moves the page (M3 §8). So
+//     (src/explorer/ExplorerContext.jsx). The jump lands the explorer's top
+//     at the foot of the whole header the landing holds (ruling T4b); on
+//     Многофамилна, whose explorer opens the page, that takes no scroll. A
+//     link that shows a list of its own section (its visit's `lands`:
+//     Многофамилна's ?view=list, M3 §6.2 #3) jumps there instead, with no
+//     dialog: the section must be at the top of the screen, its heading
+//     clear of the whole header the landing holds (ruling T4b), and the EU
+//     line in view all the same, which the landing keeps until the visitor
+//     first moves the page (M3 §8). So
 //     do the links that land on Контакти's form (`lands`: ?apartment=,
 //     ?project= or #zapitvane, M3/M4 §7.3, §8). No scroll the page makes
 //     itself may end such a landing (src/shell/landingHold.js): after its
@@ -601,13 +604,33 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       if (dialog) {
         const shown = await page.evaluate(openDialogs)
         if (!shown.includes(dialog)) problems.push(`the deep link shows no dialog „${dialog}“ (open: ${shown.map((name) => `„${name}“`).join(', ') || 'none'})`)
-        if (await page.evaluate(() => scrollY) === 0) problems.push('the deep link did not jump to the explorer')
+        const at = await page.evaluate(() => ({
+          top: document.getElementById('explorer')?.getBoundingClientRect().top ?? null,
+          header: document.querySelector('.hdr')?.getBoundingClientRect().bottom ?? 0,
+        }))
+        if (at.top === null || Math.abs(at.top - at.header) > 1) {
+          problems.push(`the deep link did not land on the explorer (its top at ${at.top === null ? 'none' : `${Math.round(at.top)} px`}, the header's foot at ${Math.round(at.header)} px)`)
+        }
       }
       if (lands) {
-        const at = await page.evaluate((id) => ({ top: document.getElementById(id)?.getBoundingClientRect().top ?? null, screen: innerHeight, y: scrollY }), lands)
+        const at = await page.evaluate((id) => {
+          const section = document.getElementById(id)
+          return {
+            top: section?.getBoundingClientRect().top ?? null,
+            heading: section?.querySelector('h1, h2')?.getBoundingClientRect().top ?? null,
+            header: document.querySelector('.hdr')?.getBoundingClientRect().bottom ?? 0,
+            screen: innerHeight,
+            y: scrollY,
+          }
+        }, lands)
         if (at.y === 0) problems.push(`the link did not jump to #${lands}`)
         if (at.top === null || at.top < 0 || at.top > at.screen / 4) {
           problems.push(`#${lands} is not at the top of the screen (its top at ${at.top === null ? 'none' : `${Math.round(at.top)} px`})`)
+        }
+        // Ruling T4b: the landing holds the whole header, the EU row with the
+        // bar, and its heading lands below it, never under the row.
+        if (at.heading === null || at.heading < at.header - 1) {
+          problems.push(`#${lands}'s heading is under the header (its top at ${at.heading === null ? 'none' : `${Math.round(at.heading)} px`}, the header's foot at ${Math.round(at.header)} px)`)
         }
         const shown = await page.evaluate(openDialogs)
         if (shown.length > 0) problems.push(`the landing on #${lands} shows a dialog (${shown.map((name) => `„${name}“`).join(', ')})`)

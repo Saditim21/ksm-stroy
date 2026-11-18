@@ -327,6 +327,14 @@ describe('src/index.css', () => {
     expect(indexRules.filter((rule) => rule.selector.includes('eu-line'))).toEqual([])
   })
 
+  // Ruling T4b: while a landing holds the EU row (src/shell/landingHold.js),
+  // the whole header stays, so the landing's jump leaves room for all of it:
+  // the list's section (?view=list on Многофамилна) lands with its heading
+  // below the row, not under it. src/utils/scroll.js reads this padding.
+  it('leaves room for the whole header while a landing holds the EU row', () => {
+    expect(declaredFor('html[data-eu-hold]', [], indexRules)).toEqual({ 'scroll-padding-top': 'var(--header-h)' })
+  })
+
   // A scroll lock hides <html>'s overflow (src/hooks/useScrollLock.js), and
   // with it a classic scrollbar (Windows). The gutter stays, so the menu or
   // a dialog never moves the page and the fixed header sideways as it opens
