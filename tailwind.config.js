@@ -20,8 +20,11 @@ export default {
   // where every style recalculation computed about thirty custom properties
   // three times an element. Продажби, with its board of 336 squares, blocked
   // for a median of 65 ms with this and 97 ms without, over six runs each
-  // (spec M3/M4 §10, M4 Task 8). No markup uses those utilities, and ten
-  // pages' captures are the same pixels with it.
+  // (spec M3/M4 §10, M4 Task 8). No markup uses those utilities. Ten pages'
+  // captures with it and without, screen by screen at 1440 and 390 px: 154
+  // of 159 slices identical, the other 5 differing by one level in 1–3 px.
+  // Tailwind tells at each build that the flag is experimental (ruling T8b);
+  // the test suite drops that one notice (vite.config.js).
   experimental: {
     optimizeUniversalDefaults: true,
   },

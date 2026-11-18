@@ -125,6 +125,8 @@ export default function TracerPage() {
         {!imgSrc && <div className="p-10 text-neutral-400">Изберете изображение от панела →</div>}
       </div>
 
+      {/* The panel scrolls as one; its own scroll boxes, the shapes list and
+          the map JSON, keep their heights (shrink-0) on a short window. */}
       <div className="flex w-80 shrink-0 flex-col gap-3 overflow-y-auto border-l border-neutral-700 p-4 text-sm">
         <input type="file" accept="image/*" onChange={(e) => e.target.files[0] && loadFile(e.target.files[0])} />
         <div className="flex gap-1">
@@ -160,7 +162,7 @@ export default function TracerPage() {
             <label>Първи <input type="number" value={band.startFloor} onChange={(e) => setBand({ ...band, startFloor: Number(e.target.value) })} className="w-14 bg-neutral-800 p-1" /></label>
           </div>
         )}
-        <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
+        <div className="flex max-h-48 shrink-0 flex-col gap-1 overflow-y-auto">
           {shapes.map((sh, i) => (
             <div key={i} className={`flex justify-between rounded px-2 py-1 ${selected === i ? 'bg-amber-500/20' : 'bg-neutral-800'}`}>
               <button onClick={() => setSelected(i)}>
@@ -174,7 +176,7 @@ export default function TracerPage() {
           <button onClick={doExport} className="rounded bg-emerald-600 px-2 py-1">Export → clipboard</button>
           <button onClick={doImport} className="rounded bg-blue-600 px-2 py-1">Import</button>
         </div>
-        <textarea value={io} onChange={(e) => setIo(e.target.value)} rows={8} className="w-full bg-neutral-800 p-2 font-mono text-xs" placeholder="map JSON" />
+        <textarea value={io} onChange={(e) => setIo(e.target.value)} rows={8} className="w-full shrink-0 bg-neutral-800 p-2 font-mono text-xs" placeholder="map JSON" />
       </div>
     </div>
   )

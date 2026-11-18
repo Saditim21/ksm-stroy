@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import { reactRouter } from '@react-router/dev/vite'
 import { defineConfig, loadEnv } from 'vite'
 import { clientChunks } from './scripts/client-chunks.mjs'
@@ -21,6 +22,22 @@ const isVitest = process.env.VITEST === 'true'
 // silenced here. The build still hears it, and the dependencies stay as they
 // are, since an update could change the built CSS (ruling C9.1).
 if (isVitest) process.env.BROWSERSLIST_IGNORE_OLD_DATA ??= 'true'
+
+// Vitest only, likewise: as this process builds that stylesheet, Tailwind
+// tells, once a run, that tailwind.config.js turns on an experimental flag
+// (optimizeUniversalDefaults, which ruling T8b keeps). The suite drops that
+// one notice, by its key, and nothing else: every other warning of Tailwind's
+// still prints, and the build still tells it (ruling FWd). Should a later
+// Tailwind move its logger, the notice shows again.
+if (isVitest) {
+  try {
+    const tailwindLog = createRequire(import.meta.url)('tailwindcss/lib/util/log.js').default
+    const { warn } = tailwindLog
+    tailwindLog.warn = (key, ...rest) => (key === 'experimental-flags-enabled' ? undefined : warn.call(tailwindLog, key, ...rest))
+  } catch {
+    // Tailwind's logger is elsewhere: its notice shows.
+  }
+}
 
 // The Vercel Functions in api/.
 const API_FUNCTIONS = ['/api/availability', '/api/odoo-lead']

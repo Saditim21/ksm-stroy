@@ -283,10 +283,44 @@ describe('copies', () => {
     if (entry.isDirectory()) return sources(file)
     return /\.(jsx?|mjs)$/.test(entry.name) && !/\.test\./.test(entry.name) ? [file] : []
   })
-  const found = sources('src').flatMap((by) => [...fs.readFileSync(path.join(repo, by), 'utf8').matchAll(/\bfrom\s+'([^'?]+)\?([\w-]+)'/g)]
-    .filter(([, , query]) => !VITE.has(query))
-    .map(([, spec, query]) => ({ by, module: path.posix.join(path.posix.dirname(by), spec), query })))
+  // What a source imports, as written, with its query where it has one:
+  // static imports and re-exports (`from '…'`), imports for their side
+  // effects (`import '…'`) and dynamic ones (`import('…')`), in either quote
+  // (the lint sets no quote style). A copy written any of these ways is
+  // found (final review, W14).
+  const IMPORT = /(?:\bfrom\s+|\bimport\s*\(\s*|\bimport\s+)(['"])([^'"?]+)(?:\?([\w-]+))?\1/g
+  const importsIn = (source) => [...source.matchAll(IMPORT)].map(([, , spec, query]) => ({ spec, query }))
+  // A relative import's module by its path from the repository; a package's
+  // by its name.
+  const moduleOf = (by, spec) => (spec.startsWith('.') ? path.posix.join(path.posix.dirname(by), spec) : spec)
+  const found = sources('src').flatMap((by) => importsIn(fs.readFileSync(path.join(repo, by), 'utf8'))
+    .filter(({ query }) => query && !VITE.has(query))
+    .map(({ spec, query }) => ({ by, module: moduleOf(by, spec), query })))
   const key = ({ by, module, query }) => `${by} imports ${module}?${query}`
+
+  it('finds an import however it is written', () => {
+    const planted = [
+      "import a from '../a.json?blog'",
+      'import b from "../b.json?about"',
+      "const c = await import('../c.jsx?contact')",
+      'const d = import( "../d.js?projects" )',
+      "export { default } from './e.js?works'",
+      "import './f.css?inline'",
+      'import g from "./g.js"',
+      "import h, { i } from 'react'",
+      "const j = import('../j.js\")",
+    ].join('\n')
+    expect(importsIn(planted)).toEqual([
+      { spec: '../a.json', query: 'blog' },
+      { spec: '../b.json', query: 'about' },
+      { spec: '../c.jsx', query: 'contact' },
+      { spec: '../d.js', query: 'projects' },
+      { spec: './e.js', query: 'works' },
+      { spec: './f.css', query: 'inline' },
+      { spec: './g.js', query: undefined },
+      { spec: 'react', query: undefined },
+    ])
+  })
 
   it('lists every query import in src/, and only those', () => {
     expect(found.map(key).sort()).toEqual(COPIES.map(key).sort())
@@ -300,8 +334,19 @@ describe('copies', () => {
     }
   })
 
-  it('lists the 404 page’s copies by hand, whose files are there', () => {
-    expect(HAND_COPIES).toEqual(['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx'])
-    for (const file of HAND_COPIES) expect(fs.existsSync(path.join(repo, file)), file).toBe(true)
+  // The pages that copy by hand (rulings M4-PF15 and T6d): the 404, its
+  // route and its drawing, and the EU page. None may import the modules the
+  // facade group's chunk holds for every page of the group: the motion hook
+  // and its runtime, the hydration hook, and the two preload helpers. Any of
+  // them would leave that chunk for one of its own, a script more on the
+  // first load of every page of the group, and no build would fail (final
+  // review, W15).
+  it('lists the pages that copy by hand, which import none of the facade chunk’s shared modules', () => {
+    expect(HAND_COPIES).toEqual(['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx', 'src/routes/eu-proekt.jsx'])
+    for (const file of HAND_COPIES) {
+      const imported = importsIn(fs.readFileSync(path.join(repo, file), 'utf8')).map(({ spec }) => moduleOf(file, spec))
+      expect(imported.length, file).toBeGreaterThan(0)
+      expect(imported.filter((module) => /^src\/(motion\/|hooks\/useHydrated|utils\/documentPreloads|utils\/fontLinks)/.test(module)), file).toEqual([])
+    }
   })
 })

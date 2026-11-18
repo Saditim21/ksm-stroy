@@ -27,9 +27,13 @@
 //    more than one chunk (spec §12), or when no chunk carries it: the explorer
 //    and Обекти load it (src/motion/flip.js), so the guard would have lost
 //    sight of it.
+// 8. Fails when any chunk in build/client/assets carries framer-motion or
+//    swiper, a lazy one too: a later import() of either would put it on a
+//    page without touching any first load (plan Review Focus 5: check:dist
+//    fails on any legacy fingerprint).
 // Before it reads build/client/, it checks its first-load, library, room,
-// list and cap verdicts against planted pages and scripts (PLANTED_PAGE,
-// PLANTED_SCRIPTS).
+// list, cap and chunk verdicts against planted pages and scripts
+// (PLANTED_PAGE, PLANTED_SCRIPTS).
 //
 // 160 kB, 60 kB and 10 kB in the spec are read as KiB, as the plan reads its
 // font budget (90 kB = 92,160 B).
@@ -272,6 +276,12 @@ function judgeRoute(route, scripts) {
   return { total, legacy, status, failures }
 }
 
+// Every chunk's verdict (inspect()), whether a page loads it first or only
+// an import() reaches it: none may carry a legacy library.
+function judgeChunks(chunks) {
+  return chunks.filter((chunk) => chunk.legacy.length > 0).map((chunk) => `${chunk.name} carries ${chunk.legacy.join(' and ')}, legacy code no chunk may hold`)
+}
+
 const missed = PLANTED.filter(({ name, bytes }) => {
   const found = []
   scan(FORBIDDEN, name, decode(name, bytes), found)
@@ -333,12 +343,23 @@ const misjudgedCaps = Object.entries(CAPS).flatMap(([route, cap]) => {
     !passes(at) && `${route} at its cap: ${at.status}, not OK`,
   ]
 })
+// A lazy chunk: framer-motion where no page loads it first. The route that
+// loads only a clean script passes; the scan of every chunk fails the
+// planted one, and only it.
+const lazyRoute = judgeRoute(PLANTED_ROUTE, [plantedOfSize(ROOM_EDGE)])
+const lazyChunks = judgeChunks([plantedOfSize(ROOM_EDGE), plantedFlip, plantedFramer])
+const misjudgedChunks = [
+  !passes(lazyRoute) && `${PLANTED_ROUTE} loading no legacy script first: ${lazyRoute.status}, not OK`,
+  !(lazyChunks.length === 1 && lazyChunks[0].startsWith(`${plantedFramer.name} carries framer-motion`))
+    && `a lazy chunk carrying framer-motion (${plantedFramer.name}): ${lazyChunks.length === 0 ? 'not a failure' : lazyChunks.join('; ')}`,
+]
 const misjudged = [
   !plantedFramer.legacy.includes('framer-motion') && `${plantedFramer.name}: framer-motion not seen`,
   !plantedFlip.flip && `${plantedFlip.name}: Flip not seen`,
   !fails(plantedRoute) && `${MUST_BE_V2[0]} with ${plantedFramer.name} in its first-load JS: ${plantedRoute.status}, not a failure`,
   ...misjudgedRoom,
   ...misjudgedCaps,
+  ...misjudgedChunks,
 ].filter(Boolean)
 if (misjudged.length > 0) {
   console.error('check:dist: FAILED, the self-check misjudged planted scripts:')
@@ -424,6 +445,9 @@ for (const route of MUST_BE_V2) {
   if (!pages.some((page) => page.route === route)) failures.push(`${route}: in MUST_BE_V2, but the build did not prerender it (react-router.config.js)`)
 }
 
+// Every chunk, the lazy ones too: no legacy library anywhere.
+failures.push(...judgeChunks(scripts.map(nameOf).map(readScript)))
+
 const motionChunks = [...names].filter((name) => MOTION_CHUNK.test(name))
 if (motionChunks.length !== 1) {
   failures.push(`expected one motion chunk (assets/engine-*.js), found ${motionChunks.length}: ${motionChunks.join(', ') || 'none'}`)
@@ -461,10 +485,10 @@ if (devCode.length > 0) {
   for (const hit of devCode) console.error(`  ${hit}`)
 }
 if (failures.length > 0) {
-  console.error('check:dist: FAILED, first-load JS, the motion chunk and Flip:')
+  console.error('check:dist: FAILED, first-load JS, legacy code in a chunk, the motion chunk and Flip:')
   for (const failure of failures) console.error(`  ${failure}`)
 }
 if (leaks.length > 0 || devCode.length > 0 || failures.length > 0) process.exit(1)
 
 console.log('check:dist: OK, no agency branding and no dev-only code in build/client/')
-console.log(`check:dist: OK, every route in MUST_BE_V2, with no legacy library, motion library or Flip in its first-load JS and ${formatBytes(MIN_ROOM)} of room or more; capped routes within their caps; the motion chunk and Flip within budget`)
+console.log(`check:dist: OK, every route in MUST_BE_V2, with no legacy library, motion library or Flip in its first-load JS and ${formatBytes(MIN_ROOM)} of room or more; capped routes within their caps; no legacy library in any chunk; the motion chunk and Flip within budget`)

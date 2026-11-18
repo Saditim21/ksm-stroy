@@ -1,6 +1,10 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { cwd } from 'node:process'
+import postcss from 'postcss'
+import tailwindcss from 'tailwindcss'
+import { vi } from 'vitest'
+import config from '../../tailwind.config.js'
 import { rulesOf } from '../test/css'
 
 // Sibling selectors that the browser can key on (M4 Task 8, spec M3/M4 §10).
@@ -97,14 +101,43 @@ it('no stylesheet of the site names a sibling after a compound that names nothin
   expect(found).toEqual([])
 })
 
-// Tailwind writes the utilities that space or divide a box's children as
+// Tailwind writes the utilities that space or divide a box's children (a
+// gap's, a rule's width, colour, style or opacity, whatever their names) as
 // `> :not([hidden]) ~ :not([hidden])`, and builds every class any module of
-// src/ names, the dev pages' and the tests' included: none may name one.
-it('no module names a Tailwind utility that spaces or divides its children', () => {
-  const modules = filesUnder(join(ROOT, 'src')).filter((file) => /\.jsx?$/.test(file))
-  const found = modules.flatMap((file) => {
-    const text = readFileSync(file, 'utf8')
-    return [...text.matchAll(/(?<![\w-])-?(?:space|divide)-[xy](?:-[\w./[\]-]+)?(?![\w-])/g)].map(([name]) => `${relative(ROOT, file)}: ${name}`)
+// src/ names, the dev pages' and the tests' included. So the test runs
+// Tailwind as the build does, the site's config over the site's sources, and
+// reads what it writes (final review, W17). The notice Tailwind gives for the
+// config's experimental flag (ruling T8b) is the one warning it silences;
+// any other fails.
+async function unkeyedInTailwind(content) {
+  const warnings = []
+  const warn = vi.spyOn(console, 'warn').mockImplementation((...args) => {
+    warnings.push(args.join(' '))
   })
+  try {
+    const { root } = await postcss([tailwindcss({ ...config, content })])
+      .process('@tailwind base; @tailwind components; @tailwind utilities;', { from: undefined })
+    const found = []
+    root.walkRules((rule) => {
+      if (rule.parent?.type === 'atrule' && rule.parent.name.endsWith('keyframes')) return
+      found.push(...rule.selectors.filter(unkeyedSiblings))
+    })
+    return { found, warnings: warnings.filter((line) => line.trim() !== '' && !/experimental features/i.test(line)) }
+  } finally {
+    warn.mockRestore()
+  }
+}
+
+// Planted names, put together here, which Tailwind's scan of this file
+// cannot read whole.
+it('finds the rules of planted utilities that divide their children, however they are named', async () => {
+  const planted = [['divide', 'y'], ['divide', 'dashed'], ['divide', 'opacity', '50'], ['divide', 'brass'], ['space', 'x', '4']].map((parts) => parts.join('-'))
+  const { found } = await unkeyedInTailwind([{ raw: `<div class="${planted.join(' ')}"></div>` }])
+  for (const name of planted) expect(found.some((selector) => selector.startsWith(`.${name} `)), name).toBe(true)
+})
+
+it('Tailwind writes no rule for the site that keys a sibling on nothing', async () => {
+  const { found, warnings } = await unkeyedInTailwind(config.content)
   expect(found).toEqual([])
+  expect(warnings).toEqual([])
 })

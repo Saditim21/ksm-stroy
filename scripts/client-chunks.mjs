@@ -137,14 +137,18 @@ export const COPIES = [
   { by: 'src/pages/about/photos.js', module: 'src/data/images/home.json', query: 'about' },
   { by: 'src/pages/about/photos.js', module: 'src/data/images/works.json', query: 'about' },
 ]
-// The 404 page (Task 6) copies by hand instead: it must import no module a
-// group's chunk holds, so it states the few values it needs itself, and a
-// test holds each to its source: the display face's preload
-// (src/routes/not-found.jsx, as src/utils/documentPreloads.js and
-// fontLinks.js give it), and plan А's drawing and block А's outlines
-// (src/pages/notfound/LostPlan.jsx, as Golden Residence's floors map gives
-// them).
-export const HAND_COPIES = ['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx']
+// The 404 page (Task 6) and the EU page (ruling T6d) copy by hand instead:
+// neither may import a module the facade group's chunk holds, so each
+// states the few values it needs itself, and a test holds each to its
+// source: the display face's preload, on both pages (src/routes/not-found.jsx
+// and src/routes/eu-proekt.jsx, as src/utils/documentPreloads.js and
+// fontLinks.js give it; their prerender tests), and plan А's drawing and
+// block А's outlines (src/pages/notfound/LostPlan.jsx, as Golden Residence's
+// floors map gives them). scripts/client-chunks.test.mjs fails on a file
+// here that imports the facade chunk's shared modules (the motion hook, the
+// hydration hook, the preload helpers), which would leave that chunk for
+// one of their own on every page of the group, the build none the wiser.
+export const HAND_COPIES = ['src/routes/not-found.jsx', 'src/pages/notfound/LostPlan.jsx', 'src/routes/eu-proekt.jsx']
 
 // A source file's module id, by its path from the repository.
 function moduleOf(ids, file) {
