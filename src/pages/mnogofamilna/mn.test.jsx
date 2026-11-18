@@ -244,11 +244,11 @@ describe('?view=list lands on #spisak with the EU row in view', () => {
     key: () => fireEvent.keyDown(document.body, { key: 'ArrowDown' }),
     'pointer press': () => fireEvent.pointerDown(document.documentElement),
   }
-  // #spisak 3000 px down the page, as jsdom lays nothing out; the jump there
-  // notes whether the row was held as it went.
-  const landingAt = (top) => {
+  // #spisak (or the section `id` names) 3000 px down the page, as jsdom lays
+  // nothing out; the jump there notes whether the row was held as it went.
+  const landingAt = (top, id = 'spisak') => {
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
-      const y = this.id === 'spisak' ? top : 0
+      const y = this.id === id ? top : 0
       return { top: y, bottom: y + 900, left: 0, right: 1440, width: 1440, height: 900, x: 0, y }
     })
     const jumps = []
@@ -320,6 +320,24 @@ describe('?view=list lands on #spisak with the EU row in view', () => {
     await wait(50)
 
     expect(jumps).toEqual([])
+    expect(held()).toBe(false)
+  }, 30000)
+
+  // An address that names the explorer, #explorer (Home's teaser: „Визуално“
+  // and „По критерии“'s ?view=list#explorer; Продажби's „Разгледайте
+  // апартаментите“), has the browser jump there: the page has landed on it,
+  // and holds the row as a list's landing does until the visitor first moves
+  // the page, its own jump leaving room for the whole header (infra minor 1,
+  // spec §8).
+  it.each(['#explorer', '?view=list#explorer'])('lands on the explorer with the row held where the address is %s', async (tail) => {
+    const jumps = landingAt(3000, 'explorer')
+    renderSiteAt(`/projects/golden-residence${tail}`)
+    if (tail.startsWith('?view=list')) await screen.findByRole('tab', { name: /По критерии/, selected: true }, { timeout: 15000 })
+
+    await waitFor(() => expect(jumps).toEqual([{ y: 3000, held: true }]), { timeout: 15000 })
+    expect(held()).toBe(true)
+    await wait(450)
+    fireEvent.keyDown(document.body, { key: 'ArrowDown' })
     expect(held()).toBe(false)
   }, 30000)
 })

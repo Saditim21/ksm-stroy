@@ -40,12 +40,14 @@
 //     at the foot of the whole header the landing holds (ruling T4b); on
 //     Многофамилна, whose explorer opens the page, that takes no scroll. A
 //     link that shows a list of its own section (its visit's `lands`:
-//     Многофамилна's ?view=list, M3 §6.2 #3) jumps there instead, with no
-//     dialog: the section must be at the top of the screen, its heading
-//     clear of the whole header the landing holds (ruling T4b), and the EU
-//     line in view all the same, which the landing keeps until the visitor
-//     first moves the page (M3 §8). So
-//     do the links that land on Контакти's form (`lands`: ?apartment=,
+//     Многофамилна's ?view=list, M3 §6.2 #3) jumps there instead, as an
+//     address that names the explorer does (Golden Residence's #explorer,
+//     Home's teaser's links, the list's tab shown where it asks for it:
+//     `tab`), with no dialog: the section must be at the top of the screen,
+//     its heading clear of the whole header the landing holds (ruling T4b),
+//     and the EU line in view all the same, which the landing keeps until
+//     the visitor first moves the page (M3 §8). So do the links that land on
+//     Контакти's form (`lands`: ?apartment=,
 //     ?project= or #zapitvane, M3/M4 §7.3, §8). No scroll the page makes
 //     itself may end such a landing (src/shell/landingHold.js): after its
 //     shot, the visit takes the page to the top and back, as every
@@ -182,6 +184,13 @@ const VISITS = [
   ...config.prerender.map((pathname) => ({ path: pathname })),
   { path: '/projects/golden-residence/block-a?floor=3', dialog: 'Блок А · Етаж 3' },
   { path: '/projects/golden-residence/block-b?floor=2&unit=%D0%91%20201', dialog: 'Б 201' },
+  // Home's teaser's own links (infra minor 1): a floor of its facade, its
+  // „Визуално“ (Продажби's „Разгледайте апартаментите“ too) and its „По
+  // критерии“, the explorer's list tab. Each lands on the explorer, the EU
+  // row in view.
+  { path: '/projects/golden-residence?floor=%D0%90-5', dialog: 'Блок А · Етаж 5' },
+  { path: '/projects/golden-residence#explorer', lands: 'explorer' },
+  { path: '/projects/golden-residence?view=list#explorer', lands: 'explorer', tab: 'По критерии' },
   // Многофамилна's deep links (spec M3 §12): a floor's plan stage, and a
   // unit's panel, each landing with the EU row in view; and its list, whose
   // section the page lands on, the EU row in view all the same (M3 §6.4, §8).
@@ -500,7 +509,7 @@ function appTrees() {
 }
 
 // One visit at one size: every problem found, and the first viewport's shot.
-async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog, lands }, size, shot, { liveData }) {
+async function visit(browser, userAgents, { path: pathname, redirect, status = 200, text, dialog, lands, tab }, size, shot, { liveData }) {
   const problems = []
   // Closing the profile aborts what is still loading; that is not the page's doing.
   let closing = false
@@ -634,6 +643,14 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         }
         const shown = await page.evaluate(openDialogs)
         if (shown.length > 0) problems.push(`the landing on #${lands} shows a dialog (${shown.map((name) => `„${name}“`).join(', ')})`)
+      }
+      // The explorer's view the address asks for (?view=list: its list tab).
+      if (tab) {
+        const selected = await page.evaluate(() => [...document.querySelectorAll('#explorer [role="tab"][aria-selected="true"]')]
+          .map((element) => element.textContent.replace(/\s+/g, ' ').trim()))
+        if (!selected.some((name) => name.startsWith(tab))) {
+          problems.push(`the explorer shows ${selected.map((name) => `„${name}“`).join(', ') || 'no tab'}, not „${tab}“`)
+        }
       }
 
       await page.screenshot({ path: shot })

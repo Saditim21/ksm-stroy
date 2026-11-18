@@ -50,7 +50,11 @@ import useExplorerState from './useExplorerState'
 //   wheel, a touch, a key or a pointer's press, 400 ms on (M3 §8, as
 //   Контакти's landing lets go; no scroll does, neither the jump's own nor
 //   the ScrollTrigger refresh that follows it: src/shell/landingHold.js), or
-//   opens a dialog over the list, in place.
+//   opens a dialog over the list, in place. So does an address that names
+//   the explorer, #explorer (Home's teaser, Продажби), where the browser
+//   jumps itself: the page jumps there again, with room for the whole header
+//   the landing holds (ruling T4b). Golden Residence's list is a tab of its
+//   explorer, so ?view=list alone shows it where it is, with no landing.
 // - The dialogs are the surfaces' chunk (surfaces.js), loaded with the
 //   project's plans when the address asks for one; the full facade has
 //   usually loaded both before, as it neared the screen. Until they are in,
@@ -76,13 +80,14 @@ export function ExplorerProvider({ project, routeBlock = null, children }) {
   // The page's arrival: a deep link's jump comes first, then the dialogs. The
   // EU row is held before the jump's scroll can reach the header. The
   // landing is 'dialog', a deep link's dialogs over the page, or 'list', a
-  // list of its own section with none over it; false once it has ended.
+  // list of its own section or the explorer the address names, with none
+  // over it; false once it has ended.
   const [arrived, setArrived] = useState(false)
   const [landing, setLanding] = useState(false)
   useEffect(() => {
     if (!hydrated || arrived) return
     const list = view === 'list' && Boolean(document.getElementById('spisak'))
-    if (stage || unitId || list) {
+    if (stage || unitId || list || window.location.hash === '#explorer') {
       holdEuRow(true)
       setLanding(stage || unitId ? 'dialog' : 'list')
       jumpToId(list ? 'spisak' : 'explorer')
