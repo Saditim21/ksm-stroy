@@ -22,6 +22,11 @@
 //   the pane's own shading (curtains, a transom) as shades of the glass;
 // - around a pane: its frame and sill, tinted by the light, and the glow on
 //   the wall, warm or a thin light rim. They become the wall's dark neutral;
+// - a little further out (HALO): the halo of its light on the wall, any
+//   pixel there lighter than the wall around it, warm and with the wall's
+//   green (the whitish crescents at блок Б's reveals, the soft rings around
+//   a window; M3's deferred minor, taken in M4 Task 7). It becomes the wall
+//   at the wall's own luminance there, fading out toward the halo's edge;
 // - anywhere in the bands: a surface lamplight tints deep orange (the attic's
 //   wall-washers under the canopy). It becomes the wall's neutral too.
 // Leaves stay green, and the timber cladding and the heads of the two street
@@ -77,12 +82,14 @@ const TIMBER = [
 ]
 // In source pixels: how wide a square proves a dim room (2 × ROOM + 1), how
 // deep inside a pane a dim warm pixel still counts as its own, how far a
-// pane's frame and glow reach, how thin a light line is a glow's rim (under
-// 2 × RIM + 1), how wide a neighbourhood gives a pane's mean light, and how
-// far from every pane the glass and the walls are sampled.
+// pane's frame and glow reach, how far the halo its light throws on the wall
+// reaches, how thin a light line is a glow's rim (under 2 × RIM + 1), how
+// wide a neighbourhood gives a pane's mean light, and how far from every
+// pane the glass and the walls are sampled.
 const ROOM = 6
 const INNER = 3
 const EDGE = 10
+const HALO = 14
 const RIM = 3
 const PANE = 10
 const CLEAR = 30
@@ -340,6 +347,7 @@ export async function makeTwin(src, out) {
   }
   const inner = blur(pane, width, height, INNER)
   const near = blur(pane, width, height, EDGE)
+  const haloNear = blur(pane, width, height, HALO)
   const paneShare = blur(pane, width, height, PANE)
   const paneMean = blur(paneLuma, width, height, PANE)
   const clear = blur(pane, width, height, CLEAR)
@@ -389,8 +397,15 @@ export async function makeTwin(src, out) {
     // neither, and stays). Anywhere: a deep orange.
     const glow = Math.max(smooth(12, 20, r - bl), smooth(6, 18, lumaOf[p] - opened[p]))
     const edgeW = near[p] > 0 && !leaf ? Math.max(tint(r, g, bl, 0.25, 0.5), smooth(wallHere - 4, wallHere + 16, y) * glow) * smooth(0, 0.01, near[p]) : 0
+    // Around a pane, out to HALO: the halo of its light on the wall, lighter
+    // than the wall around it, whatever its width (the whitish crescents at
+    // блок Б's reveals and the soft rings around a window, which the frame's
+    // pass above leaves): lamplight on the grey-olive wall, warm and with
+    // the wall's green (as isWall's). Unlit glass, cool or pink with the
+    // dusk it mirrors, stays.
+    const haloW = haloNear[p] > 0 && !leaf && r - bl > 3 && g >= 0.85 * r ? smooth(wallHere + 2, wallHere + 12, y) * smooth(0, 0.04, haloNear[p]) : 0
     const deepW = tint(r, g, bl, 0.5, 0.6) * smooth(30, 60, r)
-    const restW = Math.max(edgeW, deepW) * (1 - paneW)
+    const restW = Math.max(edgeW, haloW, deepW) * (1 - paneW)
     if (paneW <= 0 && restW <= 0) continue
     let rgb = [r, g, bl]
     if (paneW > 0) {

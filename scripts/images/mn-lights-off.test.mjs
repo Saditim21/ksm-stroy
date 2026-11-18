@@ -98,6 +98,37 @@ describe.skipIf(!present)(present ? 'mn-lights-off' : `mn-lights-off: skipped, t
     expect(changed.twinWarmth / changed.count).toBeLessThanOrEqual((changed.litWarmth / changed.count) * 0.5)
   })
 
+  // M3's deferred minor (mn-lights-off.mjs:384-385), taken in M4 Task 7: the
+  // halo of the lit windows' light on the wall left whitish crescents at the
+  // reveals of блок Б's left column (twin-block-b-100.png). In the strip just
+  // left of those windows (grid x 712–719, floors 10 to 2), against the
+  // median of the wall beside it on the same row (grid x 699–706), 906 of the
+  // lit render's pixels stand 40/255 or more over the wall and 320 of the
+  // twin's did; now hardly any do.
+  it('leaves no halo on the wall at блок Б’s left-column reveals', () => {
+    const { width, height, lit, twin: dark } = twin
+    const sx = width / 1200
+    const sy = height / 732.5
+    const xs = (from, to) => [Math.round(from * sx), Math.round(to * sx)]
+    const [strip0, strip1] = xs(712, 719)
+    const [wall0, wall1] = xs(699, 706)
+    const [row0, row1] = [Math.round((206 - 56.2) * sy), Math.round((586 - 56.2) * sy)]
+    const over = (px) => {
+      let count = 0
+      for (let y = row0; y < row1; y++) {
+        const wall = []
+        for (let x = wall0; x < wall1; x++) wall.push(luma(px, (y * width + x) * 3))
+        wall.sort((a, b) => a - b)
+        const median = wall[wall.length >> 1]
+        for (let x = strip0; x < strip1; x++) if (luma(px, (y * width + x) * 3) >= median + 40) count += 1
+      }
+      return count
+    }
+    const before = over(lit)
+    expect(before).toBeGreaterThan(500)
+    expect(over(dark)).toBeLessThan(before / 20)
+  })
+
   // M3 data-images minors: what stays as it is, the guard, and the committed
   // file the pipeline reads.
   it('leaves the street lamps’ heads and блок А’s timber exactly as they are', () => {
