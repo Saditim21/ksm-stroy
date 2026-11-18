@@ -244,6 +244,51 @@ describe('its pages', () => {
     press('ArrowRight')
     expect(counter(book)).toBe('04 / 06')
   })
+
+  // The book follows a turn of the screen (a tablet or a phone rotated):
+  // one page or two, the photo on show kept, never the spread's place in
+  // the book (final review, W10). Opened from Green Life's cover, its third
+  // photo: 02–03 on a desktop, 03 alone on a phone, and back.
+  it('keeps the photo on show as the screen turns, one page or two', async () => {
+    restoreMedia = mockMatchMedia({ reduce: true })
+    const phone = window.matchMedia('(max-width: 900px)')
+    const turnTheScreen = (matches) => act(() => {
+      phone.matches = matches
+      phone.dispatchEvent(new Event('change'))
+    })
+    const { book } = await openFromCover()
+    expect(counter(book)).toBe('02–03 / 06')
+
+    turnTheScreen(true)
+    expect(counter(book)).toBe('03 / 06')
+    expect(photosIn(book)).toEqual([`${GREEN_LIFE}, снимка 3`])
+    expect(book.querySelectorAll('.bk__page figure')).toHaveLength(1)
+
+    turnTheScreen(false)
+    expect(counter(book)).toBe('02–03 / 06')
+    expect(photosIn(book)).toEqual([`${GREEN_LIFE}, снимка 2`, `${GREEN_LIFE}, снимка 3`])
+  })
+
+  // A turn of the screen while a page turns lays the spread it was turning
+  // to alone: the page it was covering goes at once.
+  it('lays the spread it is turning to alone when the screen turns mid-turn', async () => {
+    restoreMedia = mockMatchMedia({ fine: true })
+    const phone = window.matchMedia('(max-width: 900px)')
+    const { book } = await openFromCover()
+    await waitFor(() => expect(flip.Flip.fit).toHaveBeenCalled())
+    act(() => recorder.timelines[0].vars.onComplete())
+
+    press('ArrowRight')
+    expect(counter(book)).toBe('04–05 / 06')
+    expect(book.querySelectorAll('.bk__page--l [data-layer]')).toHaveLength(2)
+    act(() => {
+      phone.matches = true
+      phone.dispatchEvent(new Event('change'))
+    })
+    expect(counter(book)).toBe('04 / 06')
+    expect(book.querySelectorAll('.bk__page--l [data-layer]')).toHaveLength(1)
+    expect(photosIn(book)).toEqual([`${GREEN_LIFE}, снимка 4`])
+  })
 })
 
 describe('its motion', () => {
@@ -310,5 +355,40 @@ describe('its motion', () => {
     expect(book.querySelectorAll('.bk__page--l figure')).toHaveLength(2)
     act(() => turn.vars.onComplete())
     expect(book.querySelectorAll('.bk__page--l figure')).toHaveLength(1)
+  })
+
+  // A close that comes while the opening waits for Flip and the photo (up
+  // to 0.4 s): the book fades out, and the opening never starts, no plate
+  // flying and no book fading back in (final review, W12).
+  it('never starts the opening once a close has come during its wait', async () => {
+    restoreMedia = mockMatchMedia({ fine: true })
+    // Flip still on its way, for the register's warm-up and the book alike.
+    let release
+    const loading = new Promise((resolve) => {
+      release = resolve
+    })
+    vi.mocked(loadFlip).mockImplementation(() => loading)
+    try {
+      const { cover, book } = await openFromCover()
+      expect(loadFlip).toHaveBeenCalled()
+
+      press('Escape')
+      const fade = recorder.tweens.find((tween) => tween.method === 'to' && tween.vars.opacity === 0)
+      expect(fade.targets).toEqual([book])
+      expect(fade.vars).toMatchObject({ duration: 0.35, onComplete: expect.any(Function) })
+      await act(async () => {
+        release(flip.Flip)
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+      expect(flip.Flip.fit).not.toHaveBeenCalled()
+      expect(document.querySelector('.bk-fly')).toBeNull()
+      expect(recorder.timelines).toEqual([])
+
+      act(() => fade.vars.onComplete())
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      expect(cover).toHaveFocus()
+    } finally {
+      vi.mocked(loadFlip).mockImplementation(() => Promise.resolve(flip.Flip))
+    }
   })
 })

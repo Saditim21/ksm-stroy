@@ -44,8 +44,9 @@ import './book.css'
 //   the book fades in. A page turns from the seam: the left one opens from
 //   its right edge, the right one from its left (from the top on a phone),
 //   over the page it covers, which goes once it has turned. Closing, it
-//   fades out. Without motion all of it is at once, and Flip is never asked
-//   for (spec §7.2: under reduced motion it opens at once).
+//   fades out; a close while the flight still waits means it never starts.
+//   Without motion all of it is at once, and Flip is never asked for (spec
+//   §7.2: under reduced motion it opens at once).
 
 const PHONE = '(max-width: 900px)'
 const FOCUS_AT_ONCE_MS = 30
@@ -254,7 +255,8 @@ export default function Book({ work, at = 0, fromRect = null, fromSrc = null, on
       const ready = () => Promise.all([loadFlip(), Promise.race([target.decode?.().catch(() => {}), wait(DECODE_WAIT_MS)])]).then(([Flip]) => Flip)
       const flipping = target ? Promise.race([ready(), wait(FLIP_WAIT_MS)]).catch(() => null) : Promise.resolve(null)
       flipping.then((Flip) => {
-        if (!alive) return
+        // Closed meanwhile (it fades out, then goes): nothing opens.
+        if (!alive || closing.current) return
         const landed = () => {
           if (target) target.style.visibility = ''
           fly?.remove()

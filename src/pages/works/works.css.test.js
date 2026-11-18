@@ -193,10 +193,81 @@ describe('the book (spec §7.2, §4.3)', () => {
     expect(declaredFor('.bk__strip button:focus-visible', [], book)['outline-offset']).toBe('1px')
   })
 
+  // Spec §4.5's 44 px targets (final review, W8): a thumbnail is 44 px wide
+  // or more, a portrait photo's cropped to it, never squeezed, and 44 px
+  // high or more at every size.
+  it('makes every thumbnail a 44 px target, a portrait photo cropped to it', () => {
+    expect(declaredFor('.bk__strip button', [], book)['min-width']).toBe('44px')
+    expect(declaredFor('.bk__thumb img', [], book)).toMatchObject({ 'min-width': '100%', 'object-fit': 'cover' })
+    const heights = rulesFor(book, '.bk__strip button').map((rule) => valueOf(rule, 'height')).filter(Boolean)
+    expect(heights).toHaveLength(3)
+    for (const height of heights) expect(Number.parseFloat(height), height).toBeGreaterThanOrEqual(44)
+  })
+
+  // The concept's `.bk__rec p` (css/obekti.css:198, its capture
+  // obekti-1440-book-title): the title page's name and line in ivory-2, the
+  // line at the description's 16 px, the name at the serif's size (final
+  // review, W11).
+  it('sets the title page’s name and line as the concept’s record', () => {
+    expect(declaredFor('.bk__rec p', [], book)).toEqual({ 'max-width': '26em', color: 'var(--ivory-2)', 'font-size': '16px', 'line-height': '1.65' })
+    expect(declaredFor('.bk__rec .serif', [], book)).toEqual({ 'max-width': '12em', 'font-size': 'clamp(34px, 3.4vw, 58px)', 'line-height': '1.02' })
+    const apart = book.filter((rule) => rule.selectors.some((selector) => /^\.bk__rec\b.*(\.small|:not\()/.test(selector)))
+    expect(apart.map((rule) => rule.selector)).toEqual([])
+  })
+
+  // Final review, W9: a title page taller than its page (a short window)
+  // starts at its top and scrolls, nothing of it cut off; one that fits
+  // stays centred.
+  it('starts a title page taller than its page at its top, and scrolls it', () => {
+    expect(declaredFor('.bk__rec', [], book)).toMatchObject({ 'align-content': 'safe center', 'overflow-y': 'auto' })
+  })
+
   it('changes on hover only where a pointer hovers', () => {
     for (const rule of book.filter((each) => each.selectors.some((selector) => selector.includes(':hover')))) {
       expect(rule.atRules, rule.selector).toEqual([FINE_POINTER])
     }
+  })
+})
+
+// Ruling FWe (final review, W7): on a phone turned sideways, a short screen,
+// the photo takes at least half the screen's height: the bar takes one row,
+// its line gone, the foot slims down, and every target keeps 44 px. Worked
+// out from the rules for the two screens the review names, a phone's layout
+// both: an iPhone 14 in Safari (844 × 340, its home bar 21 px under the
+// foot) and a Galaxy S23 in Chrome (780 × 304).
+describe('the book on a short screen, a phone turned sideways', () => {
+  const SHORT = '@media (max-height: 500px)'
+  const px = (value) => Number.parseFloat(/(-?[\d.]+)px/.exec(value)[1])
+
+  it('takes the bar to one row, its line gone, after the phone’s rules', () => {
+    expect(declaredFor('.bk__bar', [SHORT], book)['grid-template-columns']).toBe('minmax(0, 1fr) auto auto')
+    expect(declaredFor('.bk__meta', [SHORT], book).display).toBe('none')
+    for (const selector of ['.bk__n', '.bk__close']) {
+      expect(declaredFor(selector, [SHORT], book), selector).toMatchObject({ 'grid-column': 'auto', 'grid-row': 'auto' })
+      const at = (atRules) => book.findIndex((rule) => rule.selectors.includes(selector) && rule.atRules.join() === atRules)
+      expect(at(SHORT), selector).toBeGreaterThan(at(PHONE))
+    }
+  })
+
+  it('gives the photo at least half the screen’s height, every target 44 px', () => {
+    const bar = declaredFor('.bk__bar', [SHORT], book)
+    const foot = declaredFor('.bk__foot', [SHORT], book)
+    const fig = declaredFor('.bk__page .bk__fig', [SHORT], book)
+    const thumb = declaredFor('.bk__strip button', [SHORT], book)
+    const close = declaredFor('.bk__close', [], book)
+    const nav = declaredFor('.bk__nav', [PHONE], book)
+    expect(px(close['min-height'])).toBe(44)
+    expect([px(thumb.height), px(nav.height), px(nav.width)]).toEqual([44, 44, 44])
+    expect(foot['padding-bottom']).toBe('calc(6px + env(safe-area-inset-bottom))')
+
+    // The bar's row is „Затвори“'s 44 px, the tallest in it; the foot's is
+    // the strip's, its thumbnails and their room for the ring.
+    const barHeight = px(bar['padding-top']) + px(close['min-height']) + px(bar['padding-bottom']) + px(declaredFor('.bk__bar', [], book)['border-bottom'])
+    const strip = px(thumb.height) + 2 * px(declaredFor('.bk__strip', [], book).padding)
+    const footHeight = (homeBar) => px(foot['padding-top']) + Math.max(strip, px(nav.height)) + px(foot['padding-bottom']) + homeBar + px(declaredFor('.bk__foot', [], book)['border-top'])
+    const photo = (screen, homeBar) => screen - barHeight - footHeight(homeBar) - px(fig.top) - px(fig.bottom)
+    expect(photo(340, 21)).toBeGreaterThanOrEqual(340 / 2)
+    expect(photo(304, 0)).toBeGreaterThanOrEqual(304 / 2)
   })
 })
 
