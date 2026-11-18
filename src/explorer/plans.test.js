@@ -44,6 +44,24 @@ describe('Многофамилна’s plans, data and a chunk', () => {
     expect(Object.keys(loaded['А'].own)).toContain('А-808')
     expect(await plans.loadPlans(MN_PROJECT)).toBe(loaded)
   })
+
+  // A block page's rows draw each floor's mini plan from the data alone
+  // (MnBlockPage.jsx), with planGeometry.js's planOf, the one composition
+  // plans.js gives the dialogs too, less the drawing: a field PlanSvg comes
+  // to read is in both (M3's deferred minor, MnBlockPage.jsx:131-132; M4
+  // Task 7).
+  it('compose a block’s plan as a block page’s rows do, but for the drawing', async () => {
+    const { planOf } = await import('./planGeometry')
+    for (const block of ['А', 'Б']) {
+      const { drawing, ...plan } = plans.plansOf(MN_PROJECT)[block]
+      expect(drawing).toBeNull()
+      expect(planOf(MN_PROJECT.plans, block)).toEqual(plan)
+    }
+    const { drawing, ...loaded } = (await plans.loadPlans(MN_PROJECT))['А']
+    expect(drawing).toBe('/img/mn-plan-line-2400.webp')
+    const data = { ...MN_PROJECT.plans, ...(await MN_PROJECT.loadPlans()) }
+    expect(planOf(data, 'А')).toEqual(loaded)
+  })
 })
 
 describe('Golden Residence’s plans, a chunk of their own', () => {

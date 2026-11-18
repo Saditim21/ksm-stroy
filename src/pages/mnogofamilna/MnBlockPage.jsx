@@ -11,7 +11,7 @@ import Facade from '../../explorer/Facade'
 import { FloorCounts } from '../../explorer/FloorFacts'
 import { facadeOf } from '../../explorer/geometry'
 import { loadSurfaces } from '../../explorer/loadSurfaces'
-import { planFor } from '../../explorer/planGeometry'
+import { planOf } from '../../explorer/planGeometry'
 import { MN_PROJECT } from '../../explorer/projects/mn'
 import useExplorer from '../../explorer/useExplorer'
 import useHotFloor from '../../explorer/useHotFloor'
@@ -133,13 +133,11 @@ function Floors({ block }) {
   // The floor whose row crosses the middle of a desktop's screen, or null.
   const [middle, setMiddle] = useState(null)
   // The rows' plan: the block's typical floor, its numbers and its floors'
-  // words, the project's plans' data (ruling PF3), as plans.js would give
-  // them, which the rows draw without the drawing; plans.js itself, which
-  // loads the plans the dialogs draw, stays with them (surfaces.js).
-  const plan = useMemo(() => {
-    const { floors: map, unitNumber, floorMeta } = project.plans
-    return { ...planFor(map, block), unitNumber, floorMeta }
-  }, [project, block])
+  // words, from the project's plans' data (ruling PF3), composed as plans.js
+  // composes the dialogs' (planOf), which the rows draw without the drawing;
+  // plans.js itself, which loads the plans the dialogs draw, stays with them
+  // (surfaces.js).
+  const plan = useMemo(() => planOf(project.plans, block), [project, block])
 
   useMotion(ref, ({ ScrollTrigger }) => {
     if (!window.matchMedia(FINE).matches) return

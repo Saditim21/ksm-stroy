@@ -28,7 +28,7 @@
 // (surfaces.js), and loadSurfaces.js loads a project's plans before it hands
 // the surfaces over (hasPlans), so plansOf() has them whole by the time a
 // dialog draws.
-import { planFor } from './planGeometry'
+import { planOf } from './planGeometry'
 
 // Each project's plans, whole; and those of its data alone, while its chunk
 // is still to load.
@@ -38,9 +38,11 @@ const pending = new WeakMap()
 
 const drawingOf = (image) => (image ? `${image.path}-${image.widths[image.widths.length - 1]}.webp` : null)
 
-const plansFrom = ({ floors, drawings, unitNumber, floorMeta, floorWord, own, className }) => Object.freeze(Object.fromEntries(['А', 'Б'].map((block) => [
+// Each block's plan, composed as a block page's rows compose theirs
+// (planOf, planGeometry.js), with its drawing.
+const plansFrom = (data) => Object.freeze(Object.fromEntries(['А', 'Б'].map((block) => [
   block,
-  Object.freeze({ ...planFor(floors, block), drawing: drawingOf(drawings?.[block]), unitNumber, floorMeta, floorWord, own, className }),
+  Object.freeze({ ...planOf(data, block), drawing: drawingOf(data.drawings?.[block]) }),
 ])))
 
 /** `project`'s plans: { 'А': plan, 'Б': plan }, each a floors map's entry

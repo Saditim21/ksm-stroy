@@ -15,6 +15,22 @@ export function planFor(floorsMap, block) {
   return floorsMap.find((entry) => entry.appliesTo.blocks.includes(block))
 }
 
+/** A block's plan from a project's plans data (its project's `plans`, with
+ * its chunk's once loaded): the plan of the block (planFor), with the
+ * number an apartment shows on it, the project's words on a floor, its
+ * apartments' own plans and its plans' look (plans.js names each). The one
+ * composition of a plan: plans.js adds the drawing for the dialogs, and a
+ * Многофамилна block page's rows draw their mini plans from it as it is
+ * (MnBlockPage.jsx), so a field the plans come to carry reaches both. */
+export const planOf = ({ floors, unitNumber, floorMeta, floorWord, own, className }, block) => ({
+  ...planFor(floors, block),
+  unitNumber,
+  floorMeta,
+  floorWord,
+  own,
+  className,
+})
+
 const pointsOf = (plan) => plan.shapes.filter((shape) => shape.type === 'apartment').flatMap((shape) => shape.polygons[0])
 
 /** The box around a plan's apartments, `pad` wider on every side: a plan's
