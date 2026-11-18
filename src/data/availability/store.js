@@ -29,12 +29,12 @@
 
 import { normalizeStatus } from '../../utils/propertyStatus'
 
-// The browser's fetchers and the legacy floor maps' last step
-// (src/services/googleSheets.js, with sheetsCore.js's CSV reader): a chunk of
-// their own, loaded only on the paths that use them, the sheets once the API
-// has failed and the data built into the site, so neither is in a route's
-// first-load JS (spec §10, M3 §10: the bytes Многофамилна's page adds to the
-// shared chunks are freed here).
+// The browser's fetchers (src/services/googleSheets.js, with sheetsCore.js's
+// CSV reader): a chunk of their own, loaded only once the API has failed, so
+// they are in no route's first-load JS (spec §10, M3 §10: the bytes
+// Многофамилна's page adds to the shared chunks are freed here). The data
+// built into the site never needs them (rowsOf normalises it here), so it
+// still shows when their chunk cannot load either (M4 Task 7).
 const loadSheets = () => import('../../services/googleSheets')
 
 const AVAILABILITY_URL = '/api/availability'
@@ -75,10 +75,13 @@ function publish(next) {
 }
 
 // The legacy shapes the fetchers and the built-in data keep, as the API's
-// rows. The statuses go through normalizeStatus() on every path.
+// rows, normalised as the API's are: floor 0 (Многофамилна's garages, which
+// no page lists) left out, and the statuses through normalizeStatus(). The
+// fetchers' floor maps have had both done already (googleSheets.js's
+// normalizeFloorData); the built-in data has them done here.
 function rowsOf(floors) {
   if (!floors) return null
-  return Object.entries(floors).flatMap(([floor, apartments]) =>
+  return Object.entries(floors).filter(([floor]) => Number(floor) !== 0).flatMap(([floor, apartments]) =>
     apartments.map((apartment) => ({
       unit: apartment.apartment ?? '',
       floor,
@@ -180,24 +183,23 @@ async function readLive({ refresh }) {
   return (await fromApi()) ?? (await fromSheets({ refresh }))
 }
 
-// The data built into the site, normalised like a sheet's rows (floor 0 out,
-// statuses through normalizeStatus()). Each project's is a chunk of its own,
-// loaded only when a slot needs it, with the sheets' (normalizeFloorData).
+// The data built into the site, normalised like a sheet's rows (rowsOf).
+// Each project's is a chunk of its own, loaded only when a slot needs it.
 async function builtInGoldenResidence() {
-  const [{ normalizeFloorData }, data] = await Promise.all([loadSheets(), import('../../constants/apartmentFallbackData')])
+  const data = await import('../../constants/apartmentFallbackData')
   return projectsOf({
-    blockA: normalizeFloorData(data.getBlockAFallbackData()),
-    blockB: normalizeFloorData(data.getBlockBFallbackData()),
+    blockA: data.getBlockAFallbackData(),
+    blockB: data.getBlockBFallbackData(),
     garages: data.getGaragesFallbackData(),
     parking: data.getParkingFallbackData(),
   })[GOLDEN_RESIDENCE]
 }
 
 async function builtInMnogofamilna() {
-  const [{ normalizeFloorData }, data] = await Promise.all([loadSheets(), import('../../constants/mnogofamilnaFallbackData')])
+  const data = await import('../../constants/mnogofamilnaFallbackData')
   return projectsOf({
-    mnogoA: normalizeFloorData(data.getMnogoAFallbackData()),
-    mnogoB: normalizeFloorData(data.getMnogoBFallbackData()),
+    mnogoA: data.getMnogoAFallbackData(),
+    mnogoB: data.getMnogoBFallbackData(),
   })[MNOGOFAMILNA]
 }
 

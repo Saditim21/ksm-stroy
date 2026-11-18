@@ -8,8 +8,8 @@ import { apartmentUnits } from '../availability/select'
 import { getSnapshot, subscribe } from '../availability/store'
 import { MN_SNAPSHOT_DATA, MN_SNAPSHOT_DATE } from './snapshot'
 
-// The store's direct sheet fetchers fail. normalizeFloorData and the rest of
-// the service are real, so its built-in path runs as it does on a page.
+// The store's direct sheet fetchers fail. The rest of the service is real, so
+// the store takes its built-in path as it does on a page.
 const sheets = vi.hoisted(() => ({
   fetchApartmentData: vi.fn(async () => { throw new Error('the sheet failed') }),
   fetchGarageData: vi.fn(async () => { throw new Error('the sheet failed') }),

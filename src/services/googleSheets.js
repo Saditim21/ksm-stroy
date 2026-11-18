@@ -96,10 +96,11 @@ export function transformToApartmentData(rawData) {
 }
 
 /**
- * The last step for every floor map the site shows, a sheet's rows or the
- * Многофамилна data built into the site (the availability store's): floor 0, the
- * Многофамилна garages that no page lists, is dropped, and every status goes
- * through normalizeStatus(). Returns new rows; the input is left as it was.
+ * The last step for a sheet's floor map: floor 0, the Многофамилна garages
+ * that no page lists, is dropped, and every status goes through
+ * normalizeStatus(). Returns new rows; the input is left as it was. The
+ * availability store does the same for the data built into the site (its
+ * rowsOf, src/data/availability/store.js), which never loads this module.
  */
 export function normalizeFloorData(floorData) {
   const normalized = {};

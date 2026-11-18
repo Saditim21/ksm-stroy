@@ -5,7 +5,8 @@ import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // The direct fetchers of the fallback path are mocked; normalizeFloorData and
-// the rest of the service are real.
+// the rest of the service are real. The data built into the site never loads
+// the service (store.builtIn.test.js).
 const sheets = vi.hoisted(() => ({
   fetchApartmentData: vi.fn(),
   fetchGarageData: vi.fn(),

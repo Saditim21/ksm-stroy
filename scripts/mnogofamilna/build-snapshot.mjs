@@ -23,9 +23,9 @@ const OUT = fileURLToPath(new URL('../../src/data/mnogofamilna/snapshot.js', imp
 const SNAPSHOT_DATE = '01.12.2025'
 
 // The store's rows for a block, restated from src/data/availability/store.js
-// (its rowsOf, after normalizeFloorData from src/services/googleSheets.js),
-// as neither module loads in plain Node: floor key 0, the garages that no page
-// lists, is left out, and every status goes through normalizeStatus().
+// (its rowsOf), as that module does not load in plain Node: floor key 0, the
+// garages that no page lists, is left out, and every status goes through
+// normalizeStatus().
 function rowsOf(floors) {
   return Object.entries(floors)
     .filter(([floor]) => Number(floor) !== 0)
