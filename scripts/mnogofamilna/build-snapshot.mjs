@@ -70,13 +70,15 @@ const LISTS = Object.fromEntries(LISTED.map((name) => {
 }))
 
 // A block's columns. Every value must be text without the separator. A block
-// without rows would decode as one empty row, so it is refused too.
+// without rows would decode as one empty row, so it is refused too. The bad
+// value is found by its place: an `undefined` among them is bad as well, and
+// find() would give it back as if none were.
 function columnsOf(slot, rows) {
   if (rows.length === 0) throw new Error(`${slot} has no apartments.`)
   return Object.fromEntries(Object.entries(COLUMNS).map(([name, valueOf]) => {
     const values = rows.map(valueOf)
-    const bad = values.find((value) => typeof value !== 'string' || value.includes('|'))
-    if (bad !== undefined) throw new Error(`${slot}: the ${name} ${JSON.stringify(bad)} is not text, or holds the separator „|“.`)
+    const at = values.findIndex((value) => typeof value !== 'string' || value.includes('|'))
+    if (at !== -1) throw new Error(`${slot}: the ${name} ${String(JSON.stringify(values[at]))} is not text, or holds the separator „|“.`)
     if (LISTED.includes(name)) return [name, values.map((value) => LISTS[name].indexOf(value).toString(36)).join('')]
     return [name, values.join('|')]
   }))

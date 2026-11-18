@@ -167,7 +167,7 @@ function blocksOf(width, height, map) {
 
 // What stays (the lamps' heads and the timber) as a mask, and the pixel at
 // each lamp head's centre.
-function stillOf(width, height) {
+export function stillOf(width, height) {
   const sx = width / GRID.width
   const sy = height / GRID.height
   const mask = new Uint8Array(width * height)

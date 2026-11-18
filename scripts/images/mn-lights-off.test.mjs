@@ -4,16 +4,15 @@
 // every lit window of the two towers turned to dark glass, and nothing changed
 // outside the towers, so that the page can show the lit render through a
 // floor's band without a seam. A pixel "changes" when its luminance moves by
-// more than
-// 8/255, read from the raw pixels makeTwin returns, so the encoder's noise
-// never counts (ruling PF19).
+// more than 8/255, read from the raw pixels makeTwin returns, so the
+// encoder's noise never counts (ruling PF19).
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
-import { makeTwin } from './mn-lights-off.mjs'
+import { makeTwin, stillOf } from './mn-lights-off.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const sources = JSON.parse(fs.readFileSync(path.join(here, 'sources.json'), 'utf8'))
@@ -97,5 +96,45 @@ describe.skipIf(!present)(present ? 'mn-lights-off' : `mn-lights-off: skipped, t
     expect(after).toBeLessThanOrEqual(before * 0.6)
     // Glass, not dimmed lamplight: the warm cast goes too.
     expect(changed.twinWarmth / changed.count).toBeLessThanOrEqual((changed.litWarmth / changed.count) * 0.5)
+  })
+
+  // M3 data-images minors: what stays as it is, the guard, and the committed
+  // file the pipeline reads.
+  it('leaves the street lamps’ heads and блок А’s timber exactly as they are', () => {
+    const { mask } = stillOf(twin.width, twin.height)
+    let kept = 0
+    for (let p = 0; p < mask.length; p++) {
+      if (!mask[p]) continue
+      kept += 1
+      const i = p * 3
+      expect([twin.twin[i], twin.twin[i + 1], twin.twin[i + 2]], `pixel ${p % twin.width},${Math.floor(p / twin.width)}`)
+        .toEqual([twin.lit[i], twin.lit[i + 1], twin.lit[i + 2]])
+    }
+    expect(kept).toBeGreaterThan(1000)
+  })
+
+  it('refuses a picture whose street lamps are not lit: it is not the lit render', async () => {
+    const dark = path.join(tmp, 'dark.png')
+    await sharp({ create: { width: twin.width, height: twin.height, channels: 3, background: '#101010' } }).png().toFile(dark)
+    await expect(makeTwin(dark, path.join(tmp, 'dark-twin.webp'))).rejects.toThrow(/no street lamp at \d+,\d+/)
+  }, 60_000)
+
+  // The pipeline's source for mn-dusk-off is the committed file: it must be
+  // this script's output, or an edit to the script without a rerun would
+  // stay green. Over the windows the twin repaints, the committed file,
+  // decoded, keeps to a fresh twin by the encoder's noise.
+  it('is the committed src/assets/mnogofamilna/mn-dusk-off-2400.webp', async () => {
+    const committed = path.resolve(here, '..', '..', 'src', 'assets', 'mnogofamilna', 'mn-dusk-off-2400.webp')
+    const { data, info } = await sharp(fs.readFileSync(committed)).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+    expect([info.width, info.height]).toEqual([twin.width, twin.height])
+    let sum = 0
+    let count = 0
+    for (let i = 0; i < data.length; i += 3) {
+      if (Math.abs(luma(twin.twin, i) - luma(twin.lit, i)) <= CHANGED) continue
+      sum += Math.abs(luma(data, i) - luma(twin.twin, i))
+      count += 1
+    }
+    expect(count).toBe(changed.count)
+    expect(sum / count).toBeLessThan(2)
   })
 })
