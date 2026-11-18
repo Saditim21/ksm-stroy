@@ -1,5 +1,6 @@
-import { act, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { stubIdle } from '../test/gsap'
 import { mockMatchMedia } from '../test/media'
 import { buildModel } from './model'
 import { GR_PROJECT } from './projects/gr'
@@ -37,9 +38,11 @@ const MODEL = buildModel(snapshotData(), GR_PROJECT)
 
 // A fresh motion runtime (its memoised load and idle queue) and grid for
 // every test; the grid's explorer, which sizes it, a fresh module with it.
+// flushMotion() lets the engine's import() resolve, then runs every idle
+// callback queued (src/test/gsap.js, stubIdle).
 let BlockGrid
 let ExplorerContext
-let idle
+let flushMotion
 let restoreMedia
 beforeEach(async () => {
   vi.resetModules()
@@ -47,8 +50,7 @@ beforeEach(async () => {
   ;({ ExplorerContext } = await import('./useExplorer'))
   fakeMotion.gsap.from.mockClear()
   fakeMotion.gsap.context.mockClear()
-  idle = []
-  vi.stubGlobal('requestIdleCallback', (callback) => idle.push(callback))
+  flushMotion = stubIdle()
 })
 afterEach(() => {
   restoreMedia?.()
@@ -59,14 +61,6 @@ afterEach(() => {
 
 const allowMotion = () => {
   restoreMedia = mockMatchMedia()
-}
-
-// Lets the engine's import() resolve, then runs every idle callback queued.
-async function flushMotion() {
-  for (let turn = 0; turn < 3; turn += 1) {
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
-    while (idle.length > 0) await act(async () => idle.shift()())
-  }
 }
 
 // The block's half (.blk) at `top` px from the top of an 768 px screen

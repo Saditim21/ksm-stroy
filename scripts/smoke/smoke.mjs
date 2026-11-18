@@ -166,6 +166,10 @@ const POSTER_PDF = '/eu/plakat-ksm-stroy-a3.pdf'
 const HYDRATION = /hydrat|#418|#423|#425/i
 const UNUSED_PRELOAD_WINDOW_MS = 4500
 const HYDRATION_TIMEOUT_MS = 20000
+// How long the availability store waits for the API before it drops to the
+// data built into the site and shows the stale notice
+// (src/data/availability/store.js, FETCH_TIMEOUT_MS).
+const STORE_TIMEOUT_MS = 10000
 
 const VIEWPORTS = [
   { label: '1440×900', slug: 'desktop', viewport: { width: 1440, height: 900, deviceScaleFactor: 1 } },
@@ -523,6 +527,9 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
   // Home's facade intro on the way to the poster, collects garbage within it.
   const loaded = new Set()
   const aborted = []
+  // The availability API's requests on their way (the store's fetch, the
+  // document's preload), with when each went out.
+  const availability = new Map()
   const context = await browser.createBrowserContext()
   try {
     const page = await context.newPage()
@@ -540,11 +547,16 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
       }
     })
     page.on('pageerror', (error) => report(`page error: ${String(error?.message ?? error).slice(0, 500)}`))
+    page.on('request', (request) => {
+      if (sameOrigin(request.url()) && new URL(request.url()).pathname === '/api/availability') availability.set(request, Date.now())
+    })
     page.on('requestfinished', (request) => {
+      availability.delete(request)
       const answer = request.response()
       if (sameOrigin(request.url()) && answer && answer.status() < 400) loaded.add(request.url())
     })
     page.on('requestfailed', (request) => {
+      availability.delete(request)
       if (!sameOrigin(request.url())) return
       if (request.failure()?.errorText === 'net::ERR_ABORTED') aborted.push(request)
       else report(`request failed: ${relative(request.url())} (${request.failure()?.errorText})`)
@@ -666,8 +678,17 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         }
       }
 
-      // The store's data, once the visit has waited for it (src/data/availability).
+      // The store's data, once it has settled (src/data/availability): the
+      // visit is 4.5 s past `load` by now, and the store waits 10 s for the
+      // API before it drops to the built-in data. A request still on its way
+      // is waited for, to its answer or past the store's timeout, so a
+      // notice it would bring is seen.
       if (liveData) {
+        if (availability.size > 0) {
+          const until = Math.max(...availability.values()) + STORE_TIMEOUT_MS + 1000
+          while (availability.size > 0 && Date.now() < until) await delay(100)
+          await delay(300)
+        }
         const notice = await page.evaluate(() => document.querySelector('.stale')?.textContent.replace(/\s+/g, ' ').trim() ?? null)
         if (notice) problems.push(`the availability ended on the data built into the site, though the local API answers: the page shows „${notice.slice(0, 48)}…“`)
       }
@@ -1031,13 +1052,16 @@ function lensOn(key) {
   }
 }
 
-// Waits until the page's scroll has held still for 300 ms (Lenis glides).
+// Waits until the page's scroll has held still for 300 ms (Lenis glides):
+// two samples in a row, 150 ms apart, that find it where it was. At most 4 s.
 async function settled(page) {
   let last = await page.evaluate(() => scrollY)
+  let still = 0
   for (let at = 0; at < 4000; at += 150) {
     await delay(150)
     const now = await page.evaluate(() => scrollY)
-    if (now === last && at >= 300) return
+    still = now === last ? still + 150 : 0
+    if (still >= 300) return
     last = now
   }
 }
@@ -1054,15 +1078,11 @@ async function within(page, ms, fn, ...args) {
   return answer
 }
 
-// Whether the dialog `name` is open on top, within `ms`.
+// Whether the dialog `name` is open on top, within `ms`, by openDialogs()'s
+// reading, its own source sent to the page.
 async function dialogOpens(page, name, ms) {
   try {
-    await page.waitForFunction((wanted) => {
-      const names = [...document.querySelectorAll('[role="dialog"]')]
-        .filter((dialog) => dialog.getAttribute('aria-hidden') !== 'true')
-        .map((dialog) => (document.getElementById(dialog.getAttribute('aria-labelledby'))?.textContent ?? dialog.getAttribute('aria-label') ?? '').replace(/\s+/g, ' ').trim())
-      return names.includes(wanted)
-    }, { timeout: ms }, name)
+    await page.waitForFunction(`(${openDialogs})().includes(${JSON.stringify(name)})`, { timeout: ms })
     return true
   } catch {
     return false

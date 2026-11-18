@@ -1,5 +1,6 @@
-import { act, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
+import { stubIdle } from '../../test/gsap'
 import { mockMatchMedia } from '../../test/media'
 
 // DimensionLine (plan Task 7, spec §3.3): a hairline with 7 px end ticks and a
@@ -27,16 +28,17 @@ const fakeMotion = vi.hoisted(() => {
 vi.mock('../../motion/engine.js', () => ({ default: fakeMotion }))
 
 // A fresh motion runtime (memoised load, idle queue) and component per test.
+// flushMotion() lets the engine's import() resolve, then runs every idle
+// callback queued (src/test/gsap.js, stubIdle).
 let DimensionLine
-let idle
+let flushMotion
 let restoreMedia
 beforeEach(async () => {
   vi.resetModules()
   DimensionLine = (await import('./DimensionLine')).default
   fakeMotion.gsap.from.mockClear()
   fakeMotion.gsap.context.mockClear()
-  idle = []
-  vi.stubGlobal('requestIdleCallback', (callback) => idle.push(callback))
+  flushMotion = stubIdle()
 })
 afterEach(() => {
   restoreMedia?.()
@@ -46,14 +48,6 @@ afterEach(() => {
 })
 
 const allowMotion = () => { restoreMedia = mockMatchMedia() }
-
-// Lets the engine's import() resolve, then runs every idle callback queued.
-async function flushMotion() {
-  for (let turn = 0; turn < 3; turn += 1) {
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
-    while (idle.length > 0) await act(async () => idle.shift()())
-  }
-}
 
 // jsdom lays nothing out, so every element sits at the top of the viewport.
 const placeAt = (top) => vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect')
