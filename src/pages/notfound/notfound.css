@@ -1,0 +1,198 @@
+/* The 404 page (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §7.6; Diptych §5.5, §11), ported from the concept's css/404.css (:92-128
+   the page and its arrival, :130-138 its phones) with the tokens of
+   src/index.css, --screen-h for vh and svh, and the system's type: the
+   heading at Home's slogan size (M3/M4 §4.1). The shell, the seam and the
+   links are the site's (src/shell, src/styles/diptych.css).
+
+   The page's own stylesheet (src/routes/not-found.jsx), after the site's:
+   plain CSS, in no Tailwind layer (whose layers are no cascade layers in
+   the built CSS: a site rule of more weight wins whatever the order). A
+   block page's route that names no block loads it with the page, lazily
+   (src/routes/BlockRoute.jsx).
+
+   The page is all first viewport: it arrives by CSS from first paint
+   (Diptych §5.5), only under the motion gate (`:root.js`) inside @media
+   (prefers-reduced-motion: no-preference), each starting state in its
+   keyframes, held by a fill; every step waits --arrive
+   (src/styles/motion.css). */
+
+/* A screen under the header, split on the seam: the drawing on the left, the
+   words after the seam. A hinged part's gap to the seam is the hinge's. */
+.lost {
+  --hg: clamp(24px, 3vw, 52px);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(var(--screen-h) - var(--header-h));
+}
+.lost > .seam { z-index: 4; }
+
+/* ---------- the drawing, where the plan stage puts it: left, on umber ---------- */
+/* It comes first on the screen, though the words come first in the DOM. */
+.lost__plan {
+  order: -1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: clamp(40px, calc(var(--screen-h) * .07), 80px) clamp(28px, 4vw, 72px);
+  background: var(--umber);
+  overflow: clip;
+}
+/* The floor's frame, the outlines' viewBox (150 66 850 720, LostPlan.jsx):
+   as wide as the half allows, at most 760 px, and short enough to leave the
+   screen 120 px under the header. The drawing runs on past it to the
+   figure's edges, as on the plan stage. */
+.lost__draw {
+  position: relative;
+  width: min(100%, 760px, calc((var(--screen-h) - var(--header-h) - 120px) * 850 / 720));
+  aspect-ratio: 850 / 720;
+}
+.lost__draw > picture {
+  position: absolute;
+  inset: 0;
+}
+/* The explorer's dark drawing of блок А (1200 × 845), laid so that the frame
+   shows its 150 66 850 720, the outlines' grid; at .4, as the concept has
+   it, from the first paint (the page's largest picture is never faded,
+   Diptych §5.5). */
+.lost__drawing {
+  position: absolute;
+  left: calc(-150 / 850 * 100%);
+  top: calc(-66 / 720 * 100%);
+  width: calc(1200 / 850 * 100%);
+  max-width: none;
+  height: auto;
+  opacity: .4;
+}
+/* The outlines over it, in the drawing's own units: --u is one screen pixel
+   in them (LostPlan.jsx measures it), at first a pixel at the drawing's
+   common size, 604 px wide on a 1440 px screen. */
+.lost__draw svg {
+  --u: 1.4;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* The missing apartment's walls cut out of the drawing: its outline filled
+   with the stage's ground. */
+.lost__cut { fill: var(--umber); }
+/* The explorer's brass unit outlines, one screen pixel wide. */
+.lost__units path {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: calc(var(--u) * 1px);
+  stroke-linejoin: round;
+}
+/* The apartment that is not in the drawing: its outline dashed in ivory, the
+   dash 5 px and the gap 4 px on screen. */
+.lost__gone {
+  fill: none;
+  stroke: var(--ivory-3);
+  stroke-width: calc(var(--u) * 1px);
+  stroke-dasharray: calc(var(--u) * 5px) calc(var(--u) * 4px);
+}
+
+/* ---------- the words, after the seam ---------- */
+.lost__text {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 26px;
+  padding: clamp(56px, calc(var(--screen-h) * .09), 104px) var(--gut) clamp(56px, calc(var(--screen-h) * .09), 104px) var(--hg);
+}
+.lost__h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -.012em;
+}
+.lost__h1 .split-line { display: block; }
+.lost__h1 .line-mask + .line-mask { --n: 1; }
+.lost__p {
+  max-width: 30em;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--stone);
+}
+.lost__ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 34px;
+  margin-top: 6px;
+}
+
+/* ---------- phones: the drawing first, under a brass rule ---------- */
+@media (max-width: 900px) {
+  .lost {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .lost > .seam { display: none; }
+  .lost__plan {
+    padding: 28px var(--gut);
+    border-bottom: 1px solid var(--brass);
+  }
+  .lost__draw { width: min(100%, 760px); }
+  /* A pixel at 390 px (350 px of drawing), until measured. */
+  .lost__draw svg { --u: 2.4; }
+  .lost__text {
+    gap: 22px;
+    padding: 44px var(--gut) 88px;
+  }
+  .lost__h1 { font-size: clamp(32px, 10.6vw, 60px); }
+  .lost__p { font-size: 16px; }
+}
+
+/* ---------- motion (Diptych §5.5; spec §7.6) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The seam draws down; the heading's lines rise from their masks, 0.1 s
+     apart (a mask clips only while its line rises); the sentence and the
+     ways fade up after them. */
+  :root.js .lost > .seam {
+    animation: notfound-seam 1.3s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .lost__h1 .line-mask {
+    animation: notfound-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .lost__h1 .split-line {
+    animation: notfound-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .lost__p,
+  :root.js .lost__ways {
+    animation: notfound-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .35s);
+  }
+  :root.js .lost__ways { animation-delay: calc(var(--arrive) + .45s); }
+  /* The drawing draws itself: each outline its own length (pathLength 1),
+     70 ms after the one before, and the missing apartment shows last, once
+     the last outline is drawing. The dash is theirs only while they draw:
+     at rest each outline is whole. */
+  :root.js .lost__units path {
+    animation: notfound-draw 1.3s var(--e-out) backwards;
+    animation-delay: calc(var(--arrive) + .25s + var(--i) * 70ms);
+  }
+  :root.js .lost__gone {
+    animation: notfound-fade .8s var(--e-soft) backwards;
+    animation-delay: calc(var(--arrive) + 1.55s);
+  }
+}
+
+@keyframes notfound-seam { from { transform: scaleY(0); } }
+@keyframes notfound-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its line rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes notfound-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes notfound-up { from { opacity: 0; transform: translateY(14px); } }
+@keyframes notfound-draw {
+  from { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+  to { stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+}
+@keyframes notfound-fade { from { opacity: 0; } }

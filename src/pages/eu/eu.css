@@ -1,0 +1,379 @@
+/* The EU project page (spec docs/superpowers/specs/2026-11-16-ksmstroy-m3m4-design.md
+   §7.5; Diptych §5.5, §11), ported from the concept's css/eu-proekt.css
+   (:92-155 the page and its arrival, :157-191 its phones) with the tokens
+   of src/index.css, --screen-h for vh, and the system's type: the title at
+   Home's slogan size (M3/M4 §4.1). The shell, the seam, the hinge, the
+   logos' light plate and the actions are the site's (src/shell,
+   src/styles/diptych.css, src/styles/shell.css).
+
+   The page's own stylesheet (src/routes/eu-proekt.jsx), after the site's:
+   plain CSS, in no Tailwind layer (whose layers are no cascade layers in
+   the built CSS: a site rule of more weight wins whatever the order).
+
+   The opening arrives by CSS from first paint (Diptych §5.5), only under the
+   motion gate (`:root.js`) inside @media (prefers-reduced-motion:
+   no-preference), each starting state in its keyframes, held by a fill;
+   every step waits --arrive (src/styles/motion.css). The co-funding plate
+   never moves: the emblem shows on landing. The budget's seam waits at the
+   centre the same way and travels when the band is seen (eu-proekt.jsx
+   marks when), and the poster's part takes the system's reveals. */
+
+/* The budget's seam: where the grant's part of the band ends, from 0 % (the
+   left edge) to 100 %. Registered, so its move from the centre
+   interpolates; it rests at the grant's share, 70 % (24 724,03 of
+   35 320,04 евро), under reduced motion and without JS too. */
+@property --split {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 70%;
+}
+
+/* A part's gap to the seam, either side: the hinge's. */
+.doc,
+.fund,
+.fin {
+  --hg: clamp(24px, 3vw, 52px);
+}
+
+/* ---------- 1. #top, the seal on the fold (spec §7.5) ---------- */
+.doc {
+  position: relative;
+  display: grid;
+  padding: clamp(52px, calc(var(--screen-h) * .085), 96px) 0 clamp(64px, calc(var(--screen-h) * .1), 112px);
+}
+/* The seal: the co-funding plate on the seam, over it, the one thing on the
+   site that crosses it, like a seal over a document's fold. The EU lockup
+   first and larger, then ПКИП. */
+.seal {
+  position: relative;
+  z-index: 5;
+  justify-self: center;
+  margin-bottom: clamp(52px, calc(var(--screen-h) * .085), 92px);
+}
+.seal__plate {
+  gap: clamp(26px, 2.6vw, 40px);
+  padding: clamp(14px, 1.5vw, 22px) clamp(20px, 2.1vw, 32px);
+}
+/* Each logo's height: through the plate, to outweigh the shell's 28 px
+   (.eu__plate img, src/styles/shell.css), whose Tailwind layer is no
+   cascade layer in the built CSS. */
+.seal__plate .seal__emblem { height: clamp(52px, 4.6vw, 66px); }
+.seal__plate .seal__programme { height: clamp(44px, 3.9vw, 56px); }
+/* The title ends at the seam, the statement starts after it, both at the
+   top of their halves; the hinge's gutters and gaps are the site's
+   (src/styles/diptych.css). */
+.doc__hinge {
+  align-items: start;
+  margin-bottom: 0;
+}
+.doc__h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-slogan);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.012em;
+}
+.doc__h1 .split-line { display: block; }
+.doc__h1 .line-mask + .line-mask { --n: 1; }
+.doc__text {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+.doc__p1 {
+  font-size: clamp(17px, 1.25vw, 19px);
+  line-height: 1.66;
+  color: var(--ivory);
+}
+.doc__p2 {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ivory-2);
+}
+/* Beside the title, the statement's first line sits level with the title's
+   first, at the measure of 33 em. */
+@media (min-width: 901px) {
+  .doc__text {
+    max-width: calc(33em + var(--hg));
+    padding-top: .5em;
+  }
+}
+
+/* ---------- 2. #byudzhet, the budget on the seam (spec §7.5) ---------- */
+/* The whole width is the total; the grant's part is --split wide, KSM's own
+   share the rest, and the brass seam stands where they meet. */
+.fund { padding-bottom: clamp(88px, calc(var(--screen-h) * .14), 150px); }
+.fund__list {
+  --split: 70%;
+  display: grid;
+  grid-template-columns: var(--split) minmax(0, 1fr);
+  grid-template-areas: 'total total' 'grant own' 'time time';
+}
+.fund__k {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--stone);
+  letter-spacing: .02em;
+}
+/* An amount never breaks. */
+.fund__v {
+  display: block;
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums;
+  white-space: nowrap;
+}
+.fund__total,
+.fund__time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 0 var(--gut);
+}
+.fund__total .fund__k,
+.fund__time .fund__k { display: inline; }
+.fund__total {
+  grid-area: total;
+  padding-bottom: clamp(20px, calc(var(--screen-h) * .032), 30px);
+}
+.fund__total .fund__v {
+  font-size: clamp(34px, 3.2vw, 54px);
+  font-weight: 600;
+  line-height: 1;
+}
+.fund__time {
+  grid-area: time;
+  padding-top: clamp(20px, calc(var(--screen-h) * .032), 30px);
+}
+.fund__time .fund__v {
+  font-size: clamp(24px, 2vw, 32px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+.fund__grant,
+.fund__own {
+  display: grid;
+  align-content: end;
+  gap: 10px;
+  min-height: clamp(210px, calc(var(--screen-h) * .32), 300px);
+  padding-top: 28px;
+  padding-bottom: clamp(26px, calc(var(--screen-h) * .04), 38px);
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+/* The grant's half, on umber, its amount against the seam. */
+.fund__grant {
+  grid-area: grant;
+  position: relative;
+  justify-items: end;
+  text-align: right;
+  padding-left: var(--gut);
+  padding-right: var(--hg);
+  background: var(--umber);
+}
+/* The seam, overshooting the band by 18 px, as a hinge's does. */
+.fund__grant::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -18px;
+  bottom: -18px;
+  right: -.5px;
+  width: 1px;
+  background: var(--brass);
+}
+/* KSM's own share, on onyx; clipped while the seam passes through it. */
+.fund__own {
+  grid-area: own;
+  overflow: hidden;
+  padding-left: var(--hg);
+  padding-right: var(--gut);
+}
+.fund__grant .fund__v,
+.fund__own .fund__v {
+  font-size: clamp(30px, 3.6vw, 64px);
+  font-weight: 600;
+  line-height: .95;
+}
+
+/* ---------- 3. #plakat, the poster and the disclaimer (spec §7.5) ---------- */
+.fin {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding-bottom: clamp(96px, calc(var(--screen-h) * .15), 160px);
+}
+.fin > .seam {
+  top: -18px;
+  bottom: calc(clamp(96px, calc(var(--screen-h) * .15), 160px) - 18px);
+}
+.fin__l {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 var(--hg) 0 var(--gut);
+}
+.fin__note {
+  max-width: calc(36em + var(--gut) + var(--hg));
+  padding: 0 var(--gut) 0 var(--hg);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--stone);
+}
+/* The download's ↓ (10 × 14), which moves down on a pointer's hover, as the
+   system's → moves on. */
+.btn .arr--down {
+  width: 10px;
+  height: 14px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .arr--down { transform: translateY(3px); }
+}
+
+/* ---------- phones: the halves stack ---------- */
+/* The budget keeps its proportion as a bar over the list, the seam on it at
+   --split. */
+@media (max-width: 900px) {
+  .doc { padding-top: 40px; }
+  .doc > .seam {
+    bottom: auto;
+    height: 120px;
+  }
+  .seal { margin-bottom: 40px; }
+  /* The two logos stack, so each keeps its size inside a phone's width, the
+     EU emblem first and largest. */
+  .seal__plate {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px 18px;
+  }
+  .seal__plate .seal__emblem { height: clamp(40px, 12vw, 50px); }
+  .seal__plate .seal__programme { height: clamp(34px, 10vw, 42px); }
+  .doc__h1 { font-size: clamp(33px, 11.2vw, 60px); }
+
+  .fund { padding-bottom: 72px; }
+  .fund__list {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'total' 'bar' 'grant' 'own' 'time';
+    padding: 0 var(--gut);
+  }
+  /* The bar: 14 px, the grant's share filled to the seam. */
+  .fund__list::before {
+    content: '';
+    grid-area: bar;
+    height: 14px;
+    margin: 4px 0 18px;
+    border: 1px solid var(--hair-ctl);
+    background: linear-gradient(90deg, var(--ivory-3) 0 var(--split), transparent var(--split));
+  }
+  .fund__list::after {
+    content: '';
+    grid-area: bar;
+    justify-self: start;
+    width: 1px;
+    height: 32px;
+    margin: -5px 0 0 calc(var(--split) - .5px);
+    background: var(--brass);
+  }
+  .fund__total,
+  .fund__time { padding: 0; }
+  .fund__total { padding-bottom: 16px; }
+  .fund__grant,
+  .fund__own {
+    position: relative;
+    min-height: 0;
+    padding: 14px 0 16px 30px;
+    border-top: 0;
+    border-bottom: 1px solid var(--hair-2);
+    justify-items: start;
+    text-align: left;
+    background: none;
+  }
+  .fund__grant::after { display: none; }
+  /* Each half's swatch, the bar's: filled for the grant, empty for KSM's own. */
+  .fund__grant::before,
+  .fund__own::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18px;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--hair-ctl);
+  }
+  .fund__grant::before { background: var(--ivory-3); }
+  .fund__grant .fund__v,
+  .fund__own .fund__v { font-size: clamp(32px, 9vw, 44px); }
+  .fund__time { padding-top: 18px; }
+  /* The two dates may part on a small phone (at 320 px the line is wider
+     than the column); each keeps its „г.“. */
+  .fund__time .fund__v { white-space: normal; }
+
+  .fin {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 0 var(--gut) 88px;
+  }
+  .fin > .seam { display: none; }
+  .fin__l {
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .fin__note {
+    padding: 26px 0 0;
+    border-top: 1px solid var(--brass);
+  }
+}
+
+/* ---------- motion (Diptych §5.5; spec §7.5) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* The opening: the seam draws down; the title's lines rise from their
+     masks, 0.1 s apart (a mask clips only while its line rises); the
+     statement fades up after them. The plate stays where it is. */
+  :root.js .doc > .seam {
+    animation: eu-draw 1.3s var(--e-out) both;
+    animation-delay: var(--arrive);
+  }
+  :root.js .doc__h1 .line-mask {
+    animation: eu-mask .9s linear backwards;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .doc__h1 .split-line {
+    animation: eu-rise .9s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + var(--n, 0) * .1s);
+  }
+  :root.js .doc__text > p {
+    animation: eu-up 1s var(--e-out) both;
+    animation-delay: calc(var(--arrive) + .35s);
+  }
+  :root.js .doc__text > p + p { animation-delay: calc(var(--arrive) + .45s); }
+
+  /* The budget's moment: the seam waits at the centre from the first paint,
+     its keyframe's starting state, wherever the band is, and travels to the
+     grant's 70 % in 1.5 s, expo.inOut, when the band is seen. Once the page
+     has hydrated, the page marks it: waiting (it holds at the centre) until
+     its halves reach 88 % of the screen, then seen (it travels). Should the
+     page never hydrate, the keyframe itself brings it to 70 % after 4 s. */
+  :root.js .fund__list {
+    animation: eu-split 1.5s var(--e-io) both;
+    animation-delay: calc(var(--arrive) + 4s);
+  }
+  :root.js .fund__list[data-split='wait'] {
+    --split: 50%;
+    animation: none;
+  }
+  :root.js .fund__list[data-split='seen'] {
+    animation: none;
+    transition: --split 1.5s var(--e-io);
+  }
+}
+
+@keyframes eu-split { from { --split: 50%; } }
+@keyframes eu-draw { from { transform: scaleY(0); } }
+@keyframes eu-rise { from { transform: translateY(112%); } }
+/* The mask's clip while its line rises: under the landed line's descenders,
+   above the ascenders of a line waiting 112 % down. */
+@keyframes eu-mask { from, to { clip-path: inset(0 0 .12em 0); } }
+@keyframes eu-up { from { opacity: 0; transform: translateY(16px); } }
