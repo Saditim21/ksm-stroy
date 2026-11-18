@@ -470,7 +470,7 @@ git commit -m "chore(legacy): remove the legacy pages' code, palettes and librar
 ### Task 8: The speed round, verification, and the hand-off
 
 **Files:**
-- Modify: `src/motion/runtime.js` (the engine after the LCP paint), `src/components/ui/ResponsivePicture.jsx` (a `fetchPriority="low"` option), Home's and Многофамилна's pictures and `sizes`, `scripts/fonts/build-fonts.py` (`--subset-from`, only if needed), and whatever the measurements point to
+- Modify: `src/motion/runtime.js` (the engine after the LCP paint), `src/components/ui/ResponsivePicture.jsx` (a `fetchPriority="low"` option), Home's and Многофамилна's pictures and `sizes`, `scripts/fonts/build-fonts.py` (`--subset-from`, only if needed), `scripts/images/build-images.mjs` (the PNG sources' opaque alpha, Step 2b), the files Step 2c names, and whatever the measurements point to
 - Create: `docs/superpowers/notes/2026-11-17-m4-results.md`
 
 - [ ] **Step 1: Measure** the nine targeted routes: `/`, `/projects/golden-residence`, its block-a, `/projects/mnogofamilna-sgrada`, its block-a, `/projects`, `/blog`, `/about`, `/contact`.
@@ -486,14 +486,31 @@ git commit -m "chore(legacy): remove the legacy pages' code, palettes and librar
   9. deferring non-critical CSS.
 
   Each change gets a test where its behaviour is testable, and a measurement either way.
+- [ ] **Step 2b: What Task 7 handed on.** These are M3's deferred minors (docs/superpowers/notes/2026-11-17-m3-rulings.md: "Left for M4" and the final triage) that Task 7's review routed here. Take each one, or record in the results note why not:
+  1. **The PNG sources' opaque alpha** (`scripts/images/sources.json`, the 22 PNG entries). Every AVIF they produce keeps an alpha plane it doesn't need, about 0.3 KB each; none is an LCP image. Flatten opaque alpha in `build-images.mjs` and re-encode only those AVIFs, or accept it.
+  2. **Многофамилна's phone `sizes`** (Step 2, item 5). `src/explorer/projects/mn.js:74` and the block page's own `SIZES` (`src/pages/mnogofamilna/MnBlockPage.jsx`) both say `(max-width: 900px) 170vw`. That sends a DPR-3 phone the 2400 w twin (112 kB AVIF) and the 2400 w lit render. A value that keeps it on the 1400 w files costs no bytes (the M3 triage suggests `119vw`). It lands before launch either way, because of spec §10's 60 kB mobile LCP budget.
+  3. **MnList's 600 px margin** (`src/pages/mnogofamilna/MnList.jsx:29`). It starts the list's chunk and renders its 144 rows at hydration at 1440×900 and at 390×844. Measure its share of Многофамилна's TBT and of the bytes before LCP, and narrow it if it costs.
+  4. **FacadeLights' dialog CSS** (`src/explorer/FacadeLights.jsx:3`; the `.plan--mn` and `.up__*` rules in `src/explorer/mn-facade.css`). The unit panel's own-plan switch and plate are styled only through the lights' import. Before any change that drops or lazy-loads the lights (spec §10's phone contingency), move those rules into a stylesheet that `mn.plans.js` or `projects/mn.js` imports.
+
+  Task 7 took the rest in its fix round 1:
+  - the five other deferred minors: the store's built-in path, the twin's rims, fx--compact on the block facade, the plan-composition helper, and the block H1's per-line rise;
+  - the ledger's two items: the page copies, now one documented list with a check (`COPIES` in `scripts/client-chunks.mjs`), and one room-type table (`src/utils/roomTypes.js`).
+- [ ] **Step 2c: The ledger's items for this task** (added by the controller after Task 7). Take each one, or record in the results note why not:
+  1. **The facade group's riders** (Tasks 2–5's minors; ruling T0a). `/contact`, `/projects`, `/blog` and `/about` load facade.js (about 10.4 KB gzip) and facade.css (about 6.4 KB gzip, render-blocking) that they never run. Read each one's LCP and TBT from Step 1. Where a page misses, take it out of the group as T6d did for `/eu-proekt`, or split the explorer's rules out of facade.css. Record each page's figures and the choice either way.
+  2. **Обекти's first-row plate** (`src/pages/works/Register.jsx:60`, Task 4's minor). The first row's eager m2 plate is Home's work-green-life, whose smallest rung is 700 w, so a desktop fetches about 33 KB of AVIF for a slot about 200 px wide before the LCP; the strip's thumbnails of Home's six works do the same. If `/blog`'s figures show it costs, give those entries smaller rungs or choose another plate.
+  3. **The list landing's clearance** (`src/pages/mnogofamilna/mn.css:152` with `src/index.css:264`, Task 7's minor). Since T4b, a `?view=list` landing puts #spisak's heading flush with the header's foot: 2–3 px of air at 390 and about 6 px at 1440. Clear it as Контакти's landing clears its heading (28 px, `CLEAR` in `src/pages/contact/ContactInquiry.jsx`), for example with a scroll-margin-top on #spisak. The #explorer landing keeps the explorer flush at the header's foot. Check Golden Residence's list landing the same way. Captures before and after at 390 and 1440.
+  4. **The dead legacy config** (`src/config/projects.js`, Task 7's minor). Only its own test imports it, and it alone keeps `src/constants/buildingRenders.js` alive, so `src/assets.test.js` counts `building-2*` and `sgrada1*` as named by a page though no page uses them. Delete it with its test, and whatever only it kept alive; a module that live code or a test of live behaviour imports stays. The public files stay (ruling T7d): `assets.test.js` lists `building-2*` and `sgrada1*` by name as kept.
+  5. **Lint.** `npx eslint .` reports two errors. `src/pages/notfound/LostPlan.jsx:38` exports a value beside the component (react-refresh/only-export-components): move it to a module of its own, as long as nothing of the 404's reaches another route's first load (M4-PF15); if the move would split the 404's chunk, disable the rule on that line with the reason. `scripts/convert-remaining.js` (an unused `err`) is a one-off from production, superseded by `scripts/images/build-images.mjs`, and nothing names it: delete it. `npx eslint .` ends clean.
 - [ ] **Step 3: If a route still misses** and only a design change would close it, stop changing that route. Report its figures and the options for the user (spec §10).
 - [ ] **Step 4: Run** `npm run verify` (with `--maxWorkers=2`). Expected: PASS.
 - [ ] **Step 5: Write the results note,** covering:
   - first-load per route against M3's end;
   - the speed figures before and after;
   - what each change gave;
+  - what Steps 2b and 2c took, and what they left with their reasons;
   - any route the user must decide on;
-  - the deviations from the concepts that were kept;
+  - the deviations from the concepts that were kept (the M3 results note's kept deviation, the block H1's single rise, is now the concept's line-by-line rise: Task 7);
+  - FW4: Task 7's measurement and choice (the send path after a deploy is left to Vercel's Skew Protection), with Skew Protection in the launch list (M4-PF9);
   - the open items for launch.
 - [ ] **Step 6: Complete the user's capture set** in `C:/ksm-stroy/design/2026-11-17-m4-shots/`, with a `README.txt`.
 - [ ] **Step 7: Commit.**
