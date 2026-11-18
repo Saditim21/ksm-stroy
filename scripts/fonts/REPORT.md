@@ -276,10 +276,15 @@ Each fallback face was compared with its web face and with the plain local font.
 
 ## 7. Preloads
 
-- The root's `links()` (`src/root.jsx`) preloads `/fonts/ksm-text.woff2`, the shell's face.
-- `DISPLAY_FONT_PRELOADS` (`src/utils/fontLinks.js`) holds both display files, with `as: 'font'`, `type: 'font/woff2'` and `crossOrigin: 'anonymous'`.
-  - Home, the Golden Residence page and the block routes add it to their own `links` as each is rebuilt (spec §3.1).
-  - No route uses it yet. An unused preload is a console warning.
+- The root's `links()` (`src/root.jsx`) preloads `/fonts/ksm-text.woff2`, the shell's face, on every page.
+- `DISPLAY_FONT_PRELOADS` (`src/utils/fontLinks.js`) holds both display files, the upright first and the italic second, with `as: 'font'`, `type: 'font/woff2'` and `crossOrigin: 'anonymous'`.
+- A page that sets KSM Display in its first viewport preloads it with `preloadWithDocument()` (`src/utils/documentPreloads.js`; rulings C4.10 and C5.4), never through its route's `links`:
+  - React writes the preloads into the head of the page's prerendered HTML, the document it is first loaded as;
+  - in the browser the call does nothing, so a client-side visit, which has the faces already, adds none. A route's `links` would add them on every visit, and Chrome would warn "preloaded but not used" a few seconds later, which fails the smoke run.
+- Which pages preload which display file:
+  - both, the title's italic word included: Home, Golden Residence and its block pages, Многофамилна and its block pages, Контакти and За нас;
+  - the upright only: Продажби and Обекти, whose first viewport has no italic word, and `/eu-proekt` and the 404, which preload it with React's `preload()` directly, as `preloadWithDocument()` does, to keep the shared module out of their first load.
+- The pages' prerender tests check the preloads in each page's HTML, and their behaviour tests that a render in the browser adds none (`link[rel="preload"]` in the head).
 
 ## 8. Rebuilding
 
