@@ -73,6 +73,21 @@ describe.each([
     expect(textOf(h1.querySelector('em'))).toBe(letter)
   })
 
+  // The concept's H1 rises line by line (js/mnogofamilna-block-a.js:101-102;
+  // M3's deferred minor, MnBlockPage.jsx:98-99): its words stand in masks of
+  // their own, side by side, at the title's own break points, so it breaks
+  // where it always did and each line rises with its words (mn-block.css).
+  it('sets the H1’s words in masks of their own, where it may break', () => {
+    const h1 = doc().querySelector('h1')
+
+    expect([...h1.children].map((mask) => [mask.className, textOf(mask)])).toEqual([
+      ['line-mask', 'Многофамилна'],
+      ['line-mask', 'сграда,'],
+      ['line-mask', `блок ${letter}`],
+    ])
+    for (const mask of h1.children) expect(mask.querySelectorAll(':scope > .split-line')).toHaveLength(1)
+  })
+
   it('leads back to the building before its H1', () => {
     const html = doc()
     const back = [...html.querySelectorAll('main a')].find((link) => textOf(link) === 'Към Многофамилна сграда')

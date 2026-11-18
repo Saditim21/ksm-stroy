@@ -146,6 +146,29 @@ describe('the head’s entrance (Diptych §5.5, M3 §4.2)', () => {
     }
   })
 
+  // The concept's title rises line by line, 0.1 s apart
+  // (js/mnogofamilna-block-a.js:101-102; M3's deferred minor,
+  // MnBlockPage.jsx:98-99). Its words stand in masks side by side
+  // (MnBlockPage.jsx), so it breaks as it always did; each mask rises --n
+  // lines late, by the line its words stand on at each width: „Многофамилна“
+  // | „сграда, блок А“ up to 528 px and from 901 to 1840 px, „Многофамилна
+  // сграда,“ | „блок А“ from 529 and from 1841 px, one line from 688 to 900
+  // and from 2349 px (measured in Chrome with the page's faces).
+  it('rises the title line by line, 0.1 s apart', () => {
+    expect(declaredFor('.mbp .bp__title .line-mask').display).toBe('inline-block')
+    expect(declaredFor('.mbp .bp__title .line-mask + .line-mask')['--n']).toBe('1')
+    const sameLine = '@media (min-width: 529px) and (max-width: 900px), (min-width: 1841px)'
+    const oneLine = '@media (min-width: 688px) and (max-width: 900px), (min-width: 2349px)'
+    expect(declaredFor('.mbp .bp__title .line-mask:nth-child(2)', [sameLine])['--n']).toBe('0')
+    expect(declaredFor('.mbp .bp__title .line-mask:nth-child(3)', [oneLine])['--n']).toBe('0')
+    // The overrides come after the rule they override, at its weight.
+    const order = (selector) => rules.findIndex((rule) => rule.selectors.includes(selector))
+    expect(order('.mbp .bp__title .line-mask:nth-child(2)')).toBeGreaterThan(order('.mbp .bp__title .line-mask + .line-mask'))
+    for (const part of ['.line-mask', '.split-line']) {
+      expect(declaredFor(`:root.js .mbp .bp__title ${part}`, [NO_PREFERENCE])['animation-delay']).toBe('calc(var(--arrive) + .15s + var(--n, 0) * .1s)')
+    }
+  })
+
   // Keyframe names never clash with Tailwind's (ruling C4.2), nor with the
   // main page's (mn.css), which can be in the page as the doors close.
   it('names its keyframes for the block page', () => {

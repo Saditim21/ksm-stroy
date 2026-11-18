@@ -93,6 +93,20 @@ function shown(element) {
   return rect && rect.bottom > 0 && rect.top < window.innerHeight ? rect : null
 }
 
+// Words of the title that keep together: their mask, and the words that rise
+// inside it with their line (mn-block.css).
+function Words({ children }) {
+  return (
+    <span className="line-mask">
+      <span className="split-line">{children}</span>
+    </span>
+  )
+}
+
+// The head. The H1's words stand in masks of their own, side by side, where
+// the title may break (after „Многофамилна“ and after „сграда,“), so it
+// breaks as its words alone would, and rises line by line (the concept's
+// js/mnogofamilna-block-a.js:101-102).
 function Head({ block }) {
   const { model, dated } = useExplorer()
   const counts = model?.blocks[block].counts
@@ -104,11 +118,7 @@ function Head({ block }) {
           Към Многофамилна сграда
         </Button>
         <h1 className="bp__title">
-          <span className="line-mask">
-            <span className="split-line">
-              Многофамилна сграда, блок&nbsp;<em>{block}</em>
-            </span>
-          </span>
+          <Words>Многофамилна</Words> <Words>сграда,</Words> <Words>блок&nbsp;<em>{block}</em></Words>
         </h1>
       </div>
       <div className="mbh">

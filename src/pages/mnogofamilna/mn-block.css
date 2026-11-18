@@ -22,8 +22,29 @@
 /* ---------- the head (spec M3 §6.5) ---------- */
 /* The way back and the H1 against the seam (.bp); after it, the block's
    facts, its counts by status and the date they are from. From 901 px it
-   keeps out of the page's gutter, as every hinge does (diptych.css). */
+   keeps out of the page's gutter, as every hinge does (diptych.css).
+   The title's words stand in masks side by side where it may break
+   (MnBlockPage.jsx; src/styles/diptych.css: .line-mask), so it breaks as
+   its words alone would, and each rises with its line, --n lines after the
+   first (the head's entrance, below; the concept's per-line rise,
+   js/mnogofamilna-block-a.js:101-102). Which line each stands on, by the
+   widths at which the title breaks (measured in Chrome with the page's
+   faces, M4 Task 7): „Многофамилна“ | „сграда, блок А“ up to 528 px and
+   from 901 to 1840 px; „Многофамилна сграда,“ | „блок А“ from 529 and from
+   1841 px; one line from 688 to 900 and from 2349 px (block Б's narrower
+   letter makes it one line 5 and 15 px sooner). */
+.mbp .bp__title .line-mask {
+  display: inline-block;
+  vertical-align: top;
+}
 .mbp .bp__title .split-line { display: block; }
+.mbp .bp__title .line-mask + .line-mask { --n: 1; }
+@media (min-width: 529px) and (max-width: 900px), (min-width: 1841px) {
+  .mbp .bp__title .line-mask:nth-child(2) { --n: 0; }
+}
+@media (min-width: 688px) and (max-width: 900px), (min-width: 2349px) {
+  .mbp .bp__title .line-mask:nth-child(3) { --n: 0; }
+}
 .mbh {
   display: grid;
   justify-items: start;
@@ -276,21 +297,21 @@
 
 /* ---------- the head's entrance (Diptych §5.5) ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  /* The seam draws down; the title rises from its mask (a mask clips only
-     while its line rises, so nothing cuts a glyph once it lands); then the
-     way back comes up 14 px, and the facts, the counts and the date after
-     it, 0.07 s apart. */
+  /* The seam draws down; the title rises from its masks line by line, 0.1 s
+     apart (a mask clips only while its words rise, so nothing cuts a glyph
+     once they land); then the way back comes up 14 px, and the facts, the
+     counts and the date after it, 0.07 s apart. */
   :root.js .mbp .bp > .seam {
     animation: mnb-draw 1.1s var(--e-out) both;
     animation-delay: var(--arrive);
   }
   :root.js .mbp .bp__title .line-mask {
     animation: mnb-mask .9s linear backwards;
-    animation-delay: calc(var(--arrive) + .15s);
+    animation-delay: calc(var(--arrive) + .15s + var(--n, 0) * .1s);
   }
   :root.js .mbp .bp__title .split-line {
     animation: mnb-rise .9s var(--e-out) both;
-    animation-delay: calc(var(--arrive) + .15s);
+    animation-delay: calc(var(--arrive) + .15s + var(--n, 0) * .1s);
   }
   :root.js .mbp .bp__back,
   :root.js .mbh > * {
