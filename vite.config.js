@@ -123,11 +123,13 @@ export default defineConfig({
   },
   // Dev server only. Vite would otherwise discover these on the first visit to
   // a page that imports them, re-optimize and reload; a page hydrating during
-  // that reload mixes two copies of React ("Invalid hook call").
+  // that reload mixes two copies of React ("Invalid hook call"). Flip too,
+  // which the explorer's stage and Обекти's register load on first use
+  // (src/motion/devDeps.test.js holds the motion libraries to this list).
   optimizeDeps: {
     include: [
       '@emailjs/browser',
-      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
+      'gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', 'gsap/Flip', 'lenis', '@vercel/analytics/react', '@vercel/speed-insights/react',
     ],
   },
   // React Router splits the build per route; clientChunks() pins some chunks
