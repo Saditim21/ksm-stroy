@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { recordingMotion, stubIdle } from '../test/gsap'
@@ -6,25 +6,26 @@ import { mockMatchMedia } from '../test/media'
 import EuProekt from './eu-proekt'
 
 // The motion of the EU page (spec M3/M4 §7.5, §4.2; Diptych §5.5, §5.7;
-// ruling M4-PF11). The opening's entrance is CSS (eu.css.test.js), and no
-// motion's scope takes it in. Under it:
-// - #byudzhet, the page's one moment: when the band is first seen, its seam
-//   travels from the centre to the grant's 70 % in 1.5 s, expo.inOut, by the
-//   registered --split. The wait and the travel are eu.css's (a keyframe's
-//   starting state from the first paint, then a transition); the page marks
-//   when: waiting once it has hydrated, seen as the band's halves reach 88 %
-//   of the screen. Under reduced motion it rests at 70 %, unmarked.
-// - #plakat: the system's reveals, once, as it comes up from below: the seam
-//   draws, the poster's link and the disclaimer fade up (useReveals).
-// What is already on screen when the motion runs stays as it is: the first
-// viewport never moves for JS.
+// rulings M4-PF11, T6b, T6d). The opening's entrance is CSS (eu.css.test.js),
+// and the page sets up none of the system's motion: #plakat is still (T6d).
+// Its one moment is #byudzhet's: when the band is first seen, its seam
+// travels from the centre to the grant's 70 % in 1.5 s, expo.inOut, by the
+// registered --split. The wait and the travel are eu.css's (a keyframe's
+// starting state from the first paint, then a transition); the page marks
+// when, on the band's own data-band (data-split is the system's SplitText
+// marker, which never goes above the fold): waiting once it has hydrated,
+// then where the concept's js/eu-proekt.js has it (:13-17, :31): landed
+// where the list has landed with its top within 86 % of the screen (it
+// travels as the arrival's last beat), else seen once its top has come up
+// to 78 %. Under reduced motion it rests at 70 %, unmarked.
 //
 // The motion engine is a recording stand-in (src/test/gsap.js), as the
-// engine module useMotion() loads; the matchMedia mock allows motion and
-// answers a desktop; the IntersectionObserver is a stand-in that says when
-// the band is seen. jsdom lays nothing out, so each element is placed by
-// hand: the opening on screen, as it is at the top of the page, and
-// everything under it below the fold.
+// engine module useMotion() loads, so a test can tell that nothing asks for
+// it; the matchMedia mock allows motion. The IntersectionObserver is a
+// stand-in that, as a browser's does, reports where its target is when it
+// starts to watch it, and again as the visitor scrolls (scrollTo). jsdom lays
+// nothing out, so each element is placed by hand: the opening at the top of
+// the screen, everything under it `place.rest` px down.
 
 const engine = vi.hoisted(() => ({ motion: null }))
 vi.mock('../motion/engine.js', () => ({ default: engine.motion }))
@@ -32,12 +33,14 @@ vi.mock('../motion/useMotionNow', () => ({ default: () => () => engine.motion })
 const recorder = recordingMotion()
 engine.motion = recorder.motion
 
-const BELOW = 2000
 const ON_SCREEN = 300
+// A place on the screen, a share of its height down from its top.
+const down = (share) => window.innerHeight * share
 
-// The observers the page makes: each with its options, what it watches,
-// whether it was let go, and `see(isIntersecting)` to report on its targets.
+let place
 let observers
+// The observers the page makes: each with its options, what it watches and
+// whether it was let go.
 class Observer {
   constructor(callback, options) {
     this.callback = callback
@@ -46,12 +49,38 @@ class Observer {
     this.disconnected = false
     observers.push(this)
   }
-  observe(target) { this.targets.push(target) }
-  unobserve() {}
-  disconnect() { this.disconnected = true }
-  see(isIntersecting) {
-    act(() => this.callback(this.targets.map((target) => ({ target, isIntersecting }))))
+
+  // As a browser's does, it reports where the target is as it starts to
+  // watch it, a moment after.
+  observe(target) {
+    this.targets.push(target)
+    queueMicrotask(() => this.report())
   }
+
+  unobserve() {}
+
+  disconnect() { this.disconnected = true }
+
+  // Each target, in view or not: in view when its top is above the screen's
+  // foot, which the bottom margin raises (`0px 0px -22% 0px`: 78 % down), and
+  // its bottom below the screen's top.
+  report() {
+    if (this.disconnected) return
+    const margin = /^0px 0px -(\d+)% 0px$/.exec(this.options?.rootMargin ?? '')
+    if (!margin) throw new Error(`the stand-in reads a bottom margin only, not ${this.options?.rootMargin}`)
+    const foot = window.innerHeight * (1 - Number(margin[1]) / 100)
+    this.callback(this.targets.map((target) => {
+      const { top, bottom } = target.getBoundingClientRect()
+      return { target, isIntersecting: top < foot && bottom > 0 }
+    }), this)
+  }
+}
+
+// The visitor scrolls: everything under the opening comes to `rest` px down,
+// and every observer still watching reports.
+function scrollTo(rest) {
+  place.rest = rest
+  for (const observer of observers.filter(({ disconnected }) => !disconnected)) observer.report()
 }
 
 let restoreMedia
@@ -59,6 +88,7 @@ let flushMotion
 beforeEach(() => {
   recorder.reset()
   observers = []
+  place = { rest: down(0.9) }
   vi.stubGlobal('IntersectionObserver', Observer)
   vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('offline') }))
   flushMotion = stubIdle()
@@ -71,11 +101,12 @@ afterEach(async () => {
   vi.restoreAllMocks()
 })
 
-// The page, the opening `top` px down the screen and the rest `rest` px.
-function renderPage({ top = ON_SCREEN, rest = BELOW, media = {} } = {}) {
+// The page, with everything under the opening `rest` px down the screen.
+function renderPage({ rest = down(0.9), media = {} } = {}) {
+  place.rest = rest
   restoreMedia = mockMatchMedia(media)
-  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function place() {
-    const y = this.closest('#top') ? top : rest
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function where() {
+    const y = this.closest('#top') ? ON_SCREEN : place.rest
     return { top: y, bottom: y + 100, left: 0, right: 1440, width: 1440, height: 100, x: 0, y }
   })
   return render(
@@ -85,41 +116,69 @@ function renderPage({ top = ON_SCREEN, rest = BELOW, media = {} } = {}) {
   )
 }
 
-const all = (selector) => [...document.querySelectorAll(selector)]
 const band = () => document.querySelector('#byudzhet .fund__list')
-const watching = () => observers.filter((observer) => observer.targets.includes(document.querySelector('#byudzhet .fund__grant')))
-const fromsWith = (key) => recorder.tweens.filter((tween) => tween.method === 'from' && key in tween.vars)
-const targetsOf = (tweens) => tweens.flatMap(({ targets }) => (targets instanceof Element ? [targets] : [...targets]))
-const sameElements = (targets, elements) => targets.length === elements.length && elements.every((element) => targets.includes(element))
+const watching = () => observers.filter((observer) => observer.targets.includes(band()))
+const live = () => watching().filter(({ disconnected }) => !disconnected)
 
 describe('#byudzhet, the seam that moves to the grant’s share', () => {
-  // Spec §7.5: the seam waits at the centre until the band is first seen,
-  // then travels to 70 % (eu.css), once: the band's halves (a phone's bar
-  // just above them) at 88 % of the screen.
-  it('holds the band at the centre once the page has hydrated, and lets it travel when its halves are seen', async () => {
-    renderPage()
+  // The concept's rule for landing (js/eu-proekt.js:13-17): a band whose
+  // list lands with its top within 86 % of the screen (a tall window,
+  // 1680 × 1050) is seen on landing, without a scroll, and travels as the
+  // arrival's last beat (data-band="landed", which eu.css starts 0.75 s
+  // later). Nothing is fired by hand: the observer reports, as it starts to
+  // watch, that the band is in view.
+  it('marks a band that lands with its top within 86 % of the screen landed, to travel without a scroll', async () => {
+    renderPage({ rest: down(0.82) })
     await flushMotion()
 
-    expect(band().dataset.split).toBe('wait')
+    expect(band().dataset.band).toBe('landed')
     expect(watching()).toHaveLength(1)
-    const [observer] = watching()
-    expect(observer.options).toEqual({ rootMargin: '0px 0px -12% 0px' })
-
-    observer.see(false)
-    expect(band().dataset.split).toBe('wait')
-    observer.see(true)
-    expect(band().dataset.split).toBe('seen')
-    expect(observer.disconnected).toBe(true)
+    expect(live()).toEqual([])
   })
 
-  // A band already in view as the page hydrates (a tall screen) is seen at
-  // once: it travels as the arrival's last beat.
-  it('lets a band already in view travel at once', async () => {
-    renderPage({ rest: ON_SCREEN })
+  // The concept's rule for scrolling (js/eu-proekt.js:31): a band that lands
+  // lower (1440 × 900: the list's top 90 % down) waits at the centre until
+  // its top has come up to 78 % of the screen, then travels, once.
+  it('holds a band that lands lower at the centre until its top has come up to 78 %, once', async () => {
+    renderPage({ rest: down(0.9) })
     await flushMotion()
 
-    watching()[0].see(true)
-    expect(band().dataset.split).toBe('seen')
+    expect(band().dataset.band).toBe('wait')
+    expect(live()).toHaveLength(1)
+    scrollTo(down(0.82))
+    expect(band().dataset.band).toBe('wait')
+    scrollTo(down(0.79))
+    expect(band().dataset.band).toBe('wait')
+    scrollTo(down(0.76))
+    expect(band().dataset.band).toBe('seen')
+    expect(live()).toEqual([])
+    scrollTo(down(0.9))
+    expect(band().dataset.band).toBe('seen')
+  })
+
+  // Every phone: the band lands well below the fold.
+  it('holds a band far below the fold the same way', async () => {
+    renderPage({ rest: 2000 })
+    await flushMotion()
+
+    expect(band().dataset.band).toBe('wait')
+    scrollTo(down(0.7))
+    expect(band().dataset.band).toBe('seen')
+  })
+
+  // The band's state is its own attribute. data-split is the system's
+  // SplitText marker (Diptych §5.7, src/motion/useReveals.js), never used
+  // above the fold, and the band's total is in the first viewport at
+  // 1440 × 900: nothing on the page carries it, waiting or seen.
+  it('marks the band’s state as data-band, and nothing on the page as data-split', async () => {
+    renderPage({ rest: down(0.9) })
+    await flushMotion()
+
+    expect(band().dataset.band).toBe('wait')
+    expect(document.querySelectorAll('[data-split]')).toHaveLength(0)
+    scrollTo(down(0.7))
+    expect(band().dataset.band).toBe('seen')
+    expect(document.querySelectorAll('[data-split]')).toHaveLength(0)
   })
 
   // The band's keyframe as the browser reports it (getAnimations, which jsdom
@@ -146,7 +205,7 @@ describe('#byudzhet, the seam that moves to the grant’s share', () => {
       renderPage()
       await flushMotion()
 
-      expect(band().hasAttribute('data-split')).toBe(false)
+      expect(band().hasAttribute('data-band')).toBe(false)
       expect(watching()).toEqual([])
     } finally {
       restore()
@@ -159,7 +218,7 @@ describe('#byudzhet, the seam that moves to the grant’s share', () => {
       renderPage()
       await flushMotion()
 
-      expect(band().dataset.split).toBe('wait')
+      expect(band().dataset.band).toBe('wait')
     } finally {
       restore()
     }
@@ -169,59 +228,36 @@ describe('#byudzhet, the seam that moves to the grant’s share', () => {
   it('lets go of the band when the page goes', async () => {
     const { unmount } = renderPage()
     await flushMotion()
-    const [observer] = watching()
+    const [observer] = live()
 
     unmount()
     expect(observer.disconnected).toBe(true)
   })
 })
 
-// Spec §5.7: the system's reveals, once each, as #plakat comes up from below.
-it('draws #plakat’s seam and fades its two halves up, once', async () => {
-  renderPage()
+// Spec §4.2 and ruling T6d: the opening's entrance is CSS, and #plakat is
+// still, so the page sets up none of the system's motion (useMotion, the
+// reveals) and loads none of it: no setup, no tween, no split, and nothing
+// on the page marked for a reveal.
+it('sets up none of the system’s motion: the opening is CSS and #plakat is still', async () => {
+  renderPage({ rest: down(0.82) })
   await flushMotion()
 
-  const fades = fromsWith('y')
-  expect(sameElements(targetsOf(fades), all('#plakat [data-fade]'))).toBe(true)
-  for (const { vars } of fades) expect(vars).toMatchObject({ opacity: 0, y: 16, scrollTrigger: { start: 'top 92%', once: true } })
-  const draws = fromsWith('scaleY')
-  expect(sameElements(targetsOf(draws), all('#plakat [data-draw]'))).toBe(true)
-  expect(draws).toHaveLength(1)
-  expect(recorder.motion.SplitText.create).not.toHaveBeenCalled()
-})
-
-// Spec §4.2: the opening is CSS only: nothing in #top is split, faded, drawn
-// or tweened by script, and no motion's scope takes it in or lies inside it.
-it('leaves the opening to its CSS', async () => {
-  renderPage()
-  await flushMotion()
-
-  const opening = document.getElementById('top')
-  expect(opening.querySelectorAll('[data-split], [data-fade], [data-draw], [data-wipe]')).toHaveLength(0)
-  expect(targetsOf(recorder.tweens).some((element) => opening.contains(element))).toBe(false)
-  const scopes = [...new Set(recorder.motion.gsap.context.mock.calls.map(([, scope]) => scope))]
-  expect(scopes.length).toBeGreaterThan(0)
-  for (const scope of scopes) expect(scope.contains(opening) || opening.contains(scope)).toBe(false)
-})
-
-// Spec §5.7, Diptych §5.5: no replays, and the first viewport never moves
-// for JS. Parts already on screen when the motion runs stay as they are.
-it('leaves what is already on screen as it is', async () => {
-  renderPage({ rest: ON_SCREEN })
-  await flushMotion()
-
-  expect(recorder.motion.gsap.context).toHaveBeenCalled()
+  expect(recorder.motion.gsap.context).not.toHaveBeenCalled()
   expect(recorder.tweens).toEqual([])
   expect(recorder.timelines).toEqual([])
+  expect(recorder.triggers).toEqual([])
+  expect(recorder.motion.SplitText.create).not.toHaveBeenCalled()
+  expect(document.querySelectorAll('[data-split], [data-fade], [data-draw], [data-wipe]')).toHaveLength(0)
 })
 
 // Spec §7.5, Diptych §5.8: under reduced motion the band rests at 70 %,
-// unmarked, and the page is its final state, with no motion set up at all.
+// unmarked, even in view, and the page is its final state.
 it('runs no motion under reduced motion, the band resting at 70 %', async () => {
-  renderPage({ media: { reduce: true } })
+  renderPage({ rest: down(0.82), media: { reduce: true } })
   await flushMotion()
 
-  expect(band().hasAttribute('data-split')).toBe(false)
+  expect(band().hasAttribute('data-band')).toBe(false)
   expect(watching()).toEqual([])
   expect(recorder.motion.gsap.context).not.toHaveBeenCalled()
   expect(recorder.tweens).toEqual([])

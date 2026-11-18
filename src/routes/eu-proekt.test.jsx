@@ -97,6 +97,22 @@ it('is a solid page that sends „Запитване“ to the contact form, and
   expect(document.head.querySelectorAll('link[rel="preload"]')).toHaveLength(0)
 })
 
+// Ruling T6d: the page is in no chunk group (scripts/client-chunks.mjs), so
+// it loads none of the facade group's code. It imports no group's head (the
+// motion hook, as the reveals do, or the hydration hook), which would fail
+// the build, and neither of the two preload helpers that every page of the
+// facade group imports (src/utils/documentPreloads.js, src/utils/fontLinks.js),
+// which would quietly take them out of the facade's chunk into one of their
+// own, a script more on every page of the group. It asks React for its
+// title face itself.
+it('imports none of the facade group’s code', () => {
+  const source = import.meta.glob('./eu-proekt.jsx', { query: '?raw', import: 'default', eager: true })['./eu-proekt.jsx']
+  const imported = [...source.matchAll(/^import .* from '([^']+)'/gm)].map(([, from]) => from)
+
+  expect(imported).toContain('react-dom')
+  expect(imported.filter((from) => /^\.\.\/(motion\/|hooks\/useHydrated|utils\/documentPreloads|utils\/fontLinks)/.test(from))).toEqual([])
+})
+
 // The teammate's head, unchanged; its share image is the site's (ruling
 // M4-PF6: the page has no photo of its own).
 it('keeps the page’s head', () => {

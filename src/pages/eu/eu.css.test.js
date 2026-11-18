@@ -110,7 +110,7 @@ describe('#byudzhet, the seam at the grant’s share', () => {
     // the page marks, both under the motion gate. No other rule moves it.
     const centre = rules.filter((rule) => rule.declarations.some(({ prop, value }) => prop === '--split' && value !== '70%'))
     expect(centre.map((rule) => [rule.selector, rule.atRules])).toEqual([
-      [":root.js .fund__list[data-split='wait']", [NO_PREFERENCE]],
+      [":root.js .fund__list[data-band='wait']", [NO_PREFERENCE]],
       ['from', ['@keyframes eu-split']],
     ])
   })
@@ -119,19 +119,32 @@ describe('#byudzhet, the seam at the grant’s share', () => {
   // 70 % in 1.5 s, expo.inOut. It waits at the centre from the first paint,
   // a keyframe's starting state, so a band whose edge already shows in the
   // first viewport (1440 × 900) never jumps; the page marks it waiting, then
-  // seen (eu-proekt.jsx). Without the page's script the keyframe brings it to
-  // 70 % after 4 s; under reduced motion none of this applies, and it rests
-  // at 70 %.
+  // landed or seen (eu-proekt.jsx), on its own data-band. A band that has
+  // landed in view travels as the arrival's last beat, 0.75 s after the
+  // opening's wait (the concept's js/eu-proekt.js:17); one scrolled into
+  // view, at once. Without the page's script the keyframe brings it to 70 %
+  // after 4 s; under reduced motion none of this applies, and it rests at
+  // 70 %.
   it('waits at the centre from the first paint and travels to 70 % in 1.5 s when the band is seen', () => {
     const arrival = animationOf(':root.js .fund__list')
     expect(arrival.atRules).toEqual([NO_PREFERENCE])
     expect(valueOf(arrival, 'animation')).toBe('eu-split 1.5s var(--e-io) both')
     expect(valueOf(arrival, 'animation-delay')).toBe('calc(var(--arrive) + 4s)')
     expect(keyframes('eu-split').map((frame) => [frame.selector, valueOf(frame, '--split')])).toEqual([['from', '50%']])
-    const wait = declaredFor(":root.js .fund__list[data-split='wait']", [NO_PREFERENCE])
+    const wait = declaredFor(":root.js .fund__list[data-band='wait']", [NO_PREFERENCE])
     expect(wait).toEqual({ '--split': '50%', animation: 'none' })
-    const seen = declaredFor(":root.js .fund__list[data-split='seen']", [NO_PREFERENCE])
+    const seen = declaredFor(":root.js .fund__list[data-band='seen']", [NO_PREFERENCE])
     expect(seen).toEqual({ animation: 'none', transition: '--split 1.5s var(--e-io)' })
+    const landed = declaredFor(":root.js .fund__list[data-band='landed']", [NO_PREFERENCE])
+    expect(landed).toEqual({ animation: 'none', transition: '--split 1.5s var(--e-io)', 'transition-delay': 'calc(var(--arrive) + .75s)' })
+  })
+
+  // data-split is the system's SplitText marker (Diptych §5.7,
+  // src/motion/useReveals.js), never used above the fold, and the band's
+  // total is in the first viewport at 1440 × 900: the band's state has a name
+  // of its own, and no rule here selects data-split.
+  it('never selects data-split, the system’s SplitText marker', () => {
+    expect(rules.filter((rule) => rule.selectors.some((selector) => selector.includes('data-split')))).toEqual([])
   })
 
   // Each amount holds its line (an amount never breaks), but for the dates,

@@ -1,13 +1,11 @@
 import { useEffect, useRef } from 'react'
+import { preload } from 'react-dom'
 import Button from '../components/ui/Button'
 import ResponsivePicture from '../components/ui/ResponsivePicture'
 import Seam from '../components/ui/Seam'
 import images from '../data/images/shell.json'
 import useMotionAllowed from '../hooks/useMotionAllowed'
-import useReveals from '../motion/useReveals'
 import { pageMeta } from '../seo/meta'
-import { preloadWithDocument } from '../utils/documentPreloads'
-import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
 import '../pages/eu/eu.css'
 
 // The page about the EU project, /eu-proekt (spec M3/M4 §7.5; the concept's
@@ -18,7 +16,8 @@ import '../pages/eu/eu.css'
 //    seam and the statement starts after it.
 // 2. #byudzhet, the page's moment: the page's width is the total budget, and
 //    the seam moves from the centre to where the EU's grant ends.
-// 3. #plakat: the poster's download and the disclaimer, across the seam.
+// 3. #plakat: the poster's download and the disclaimer, across the seam,
+//    still.
 // Every statement the EU visibility rules and the contract
 // (tests/contracts/eu-visibility.test.jsx) need is the teammate's text, word
 // for word (origin/vidimost-es src/pages/EuProekt.jsx): the emblem with
@@ -46,8 +45,16 @@ export const handle = { header: 'solid' }
 // The upright display face, which the title sets in the first viewport (it
 // has no italic word, for it is the project's name): preloaded with the
 // document the page is first loaded as, never again on a client-side visit
-// (ruling C5.4, src/utils/documentPreloads.js).
-const PRELOADS = [DISPLAY_FONT_PRELOADS[0]]
+// (ruling C5.4), as preloadWithDocument does (src/utils/documentPreloads.js).
+// That helper and DISPLAY_FONT_PRELOADS ride in the facade group's chunk
+// (scripts/client-chunks.mjs), which this page doesn't load (ruling T6d):
+// importing them here would take them out of that chunk, into one of their
+// own on every page that loads it, so the page asks React for the face
+// itself, as the 404 does (src/routes/not-found.jsx).
+function preloadTitleFace() {
+  if (typeof document !== 'undefined') return
+  preload('/fonts/ksm-display.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
+}
 
 const POSTER = '/eu/plakat-ksm-stroy-a3.pdf'
 
@@ -107,7 +114,7 @@ function Seal() {
         </h1>
         <div className="doc__text">
           <p className="doc__p1">
-            КСМ СТРОЙ ООД изпълнява проект №&nbsp;BG16RFPR001-1.012-1485-C01 „Дигитализация на предприятията“ по Програма
+            КСМ&nbsp;СТРОЙ&nbsp;ООД изпълнява проект №&nbsp;BG16RFPR001-1.012-1485-C01 „Дигитализация на предприятията“ по Програма
             „Конкурентоспособност и&nbsp;иновации в&nbsp;предприятията“ 2021-2027, съфинансирана от Европейския съюз чрез
             Европейския фонд за регионално развитие.
           </p>
@@ -130,40 +137,63 @@ function Seal() {
 // phone it is a 14 px bar with the seam at 70 % over the list, with swatches.
 //
 // When the band is first seen, its seam travels from the centre to 70 % in
-// 1.5 s, expo.inOut, by the registered --split (eu.css): once, as the band's
-// halves (a phone's bar just above them) reach 88 % of the screen, where the
-// concept's js/eu-proekt.js starts it. Its wait is CSS, the opening's kind of
-// motion: wherever motion is allowed the band shows the seam at the centre
-// from the first paint, the starting state of a keyframe, so a band whose
-// edge already shows at the foot of the first viewport (1440 × 900) never
-// jumps. Should nothing else happen, that keyframe brings it to 70 % after 4
-// s (eu.css). Once the page has hydrated, where motion is allowed, the band
-// is marked waiting (data-split="wait": it holds at the centre) until it is
-// seen (data-split="seen": it travels); a band already in view by then
-// travels at once, as the arrival's last beat. Where its keyframe has begun
-// to move it before then (a slow first load), it is left to finish. Under
-// reduced motion and without JS it rests at 70 %, the markup's final state.
+// 1.5 s, expo.inOut, by the registered --split (eu.css), once. Its wait is
+// CSS, the opening's kind of motion: wherever motion is allowed the band
+// shows the seam at the centre from the first paint, the starting state of a
+// keyframe, so a band whose edge already shows at the foot of the first
+// viewport (1440 × 900) never jumps. Should nothing else happen, that
+// keyframe brings it to 70 % after 4 s (eu.css). Once the page has hydrated,
+// where motion is allowed, the band is marked waiting (data-band="wait": it
+// holds at the centre), then seen, by the concept's rule (js/eu-proekt.js
+// :13-17, :31), on the list as the concept has it:
+// - landed with the list's top within 86 % of the screen (1680 × 1050, say),
+//   it travels as the arrival's last beat (data-band="landed": eu.css starts
+//   it 0.75 s after the opening's own wait, --arrive, as the concept does,
+//   counted from the mark, which comes as the page hydrates, a moment after
+//   the opening has begun);
+// - lower (1440 × 900, every phone), it waits until the list's top has come
+//   up to 78 %, then travels (data-band="seen").
+// An IntersectionObserver tells both, with the margin that raises the
+// screen's foot to 86 % or 78 %: its first report, a frame after the band is
+// marked waiting, says where it has landed, so the seam always travels from
+// the centre. Where the keyframe has begun to move it before the page
+// hydrates (a slow first load), it is left to finish. Under reduced motion
+// and without JS it rests at 70 %, the markup's final state. The band's
+// state is its own attribute: data-split is the system's SplitText marker
+// (src/motion/useReveals.js), which never goes above the fold, and the
+// band's total is in the first viewport at 1440 × 900.
+const LANDED = '0px 0px -14% 0px'
+const SCROLLED = '0px 0px -22% 0px'
+
 function Budget() {
   const ref = useRef(null)
   const allowed = useMotionAllowed()
 
   useEffect(() => {
     const band = ref.current?.querySelector('.fund__list')
-    const halves = band?.querySelector('.fund__grant')
-    if (!allowed || !halves) return undefined
+    if (!allowed || !band) return undefined
     const arrival = band.getAnimations?.().find((animation) => animation.animationName === 'eu-split')
     const timing = arrival?.effect?.getComputedTiming()
     if (timing && timing.localTime >= timing.delay) return undefined
-    band.dataset.split = 'wait'
-    const seen = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return
-      seen.disconnect()
-      band.dataset.split = 'seen'
-    }, { rootMargin: '0px 0px -12% 0px' })
-    seen.observe(halves)
+    band.dataset.band = 'wait'
+    let watch
+    // Watches the list with `rootMargin` until it is in view, then marks it
+    // landed or seen; the landing watch hands over to the scrolling one on
+    // its first report, if the band is not in view by then.
+    const look = (rootMargin, landing) => {
+      watch = new IntersectionObserver((entries, observer) => {
+        const inView = entries[entries.length - 1].isIntersecting
+        if (!inView && !landing) return
+        observer.disconnect()
+        if (!inView) look(SCROLLED, false)
+        else band.dataset.band = landing ? 'landed' : 'seen'
+      }, { rootMargin })
+      watch.observe(band)
+    }
+    look(LANDED, true)
     return () => {
-      seen.disconnect()
-      delete band.dataset.split
+      watch.disconnect()
+      delete band.dataset.band
     }
   }, [allowed])
 
@@ -183,16 +213,14 @@ function Budget() {
 // 3. The poster and the disclaimer, across the seam (spec §7.5): the one
 // download link the contract counts, its ↓ drawn and hidden from assistive
 // technology, so its name is its words; then the statement the programme
-// requires, word for word. They come in with the system's reveals as the
-// part comes up from below: the seam draws, the two halves fade up.
+// requires, word for word. The part is still, the quiet document's last
+// word (ruling T6d): with none of the system's reveals, the page loads none
+// of their code (scripts/client-chunks.mjs).
 function Poster() {
-  const ref = useRef(null)
-  useReveals(ref)
-
   return (
-    <div ref={ref} className="fin" id="plakat">
-      <Seam draw />
-      <div className="fin__l" data-fade="">
+    <div className="fin" id="plakat">
+      <Seam />
+      <div className="fin__l">
         <Button href={POSTER} download="Плакат A3 - КСМ Строй.pdf">
           Изтегли плаката (PDF)
           <svg className="arr arr--down" viewBox="0 0 10 14" width="10" height="14" aria-hidden="true" focusable="false">
@@ -200,16 +228,16 @@ function Poster() {
           </svg>
         </Button>
       </div>
-      <p className="fin__note" data-fade="">
-        Цялата отговорност за съдържанието се носи от КСМ СТРОЙ ООД и&nbsp;при никакви обстоятелства не може да се приема, че
-        този документ отразява официалното становище на Европейския съюз и&nbsp;Управляващия орган.
+      <p className="fin__note">
+        Цялата отговорност за съдържанието се носи от КСМ&nbsp;СТРОЙ&nbsp;ООД и&nbsp;при никакви обстоятелства не може да се
+        приема, че този документ отразява официалното становище на Европейския съюз и&nbsp;Управляващия орган.
       </p>
     </div>
   )
 }
 
 export default function EuProekt() {
-  preloadWithDocument(PRELOADS)
+  preloadTitleFace()
   return (
     <>
       <Seal />

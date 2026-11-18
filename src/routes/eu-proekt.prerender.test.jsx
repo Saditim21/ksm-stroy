@@ -88,7 +88,8 @@ describe('#top, the seal on the fold', () => {
   // (it is the project's name) and ends at the seam, each line in a mask of
   // its own, authored by hand (never split by script above the fold); the
   // two paragraphs follow it, the teammate's text word for word, a no-break
-  // space after „№“ and every one-letter word („е да повиши“).
+  // space after „№“ and every one-letter word („е да повиши“), and inside
+  // the company's name.
   it('prerenders one H1 in its two masks, with no italic word, and the statement after it', () => {
     const doc = parse(prerender())
     const h1 = doc.querySelector('h1')
@@ -105,7 +106,9 @@ describe('#top, the seal on the fold', () => {
       'Целта на проекта е да повиши нивото на дигитализация на КСМ СТРОЙ ООД. Внедряват се четири свързани системи: за управление на ресурсите (ERP), за работа с клиенти (CRM), за бизнес анализи (BI) и за електронно обучение на служителите. Така обектите, офертите и клиентските запитвания се водят на едно място, а решенията се вземат по актуални данни.',
     ])
     expect(paragraphs[0].textContent).toContain('№\u00a0BG16RFPR001-1.012-1485-C01')
+    expect(paragraphs[0].textContent).toMatch(/^\s*КСМ\u00a0СТРОЙ\u00a0ООД изпълнява/)
     expect(paragraphs[1].textContent).toContain('е\u00a0да повиши')
+    expect(paragraphs[1].textContent).toContain('на КСМ\u00a0СТРОЙ\u00a0ООД.')
   })
 
   // What an entrance's first frame would write, kept out of the opening: an
@@ -125,9 +128,9 @@ describe('#top, the seal on the fold', () => {
 // dates. Each line is the legacy text, one run of text (the contract,
 // tests/contracts/eu-visibility.test.jsx): its label and its amount in the
 // one list item, a space between. No percentage is printed. The seam's 70 %
-// is the stylesheet's at rest (eu.css), so the HTML carries no split of its
-// own; its wait for the visitor is marked only once the page has hydrated
-// (eu-proekt.motion.test.jsx).
+// is the stylesheet's at rest (eu.css), so the HTML carries no mark of the
+// band's own (data-band); its wait for the visitor is marked only once the
+// page has hydrated (eu-proekt.motion.test.jsx).
 describe('#byudzhet, the budget on the seam', () => {
   const budget = () => parse(prerender()).querySelector('#byudzhet')
 
@@ -160,14 +163,22 @@ describe('#byudzhet, the budget on the seam', () => {
 
     expect(band.textContent).not.toMatch(/%/)
     expect(band.querySelector('.fund__list').hasAttribute('style')).toBe(false)
-    expect(band.querySelector('.fund__list').hasAttribute('data-split')).toBe(false)
+    expect(band.querySelector('.fund__list').hasAttribute('data-band')).toBe(false)
   })
 })
 
+// data-split is the system's SplitText marker (Diptych §5.7,
+// src/motion/useReveals.js), never used above the fold (spec §4.2): the
+// opening's masks are authored by hand, the band's total is in the first
+// viewport at 1440 × 900, and nothing on the page carries it.
+it('marks nothing on the page with data-split', () => {
+  expect(parse(prerender()).querySelectorAll('[data-split]')).toHaveLength(0)
+})
+
 // Spec §7.5: „Изтегли плаката (PDF)“ with a ↓, the page's only such link,
-// across the seam from the disclaimer, word for word. They come in with the
-// system's reveals as the part comes up from below: the seam draws, the two
-// halves fade up (eu-proekt.motion.test.jsx).
+// across the seam from the disclaimer, word for word. The part is still
+// (ruling T6d): the page's last word, with none of the system's reveals
+// (eu-proekt.motion.test.jsx).
 describe('#plakat, the poster and the disclaimer', () => {
   const poster = () => parse(prerender()).querySelector('#plakat')
 
@@ -186,14 +197,15 @@ describe('#plakat, the poster and the disclaimer', () => {
     expect([...doc.querySelectorAll('main a')].filter((a) => a.getAttribute('href') === POSTER)).toHaveLength(1)
   })
 
-  it('reads the disclaimer across the seam, the two halves revealed as the part comes up', () => {
+  it('reads the disclaimer across the seam, still: nothing in the part is marked for a reveal', () => {
     const part = poster()
 
     expect(textOf(part.querySelector('.fin__note'))).toBe(
       'Цялата отговорност за съдържанието се носи от КСМ СТРОЙ ООД и при никакви обстоятелства не може да се приема, че този документ отразява официалното становище на Европейския съюз и Управляващия орган.',
     )
-    expect(part.querySelector(':scope > .seam').hasAttribute('data-draw')).toBe(true)
-    expect([...part.querySelectorAll('[data-fade]')].map((element) => element.className)).toEqual(['fin__l', 'fin__note'])
+    expect(part.querySelector('.fin__note').textContent).toContain('от КСМ\u00a0СТРОЙ\u00a0ООД и\u00a0при')
+    expect(part.querySelector(':scope > .seam').getAttribute('aria-hidden')).toBe('true')
+    expect(part.querySelectorAll('[data-split], [data-fade], [data-draw], [data-wipe]')).toHaveLength(0)
   })
 })
 
@@ -205,16 +217,31 @@ it('binds every one-letter word to the next', () => {
   expect(main.textContent).not.toMatch(/(^|[\s„(])[А-Яа-яA-Za-z] /u)
 })
 
+// The company's name never breaks across lines, wherever the page's copy
+// names it: the statement's two paragraphs and the disclaimer, a no-break
+// space inside it, as За нас binds „КСМ Строй ООД“ (src/pages/about/Offer.jsx).
+it('binds the company’s name wherever the copy names it', () => {
+  const names = parse(prerender()).querySelector('main').textContent.match(/КСМ\s+СТРОЙ\s+ООД/g)
+
+  expect(names).toEqual(['КСМ\u00a0СТРОЙ\u00a0ООД', 'КСМ\u00a0СТРОЙ\u00a0ООД', 'КСМ\u00a0СТРОЙ\u00a0ООД'])
+})
+
 // Ruling C5.4 (C4.10's pattern): only what the page uses at load, with the
 // document it is first loaded as: the upright display face, which the title
-// sets in the first viewport. It has no italic word and no count.
+// sets in the first viewport. It has no italic word and no count. The page
+// writes that preload itself (eu-proekt.jsx; ruling T6d keeps the site's
+// helpers out of its first load), so it is pinned to the site's own
+// (src/utils/fontLinks.js), its type and CORS mode too, which the font's
+// request must match to reuse it.
 it('preloads the upright display face and nothing else', () => {
   const doc = parse(prerender())
   const preloads = [...doc.querySelectorAll('link[rel="preload"]')].map((link) => ({
     href: link.getAttribute('href'),
     as: link.getAttribute('as'),
+    type: link.getAttribute('type'),
+    crossorigin: link.getAttribute('crossorigin'),
   }))
 
-  expect(preloads).toEqual([{ href: DISPLAY_FONT_PRELOADS[0].href, as: 'font' }])
-  expect(DISPLAY_FONT_PRELOADS[0].href).toBe('/fonts/ksm-display.woff2')
+  expect(preloads).toEqual([{ href: DISPLAY_FONT_PRELOADS[0].href, as: 'font', type: DISPLAY_FONT_PRELOADS[0].type, crossorigin: '' }])
+  expect(DISPLAY_FONT_PRELOADS[0]).toMatchObject({ href: '/fonts/ksm-display.woff2', type: 'font/woff2', crossOrigin: 'anonymous' })
 })

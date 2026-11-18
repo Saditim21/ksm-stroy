@@ -16,7 +16,7 @@
    every step waits --arrive (src/styles/motion.css). The co-funding plate
    never moves: the emblem shows on landing. The budget's seam waits at the
    centre the same way and travels when the band is seen (eu-proekt.jsx
-   marks when), and the poster's part takes the system's reveals. */
+   marks when), and the poster's part is still (ruling T6d). */
 
 /* The budget's seam: where the grant's part of the band ends, from 0 % (the
    left edge) to 100 %. Registered, so its move from the centre
@@ -353,21 +353,30 @@
   /* The budget's moment: the seam waits at the centre from the first paint,
      its keyframe's starting state, wherever the band is, and travels to the
      grant's 70 % in 1.5 s, expo.inOut, when the band is seen. Once the page
-     has hydrated, the page marks it: waiting (it holds at the centre) until
-     its halves reach 88 % of the screen, then seen (it travels). Should the
-     page never hydrate, the keyframe itself brings it to 70 % after 4 s. */
+     has hydrated, the page marks it on its own data-band (never data-split,
+     the system's SplitText marker): waiting (it holds at the centre), then
+     landed, where the list has landed with its top within 86 % of the
+     screen, or seen, once its top has come up to 78 % (the concept's
+     js/eu-proekt.js). Either way it travels. Should the page never hydrate,
+     the keyframe itself brings it to 70 % after 4 s. */
   :root.js .fund__list {
     animation: eu-split 1.5s var(--e-io) both;
     animation-delay: calc(var(--arrive) + 4s);
   }
-  :root.js .fund__list[data-split='wait'] {
+  :root.js .fund__list[data-band='wait'] {
     --split: 50%;
     animation: none;
   }
-  :root.js .fund__list[data-split='seen'] {
+  :root.js .fund__list[data-band='seen'],
+  :root.js .fund__list[data-band='landed'] {
     animation: none;
     transition: --split 1.5s var(--e-io);
   }
+  /* A band that has landed in view travels as the arrival's last beat, as
+     the concept's does (js/eu-proekt.js:17): 0.75 s after the opening's own
+     wait, --arrive, counted from the mark, which comes as the page hydrates,
+     a moment after the opening has begun. */
+  :root.js .fund__list[data-band='landed'] { transition-delay: calc(var(--arrive) + .75s); }
 }
 
 @keyframes eu-split { from { --split: 50%; } }

@@ -69,6 +69,9 @@ it('hydrates with a fine pointer and motion allowed, and no recoverable error', 
   expect(textOf(container.querySelector('h1'))).toBe('Дигитализация на предприятията')
   expect(container.querySelectorAll('#byudzhet li')).toHaveLength(4)
   expect(container.querySelector('#byudzhet .fund__list').hasAttribute('style')).toBe(false)
+  // Hydrated, with motion allowed, the band is marked on its own data-band;
+  // nothing carries data-split, the system's SplitText marker.
+  expect(container.querySelectorAll('[data-split]')).toHaveLength(0)
 })
 
 it('hydrates on a phone with no error', async () => {

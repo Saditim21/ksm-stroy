@@ -59,12 +59,15 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // have nothing else in common that it lacks (its module graph, read in M4
 // Task 4: the motion hook, the reveals and the two preload helpers), so no
 // head is theirs alone: it takes in the facade's group the same way. So
-// does За нас (M4 Task 5), which shares the same four and nothing more, and
-// so does the EU page (M4 Task 6), whose poster comes in with the reveals.
-// The 404 page has no motion of its own (all of it is its first viewport,
-// which is CSS), so it joins no group, and must import none of the four:
-// each would leave the facade's chunk for one of its own on every page of
-// the group.
+// does За нас (M4 Task 5), which shares the same four and nothing more.
+// The EU page and the 404 page (M4 Task 6) join no group, and must import
+// none of the four: each would leave the facade's chunk for one of its own
+// on every page of the group. The 404's motion is all CSS (it is all first
+// viewport); the EU page's is CSS too, its budget's moment marked by an
+// IntersectionObserver, and its poster is still (M4 ruling T6d: as one of
+// the facade's pages, for the reveals on its poster alone, it loaded the
+// facade's chunk and stylesheet unused, 10,400 B of script and about
+// 6.4 KB of render-blocking CSS, gzip).
 // Those heads are other pages' too: the motion hook is every page's with
 // the system's reveals (useReveals, useWipes), and the hydration hook every
 // page's whose view waits for hydration. Such a page fails the build until
@@ -74,22 +77,21 @@ const ROOT_ROUTE = /[\\/]src[\\/]root\.jsx\?/
 // pages, or give the group a head that page doesn't import.
 export const GROUPS = [
   // Its pages, which all have motion: Home, both projects' pages and their
-  // block pages, Контакти, Продажби, Обекти, За нас and the EU page. The
-  // form, the facade and what they share, with riders that only some of
-  // those pages show: the form itself and the closing inquiry's section (not
-  // on Продажби, Обекти, За нас or the EU page), the facade itself (on none
-  // of the five), the status counts (not on Контакти, Обекти, За нас or the
-  // EU page), the number that rolls in (not on a Многофамилна block page,
-  // Обекти, За нас or the EU page), the stale-data notice with its
-  // stylesheet (only on Home, Golden Residence's pages, Контакти and
-  // Продажби) and the explorer's context (only on the projects' pages and
-  // Продажби). A page loads them unused, as a Многофамилна page did before;
-  // without them, Home and Golden Residence, whose first load M4 caps, would
-  // load more.
+  // block pages, Контакти, Продажби, Обекти and За нас. The form, the
+  // facade and what they share, with riders that only some of those pages
+  // show: the form itself and the closing inquiry's section (not on
+  // Продажби, Обекти or За нас), the facade itself (on none of the four),
+  // the status counts (not on Контакти, Обекти or За нас), the number that
+  // rolls in (not on a Многофамилна block page, Обекти or За нас), the
+  // stale-data notice with its stylesheet (only on Home, Golden Residence's
+  // pages, Контакти and Продажби) and the explorer's context (only on the
+  // projects' pages and Продажби). A page loads them unused, as a
+  // Многофамилна page did before; without them, Home and Golden Residence,
+  // whose first load M4 caps, would load more.
   {
     name: 'facade',
     head: 'src/motion/useMotion.js',
-    pages: ['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx', 'src/routes/about.jsx', 'src/routes/eu-proekt.jsx'],
+    pages: ['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx', 'src/routes/about.jsx'],
     riders: ['src/components/inquiry/useInquiryForm.jsx', 'src/components/inquiry/InquirySection.jsx', 'src/explorer/Facade.jsx', 'src/components/ui/StatusCount.jsx', 'src/components/ui/RollingNumber.jsx', 'src/explorer/StaleNotice.jsx', 'src/explorer/useExplorer.js'],
   },
   // Its pages, which all wait for hydration: every page of a project, and

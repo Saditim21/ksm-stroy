@@ -8,8 +8,9 @@ import { clientChunks, GROUPS, pinnedChunks } from './client-chunks.mjs'
 // pages, the contact page, which has the inquiry form and waits for
 // hydration but has neither a facade nor an explorer, the sales page, which
 // shows the status counts and a block grid but has neither the form nor the
-// facade, the works page, the company page and the EU page, which have the
-// system's motion and none of the rest, and the 404 page, with none of them.
+// facade, the works page and the company page, which have the system's
+// motion and none of the rest, and the EU page and the 404 page, with none of
+// them.
 
 const ROUTE = '?__react-router-build-client-route'
 const id = {
@@ -81,7 +82,7 @@ const GRAPH = {
   [id.projectBlockRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.captions, id.rolling, id.stale, id.inquiry] },
   [id.mnRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.rolling, id.inquiry] },
   [id.blockRoute]: { entry: true, imports: [id.react, id.motion, id.facade, id.context, id.captions, id.inquiry] },
-  [id.euRoute]: { entry: true, imports: [id.react, id.motion] },
+  [id.euRoute]: { entry: true, imports: [id.react, id.button] },
   [id.notFoundRoute]: { entry: true, imports: [id.react, id.button, id.status, id.digits, id.dims] },
   [id.contactRoute]: { entry: true, imports: [id.react, id.motion, id.form, id.rolling, id.hydrated, id.hold] },
   [id.salesRoute]: { entry: true, imports: [id.react, id.motion, id.counts, id.model, id.loadSurfaces, id.rolling, id.stale, id.useExplorer] },
@@ -142,8 +143,8 @@ describe('pinnedChunks', () => {
   it('makes a group of what every page with its head needs, and of its riders', () => {
     // The facade's group is the motion hook's: its pages, which GROUPS
     // names, are Home, both projects' pages and their block pages, the
-    // contact page, the sales page, the works page, the company page and
-    // the EU page, which all need the hook.
+    // contact page, the sales page, the works page and the company page,
+    // which all need the hook.
     expect(pinned.get(id.motion)).toBe('facade')
     // Riders, which the sales page doesn't need: the form and the closing
     // inquiry.
@@ -231,7 +232,7 @@ describe('pinnedChunks', () => {
 
   it('names the pages of each group the build uses', () => {
     const pages = Object.fromEntries(GROUPS.map(({ name, pages: named }) => [name, named]))
-    expect(pages.facade).toEqual(['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx', 'src/routes/about.jsx', 'src/routes/eu-proekt.jsx'])
+    expect(pages.facade).toEqual(['src/pages/Home.jsx', 'src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx', 'src/routes/projects.jsx', 'src/routes/blog.jsx', 'src/routes/about.jsx'])
     expect(pages.explorer).toEqual(['src/routes/golden-residence.jsx', 'src/routes/golden-residence-block.jsx', 'src/routes/mnogofamilna.jsx', 'src/routes/mnogofamilna-block.jsx', 'src/routes/contact.jsx'])
   })
 })
@@ -257,6 +258,7 @@ describe('the plugin', () => {
     const rootOnly = {
       ...GRAPH,
       [id.home]: { imports: GRAPH[id.home].imports.filter((each) => each !== id.button) },
+      [id.euRoute]: { entry: true, imports: GRAPH[id.euRoute].imports.filter((each) => each !== id.button) },
       [id.notFoundRoute]: { entry: true, imports: GRAPH[id.notFoundRoute].imports.filter((each) => each !== id.button) },
     }
     expect(output.manualChunks(id.button, api(rootOnly))).toBeUndefined()
