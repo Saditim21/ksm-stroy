@@ -7,7 +7,6 @@ import StatusChip from '../components/ui/StatusChip'
 import { statusKeyOf } from '../components/ui/status'
 import useScrollLock from '../hooks/useScrollLock'
 import useMotionNow from '../motion/useMotionNow'
-import { PALETTE } from '../styles/palette'
 import { formatDecimal } from '../utils/format'
 import { STATUS_LABEL } from '../utils/propertyStatus'
 import { trapTab } from '../utils/trapTab'
@@ -49,10 +48,17 @@ import { stepUnit } from './surfaceModel'
 //   (its own keys wait while it is covered). Tab stays inside; a click on the
 //   backdrop closes it too. The focus moves to its action after 500 ms (20 ms
 //   without motion), else to its close; the parent gives it back.
-// - The page holds still under it (useScrollLock), on umber.
+// - The page holds still under it (useScrollLock), the scrollbar's strip
+//   in the colour beside it (SCRIM).
 // - With motion (useMotionNow): the backdrop fades in, the halves open
 //   outward from the seam and the seam draws; a step fades the details out
 //   and the next unit's in; on close a clone of its last frame fades out.
+
+// Where a classic scrollbar (Windows) keeps its gutter while the lock hides
+// it, the strip takes <html>'s colour (useScrollLock). Beside it lies the
+// panel's backdrop, explorer.css's .up, rgba(8, 7, 6, .72), over the page's
+// onyx: #0A0907. Umber showed there as a lighter band (FR11).
+const SCRIM = '#0A0907'
 
 const FOCUS_AFTER_MS = 500
 const FOCUS_AT_ONCE_MS = 20
@@ -127,7 +133,7 @@ function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire })
   const rightRef = useRef(null)
   const titleId = useId()
   const motionNow = useMotionNow()
-  useScrollLock(PALETTE.umber)
+  useScrollLock(SCRIM)
   const plan = plans[unit.block]
   const shape = planShapes(plan).find(({ suffix }) => suffix === unit.suffix)
   // The crop matches the plan's box in the left half, measured (cropFor):

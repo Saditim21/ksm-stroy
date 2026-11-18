@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { MN_SNAPSHOT_DATA } from '../data/mnogofamilna/snapshot'
+import { rulesFor, rulesOf, valueOf } from '../test/css'
 import { recordingMotion } from '../test/gsap'
 import { buildModel } from './model'
 import { loadPlans } from './plans'
@@ -224,12 +225,22 @@ describe('as a dialog', () => {
     expect(document.activeElement).toBe(within(panel('А 301')).getByRole('button', { name: 'Затворете' }))
   })
 
-  it('holds the page still while it is open, on umber', () => {
+  // FR11: the page holds still, and where a classic scrollbar (Windows) keeps
+  // its gutter, the strip takes the colour beside it: the panel's dark
+  // backdrop over the page's onyx (explorer.css's .up), never umber, which
+  // showed as a lighter band down the screen's edge.
+  it('holds the page still while it is open, the scrollbar’s strip the colour of its backdrop over onyx', () => {
+    const backdrop = valueOf(rulesFor(rulesOf('src/explorer/explorer.css'), '.up')[0], 'background')
+    const [r, g, b, a] = backdrop.match(/[\d.]+/g).map(Number)
+    const onyx = [14, 13, 11]
+    const over = [r, g, b].map((channel, i) => Math.round(channel * a + onyx[i] * (1 - a)))
+
     const { unmount } = renderPanel('А 302')
     expect(document.documentElement.style.overflow).toBe('hidden')
-    expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
+    expect(document.documentElement.style.backgroundColor).toBe(`rgb(${over.join(', ')})`)
     unmount()
     expect(document.documentElement.style.overflow).toBe('')
+    expect(document.documentElement.style.backgroundColor).toBe('')
   })
 })
 
