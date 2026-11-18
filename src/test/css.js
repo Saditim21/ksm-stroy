@@ -75,14 +75,36 @@ export function rulesFor(rules, selector) {
 
 export const NO_PREFERENCE = '@media (prefers-reduced-motion: no-preference)'
 
+// Whether a translation's amounts (`0 22px`, `-50%, -54%`) move the box by a
+// set amount: not when each is 0, not when one reads a custom property (it
+// follows the page's state: Home's split), and not when each that is not 0
+// is -50 % or an optical nudge off it (-40 to -60 %), which centres the box.
+function moves(amounts) {
+  if (/var\(/.test(amounts) || amounts.trim() === 'none') return false
+  const moved = amounts.split(/[\s,]+/).filter((amount) => amount && !/^-?0*\.?0+[a-z%]*$/i.test(amount))
+  return moved.length > 0 && !moved.every((amount) => /^-[45]\d(\.\d+)?%$/.test(amount))
+}
+
+// Whether a clip-path cuts its box away whole: an inset() whose two opposite
+// sides add up to 100 % or more. A length weighs nothing here, and an inset
+// that a calc() sets follows the page's state (Home's halves).
+function clipsAway(value) {
+  const inset = /\binset\(([^()]*)\)/.exec(value)
+  if (!inset) return false
+  const [t, r = t, b = t, l = r] = inset[1].split(/\s+round\s+/)[0].trim().split(/\s+/).map((side) => (side.endsWith('%') ? Number.parseFloat(side) : 0))
+  return t + b >= 100 || l + r >= 100
+}
+
 // What keeps an element out of sight, or away from its place, until an
 // animation brings it in: a starting state of the first viewport's motion.
 const HIDING = {
   opacity: (value) => /^(0+\.?0*|\.0+)$/.test(value.trim()),
   visibility: (value) => value.trim() === 'hidden',
   'stroke-dashoffset': () => true,
-  transform: (value) => /translateY\(|scale[XYZ3d]*\(/i.test(value),
-  translate: (value) => value.trim().split(/\s+/).length > 1,
+  'clip-path': clipsAway,
+  transform: (value) => /translateY\(|scale[XYZ3d]*\(/i.test(value)
+    || [...value.matchAll(/translate(?:X|3d)?\(((?:[^()]|\([^()]*\))*)\)/gi)].some(([, amounts]) => moves(amounts)),
+  translate: moves,
   scale: (value) => !/^(none|1)$/.test(value.trim()),
 }
 
@@ -101,9 +123,10 @@ const classesOf = (selector) => [...selector.matchAll(/\.([\w-]+)/g)].map(([, na
 //   selector, and sits inside @media (prefers-reduced-motion: no-preference);
 // - outside @keyframes and outside that media query, no rule of the first
 //   viewport declares opacity 0, visibility hidden, a stroke-dashoffset, a
-//   translateY(…) or a scale…(…). The starting states live in the keyframes,
-//   held by a `both` fill, so reduced motion switched on mid-page never leaves
-//   anything hidden, moved or covered.
+//   clip-path that cuts its box away whole, a translateY(…), a translation
+//   by a set amount or a scale…(…) (HIDING). The starting states live in the
+//   keyframes, held by a `both` fill, so reduced motion switched on mid-page
+//   never leaves anything hidden, moved or covered.
 // Returns the problems, one line each; [] when there are none.
 export function firstViewportMotionProblems(path, hero) {
   const blocks = hero.split(',').map((selector) => selector.trim().replace(/^\./, ''))

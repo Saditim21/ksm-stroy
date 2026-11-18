@@ -181,4 +181,44 @@ describe('firstViewportMotionProblems', () => {
       `.hero .x: scale: 1.1 outside ${NO_PREFERENCE}`,
     ])
   })
+
+  // Shell minor 6: a box clipped away whole (an inset of 100 % between two
+  // opposite sides) and a box moved by a set amount (translate(), its X and
+  // 3D forms, or the translate property along one axis) are starting states
+  // too.
+  it('finds a clipped-away or moved starting state, however it is written', () => {
+    expect(check(`
+      .hero__img { clip-path: inset(100% 0 0 0); }
+      .door--r { clip-path: inset(0 0 0 100%); }
+      .hero__cap { clip-path: inset(0 40% 0 60%); }
+      .hero__veil { clip-path: inset(50%); }
+      .door__mark { transform: translate(0, 24px); }
+      .hero__lead { transform: translateX(-30px); }
+      .hero__line { transform: translate3d(0, 1em, 0); }
+      .door__glint { translate: 40px; }
+    `)).toEqual([
+      `.hero__img: clip-path: inset(100% 0 0 0) outside ${NO_PREFERENCE}`,
+      `.door--r: clip-path: inset(0 0 0 100%) outside ${NO_PREFERENCE}`,
+      `.hero__cap: clip-path: inset(0 40% 0 60%) outside ${NO_PREFERENCE}`,
+      `.hero__veil: clip-path: inset(50%) outside ${NO_PREFERENCE}`,
+      `.door__mark: transform: translate(0, 24px) outside ${NO_PREFERENCE}`,
+      `.hero__lead: transform: translateX(-30px) outside ${NO_PREFERENCE}`,
+      `.hero__line: transform: translate3d(0, 1em, 0) outside ${NO_PREFERENCE}`,
+      `.door__glint: translate: 40px outside ${NO_PREFERENCE}`,
+    ])
+  })
+
+  // What only frames or places a box is no starting state: a clip that
+  // leaves some of it, a clip the page's state sets (Home's halves), a
+  // centring translate (-50 %, or an optical nudge off it), one that follows
+  // a custom property (the hero's split), and none at all.
+  it('passes a partial clip, a stateful clip or move, a centring translate and none', () => {
+    expect(check(`
+      .hero__img { clip-path: inset(0 0 12% 0); }
+      .hero--gr { clip-path: inset(0 calc((1 - var(--s)) * 100%) 0 0); }
+      .door { clip-path: inset(0); transform: translate(-50%, -54%); }
+      .door__mark { transform: translateX(var(--xg)); translate: none; }
+      .hero__tag { translate: 0; transform: translate(0, 0); }
+    `)).toEqual([])
+  })
 })
