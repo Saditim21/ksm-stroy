@@ -7,7 +7,7 @@ import { GR_FACTS } from '../../config/facts'
 import BlockGrid from '../../explorer/BlockGrid'
 import useExplorer from '../../explorer/useExplorer'
 import useReveals from '../../motion/useReveals'
-import { plural } from '../../utils/format'
+import { TYPE_WORDS, typeWord } from '../../utils/roomTypes'
 
 // The two blocks in numbers, #blokove (spec §6.16, §8.2 #4; extract §4.27;
 // the concept's gr.js:185-210): the hinge, then a split on the seam, Блок А
@@ -31,16 +31,6 @@ const PER_BLOCK = GR_FACTS.apartments / GR_FACTS.blocks
 const FACTS = `${PER_BLOCK} апартамента · ${GR_FACTS.floors} етажа · ${GR_FACTS.perFloor} на етаж`
 // Each block's half: Блок А's against the seam on the left.
 const SIDES = { 'block-a': 'a', 'block-b': 'b' }
-
-// A count of a room type in words (the concept's core.js:56-62), by the
-// sheets' Вид: „56 двустайни“, „1 ателие“; a type the words do not know as
-// the sheet writes it.
-const TYPE_WORDS = {
-  '2-стаен': ['двустаен', 'двустайни'],
-  '3-стаен': ['тристаен', 'тристайни'],
-  'Ателие': ['ателие', 'ателиета'],
-}
-const typeWord = (type, count) => (TYPE_WORDS[type] ? plural(count, ...TYPE_WORDS[type]) : type)
 
 // The block's counts by status, its room types, and its exposures or the
 // note; `stats` is the model's block (buildModel()'s `blocks[letter]`), or

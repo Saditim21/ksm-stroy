@@ -8,7 +8,7 @@ import { MN_FACTS } from '../../data/mnogofamilna/facts'
 import BlockGrid from '../../explorer/BlockGrid'
 import useExplorer from '../../explorer/useExplorer'
 import useReveals from '../../motion/useReveals'
-import { plural } from '../../utils/format'
+import { typeWord } from '../../utils/roomTypes'
 
 // Both blocks, apartment by apartment, #blokove (spec M3 §6.2 #2; the
 // concept's mnogofamilna.html:87-98 and js/mnogofamilna.js:1075-1097):
@@ -35,22 +35,16 @@ const pad = (n) => String(n).padStart(2, '0')
 // Each block's half: Блок А's against the seam on the left.
 const SIDES = { 'block-a': 'a', 'block-b': 'b' }
 
-// The room types' words (the concept's core.js:56-62), by the sheets' Вид;
-// a type they do not know as the sheet writes it.
-const TYPE_WORDS = {
-  '2-стаен': ['двустаен', 'двустайни'],
-  '3-стаен': ['тристаен', 'тристайни'],
-}
-
-/** A count of each room type in words, the types in the order of their
- * names: „36 двустайни · 36 тристайни“. `types` is { [Вид]: count }. */
+/** A count of each room type in words (typeWord, src/utils/roomTypes.js),
+ * the types in the order of their names: „36 двустайни · 36 тристайни“.
+ * `types` is { [Вид]: count }. */
 export function TypeCounts({ types }) {
   return Object.entries(types)
     .sort(([a], [b]) => a.localeCompare(b, 'bg'))
     .map(([type, count], i) => (
       <span key={type}>
         {i > 0 ? ' · ' : null}
-        <b>{count}</b> {TYPE_WORDS[type] ? plural(count, ...TYPE_WORDS[type]) : type}
+        <b>{count}</b> {typeWord(type, count)}
       </span>
     ))
 }

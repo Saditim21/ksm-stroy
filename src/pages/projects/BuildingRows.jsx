@@ -13,6 +13,7 @@ import useReveals from '../../motion/useReveals'
 import useWipes from '../../motion/useWipes'
 import { inquiryHref } from '../../shell/handle'
 import { formatDecimal, plural } from '../../utils/format'
+import { typeWord } from '../../utils/roomTypes'
 import { BUILDINGS, useBuildings } from './buildings'
 
 // The two buildings row by row, #sgradite (spec M3/M4 §7.1; the concept's
@@ -40,13 +41,6 @@ import { BUILDINGS, useBuildings } from './buildings'
 // The picture's width: half the page on a desktop, the page on a phone.
 const SIZES = '(max-width: 900px) 100vw, 42vw'
 
-// The room types' words, by the sheets' Вид.
-const TYPE_WORDS = {
-  '2-стаен': ['двустаен', 'двустайни'],
-  '3-стаен': ['тристаен', 'тристайни'],
-  'Ателие': ['ателие', 'ателиета'],
-}
-
 // A figure set in the serif, then what it counts: „112 двустайни“.
 const Figure = ({ children }) => <b className="n">{children}</b>
 
@@ -58,7 +52,7 @@ function Types({ types, counts }) {
     return (
       <span key={type}>
         {i > 0 ? ', ' : null}
-        <Figure>{count ?? '—'}</Figure> {TYPE_WORDS[type] ? plural(count, ...TYPE_WORDS[type]) : type}
+        <Figure>{count ?? '—'}</Figure> {typeWord(type, count)}
       </span>
     )
   })
