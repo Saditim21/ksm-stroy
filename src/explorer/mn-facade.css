@@ -109,8 +109,10 @@
 }
 .fx--mn .fx__bname--a { right: calc(49.208% + 22px); }
 .fx--mn .fx__bname--b { left: calc(50.792% + 22px); }
-/* The building dims a little deeper around a hot floor, its lights with it. */
-.fx--mn.is-hot .fx__dim { opacity: .62; }
+/* The building dims a little deeper around a hot floor, its lights with it:
+   a class more than explorer.css's `.fx.is-hot .fx__dim`, whichever
+   stylesheet the build loads last. */
+.fx.fx--mn.is-hot .fx__dim { opacity: .62; }
 /* The panels: the facade's height; „Блок А · Етаж 10“ keeps one line in the
    panel's 284 px. */
 .fx--mn .fxp { min-height: 0; }

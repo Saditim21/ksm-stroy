@@ -580,7 +580,10 @@ describe('the panels’ chunk', () => {
 
     fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
     expect(observers).toHaveLength(0)
-    expect((await import('./loadSurfaces')).loadedSurfaces()).toBeNull()
+    // Nothing loaded, nor on its way: a load the facade started would have
+    // landed by now (the surfaces and Golden Residence's plans, its project's).
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    expect((await import('./loadSurfaces')).loadedSurfaces(GR_PROJECT)).toBeNull()
   })
 
   it('never loads in compact mode', async () => {
@@ -591,7 +594,10 @@ describe('the panels’ chunk', () => {
 
     fireEvent.pointerEnter(document.querySelector('.fx'), { pointerType: 'mouse' })
     expect(observers).toHaveLength(0)
-    expect((await import('./loadSurfaces')).loadedSurfaces()).toBeNull()
+    // Nothing loaded, nor on its way: a load the facade started would have
+    // landed by now (the surfaces and Golden Residence's plans, its project's).
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    expect((await import('./loadSurfaces')).loadedSurfaces(GR_PROJECT)).toBeNull()
   })
 })
 

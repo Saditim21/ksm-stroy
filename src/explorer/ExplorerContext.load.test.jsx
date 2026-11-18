@@ -132,4 +132,19 @@ describe('a dialogs chunk that failed to load', () => {
     expect(load).toHaveBeenCalledTimes(2)
     expect(dialogs()).toHaveTextContent('Б 204')
   })
+
+  // What the retries rest on (M3 engine minor, ExplorerContext.jsx): while
+  // the chunk is not in, only openFloor changes the floor and only openUnit
+  // the unit, each a new opening, which asks once. The provider's setFloor
+  // and setBlock, which change the floor without one, reach the dialogs
+  // alone, which come with the chunk: no other module names them.
+  it('leaves setFloor and setBlock to the dialogs, which come with the chunk', () => {
+    const sources = import.meta.glob(['../**/*.{js,jsx}', '!../**/*.test.{js,jsx}', '!../test/**'], { query: '?raw', import: 'default', eager: true })
+    expect(Object.keys(sources)).toEqual(expect.arrayContaining(['./ExplorerDialogs.jsx', '../root.jsx']))
+    const naming = Object.keys(sources).filter((path) => /\bset(Floor|Block)\b/.test(sources[path])).sort()
+    // The state that makes them, the provider that hands them on, the hook's
+    // contract that names them, and the dialogs that use them.
+    expect(naming).toEqual(['./ExplorerContext.jsx', './ExplorerDialogs.jsx', './useExplorer.js', './useExplorerState.js'])
+    expect(sources['./useExplorer.js'].split('\n').filter((line) => /\bset(Floor|Block)\b/.test(line)).every((line) => line.trim().startsWith('//'))).toBe(true)
+  })
 })

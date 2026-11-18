@@ -4,6 +4,7 @@ import { goOffline, renderSiteAt } from '../../tests/contracts/site'
 import { presetInquiry, resetInquiry } from '../components/inquiry/inquiryStore'
 import { setLenis } from '../utils/lenis'
 import { loadSurfaces } from './loadSurfaces'
+import { GR_PROJECT } from './projects/gr'
 import { named } from './testing'
 
 // The explorer's state in the address (spec §7.10): ?floor opens the plan
@@ -26,7 +27,8 @@ const findStage = (name, options) => screen.findByRole('dialog', { name: named(n
 const rail = (block, floor) => screen.getByRole('button', { name: new RegExp(`^Блок ${block}, етаж ${floor}[:.]`) })
 const rowOf = (dialog, label) => within(dialog.querySelector('tbody')).getByRole('row', { name: new RegExp(`^${label}\\b`) })
 
-beforeAll(() => loadSurfaces())
+// The surfaces with Golden Residence's plans, as its pages load them.
+beforeAll(() => loadSurfaces(GR_PROJECT))
 
 beforeEach(() => {
   goOffline()

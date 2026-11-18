@@ -8,6 +8,7 @@ import App from '../root'
 import BlockPageRoute, { handle } from '../routes/golden-residence-block'
 import { mockMatchMedia } from '../test/media'
 import { loadSurfaces } from './loadSurfaces'
+import { GR_PROJECT } from './projects/gr'
 import { named } from './testing'
 
 // The build prerenders /projects/golden-residence/block-a without a query,
@@ -31,7 +32,8 @@ const page = (at) => <RouterProvider router={createMemoryRouter(routes(), { init
 const prerender = () => renderToString(page(PATH))
 const rows = (dialog) => dialog.querySelectorAll('tbody tr')
 
-beforeAll(() => loadSurfaces())
+// The surfaces with Golden Residence's plans, as the page loads them.
+beforeAll(() => loadSurfaces(GR_PROJECT))
 
 let container
 let root

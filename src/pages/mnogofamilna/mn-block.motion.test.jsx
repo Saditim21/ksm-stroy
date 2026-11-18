@@ -1,8 +1,9 @@
-import { act, fireEvent, render } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline } from '../../../tests/contracts/site'
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
+import { named } from '../../explorer/testing'
 import { recordingMotion, stubIdle } from '../../test/gsap'
 import { mockMatchMedia } from '../../test/media'
 import MnBlockPage from './MnBlockPage'
@@ -155,8 +156,61 @@ it('lets the middle row go below 901 px', async () => {
   expect(hotRows()).toEqual([])
 })
 
+// M3 minor (MnBlockPage.jsx): reduced motion switched on mid-page reverts
+// the ScrollTrigger, and the row it had lit goes with it, rather than stay
+// hot with nothing left to move it.
+it('lets the middle row go when the motion stops mid-page', async () => {
+  const { rows, trigger } = await renderPage({ fine: true })
+  scrolledTo(rows, -500)
+  act(() => trigger.onUpdate())
+  expect(hotRows()).toEqual(['А-7'])
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+  reduce.matches = true
+  act(() => reduce.dispatchEvent(new Event('change')))
+  await flushMotion()
+  expect(hotRows()).toEqual([])
+  expect(document.querySelector('#explorer .fx')).not.toHaveClass('is-hot')
+})
+
 it('sets nothing up on a touch screen', async () => {
   await renderPage({ coarse: true })
 
   expect(recorder.triggers.find((vars) => vars.trigger === document.querySelector('#explorer .mbl__rows'))).toBeUndefined()
+})
+
+// Spec M3 §6.5 (M3 minor, mn-block.test.jsx): a floor opened from a row grows
+// from that row's plan, the stage's morph (its ghost leaves the row's place),
+// and so does one opened on the facade while its row is on the screen; with
+// the row off the screen there is no place to grow from, and the stage fades
+// in. jsdom lays nothing out: the row's plan is placed where the case needs.
+describe('the floor’s stage, as it opens', () => {
+  const ghostMoved = () => recorder.tweens.some(({ method, targets }) => method === 'set' && targets?.classList?.contains('ps__ghost'))
+  const faded = () => recorder.tweens.some(({ method, targets, from }) => method === 'fromTo' && targets?.classList?.contains('ps') && from?.opacity === 0)
+  const planOf = (key) => document.querySelector(`#explorer .mbr[data-k="${key}"] .mbr__plan svg`)
+
+  it('grows from the row’s plan when the row’s „Отворете плана“ opens it', async () => {
+    await renderPage({ fine: true })
+    const plan = planOf('А-7')
+    const measured = place(plan, 420, 180)
+
+    fireEvent.click(document.querySelector('#explorer .mbr[data-k="А-7"] .mbr__go'))
+    await screen.findByRole('dialog', { name: named('Блок А · Етаж 7') }, { timeout: 15000 })
+    expect(measured).toHaveBeenCalled()
+    expect(ghostMoved()).toBe(true)
+    expect(faded()).toBe(false)
+  }, 30000)
+
+  it.each([
+    ['on the screen', 300, true],
+    ['off the screen', SCREEN + 200, false],
+  ])('grows from the row’s plan when the facade opens a floor whose row is %s', async (_, top, grows) => {
+    await renderPage({ fine: true })
+    place(planOf('А-7'), top, 180)
+
+    fireEvent.click(document.querySelector('#explorer .fx__cnt[data-k="А-7"]'))
+    await screen.findByRole('dialog', { name: named('Блок А · Етаж 7') }, { timeout: 15000 })
+    expect(ghostMoved()).toBe(grows)
+    expect(faded()).toBe(!grows)
+  }, 30000)
 })

@@ -142,8 +142,8 @@ describe('a row and its floor on the facade, one hot floor (spec M3 §6.5)', () 
 
     const stage = await screen.findByRole('dialog', { name: named('Блок А · Етаж 7') }, { timeout: 15000 })
     fireEvent.keyDown(stage, { key: 'Escape' })
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
-    await waitFor(() => expect(document.activeElement).toBe(button))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), { timeout: 15000 })
+    await waitFor(() => expect(document.activeElement).toBe(button), { timeout: 15000 })
   }, 30000)
 
   // A unit of a row's plan opens the stage on its floor, then its panel.

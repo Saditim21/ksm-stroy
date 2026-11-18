@@ -7,7 +7,7 @@
 // - `unitNumber(unit)`, the number an apartment shows on it (Golden
 //   Residence's „501“, Многофамилна's „101“, PlanSvg.jsx);
 // - `floorMeta(floor)`, the project's word on a floor, or null (the кота its
-//   drawings give, the attic; FloorMeta, FloorPanel.jsx);
+//   drawings give, the attic; FloorMeta, FloorFacts.jsx);
 // - `floorWord(floor)`, the word after the floor's number where one
 //   apartment is named, or null, or undefined where the project has none
 //   (Многофамилна's attic, „етаж 10, тавански“; UnitPanel.jsx);

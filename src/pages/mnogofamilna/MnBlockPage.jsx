@@ -156,6 +156,8 @@ function Floors({ block }) {
       setMiddle(key)
     }
     ScrollTrigger.create({ trigger: rows, start: 'top bottom', end: 'bottom top', onUpdate: pick, onLeave: pick, onLeaveBack: pick })
+    // Reverted (reduced motion switched on mid-page), it lets its row go.
+    return () => setMiddle(null)
   })
 
   // The middle row is the hot floor while nothing else is: a floor pointed

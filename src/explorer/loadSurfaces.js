@@ -12,8 +12,13 @@ let loading = null
 export const loadedSurfaces = (project) => (loaded?.hasPlans(project) ? loaded : null)
 
 /** Loads the surfaces, once, then `project`'s plans, when one is given; a
- * failed load may be tried again. */
+ * failed load may be tried again. A project's chunk of plans starts with the
+ * surfaces', not once they are in: one round trip before the first panel or
+ * a deep link's dialog, not two. That start only gets the chunk on its way
+ * (an import() made twice loads once); the surfaces' own loadPlans waits for
+ * it, and tries a failed one again (plans.js). */
 export function loadSurfaces(project) {
+  project?.loadPlans?.().catch(() => {})
   loading ??= import('./surfaces').then(
     (module) => {
       loaded = module

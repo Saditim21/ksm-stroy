@@ -4,6 +4,7 @@ import { goOffline, mainText, renderSiteAt } from '../../../tests/contracts/site
 import { resetInquiry } from '../../components/inquiry/inquiryStore'
 import { mapsUrl } from '../../config/site'
 import { loadSurfaces } from '../../explorer/loadSurfaces'
+import { GR_PROJECT } from '../../explorer/projects/gr'
 import { snapshotAvailability } from '../../explorer/testing'
 import * as grModule from '../../routes/golden-residence'
 import { setLenis } from '../../utils/lenis'
@@ -156,7 +157,7 @@ describe('the story (spec §6.15)', () => {
 describe('the blocks (spec §6.16)', () => {
   beforeAll(async () => {
     snapshot = snapshotAvailability()
-    await loadSurfaces()
+    await loadSurfaces(GR_PROJECT)
   })
   afterAll(() => {
     snapshot = null
