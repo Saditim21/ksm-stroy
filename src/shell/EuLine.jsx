@@ -8,13 +8,12 @@ import images from '../data/images/shell.json'
 // the project and „За проекта“, which opens the page about it, with a 44 px
 // hit box. The look is src/styles/shell.css's.
 //
-// - row: the header's 36 px top row, on every page, so it is seen on landing
-//   without scrolling; logos 20 px tall. The text takes the room the logos
-//   and „За проекта“ leave, and that box shows the full text when it holds it
-//   through the project number, else the short text when that fits through
-//   the number, else nothing; an ellipsis may end the rest of a text, never
-//   the number. Both versions stay in the page and CSS shows one, which is
-//   the one a screen reader reads.
+// - row: the header's 36 px top row, on every page, so the emblem and its
+//   „Съфинансирано от Европейския съюз“ are seen on landing without scrolling
+//   (the beneficiary's handbook 2021-2027, §3.1); logos 20 px tall, then
+//   „За проекта“. No sentence about the project: the owner asked for the
+//   row without it (2026-11-19), and the rule asks only for the emblem and
+//   its words there. The footer and /eu-proekt carry the sentence.
 // - footer: the full text beside 28 px logos.
 // - menu: the short text beside 28 px logos.
 //
@@ -84,14 +83,6 @@ export default function EuLine({ variant = 'row' }) {
   return (
     <div className="eu eu--row">
       <Plate widths={WIDTHS.row} eager />
-      <p className="eu__text">
-        <span className="eu__short">
-          <ShortText />
-        </span>
-        <span className="eu__full">
-          <FullText />
-        </span>
-      </p>
       <More />
     </div>
   )

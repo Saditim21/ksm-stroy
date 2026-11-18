@@ -104,36 +104,14 @@ describe('the EU line (spec §6.3)', () => {
     expect(declaredFor('.eu--row .eu__plate img').height).toBe('20px')
   })
 
-  // The row's text takes the room the logos and „За проекта“ leave, and that
-  // box, not the viewport, decides which text shows.
-  it('gives the row’s text the room that is left, as a container', () => {
-    expect(declaredFor('.eu--row')['grid-template-columns']).toBe('auto minmax(0, 1fr) auto')
-    // Taller than the row (WCAG 1.4.12 text spacing), the text keeps below
+  // The row holds the plate at its start and „За проекта“ at its end, with
+  // no sentence between them (src/shell/EuLine.jsx).
+  it('sets the row’s plate at its start and „За проекта“ at its end', () => {
+    expect(declaredFor('.eu--row')).toMatchObject({ display: 'flex', 'justify-content': 'space-between' })
+    // Taller than the row (WCAG 1.4.12 text spacing), the link keeps below
     // the screen's top edge.
     expect(declaredFor('.eu--row')['align-items']).toBe('safe center')
-    expect(declaredFor('.eu__text')).toMatchObject({ 'container-type': 'inline-size', 'white-space': 'nowrap', 'text-overflow': 'ellipsis' })
-    expect(declaredFor('.eu__text > span').display).toBe('none')
-  })
-
-  // The short text from the width that holds it through the number, the full
-  // one from the width that holds it through „…C01, “ and the ellipsis, in
-  // 13 px Manrope and its widest fallback face: never a cut number. Spec
-  // §6.3 gives Manrope's widths (about 256 and 483 px); Chrome measures the
-  // widest face, Arial, at 284 and 526 px.
-  it('shows the short text, then the full one, only once the box holds each through the number', () => {
-    const widthOf = (selector) => {
-      const rule = rules.find((r) => r.selectors.includes(selector) && valueOf(r, 'display') === 'inline')
-      expect(rule, selector).toBeDefined()
-      const query = rule.atRules.find((at) => at.startsWith('@container'))
-      return Number(/min-width:\s*(\d+)px/.exec(query)?.[1])
-    }
-    const short = widthOf('.eu__text > .eu__short')
-    const full = widthOf('.eu__text > .eu__full')
-    expect(short).toBeGreaterThanOrEqual(284)
-    expect(full).toBeGreaterThanOrEqual(526)
-    // And no wider than a few pixels past them, so a text shows once it fits.
-    expect(short).toBeLessThan(300)
-    expect(full).toBeLessThan(540)
+    expect(rules.some((r) => r.selectors.some((s) => s.includes('.eu__text')))).toBe(false)
   })
 })
 

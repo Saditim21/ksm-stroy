@@ -49,11 +49,12 @@ describe('the header', () => {
     expect(within(header).queryByRole('link', { name: 'Продажби' })).toBeNull()
   })
 
-  // Spec §6.3, §14.1: the EU line is the header's top row on every page, seen
-  // on landing without scrolling. Both versions of its text stay in the page,
-  // and its box shows the longest one whose project number fits there
-  // (src/styles/shell.css); no test here can see which.
-  it('carries the EU row with the project number and „За проекта“', async () => {
+  // Spec §6.3, §14.1: the EU line is the header's top row on every page, so
+  // the emblem and its „Съфинансирано от Европейския съюз“ are seen on
+  // landing without scrolling. The owner asked for the row without the
+  // sentence about the project (2026-11-19): the footer and /eu-proekt carry
+  // it.
+  it('carries the EU row: the emblem, the programme’s logo and „За проекта“, no sentence', async () => {
     renderSiteAt('/about')
     const header = await siteHeader()
     const row = within(header)
@@ -61,12 +62,9 @@ describe('the header', () => {
     expect(row.getByRole('link', { name: 'За проекта' })).toHaveAttribute('href', '/eu-proekt')
     expect(row.getByRole('img', { name: 'Съфинансирано от Европейския съюз' })).toBeInTheDocument()
     expect(row.getByRole('img', { name: 'Програма „Конкурентоспособност и иновации в предприятията“' })).toBeInTheDocument()
-    expect(textOf(header)).toContain(FULL_EU_TEXT)
-    expect(textOf(header)).toContain(SHORT_EU_TEXT)
-    // Wherever a version ends, the number stays in one piece.
-    const numbers = row.getAllByText('№ BG16RFPR001-1.012-1485-C01')
-    expect(numbers).toHaveLength(2)
-    for (const number of numbers) expect(number).toHaveClass('nb')
+    expect(textOf(header)).not.toContain(FULL_EU_TEXT)
+    expect(textOf(header)).not.toContain(SHORT_EU_TEXT)
+    expect(textOf(header)).not.toContain('BG16RFPR001-1.012-1485-C01')
   })
 
   // The logos are in every first viewport: lazy loading only held them back

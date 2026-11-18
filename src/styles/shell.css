@@ -239,24 +239,17 @@
     max-width: 34em;
   }
 
-  /* The header's row, 36 px: the plate with 20 px logos, the text, and
-     „За проекта“ at the end; the plate and the link fit a 320 px phone
-     (186 + 73 px and the two gaps in its 280 px). With a reader's text
-     spacing the link is 91 px there, and it takes two lines rather than
-     squeeze the plate, which never narrows (above). The text takes the room
-     the other two leave, a container that shows the full text when it holds
-     it through the project number, else the short text when that fits
-     through the number, else nothing; an ellipsis may end the rest of a
-     text, never the number. Each threshold is the 13 px text through „…C01“
-     (the short one) or „…C01, “ (the full one) plus the ellipsis, measured
-     in Chrome in KSM Text and its fallback faces and rounded up past the
-     widest, Arial (284 and 526 px; KSM Text 254 and 502, Segoe UI 273 and
-     516, Roboto 267 and 509): short 286 px, full 528 px. `safe center`:
-     should the text take more room than the row (a reader's text spacing,
-     WCAG 1.4.12), it stays below the top of the screen. */
+  /* The header's row, 36 px: the plate with 20 px logos at the start, over
+     the logo, and „За проекта“ at the end, over „Запитване“. No sentence
+     (src/shell/EuLine.jsx). They fit a 320 px phone (186 + 73 px and the
+     gap in its 280 px). With a reader's text spacing the link is 91 px
+     there, and it takes two lines rather than squeeze the plate, which never
+     narrows (above). `safe center`: should the link take more room than the
+     row (a reader's text spacing, WCAG 1.4.12), it stays below the top of
+     the screen. */
   .eu--row {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    display: flex;
+    justify-content: space-between;
     align-items: safe center;
     column-gap: 10px;
     height: 100%;
@@ -267,28 +260,6 @@
   }
   .eu--row .eu__plate img {
     height: 20px;
-  }
-  .eu__text {
-    container-type: inline-size;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .eu__text > span {
-    display: none;
-  }
-  @container (min-width: 286px) {
-    .eu__text > .eu__short {
-      display: inline;
-    }
-  }
-  @container (min-width: 528px) {
-    .eu__text > .eu__short {
-      display: none;
-    }
-    .eu__text > .eu__full {
-      display: inline;
-    }
   }
 
   /* ---------- the menu (spec §6.4) ---------- */
