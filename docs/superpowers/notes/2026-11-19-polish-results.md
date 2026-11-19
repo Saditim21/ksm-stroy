@@ -8,12 +8,18 @@ its deferred minors are at the end of this note.
 
 | # | The owner's ask | What the site does now | Commits |
 |---|---|---|---|
-| 1 | Remove the project's sentence from the top | The header's EU row holds the co-funding lockup, the programme's logo and „За проекта“; the sentence is in the footer and on /eu-proekt. The emblem stays in view on opening (handbook 2021–2027, §3.1). | cc745d8 |
+| 1 | Remove the project's sentence from the top | The sentence went first; then, at the owner's request before the preview, the whole EU row (see below). The footer, the menu, Home's poster and /eu-proekt carry the EU line. | cc745d8, 929bf8a |
 | 2 | Better covers in „Нашите обекти“ | Six covers of their own (`cover-<work>`), 1920 px masters in one grade; Green Life the night pool from the owner's photo's larger original. AI enlargement waits for the owner to run Real-ESRGAN (`scripts/images/covers.mjs --x4 <dir>`). | 9e33306 |
 | 3 | Продажби easier to understand, opening on images | Concept A „Две сгради“: the two buildings first, „Етаж по етаж“, the free apartments with filters. | e98ad04, ea6bea8 |
 | 4 | A creative За нас, not opening on the names | Concept A „Стена“: the motto over 35 photographs that zoom into Хотел Парадайс; the founding in production's words; the works on a sideways track (a grid where the track cannot run); the legacy sections. | e544818, 3633804, 467535a |
 | 5 | Try a light mode | „Травертин“ behind a switch in the header and the menu, remembered, set before the first paint; what sits on photographs stays dark (Home's services' columns included). Dark is the default. | b15410e, 8c4c341, cf076e7, a4c52d6 |
 | 6 | Responsive on every device | The sweep below, and its fixes. | b31da32, 3633804 |
+
+## After the round: the EU row comes off the header
+
+Before sending the preview, the owner asked for the row at the top of every page gone: the co-funding emblem, the programme's logo and „За проекта“ (the round had removed only the project's sentence). The header is now the bar alone, and `--eu-h` is 0. The footer, the menu, Home's poster and /eu-proekt keep the EU line, so the contract test (`tests/contracts/eu-visibility.test.jsx`) passes unchanged. The row's styles and a deep link's landing hold stay, unused; rendering the row and setting `--eu-h` back to 36px restores it.
+
+Before launch, the beneficiary's EU visibility rules for the project (until 27.01.2027) want the emblem visible on opening, without scrolling. That is worth confirming with KSM's contact for the grant: without the row, the emblem shows only in the footer, the menu and on /eu-proekt.
 
 ## The final review, and what it changed
 
