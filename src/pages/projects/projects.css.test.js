@@ -51,3 +51,24 @@ describe('#etazhi and #svobodni', () => {
     expect(declaredFor('.fl__row', [PHONE])['grid-template-areas']).toBe("'id b go' 'id meta go'")
   })
 })
+
+// Polish spec §6 (the sweep): a floor's squares shrink to the room the row
+// has, never wider than 22 px, so two blocks side by side fit a 1024 px
+// screen; on a phone the count goes under the squares, which take the width.
+describe('a floor’s row in any width', () => {
+  it('lets its squares shrink to fit', () => {
+    expect(declaredFor('.fr__c')['grid-template-columns']).toBe('repeat(var(--n), minmax(0, 22px))')
+    expect(declaredFor('.fr')['grid-template-columns']).toBe('3.4em minmax(0, 1fr) auto')
+  })
+
+  it('puts the count under the squares on a phone', () => {
+    expect(declaredFor('.fr', [PHONE])['grid-template-areas']).toBe("'n c' 'n w'")
+  })
+})
+
+// Polish spec §6 (the sweep): one under the other, a half clears the header
+// and the title above its words, so on a short screen (a phone on its side)
+// its name never slides under them.
+it('keeps a stacked half’s words clear of the header and the title', () => {
+  expect(declaredFor('.gw__half', [PHONE])).toMatchObject({ flex: 'none', 'padding-top': 'calc(var(--eu-h) + var(--bar-h) + 96px)' })
+})

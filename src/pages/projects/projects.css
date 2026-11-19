@@ -245,7 +245,7 @@
    mirrored about the seam. */
 .fr {
   display: grid;
-  grid-template-columns: 3.4em auto 7.5em;
+  grid-template-columns: 3.4em minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
   width: 100%;
@@ -256,7 +256,7 @@
   text-align: left;
   transition: border-color .25s, background-color .25s;
 }
-.ff__blk:first-of-type .fr { grid-template-columns: 7.5em auto 3.4em; text-align: right; }
+.ff__blk:first-of-type .fr { grid-template-columns: auto minmax(0, 1fr) 3.4em; text-align: right; }
 .ff__blk:first-of-type .fr__n { order: 3; text-align: left; }
 .ff__blk:first-of-type .fr__c { order: 2; }
 .ff__blk:first-of-type .fr__w { order: 1; }
@@ -269,15 +269,19 @@
   font: 500 20px/1 var(--serif);
   font-variant-numeric: tabular-nums lining-nums;
 }
+/* The squares share the room the row has, never wider than 22 px
+   (--n: the floor's count, FloorLedger.jsx); block А's stand against the
+   seam, on the right of theirs. */
 .fr__c {
   display: grid;
-  grid-auto-columns: 22px;
-  grid-auto-flow: column;
+  grid-template-columns: repeat(var(--n), minmax(0, 22px));
   gap: 4px;
+  min-width: 0;
 }
+.ff__blk:first-of-type .fr__c { justify-content: end; }
+.fr__c > i { aspect-ratio: 1; }
 .fr__c > i {
   display: block;
-  height: 22px;
   border: 1px solid var(--c);
 }
 .fr__c > .s-none { --c: var(--hair); }
@@ -450,7 +454,14 @@
     min-height: 0;
   }
   .gw__seam { display: none; }
-  .gw__half { min-height: calc(var(--screen-h) * .92); }
+  /* Each half at least nearly a screen, its words clear of the header and
+     the title above them: on a short screen (a phone on its side) the half
+     grows rather than slide its name under them. */
+  .gw__half {
+    flex: none;
+    min-height: calc(var(--screen-h) * .92);
+    padding-top: calc(var(--eu-h) + var(--bar-h) + 96px);
+  }
   .gw__half + .gw__half { border-top: 1px solid var(--brass); }
   .gw__title {
     top: calc(var(--eu-h) + var(--bar-h) + 16px);
@@ -466,18 +477,18 @@
   .ff__seam { display: none; }
   .ff__blk, .ff__blk:first-of-type { justify-items: stretch; padding: 0; }
   .ff__blk:first-of-type .ff__bt { text-align: left; }
+  /* The number, then the squares across the row, the count under them. */
   .fr, .ff__blk:first-of-type .fr {
-    grid-template-columns: 2.4em auto 1fr;
-    gap: 12px;
+    grid-template-columns: 2.4em minmax(0, 1fr);
+    grid-template-areas: 'n c' 'n w';
+    gap: 6px 12px;
     max-width: none;
     text-align: left;
   }
-  .ff__blk:first-of-type .fr__n { order: 1; }
-  .ff__blk:first-of-type .fr__c { order: 2; }
-  .ff__blk:first-of-type .fr__w { order: 3; }
-  .fr__w { text-align: right; }
-  .fr__c { grid-auto-columns: minmax(10px, 18px); gap: 3px; }
-  .fr__c > i { height: 18px; }
+  .fr__n, .ff__blk:first-of-type .fr__n { grid-area: n; }
+  .fr__c, .ff__blk:first-of-type .fr__c { grid-area: c; justify-content: start; }
+  .fr__w, .ff__blk:first-of-type .fr__w { grid-area: w; text-align: left; }
+  .fr__c { grid-template-columns: repeat(var(--n), minmax(0, 18px)); gap: 3px; }
   .fr__open { max-width: none; }
   .ff__blk:first-of-type .fr__open ul { justify-content: flex-start; }
 

@@ -39,7 +39,7 @@ function FloorRow({ building, project, model, block, floor, open, onToggle, pane
         onClick={onToggle}
       >
         <span className="fr__n" aria-hidden="true">{floor}</span>
-        <span className="fr__c" aria-hidden="true">
+        <span className="fr__c" aria-hidden="true" style={{ '--n': cells.length }}>
           {cells.map((look, i) => (
             // A floor's squares in its numbers' order: a list that never reorders.
             <i key={i} className={`s-${look}`} />
