@@ -169,7 +169,8 @@ it('the hero move is cancelled by unmount', async () => {
 
   fireEvent.click(link)
   await act(async () => { vi.advanceTimersByTime(400) })
-  fireEvent.click(within(screen.getByRole('banner')).getByRole('link', { name: 'За проекта' }))
+  // Another page: the footer's „За проекта“ (the header carries no EU row).
+  fireEvent.click(within(screen.getByRole('contentinfo')).getByRole('link', { name: 'За проекта' }))
   await act(async () => {})
   expect(window.location.pathname).toBe('/eu-proekt')
 

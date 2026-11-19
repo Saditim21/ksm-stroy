@@ -26,17 +26,16 @@
 //     page shows when the host answers with HTML the client router does not
 //     match to the same route: React skips the prerendered tree and renders
 //     the live one beside it, with no error in the console;
-//   - the EU line's „За проекта“ link not visible in the first viewport,
-//     without scrolling: a box of its own inside the viewport, opacity 1 up
-//     its ancestors, visibility visible, and nothing over it (the element at
-//     its centre is the link's own). On / the poster PDF links, scrolled to,
-//     must be visible too. jsdom cannot see CSS hide anything; this can.
+//   - no „За проекта“ link to /eu-proekt in the page: every page carries
+//     the EU line, in its footer, for the header carries no EU row (the
+//     owner's call, 2026-11-19; until then the link had to be visible in the
+//     first viewport, spec §1.9, §14.1). On / the poster PDF links, scrolled
+//     to, must be visible: a box of its own inside the viewport, opacity 1
+//     up its ancestors, visibility visible, and nothing over it. jsdom cannot see CSS hide anything; this can.
 //     A deep link that opens a dialog (its visit's `dialog`: a floor's plan
 //     stage or a unit's panel, spec §7.10) first jumps to the explorer, and
 //     the dialog lies over the page. Its visit must show that dialog, open
-//     and named, and the EU line all the same (spec §1.9, §14.1: in view on
-//     landing), which the landing keeps above its dialogs
-//     (src/explorer/ExplorerContext.jsx). The jump lands the explorer's top
+//     and named. The jump lands the explorer's top
 //     at the foot of the whole header the landing holds (ruling T4b); on
 //     Многофамилна, whose explorer opens the page, that takes no scroll. A
 //     link that shows a list of its own section (its visit's `lands`:
@@ -44,16 +43,14 @@
 //     address that names the explorer does (Golden Residence's #explorer,
 //     Home's teaser's links, the list's tab shown where it asks for it:
 //     `tab`), with no dialog: the section must be at the top of the screen,
-//     its heading clear of the whole header the landing holds (ruling T4b),
-//     and the EU line in view all the same, which the landing keeps until
-//     the visitor first moves the page (M3 §8). So do the links that land on
+//     its heading clear of the whole header the landing holds (ruling T4b).
+//     So do the links that land on
 //     Контакти's form (`lands`: ?apartment=,
 //     ?project= or #zapitvane, M3/M4 §7.3, §8). No scroll the page makes
 //     itself may end such a landing (src/shell/landingHold.js): after its
 //     shot, the visit takes the page to the top and back, as every
-//     ScrollTrigger.refresh() does, and the EU line must still be in view
-//     once the header could have slid; then a key, the visitor's first
-//     move, must let the row go (data-eu-hold off <html>).
+//     ScrollTrigger.refresh() does; then a key, the visitor's first move,
+//     must let the hold go (data-eu-hold off <html>).
 // And a path fails when its HTML, loaded with JavaScript off, has anything
 // but exactly one H1 (spec §11).
 //
@@ -63,8 +60,8 @@
 //
 // Then the focus ring (spec §11), in its ground's text colour: at 1440×900,
 // Tab from the top of each page in FOCUS_RING reaches each of its stops in
-// turn, and each shows a solid 2 px ring of its colour. On /, the EU row's
-// „За проекта“, the header's „Запитване“ and the Golden Residence half, whose
+// turn, and each shows a solid 2 px ring of its colour. On /, the header's
+// „Запитване“ and the Golden Residence half, whose
 // ring rides on an inset overlay (its ::after), all ivory on the dark site;
 // on /contact, „Изпратете запитване“ twice: the answer's link to the form, on
 // umber, then the form's own action, both ivory. jsdom cannot compute a
@@ -79,9 +76,8 @@
 // Golden Residence info; each half's info whole on its side of the seam; the
 // page no wider than the screen (anything wider, anywhere on the page, would
 // widen the layout viewport, and the fixed header with it, past the screen's
-// edge); the header's „За проекта“ and „Меню“ within the screen; the EU
-// row's logos in their own proportions; and the live count's digits whole in
-// their one-digit window. jsdom lays out no text; Chrome does.
+// edge); the header's „Меню“ within the screen; and the live count's
+// digits whole in their one-digit window. jsdom lays out no text; Chrome does.
 //
 // And the explorer (spec §7.2–7.6, §7.10), each step failing with its name:
 //   - desktop mouse, /projects/golden-residence at 1440×900: #explorer
@@ -95,8 +91,7 @@
 //     the sheet, titled „Блок А · Етаж 3“, and only that; a second tap
 //     opens the dialog of that name;
 //   - deep link, /projects/golden-residence/block-a?floor=3 at 1440×900:
-//     the dialog „Блок А · Етаж 3“ once the page has hydrated, and the EU
-//     line's „За проекта“ in view over it (spec §7.10 with §1.9);
+//     the dialog „Блок А · Етаж 3“ once the page has hydrated (spec §7.10);
 //   - text spacing, the Golden Residence page at 320×568 with TEXT_SPACING:
 //     no visible text in #explorer runs past the screen's edge, where the
 //     section's clip would cut it (the page's width cannot tell: the clip
@@ -113,7 +108,7 @@
 // the first rail, А-10, then ↓ to А-9 and → to Б-9, each rail's panel
 // showing and the dashed lens on its floor; on the phone, a tap on А-9's
 // rail once it has risen into view, then a second; the deep link ?floor=А-9
-// at 1440×900, the EU line in view over its dialog; text spacing at 320×568
+// at 1440×900, its dialog open; text spacing at 320×568
 // (its #explorer holds the H1, the address, the facts, the actions and the
 // facade's caption); and that deep link at 320×568 and at 390×844, with and
 // without text spacing. Then text spacing at 320×568 on its block page
@@ -196,8 +191,8 @@ const VISITS = [
   { path: '/projects/golden-residence#explorer', lands: 'explorer' },
   { path: '/projects/golden-residence?view=list#explorer', lands: 'explorer', tab: 'По критерии' },
   // Многофамилна's deep links (spec M3 §12): a floor's plan stage, and a
-  // unit's panel, each landing with the EU row in view; and its list, whose
-  // section the page lands on, the EU row in view all the same (M3 §6.4, §8).
+  // unit's panel, each landing with its dialog open; and its list, whose
+  // section the page lands on (M3 §6.4, §8).
   { path: '/projects/mnogofamilna-sgrada?floor=%D0%91-5', dialog: 'Блок Б · Етаж 5' },
   { path: '/projects/mnogofamilna-sgrada?unit=%D0%90-802', dialog: 'А-802' },
   { path: '/projects/mnogofamilna-sgrada?view=list', lands: 'spisak' },
@@ -205,7 +200,7 @@ const VISITS = [
   { path: '/projects/mnogofamilna-sgrada/block-a?floor=7', dialog: 'Блок А · Етаж 7' },
   // Links that land on Контакти's form (M3/M4 §7.3, §8): an apartment, a
   // subject with the form's hash, and the hash alone. Each lands on
-  // #zapitvane with the EU row in view and no dialog.
+  // #zapitvane with no dialog.
   { path: '/contact?apartment=%D0%90%20301', lands: 'zapitvane' },
   { path: '/contact?project=stroitelstvo#zapitvane', lands: 'zapitvane' },
   { path: '/contact#zapitvane', lands: 'zapitvane' },
@@ -244,7 +239,6 @@ const FOCUS_RING = [
   {
     path: '/',
     stops: [
-      { text: 'За проекта', ring: 'rgb(239, 233, 221)', ground: 'the EU row over the opening: ivory' },
       { text: 'Запитване', ring: 'rgb(239, 233, 221)', ground: 'the see-through header: ivory' },
       { text: 'Golden Residence', prefix: true, pseudo: '::after', ring: 'rgb(239, 233, 221)', ground: 'the Golden Residence half, on its overlay: ivory' },
     ],
@@ -259,7 +253,7 @@ const FOCUS_RING = [
 ]
 const MAX_TABS = 60
 
-// The phone opening check (spec §6.7): real phone screens under the EU row,
+// The phone opening check (spec §6.7): real phone screens under the header,
 // where the H1 must take two lines, broken after „пространства“ (spec §3.2),
 // and stay clear of the Golden Residence info.
 const PHONE_HERO = {
@@ -274,9 +268,7 @@ const PHONE_HERO = {
 // WCAG 1.4.12's text spacing as a reader's stylesheet sets it: line height
 // 1.5, letter spacing 0.12 em, word spacing 0.16 em, paragraphs 2 em apart.
 const TEXT_SPACING = '* { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } p { margin-bottom: 2em !important; }'
-// How far a logo may stand from its own proportions (rounding), and how far
-// a part may reach over the seam's half pixel.
-const LOGO_TOLERANCE = 0.02
+// How far a part may reach over the seam's half pixel.
 const SEAM_TOLERANCE_PX = 1
 
 // The explorer's steps (spec §7): the Golden Residence page's, and a deep
@@ -303,7 +295,7 @@ const EXPLORER = {
 // the keyboard's first rail (А-10, the attic), then the arrow keys from rail
 // to rail, the dashed lens following (`arrows`: each key and the floor whose
 // rail it focuses); a finger on a rail, block А's on a phone; a deep link to
-// А-9, landing with the EU row in view, as every deep link does; and block
+// А-9, landing with its dialog open, as every deep link does; and block
 // А's page (`blockPath`), for text spacing.
 const MN_EXPLORER = {
   path: '/projects/mnogofamilna-sgrada',
@@ -459,8 +451,8 @@ async function inspectLinks({ pathname, text, scroll, jumped = false }) {
 // hold's first 400 ms: the page to the top and back in one task, as every
 // ScrollTrigger.refresh() takes it (the motion's idle queue makes one as it
 // drains, src/motion/runtime.js), and the browser's `scroll` heard; then the
-// header's slide (0.5 s) waited out, and „За проекта“ must still be in view.
-// Then a key, the visitor's first move, must let the row go. The problems.
+// header's slide (0.5 s) waited out. Then a key, the visitor's first move,
+// must let the hold go. The problems.
 async function landingHold(page) {
   const problems = []
   await page.evaluate(() => new Promise((resolve) => {
@@ -472,14 +464,9 @@ async function landingHold(page) {
     // check goes on all the same if it does not.
     setTimeout(resolve, 2000)
   }))
-  const links = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: true })
-  if (!links.some(({ issues }) => issues.length === 0)) {
-    problems.push(`a scroll the page made itself (to the top and back, as ScrollTrigger's refresh does) let the EU row go: „За проекта“ ${links.length === 0 ? 'not found' : links[0].issues.join(', ')}`)
-    return problems
-  }
   await page.keyboard.press('Shift')
   const released = await page.waitForFunction(() => !document.documentElement.hasAttribute('data-eu-hold'), { timeout: 2000 }).then(() => true, () => false)
-  if (!released) problems.push('the visitor’s first key did not let the EU row go (data-eu-hold still on <html> 2 s on)')
+  if (!released) problems.push('the visitor’s first key did not let the landing’s hold go (data-eu-hold still on <html> 2 s on)')
   return problems
 }
 
@@ -620,11 +607,10 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         if (!shown.includes(text)) problems.push(`the page does not say „${text}“`)
       }
 
+      // The EU line every page carries, in its footer (the header carries no
+      // EU row: the owner's call, 2026-11-19).
       const euLinks = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: Boolean(dialog || lands) })
       if (euLinks.length === 0) problems.push('no „За проекта“ link to /eu-proekt')
-      else if (!euLinks.some(({ issues }) => issues.length === 0)) {
-        problems.push(`„За проекта“ is not visible in the first viewport: ${euLinks[0].issues.join(', ')}`)
-      }
       if (dialog) {
         const shown = await page.evaluate(openDialogs)
         if (!shown.includes(dialog)) problems.push(`the deep link shows no dialog „${dialog}“ (open: ${shown.map((name) => `„${name}“`).join(', ') || 'none'})`)
@@ -651,8 +637,8 @@ async function visit(browser, userAgents, { path: pathname, redirect, status = 2
         if (at.top === null || at.top < 0 || at.top > at.screen / 4) {
           problems.push(`#${lands} is not at the top of the screen (its top at ${at.top === null ? 'none' : `${Math.round(at.top)} px`})`)
         }
-        // Ruling T4b: the landing holds the whole header, the EU row with the
-        // bar, and its heading lands below it, never under the row.
+        // Ruling T4b: the landing holds the whole header, and its heading
+        // lands below it, never under it.
         if (at.heading === null || at.heading < at.header - 1) {
           problems.push(`#${lands}'s heading is under the header (its top at ${at.heading === null ? 'none' : `${Math.round(at.heading)} px`}, the header's foot at ${Math.round(at.header)} px)`)
         }
@@ -884,10 +870,9 @@ async function openingBoxes() {
 }
 
 // In the page, under TEXT_SPACING: the boxes of the H1, the two infos, the
-// seam, the opening and the header's „За проекта“ and „Меню“; the screen's
-// width and the layout viewport's, which grows past the screen when anything
-// on the page is wider; and how far each of the EU row's logos stands from
-// its own proportions.
+// seam, the opening and the header's „Меню“; and the screen's width and the
+// layout viewport's, which grows past the screen when anything on the page
+// is wider.
 function spacedOpening() {
   const box = (selector) => {
     const element = document.querySelector(selector)
@@ -895,12 +880,6 @@ function spacedOpening() {
     const { top, right, bottom, left } = element.getBoundingClientRect()
     return { top, right, bottom, left }
   }
-  const logos = [...document.querySelectorAll('.hdr .eu__plate img')]
-    .filter((img) => img.complete && img.naturalWidth > 0)
-    .map((img) => {
-      const { width, height } = img.getBoundingClientRect()
-      return { name: img.alt, off: Math.abs(width / height / (img.naturalWidth / img.naturalHeight) - 1) }
-    })
   // A live count's digits (RollingNumber): each column's strip of ten
   // digits, and the one-digit window it shows them through.
   const digits = [...document.querySelectorAll('.hero .roll-strip')].map((strip) => ({
@@ -913,11 +892,9 @@ function spacedOpening() {
     seam: box('.hero__seam'),
     mn: box('.half--mn .half__info'),
     hero: box('.hero'),
-    more: box('.hdr__eu a.hit'),
     menu: box('.hdr__menu'),
     screen: document.documentElement.clientWidth,
     layout: innerWidth,
-    logos,
     digits,
   }
 }
@@ -925,10 +902,10 @@ function spacedOpening() {
 // What a phone opening measured under TEXT_SPACING (spacedOpening) gets
 // wrong: a part over the next, an info across the seam or past the opening's
 // foot, a page wider than the screen, a header control past the screen's
-// edge, a squeezed logo, a live count's digits taller than their window.
-function spacingProblems(size, { title, gr, seam, mn, hero, more, menu, screen, layout, logos, digits }) {
+// edge, a live count's digits taller than their window.
+function spacingProblems(size, { title, gr, seam, mn, hero, menu, screen, layout, digits }) {
   const at = `${size} with text spacing`
-  const missing = Object.entries({ H1: title, 'Golden Residence info': gr, seam, 'Многофамилна info': mn, opening: hero, '„За проекта“': more, '„Меню“': menu })
+  const missing = Object.entries({ H1: title, 'Golden Residence info': gr, seam, 'Многофамилна info': mn, opening: hero, '„Меню“': menu })
     .filter(([, found]) => !found)
     .map(([name]) => name)
   if (missing.length > 0) return [`${at}: no ${missing.join(', ')} in the page`]
@@ -950,12 +927,7 @@ function spacingProblems(size, { title, gr, seam, mn, hero, more, menu, screen, 
   if (layout > screen) {
     problems.push(`${at}: the page is ${layout} px wide on a ${screen} px screen; something on it is wider than the screen, and the fixed header widens with it`)
   }
-  for (const [name, control] of [['„За проекта“', more], ['„Меню“', menu]]) {
-    if (control.right > screen + 0.5) problems.push(`${at}: the header's ${name} ends at ${Math.round(control.right)}, past the screen's ${screen} px`)
-  }
-  for (const { name, off } of logos) {
-    if (off > LOGO_TOLERANCE) problems.push(`${at}: the EU row's logo „${name}“ is squeezed ${Math.round(off * 100)} % out of its proportions`)
-  }
+  if (menu.right > screen + 0.5) problems.push(`${at}: the header's „Меню“ ends at ${Math.round(menu.right)}, past the screen's ${screen} px`)
   const cut = digits.find(({ line, window }) => Math.abs(line - window) > 0.5)
   if (cut) {
     problems.push(`${at}: the Golden Residence count's digits take ${cut.line.toFixed(1)} px each in a ${cut.window.toFixed(1)} px window, which cuts them`)
@@ -1241,9 +1213,8 @@ async function explorerPhone(page, problems, explorer) {
   }
 }
 
-// Deep link: the floor's plan stage, once the page has hydrated, and the EU
-// line's „За проекта“ in view over it, which the landing keeps (spec §7.10
-// with §1.9, §14.1; ruling T7a).
+// Deep link: the floor's plan stage, once the page has hydrated (spec §7.10;
+// ruling T7a).
 async function explorerDeepLink(page, problems, explorer) {
   const dialog = titleOf(explorer.deepLink.floor)
   if (!(await dialogOpens(page, dialog, 10000))) {
@@ -1252,10 +1223,6 @@ async function explorerDeepLink(page, problems, explorer) {
   }
   // Time for a late error to show.
   await delay(1000)
-  const eu = await page.evaluate(inspectLinks, { pathname: '/eu-proekt', text: 'За проекта', scroll: false, jumped: true })
-  if (!eu.some(({ issues }) => issues.length === 0)) {
-    problems.push(`„За проекта“ is not in view over the dialog: ${eu.length === 0 ? 'no link to /eu-proekt' : eu[0].issues.join(', ')}`)
-  }
 }
 
 // In the page: the visible text inside `selector` that runs past the

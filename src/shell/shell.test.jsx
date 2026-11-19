@@ -58,36 +58,19 @@ describe('the header', () => {
     expect(theme.compareDocumentPosition(menu) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  // Spec §6.3, §14.1: the EU line is the header's top row on every page, so
-  // the emblem and its „Съфинансирано от Европейския съюз“ are seen on
-  // landing without scrolling. The owner asked for the row without the
-  // sentence about the project (2026-11-19): the footer and /eu-proekt carry
-  // it.
-  it('carries the EU row: the emblem, the programme’s logo and „За проекта“, no sentence', async () => {
+  // The header carries no EU row: the owner's call (2026-11-19), after the
+  // round that had kept the emblem, the programme's logo and „За проекта“
+  // there (spec §6.3, §14.1). The footer, the menu and /eu-proekt carry the EU
+  // line (tests/contracts/eu-visibility.test.jsx).
+  it('carries no EU row: no emblem, no programme logo, no „За проекта“', async () => {
     renderSiteAt('/about')
     const header = await siteHeader()
     const row = within(header)
 
-    expect(row.getByRole('link', { name: 'За проекта' })).toHaveAttribute('href', '/eu-proekt')
-    expect(row.getByRole('img', { name: 'Съфинансирано от Европейския съюз' })).toBeInTheDocument()
-    expect(row.getByRole('img', { name: 'Програма „Конкурентоспособност и иновации в предприятията“' })).toBeInTheDocument()
-    expect(textOf(header)).not.toContain(FULL_EU_TEXT)
-    expect(textOf(header)).not.toContain(SHORT_EU_TEXT)
-    expect(textOf(header)).not.toContain('BG16RFPR001-1.012-1485-C01')
-  })
-
-  // The logos are in every first viewport: lazy loading only held them back
-  // (Chrome's LazyLoadImageIssue). They are no page's LCP image, so they take
-  // no fetch priority from it.
-  it('loads the EU logos at once, with no fetch priority', async () => {
-    renderSiteAt('/about')
-    const header = within(await siteHeader())
-
-    for (const name of ['Съфинансирано от Европейския съюз', 'Програма „Конкурентоспособност и иновации в предприятията“']) {
-      const logo = header.getByRole('img', { name })
-      expect(logo).toHaveAttribute('loading', 'eager')
-      expect(logo).not.toHaveAttribute('fetchpriority')
-    }
+    expect(row.queryByRole('link', { name: 'За проекта' })).toBeNull()
+    expect(row.queryByRole('img', { name: 'Съфинансирано от Европейския съюз' })).toBeNull()
+    expect(row.queryByRole('img', { name: 'Програма „Конкурентоспособност и иновации в предприятията“' })).toBeNull()
+    expect(header.querySelector('.hdr__eu')).toBeNull()
   })
 
   // The footer's plate sets its logos larger than the row's (128 and 102 px

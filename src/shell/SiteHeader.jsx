@@ -4,15 +4,19 @@ import Logo from '../components/brand/Logo'
 import Button from '../components/ui/Button'
 import { PRIMARY_PHONE } from '../config/site'
 import { normalizePathname } from '../utils/pathname'
-import EuLine from './EuLine'
 import SiteMenu from './SiteMenu'
 import ThemeSwitch from './ThemeSwitch'
 import { inquiryTarget, useRouteHandle } from './handle'
 
 // The site's header (spec §6.2; extract §4.2): one fixed element holding the
-// EU row (EuLine, 36 px) over the bar, which holds the logo, „Меню“, and from
-// 901 px the phone and „Запитване“. No page links: they are in the menu and
-// the footer. The look is src/styles/shell.css's.
+// bar, with the logo, the theme switch, „Меню“, and from 901 px the phone and
+// „Запитване“. No page links: they are in the menu and the footer. The look
+// is src/styles/shell.css's.
+//
+// It carries no EU row: the owner's call (2026-11-19). The footer, the menu
+// and /eu-proekt carry the EU line (EuLine). To bring the row back, render
+// <div className="hdr__eu"><EuLine /></div> above the bar and set --eu-h to
+// 36px (src/index.css): its styles and the deep link's landing hold remain.
 //
 // - Over a page whose route handle asks for an overlay (src/shell/handle.js)
 //   it is see-through over a scrim until the page has scrolled 40 px; from
@@ -73,9 +77,6 @@ export default function SiteHeader() {
         Към съдържанието
       </a>
       <header className="hdr" data-look={overlay ? 'overlay' : 'solid'} data-scrolled={scrolled ? '' : undefined}>
-        <div className="hdr__eu">
-          <EuLine />
-        </div>
         <div className="hdr__bar">
           <Link to="/" aria-label="КСМ Строй, начална страница" className="hdr__logo">
             <Logo markClassName="text-brass" />

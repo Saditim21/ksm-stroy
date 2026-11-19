@@ -288,10 +288,12 @@
 }
 
 :root {
-  /* The header (src/shell/SiteHeader.jsx, spec §2.2, §4): the EU row, one
-     36 px row everywhere, over the bar, 76 px and 64 px on a phone. A page
-     starts below both, or at the top under an overlay header (root.jsx). */
-  --eu-h: 36px;
+  /* The header (src/shell/SiteHeader.jsx, spec §2.2, §4): the bar, 76 px
+     and 64 px on a phone. A page starts below it, or at the top under an
+     overlay header (root.jsx). The EU row that sat over the bar is gone (the
+     owner's call, 2026-11-19): its height is 0, and every place set below it
+     sits at the bar. 36px brings the row's place back with the row. */
+  --eu-h: 0px;
   --bar-h: 76px;
   --header-h: calc(var(--eu-h) + var(--bar-h));
 }

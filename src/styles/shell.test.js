@@ -83,8 +83,13 @@ describe('the header (spec §6.2)', () => {
     expect(declaredFor(':root[data-eu-hold] .hdr[data-scrolled]').transform).toBe('none')
   })
 
-  it('carries the EU row and the bar at their heights', () => {
-    expect(declaredFor('.hdr__eu').height).toBe('var(--eu-h)')
+  // The header carries no EU row (the owner's call, 2026-11-19): the row's
+  // height is 0, so the header is the bar alone, and what was placed below
+  // the row (a page's top, Home's seam, Продажби's title) sits at the bar.
+  // The row's rules stay, unused, should it come back (at 36 px).
+  it('gives the EU row no height: the header is the bar alone', () => {
+    const root = rulesFor(indexRules, ':root').find((rule) => valueOf(rule, '--eu-h') !== undefined)
+    expect(valueOf(root, '--eu-h')).toBe('0px')
     expect(declaredFor('.hdr__bar').height).toBe('var(--bar-h)')
   })
 
@@ -293,11 +298,12 @@ describe('src/index.css', () => {
     expect(css).toMatch(/@import '\.\/styles\/shell\.css';/)
   })
 
-  // Spec §2.2, §4: one 36 px EU row everywhere; a 76 px bar, 64 px on a
-  // phone; an in-page jump leaves room for the bar.
+  // Spec §2.2, §4, with the owner's call of 2026-11-19: no EU row (0 px, see
+  // above); a 76 px bar, 64 px on a phone; an in-page jump leaves room for
+  // the bar.
   it('sets the header’s heights and leaves room for the bar on a jump', () => {
     expect(declaredFor(':root', [], indexRules)).toMatchObject({
-      '--eu-h': '36px',
+      '--eu-h': '0px',
       '--bar-h': '76px',
       '--header-h': 'calc(var(--eu-h) + var(--bar-h))',
     })
