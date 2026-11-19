@@ -285,7 +285,7 @@ export default function PlanStage({ project, plans, dated = null, model, block, 
     <>
       <div
         ref={rootRef}
-        className="ps"
+        className="ps dark"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

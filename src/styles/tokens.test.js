@@ -160,3 +160,13 @@ it('gives hand-written CSS the same type stacks as Tailwind', () => {
   expect(indexCss).toContain(`--serif: ${t.fontFamily.display.join(', ')};`)
   expect(indexCss).toContain(`--sans: ${t.fontFamily.text.join(', ')};`)
 })
+
+// The brightest the ground allows (src/styles/diptych.css's hovers): white on
+// the dark grounds, black on the light one, white again on a dark island.
+it('sets --hi for each ground', () => {
+  const after = (selector) => indexCss.slice(indexCss.indexOf(`${selector} {`))
+  const valueIn = (block) => /--hi: (#[0-9A-F]{6});/.exec(block.slice(0, block.indexOf('}')))?.[1]
+  expect(valueIn(after('  :root'))).toBe('#FFFFFF')
+  expect(valueIn(after(':root[data-theme="light"]'))).toBe('#000000')
+  expect(valueIn(after(':root[data-theme="light"] .dark'))).toBe('#FFFFFF')
+})

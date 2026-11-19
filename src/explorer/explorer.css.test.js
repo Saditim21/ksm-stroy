@@ -91,7 +91,7 @@ describe('the rails (spec §7.2)', () => {
   // A zero count dims to 3.36:1 on onyx (src/styles/tokens.test.js), a hot
   // one turns brass-l and the others fade back.
   it('dims a zero, lights the hot count and fades the others', () => {
-    expect(declaredFor('.fx__cnt.is-zero .n').color).toBe('rgba(155, 148, 136, .65)')
+    expect(declaredFor('.fx__cnt.is-zero .n').color).toBe('color-mix(in srgb, var(--stone) 65%, transparent)')
     expect(declaredFor('.fx__cnt.is-hot .n').color).toBe('var(--brass-l)')
     expect(declaredFor('.fx.is-hot .fx__cnt:not(.is-hot) > span').opacity).toBe('.32')
   })
@@ -108,7 +108,7 @@ describe('the rails (spec §7.2)', () => {
 
 describe('the edge panel and the sheet (spec §7.3, §7.5)', () => {
   it('sets the panel var(--pw) wide, 470 px tall at least, over the block’s edge', () => {
-    expect(declaredFor('.fxp')).toMatchObject({ width: 'var(--pw)', 'min-height': '470px', background: 'rgba(26, 23, 20, .97)', visibility: 'hidden' })
+    expect(declaredFor('.fxp')).toMatchObject({ width: 'var(--pw)', 'min-height': '470px', background: 'color-mix(in srgb, var(--umber) 97%, transparent)', visibility: 'hidden' })
     expect(declaredFor('.fxp[data-open]').visibility).toBe('visible')
     expect(declaredFor('.fxp--a')['border-right']).toBe('1px solid var(--brass)')
     expect(declaredFor('.fxp--b')['border-left']).toBe('1px solid var(--brass)')

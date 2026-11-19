@@ -169,3 +169,13 @@ describe('the seam and the halves (spec §4)', () => {
 it('.grade has the spec’s filter', () => {
   expect(declared(only('.grade'))).toEqual({ filter: 'saturate(.5) sepia(.2) brightness(.74) contrast(1.08)' })
 })
+
+// Polish spec §5: the hovers that brighten to the brightest the ground
+// allows take --hi, white on the dark grounds and black on the light one
+// (src/index.css), never a literal white, which the light ground swallows.
+describe('the hovers in either theme', () => {
+  it('brightens the solid action and the link to --hi', () => {
+    expect(declaredFor('.btn--solid:hover', [LAYER, FINE])).toMatchObject({ 'background-color': 'var(--hi)', 'border-color': 'var(--hi)', color: 'var(--onyx)' })
+    expect(declaredFor('.link:hover', [LAYER, FINE]).color).toBe('var(--hi)')
+  })
+})

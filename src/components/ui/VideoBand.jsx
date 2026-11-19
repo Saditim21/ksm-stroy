@@ -120,7 +120,7 @@ export default function VideoBand({ sources, poster, alt, priority = false, clas
   }, [showFilm, wanted])
 
   return (
-    <div ref={bandRef} className={`relative overflow-hidden ${className}`.trim()}>
+    <div ref={bandRef} className={`dark relative overflow-hidden ${className}`.trim()}>
       <ResponsivePicture
         image={poster.mobile}
         art={{ media: MD_UP, image: poster.desktop }}

@@ -133,7 +133,7 @@ export default function SplitHero() {
 
   return (
     <section
-      className="hero"
+      className="hero dark"
       id="proekti"
       aria-label="Нашите сгради"
       data-moving={moving ? '' : undefined}

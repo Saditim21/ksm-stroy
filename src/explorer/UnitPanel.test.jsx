@@ -428,3 +428,10 @@ describe('the attic in the unit’s line', () => {
     expect(lineOf('А 101')).toMatch(/^Блок\u00A0А · етаж 1 · \d-стаен$/)
   })
 })
+
+// Polish spec §5: the unit panel keeps the dark values in the light theme,
+// a dark box over the page, its plan made for its dark ground.
+it('stays dark in both themes', () => {
+  renderPanel('А 301')
+  expect(document.querySelector('.up')).toHaveClass('dark')
+})

@@ -425,3 +425,10 @@ describe('the motion', () => {
     expect(document.querySelector('.ps')).toBeNull()
   })
 })
+
+// Polish spec §5: the plan stage keeps the dark values in the light theme,
+// its drawings and labels made for its dark ground.
+it('stays dark in both themes', () => {
+  renderStage()
+  expect(document.querySelector('.ps')).toHaveClass('dark')
+})

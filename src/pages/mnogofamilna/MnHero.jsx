@@ -66,7 +66,7 @@ export default function MnHero() {
   )
 
   return (
-    <section className="mnx" id="explorer" aria-labelledby="mn-h">
+    <section className="mnx dark" id="explorer" aria-labelledby="mn-h">
       <div className="mnx__head">
         <Seam />
         <h1 className="mnx__h1" id="mn-h">

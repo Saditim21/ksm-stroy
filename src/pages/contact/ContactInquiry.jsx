@@ -317,7 +317,7 @@ export default function ContactInquiry() {
             Изпратете <em>запитване</em>
           </h2>
         </div>
-        <div className="ask__media">
+        <div className="ask__media dark">
           <div className="ask__frame">
             <div className="ask__plates" aria-hidden="true">
               {SUBJECTS.map(({ option: { value } }) => (

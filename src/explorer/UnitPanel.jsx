@@ -265,7 +265,7 @@ function Panel({ plans, dated = null, model, unit, onClose, onStep, onInquire })
   return createPortal(
     <div
       ref={rootRef}
-      className="up"
+      className="up dark"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}

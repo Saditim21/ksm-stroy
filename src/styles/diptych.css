@@ -85,8 +85,8 @@
 
   @media (hover: hover) and (pointer: fine) {
     .btn:hover { --b: var(--brass-l); background-color: rgba(184, 149, 74, .09); }
-    .btn--solid:hover { background-color: #fff; border-color: #fff; color: var(--onyx); }
-    .link:hover { background-image: linear-gradient(var(--brass-l), var(--brass-l)); color: #fff; }
+    .btn--solid:hover { background-color: var(--hi); border-color: var(--hi); color: var(--onyx); }
+    .link:hover { background-image: linear-gradient(var(--brass-l), var(--brass-l)); color: var(--hi); }
     .btn:hover .arr,
     .link:hover .arr { transform: translateX(4px); }
   }

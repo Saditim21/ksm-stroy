@@ -75,15 +75,15 @@
 .blk__grid .s-none { --c: var(--hair); }
 .blk__grid .s-free {
   --c: var(--status-free);
-  background: rgba(79, 191, 133, .55);
+  background: color-mix(in srgb, var(--status-free) 55%, transparent);
 }
 .blk__grid .s-reserved {
   --c: var(--status-reserved);
-  background: repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px);
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--status-reserved) 90%, transparent) 0 1.5px, transparent 1.5px 4px);
 }
 .blk__grid .s-sold {
-  --c: rgba(212, 87, 78, .7);
-  background-image: radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px);
+  --c: color-mix(in srgb, var(--status-sold) 70%, transparent);
+  background-image: radial-gradient(color-mix(in srgb, var(--status-sold) 85%, transparent) 1px, transparent 1.3px);
   background-size: 4px 4px;
 }
 .blk__grid .s-blocked {

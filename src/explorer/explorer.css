@@ -295,7 +295,7 @@
   opacity: 1 !important;
   transform: none !important;
 }
-.fx__cnt.is-zero .n { color: rgba(155, 148, 136, .65); }
+.fx__cnt.is-zero .n { color: color-mix(in srgb, var(--stone) 65%, transparent); }
 .fx__cnt.is-hot .n { color: var(--brass-l); }
 .fx.is-hot .fx__cnt:not(.is-hot) > span { opacity: .32; }
 /* Below 1000 px the stage's 860 px reach the page's edges: the counts stay
@@ -356,7 +356,7 @@
   height: 100%;
   min-height: 470px;
   padding: 26px 26px 22px;
-  background: rgba(26, 23, 20, .97);
+  background: color-mix(in srgb, var(--umber) 97%, transparent);
   visibility: hidden;
 }
 .fxp[data-open] { visibility: visible; }
@@ -522,7 +522,7 @@
   transition: color .2s, background-color .2s;
 }
 .step button:disabled {
-  color: rgba(155, 148, 136, .4);
+  color: color-mix(in srgb, var(--stone) 40%, transparent);
   cursor: default;
 }
 .step button svg {

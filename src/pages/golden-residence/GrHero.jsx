@@ -40,7 +40,7 @@ export default function GrHero() {
   const free = grFree(useAvailability())
 
   return (
-    <section className="grhero" id="top" aria-labelledby="gr-h">
+    <section className="grhero dark" id="top" aria-labelledby="gr-h">
       <div className="grhero__media">
         <ResponsivePicture image={grImages['gr-dusk']} alt="Golden Residence по здрач, визуализация" sizes="100vw" priority />
       </div>

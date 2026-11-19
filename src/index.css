@@ -31,6 +31,8 @@
     --status-reserved: #E9953F;
     --status-sold: #D4574E;
     --status-blocked: #8A867D;
+    /* The brightest the ground allows, for the hovers that brighten. */
+    --hi: #FFFFFF;
 
     --gut: clamp(20px, 3.6vw, 60px);
 
@@ -77,6 +79,7 @@
     --status-reserved: #B0621A;
     --status-sold: #BA4136;
     --status-blocked: #7A756B;
+    --hi: #000000;
     color-scheme: light;
   }
 
@@ -102,6 +105,7 @@
     --status-reserved: #E9953F;
     --status-sold: #D4574E;
     --status-blocked: #8A867D;
+    --hi: #FFFFFF;
     color-scheme: dark;
     color: var(--ivory);
   }

@@ -42,9 +42,9 @@ describe('a block in numbers (spec §6.16; extract §4.27)', () => {
 
   // Spec §7.9: never colour alone; a status's pattern on each square.
   it('marks each square by its status’s pattern, blocked by a dashed outline, and waits in a hair outline', () => {
-    expect(declaredFor('.blk__grid .s-free')).toMatchObject({ '--c': 'var(--status-free)', background: 'rgba(79, 191, 133, .55)' })
-    expect(declaredFor('.blk__grid .s-reserved').background).toBe('repeating-linear-gradient(-45deg, rgba(233, 149, 63, .9) 0 1.5px, transparent 1.5px 4px)')
-    expect(declaredFor('.blk__grid .s-sold')).toMatchObject({ '--c': 'rgba(212, 87, 78, .7)', 'background-image': 'radial-gradient(rgba(212, 87, 78, .85) 1px, transparent 1.3px)', 'background-size': '4px 4px' })
+    expect(declaredFor('.blk__grid .s-free')).toMatchObject({ '--c': 'var(--status-free)', background: 'color-mix(in srgb, var(--status-free) 55%, transparent)' })
+    expect(declaredFor('.blk__grid .s-reserved').background).toBe('repeating-linear-gradient(-45deg, color-mix(in srgb, var(--status-reserved) 90%, transparent) 0 1.5px, transparent 1.5px 4px)')
+    expect(declaredFor('.blk__grid .s-sold')).toMatchObject({ '--c': 'color-mix(in srgb, var(--status-sold) 70%, transparent)', 'background-image': 'radial-gradient(color-mix(in srgb, var(--status-sold) 85%, transparent) 1px, transparent 1.3px)', 'background-size': '4px 4px' })
     expect(declaredFor('.blk__grid .s-blocked')).toMatchObject({ '--c': 'var(--status-blocked)', 'border-style': 'dashed' })
     expect(declaredFor('.blk__grid .s-none')['--c']).toBe('var(--hair)')
   })

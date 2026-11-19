@@ -190,7 +190,7 @@ export default function WorksSection() {
   return (
     <section ref={ref} className="works split" id="obekti" aria-labelledby="works-h">
       <Seam />
-      <div className="works__media" aria-hidden="true">
+      <div className="works__media dark" aria-hidden="true">
         <div className="works__frame">
           {WORKS.map(({ image }, work) => {
             const depth = shown.findIndex((show) => show.own && show.work === work)

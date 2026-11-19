@@ -155,7 +155,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  border: 1px solid rgba(216, 189, 122, 0);
+  border: 1px solid color-mix(in srgb, var(--brass-l) 0%, transparent);
   pointer-events: none;
   transition: border-color .3s var(--e-soft);
 }
@@ -186,7 +186,7 @@
 }
 .wk__tag {
   padding: 4px 8px;
-  border: 1px solid rgba(216, 189, 122, .4);
+  border: 1px solid color-mix(in srgb, var(--brass-l) 40%, transparent);
   color: var(--brass-l);
   font-size: 12px;
   line-height: 1;
@@ -239,7 +239,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .ob__filter button[aria-pressed='false']:hover { color: var(--ivory); }
-  .wk__ph:hover::after { border-color: rgba(216, 189, 122, .75); }
+  .wk__ph:hover::after { border-color: color-mix(in srgb, var(--brass-l) 75%, transparent); }
 }
 
 /* ---------- 3. the closing (spec §7.2) ---------- */
