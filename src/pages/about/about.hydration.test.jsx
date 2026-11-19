@@ -8,15 +8,11 @@ import App from '../../root'
 import About, { handle } from '../../routes/about'
 import { mockMatchMedia } from '../../test/media'
 
-// The browser hydrates За нас's prerendered HTML (about.prerender.test.jsx
-// reads it as the build makes it, in Node), and what the browser knows (a
-// fine pointer or a finger, motion allowed or not) must not change the first
-// client render (plan, global rules; spec M3/M4 §7.4, ruling M4-PF11): no
-// recoverable error and no console.error. Rendered on the "server" here,
-// then hydrated, as blog.hydration.test.jsx does.
+// The browser hydrates За нас's prerendered HTML (about.prerender.test.jsx),
+// and what the browser knows (a pointer or a finger, motion allowed or not,
+// the light theme) must not change the first client render: no recoverable
+// error and no console.error. The motion engine never loads here.
 
-// The motion engine never loads here: hydration is the question, and GSAP
-// and Lenis have no business in jsdom.
 vi.mock('../../motion/runtime', () => ({
   loadMotion: () => new Promise(() => {}),
   getMotion: () => null,
@@ -42,12 +38,11 @@ afterEach(() => {
   container.remove()
   restore?.()
   restore = undefined
+  document.documentElement.removeAttribute('data-theme')
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
-// Hydrates the prerendered page with `media` (mockMatchMedia's); every
-// recoverable error is kept, to fail the test, and console.error is watched.
 async function hydrate(media) {
   const html = renderToString(page())
   restore = mockMatchMedia(media)
@@ -65,9 +60,8 @@ it('hydrates with a fine pointer and motion allowed, and no recoverable error', 
 
   expect(errors).toEqual([])
   expect(logged.mock.calls).toEqual([])
-  expect(textOf(container.querySelector('h1'))).toBe('Добре дошли в КСМ Строй ООД')
-  expect(textOf(container.querySelector('figure.lineage figcaption'))).toMatch(/основана през месец септември 2008/)
-  expect(container.querySelectorAll('main picture')).toHaveLength(5)
+  expect(textOf(container.querySelector('h1'))).toBe('Добрата работа – реклама за майстора')
+  expect(container.querySelectorAll('.wl__t')).toHaveLength(35)
 })
 
 it('hydrates on a phone with no error', async () => {
@@ -79,6 +73,14 @@ it('hydrates on a phone with no error', async () => {
 
 it('hydrates under reduced motion with no error', async () => {
   const { errors, logged } = await hydrate({ reduce: true })
+
+  expect(errors).toEqual([])
+  expect(logged.mock.calls).toEqual([])
+})
+
+it('hydrates over the light theme with no error', async () => {
+  document.documentElement.setAttribute('data-theme', 'light')
+  const { errors, logged } = await hydrate({ fine: true })
 
   expect(errors).toEqual([])
   expect(logged.mock.calls).toEqual([])

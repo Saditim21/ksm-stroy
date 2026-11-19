@@ -106,6 +106,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-entrance-1920.webp",
     "widths": [
+      480,
       1000,
       1920
     ]
@@ -115,6 +116,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-balconies-1300.webp",
     "widths": [
+      480,
       800,
       1300
     ]
@@ -124,6 +126,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-terrace-1600.webp",
     "widths": [
+      480,
       900,
       1600
     ]
@@ -133,6 +136,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-garden-1600.webp",
     "widths": [
+      480,
       900,
       1600
     ]
@@ -165,6 +169,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-endtowers-1600.webp",
     "widths": [
+      480,
       900,
       1600
     ]
@@ -183,6 +188,7 @@
     "group": "golden-residence",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-longfacade-1024.webp",
     "widths": [
+      480,
       1024
     ]
   },
@@ -252,6 +258,7 @@
     "group": "mnogofamilna",
     "src": "src/assets/продажби/project 1/photos/photo-1.png",
     "widths": [
+      480,
       800,
       1352
     ]
@@ -261,6 +268,7 @@
     "group": "mnogofamilna",
     "src": "src/assets/продажби/project 1/photos/photo-2.png",
     "widths": [
+      480,
       800,
       1356
     ]
@@ -450,6 +458,7 @@
     "group": "home",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/res-photo4-1600.webp",
     "widths": [
+      480,
       900,
       1600
     ]
@@ -459,6 +468,7 @@
     "group": "home",
     "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/works-chitalishte-1200.webp",
     "widths": [
+      480,
       700,
       1200
     ]
