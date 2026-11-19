@@ -15,8 +15,9 @@ import { typeWord } from '../../utils/roomTypes'
 // as squares in their statuses' patterns (neutral until the data is in, as
 // the explorer's grids are), and „6 свободни“ or „няма свободни“; it opens to
 // the floor's free apartments, each a link to it on its building's page
-// (unitHref). Its accessible name says it all: „Блок А, етаж 8: 12 свободни
-// от 12“. Opening another building closes every row.
+// (unitHref), or, before the numbers are in, says they are on their way. Its
+// accessible name says it all: „Блок А, етаж 8: 12 свободни от 12“. Opening
+// another building closes every row.
 
 function FloorRow({ building, project, model, block, floor, open, onToggle, panelId }) {
   const stats = model?.floors.get(floorKey(block, floor)) ?? null
@@ -52,7 +53,11 @@ function FloorRow({ building, project, model, block, floor, open, onToggle, pane
       </button>
       {open ? (
         <div className="fr__open" id={panelId}>
-          {freeUnits.length ? (
+          {/* Before the numbers are in (a cold API holds them up to 10 s), the
+              floor is not sold out: its apartments are on their way. */}
+          {!stats ? (
+            <p>Зареждаме апартаментите на етажа…</p>
+          ) : freeUnits.length ? (
             <ul>
               {freeUnits.map((unit) => {
                 const label = project.unitLabel(unit)
