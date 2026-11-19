@@ -27,9 +27,10 @@ const THEMES = (arg('theme', 'both') === 'both' ? ['dark', 'light'] : [arg('them
 
 const only = (() => { const at = process.argv.indexOf('--route'); return at > -1 ? process.argv[at + 1] : null })()
 export const ROUTES = (only ? [only] : null) ?? ['/', '/projects', '/about', '/projects/golden-residence', '/projects/golden-residence/block-a', '/projects/mnogofamilna-sgrada', '/projects/mnogofamilna-sgrada/block-b', '/contact', '/blog', '/eu-proekt', '/missing-page']
-// Phones (small to large), a phone on its side, tablets upright and on their
+// Phones (small to large), phones on their side (the larger past 900 px, so
+// in the desktop layout), tablets upright and on their
 // side, laptops, desktops, a wide screen.
-export const SIZES = [[320, 640], [360, 760], [375, 667], [390, 844], [414, 896], [430, 932], [844, 390], [768, 1024], [820, 1180], [1024, 768], [1280, 800], [1440, 900], [1920, 1080], [2560, 1440]]
+export const SIZES = [[320, 640], [360, 760], [375, 667], [390, 844], [414, 896], [430, 932], [844, 390], [932, 430], [768, 1024], [820, 1180], [1024, 768], [1280, 800], [1440, 900], [1920, 1080], [2560, 1440]]
 
 const chrome = () => process.env.CHROME_PATH ?? (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome')
 
