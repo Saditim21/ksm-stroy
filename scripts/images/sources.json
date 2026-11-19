@@ -482,6 +482,72 @@
     ]
   },
   {
+    "id": "cover-green-life",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-green-life.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
+    "id": "cover-aivazovski",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-aivazovski.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
+    "id": "cover-panorama",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-panorama.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
+    "id": "cover-sunny-hill",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-sunny-hill.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
+    "id": "cover-hotel-paradise",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-hotel-paradise.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
+    "id": "cover-chitalishte",
+    "group": "home",
+    "src": "src/assets/home/covers/cover-chitalishte.jpg",
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ]
+  },
+  {
     "id": "work-green-life",
     "group": "home",
     "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45306470_104924097180788_3096088000648445952_n.webp",

@@ -1,4 +1,76 @@
 {
+  "cover-aivazovski": {
+    "path": "/img/cover-aivazovski",
+    "w": 1920,
+    "h": 1440,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#7A7A67"
+  },
+  "cover-chitalishte": {
+    "path": "/img/cover-chitalishte",
+    "w": 1920,
+    "h": 1080,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#A19F9E"
+  },
+  "cover-green-life": {
+    "path": "/img/cover-green-life",
+    "w": 1920,
+    "h": 1280,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#484741"
+  },
+  "cover-hotel-paradise": {
+    "path": "/img/cover-hotel-paradise",
+    "w": 1920,
+    "h": 1440,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#797767"
+  },
+  "cover-panorama": {
+    "path": "/img/cover-panorama",
+    "w": 1920,
+    "h": 1120,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#716C66"
+  },
+  "cover-sunny-hill": {
+    "path": "/img/cover-sunny-hill",
+    "w": 1920,
+    "h": 1440,
+    "widths": [
+      700,
+      960,
+      1400,
+      1920
+    ],
+    "color": "#84817E"
+  },
   "svc-commercial": {
     "path": "/img/svc-commercial",
     "w": 960,

@@ -70,7 +70,7 @@ it('brings the work clicked into the panel, „{name}, {place}“ under it', asy
   expect(buttons()[2]).toHaveAttribute('aria-current', 'true')
   expect(buttons()[0]).not.toHaveAttribute('aria-current')
   expect(caption()).toBe('Панорама Резидънс, гр. Созопол')
-  expect(document.querySelector('#obekti .works__img[data-shown="top"] img')).toHaveAttribute('src', expect.stringContaining('/img/work-panorama-'))
+  expect(document.querySelector('#obekti .works__img[data-shown="top"] img')).toHaveAttribute('src', expect.stringContaining('/img/cover-panorama-'))
 })
 
 // The keyboard chooses as the pointer does: focus is the choice.
@@ -258,4 +258,13 @@ describe('with motion', () => {
     expect(stub.timelines.map((wipe) => wipe.killed)).toEqual([true])
     expect(onShow().map(workOf)).toEqual([3])
   })
+})
+
+// Polish spec §2: each work has a cover of its own, enlarged and graded
+// alike (scripts/images/covers.mjs): Green Life the night pool, Хотел
+// Парадайс from the air, Панорама its frame, Сънни Хил its finished corner.
+it('shows each work’s own cover', () => {
+  render(<WorksSection />)
+  const covers = [...document.querySelectorAll('#obekti .works__img img')].map((img) => /\/img\/(cover-[a-z-]+?)-\d+\./.exec(img.getAttribute('src'))?.[1])
+  expect(covers).toEqual(['cover-green-life', 'cover-aivazovski', 'cover-panorama', 'cover-sunny-hill', 'cover-hotel-paradise', 'cover-chitalishte'])
 })

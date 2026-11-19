@@ -19,9 +19,11 @@ import useReveals from '../../motion/useReveals'
 // show: a quick change wipes over a wipe still under way, and a work chosen
 // again before its cover has left the stack wipes in as a fresh layer, so the
 // covers under it stay and the frame never shows through. Without motion the
-// cover changes at once. The covers are production's photos
-// (src/assets/projects), all six in the panel from the start, hidden but
-// for the chosen one, so a change never waits for a download. The panel is
+// cover changes at once. The covers are the works' own photographs, each a
+// master enlarged and graded alike (polish spec §2, scripts/images/covers.mjs:
+// Green Life its night pool, Хотел Парадайс from the air, Панорама its frame,
+// Сънни Хил its finished corner), all six in the panel from the start, hidden
+// but for the chosen one, so a change never waits for a download. The panel is
 // decoration, hidden from assistive technology: the list carries the names,
 // and aria-current the choice.
 
@@ -30,28 +32,28 @@ const WORKS = [
     name: 'Green Life – Paradise Gardens and Town House',
     place: 'гр. Созопол',
     line: 'гр. Созопол · жилищен комплекс · 2018',
-    image: homeImages['work-green-life'],
+    image: homeImages['cover-green-life'],
   },
-  { name: 'Айвазовски Парк', place: 'гр. Поморие', line: 'гр. Поморие · жилищен комплекс', image: homeImages['work-aivazovski'] },
+  { name: 'Айвазовски Парк', place: 'гр. Поморие', line: 'гр. Поморие · жилищен комплекс', image: homeImages['cover-aivazovski'] },
   {
     name: 'Панорама Резидънс',
     place: 'гр. Созопол',
     tag: 'груб строеж',
     line: 'гр. Созопол · жилищен комплекс',
-    image: homeImages['work-panorama'],
+    image: homeImages['cover-panorama'],
   },
   {
     name: 'Сънни Хил блок 9',
     place: 'кв. Меден Рудник, гр. Бургас',
     line: 'кв. Меден Рудник, гр. Бургас · жилищна сграда',
-    image: homeImages['work-sunny-hill'],
+    image: homeImages['cover-sunny-hill'],
   },
-  { name: 'Хотел Парадайс', place: 'с. Огняново', line: 'с. Огняново · хотелски комплекс', image: homeImages['work-hotel-paradise'] },
+  { name: 'Хотел Парадайс', place: 'с. Огняново', line: 'с. Огняново · хотелски комплекс', image: homeImages['cover-hotel-paradise'] },
   {
     name: 'Читалище „Асен Златаров-1924“',
     place: 'с. Огняново, община Гърмен',
     line: 'с. Огняново, община Гърмен · обществена сграда',
-    image: homeImages['work-chitalishte'],
+    image: homeImages['cover-chitalishte'],
   },
 ]
 
