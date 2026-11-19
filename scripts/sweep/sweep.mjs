@@ -33,7 +33,9 @@ export const SIZES = [[320, 640], [360, 760], [375, 667], [390, 844], [414, 896]
 
 const chrome = () => process.env.CHROME_PATH ?? (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome')
 
-// Runs in the page: what is wrong with its layout now.
+// Runs in the page, where the browser's globals are (as smoke.mjs's
+// inspectors): what is wrong with its layout now.
+/* global document, getComputedStyle, window */
 function inspect() {
   const vw = document.documentElement.clientWidth
   const problems = []
