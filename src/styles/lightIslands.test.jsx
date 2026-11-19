@@ -4,8 +4,10 @@ import { goOffline, renderSiteAt } from '../../tests/contracts/site'
 
 // Polish spec §5: in the light theme, what sits on photographs keeps the dark
 // values (`.dark`, src/index.css), so its words and lines stay readable on the
-// picture: the openings over photographs, Home's works panel, the contact
-// form's pictures. Продажби's halves and За нас's wall are their own pages'
+// picture: the openings over photographs, Home's works panel and its
+// services' columns (each opens on a darkened photograph, and a touch screen
+// shows them all at half strength: the final review's fourth finding), the
+// contact form's pictures. Продажби's halves and За нас's wall are their own pages'
 // tests (src/pages/projects, src/pages/about); the explorer's dialogs are
 // PlanStage's and UnitPanel's.
 
@@ -20,6 +22,7 @@ afterEach(() => {
 it.each([
   ['/', '.hero'],
   ['/', '.works__media'],
+  ['/', '.svc__cols'],
   ['/projects/golden-residence', '.grhero'],
   ['/projects/mnogofamilna-sgrada', '.mnx'],
   ['/contact', '.ask__media'],

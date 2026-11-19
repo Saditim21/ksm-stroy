@@ -78,7 +78,7 @@ export default function ServicesSection() {
         <Seam draw />
       </div>
       {/* Each column is focusable, so the keyboard opens it as the pointer does. */}
-      <div className="svc__cols">
+      <div className="svc__cols dark">
         {SERVICES.map(({ id, numeral, title, text, image, photo }, i) => (
           <article key={id} className="svc__col" tabIndex={0} aria-labelledby={id}>
             {i > 0 ? <Seam draw /> : null}
