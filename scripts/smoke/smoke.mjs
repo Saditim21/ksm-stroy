@@ -318,12 +318,12 @@ const MN_EXPLORER = {
 // Продажби's board (M3/M4 §7.1): the Golden Residence square the mouse
 // points at, its floor's words in the caption, and the page whose unit panel
 // a click opens, the apartment's label its name.
-const BOARD = {
+// Продажби's floors (polish spec §3): the row a mouse opens, and the page its
+// free apartments open on.
+const LEDGER = {
   path: '/projects',
-  label: 'А 503',
-  floor: 'Блок А, етаж 5',
+  row: 'Блок А, етаж 5:',
   opens: '/projects/golden-residence',
-  captionWithinMs: EXPLORER.panelWithinMs,
 }
 // Обекти's book (M3/M4 §7.2): the plate Tab reaches first, the first work's
 // cover, the dialog it opens, named after the work, and its counter as it
@@ -1345,58 +1345,57 @@ async function explorerStageNarrow(page, problems, explorer) {
 }
 
 // In the page: the centre of the board's Golden Residence square `label`,
-// and whether the pointer would land on it there.
-function boardSquare(label) {
-  const square = [...document.querySelectorAll('.bd--gr .blk__grid > button')].find((each) => each.getAttribute('aria-label').split(',')[0] === label)
-  if (!square) return null
-  const { left, top, width, height } = square.getBoundingClientRect()
+// In the page: Продажби's floor row whose name starts with `prefix`, brought
+// to the middle of the screen, and whether the pointer would land on it.
+function ledgerRow(prefix) {
+  const row = [...document.querySelectorAll('#etazhi button.fr')].find((each) => each.getAttribute('aria-label').startsWith(prefix))
+  if (!row) return null
+  row.scrollIntoView({ block: 'center' })
+  const { left, top, width, height } = row.getBoundingClientRect()
   const [x, y] = [left + width / 2, top + height / 2]
   const there = document.elementFromPoint(x, y)
-  return { x, y, onScreen: y > 0 && y < innerHeight, hits: Boolean(there && square.contains(there)), there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
+  return { x, y, hits: Boolean(there && row.contains(there)), there: there ? `<${there.tagName.toLowerCase()}${[...there.classList].map((name) => `.${name}`).join('')}>` : 'nothing' }
 }
 
-// In the page: whether Golden Residence's caption names `floor` and the
-// apartment `label`, its words wholly on the screen (the caption keeps room
-// for two lines below them).
-function boardCaption(floor, label) {
-  const caption = document.querySelector('.bd--gr .bd__cap')
-  if (!caption) return { shows: false, state: 'no caption in the page' }
-  const said = caption.textContent.replace(/\s+/g, ' ').trim()
-  const lines = [...caption.children].map((child) => child.getBoundingClientRect())
-  const box = { top: Math.min(...lines.map((line) => line.top)), bottom: Math.max(...lines.map((line) => line.bottom)), height: lines.length }
-  const onScreen = box.height > 0 && box.top >= 0 && box.bottom <= innerHeight
-  return {
-    shows: said.startsWith(floor) && said.includes(label) && onScreen,
-    state: `„${said}“, ${onScreen ? 'on screen' : `off screen (${Math.round(box.top)}–${Math.round(box.bottom)} of ${innerHeight})`}`,
-  }
+// In the page: the first free apartment an open floor row lists, its label
+// and where the pointer would land on it (`shows`, for within()).
+function ledgerUnit() {
+  const row = document.querySelector('#etazhi button.fr[aria-expanded="true"]')
+  const link = row && document.getElementById(row.getAttribute('aria-controls'))?.querySelector('a')
+  if (!link) return { shows: false }
+  const { left, top, width, height } = link.getBoundingClientRect()
+  return { shows: true, label: link.querySelector('b').textContent.trim(), x: left + width / 2, y: top + height / 2 }
 }
 
-// Продажби's board (M3/M4 §7.1): a real mouse over a Golden Residence square
-// shows its floor and its apartment in the building's caption, within
-// 600 ms; a click opens that apartment on the Golden Residence page, its
-// unit panel named by its label (the doors and the page's deep link first).
-async function boardMouse(page, problems) {
-  // The board's squares take their statuses with the data, and rise in.
-  await page.waitForFunction(() => document.querySelectorAll('.bd--gr .blk__grid > .s-none').length === 0, { timeout: 15000 })
-  await delay(2500)
-  const square = await page.evaluate(boardSquare, BOARD.label)
-  if (!square?.onScreen || !square.hits) {
-    problems.push(`the square ${BOARD.label} cannot be pointed at: ${square ? `its centre lands on ${square.there}` : 'no square'}`)
+// Продажби's floors (polish spec §3): a real mouse opens a floor of Golden
+// Residence, which lists its free apartments; a click on the first opens it
+// on the Golden Residence page, its unit panel named by its label (the doors
+// and the page's deep link first).
+async function ledgerMouse(page, problems) {
+  // The rows take their statuses with the data.
+  await page.waitForFunction(() => document.querySelectorAll('#etazhi .fr__c > .s-none').length === 0, { timeout: 15000 })
+  const row = await page.evaluate(ledgerRow, LEDGER.row)
+  await delay(800)
+  const at = await page.evaluate(ledgerRow, LEDGER.row)
+  if (!row || !at?.hits) {
+    problems.push(`the floor row „${LEDGER.row}“ cannot be pointed at: ${at ? `its centre lands on ${at.there}` : 'no row'}`)
     return
   }
-  await page.mouse.move(square.x - 40, square.y, { steps: 2 })
-  await page.mouse.move(square.x, square.y, { steps: 4 })
-  const caption = await within(page, BOARD.captionWithinMs, boardCaption, BOARD.floor, BOARD.label)
-  if (!caption.shows) problems.push(`Golden Residence's caption does not name „${BOARD.floor}“ and ${BOARD.label} within ${BOARD.captionWithinMs} ms of the hover (${caption.state})`)
-
-  await page.mouse.click(square.x, square.y)
+  await page.mouse.move(at.x, at.y, { steps: 4 })
+  await page.mouse.click(at.x, at.y)
+  const unit = await within(page, 2000, ledgerUnit)
+  if (!unit.shows) {
+    problems.push(`a click on „${LEDGER.row}“ lists no free apartment`)
+    return
+  }
+  await page.mouse.click(unit.x, unit.y)
   try {
-    await page.waitForFunction((pathname) => window.location.pathname === pathname, { timeout: 10000 }, BOARD.opens)
+    await page.waitForFunction((pathname) => window.location.pathname === pathname, { timeout: 10000 }, LEDGER.opens)
   } catch {
-    problems.push(`a click on ${BOARD.label} does not land on ${BOARD.opens} (at ${await page.evaluate(() => window.location.pathname + window.location.search)})`)
+    problems.push(`a click on ${unit.label} does not land on ${LEDGER.opens} (at ${await page.evaluate(() => window.location.pathname + window.location.search)})`)
     return
   }
-  if (!(await dialogOpens(page, BOARD.label, 10000))) problems.push(`a click on ${BOARD.label} opens no dialog „${BOARD.label}“ on ${BOARD.opens} (open: ${await openNames(page)})`)
+  if (!(await dialogOpens(page, unit.label, 10000))) problems.push(`a click on ${unit.label} opens no dialog „${unit.label}“ on ${LEDGER.opens} (open: ${await openNames(page)})`)
 }
 
 // In the page: the name of the register's plate that has the focus, or null.
@@ -1463,7 +1462,7 @@ const EXPLORER_STEPS = [
   { name: 'deep link on a phone, with and without text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
   { name: 'deep link on a phone, with and without text spacing', size: VIEWPORTS[1], explorer: MN_EXPLORER, path: MN_EXPLORER.deepLink.path, run: explorerStageNarrow },
   { name: 'text spacing', size: NARROW, explorer: MN_EXPLORER, path: MN_EXPLORER.blockPath, run: explorerSpaced },
-  { name: 'sales board, mouse', size: VIEWPORTS[0], explorer: null, path: BOARD.path, run: boardMouse },
+  { name: 'floors of Продажби, mouse', size: VIEWPORTS[0], explorer: null, path: LEDGER.path, run: ledgerMouse },
   { name: 'works book, keyboard', size: VIEWPORTS[0], explorer: null, path: BOOK.path, run: bookKeyboard },
 ]
 
