@@ -1,4 +1,5 @@
 import { firstViewportMotionProblems, NO_PREFERENCE, rulesFor, rulesOf, valueOf } from '../../test/css'
+import { LIGHT_PALETTE } from '../../styles/palette.js'
 
 // src/pages/contact/contact.css, Контакти's own (spec M3/M4 §7.3; Diptych
 // §5.5, §11): its opening's entrance, the form's sticky picture, the
@@ -142,4 +143,17 @@ it('stacks the halves on a phone, each second half under a brass rule', () => {
   expect(declaredFor('.ask__grid > .seam', [PHONE]).display).toBe('none')
   expect(declaredFor('.ask__fields', [PHONE])['border-top']).toBe('1px solid var(--brass)')
   expect(declaredFor('.doorway', [PHONE])['grid-template-columns']).toBe('1fr')
+})
+
+// On a phone the subjects leave the photograph for the page below it, yet sit
+// in its dark island (.ask__media.dark): in the light theme they take the
+// page's light values back, as the form's other fields have them, and their
+// inherited colour with them. The light sweep found the chosen subject ivory
+// on the light stone, all but invisible.
+it('gives the subjects the light values on a phone in the light theme', () => {
+  const values = declaredFor(':root[data-theme="light"] .ask__media .subj', [PHONE])
+  for (const [key, value] of Object.entries(LIGHT_PALETTE)) expect(values[`--${key}`], key).toBe(value)
+  expect(values['--hi']).toBe('#000000')
+  expect(values['color-scheme']).toBe('light')
+  expect(values.color).toBe('var(--ivory)')
 })
