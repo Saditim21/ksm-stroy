@@ -24,6 +24,11 @@ import { WORKS } from './photos'
 // side). The slide follows the screen across it (a tablet turned, a window
 // resized): the setup runs again, and undoes or makes the slide.
 const STILL = '(max-width: 900px), (max-height: 599px)'
+// The front photograph is as wide as its stack; the two behind it show only
+// their edges on a phone, where the stack rests, so a phone asks for them at
+// half the screen (a lighter first load). On a desktop all three fan out.
+const FRONT_SIZES = '(max-width: 900px) 86vw, 34vw'
+const BACK_SIZES = '(max-width: 900px) 50vw, 34vw'
 // The three photographs at rest, back to front: [rotation, x %, y %].
 const REST = [[-7, -9, 5], [5, 8, -3], [-2, 0, 0]]
 const SPREAD = [[-8, -16, -7], [6, 14, 5], [-1, 0, 0]]
@@ -69,7 +74,7 @@ export default function WorksTrack() {
               <div className="trk__stack" aria-hidden="true">
                 {[...photos].reverse().map((image, i) => (
                   <div key={image.path} className="trk__ph" data-n={2 - i}>
-                    <ResponsivePicture image={image} alt="" sizes="(max-width: 900px) 86vw, 34vw" />
+                    <ResponsivePicture image={image} alt="" sizes={i === 2 ? FRONT_SIZES : BACK_SIZES} />
                   </div>
                 ))}
               </div>

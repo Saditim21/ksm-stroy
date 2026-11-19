@@ -73,6 +73,20 @@ it('hides nothing in the opening by markup', () => {
   }
 })
 
+// A stack's two back photographs show only their edges on a phone, where the
+// stack rests: a phone asks for them at half the screen's width, and for the
+// front one at the stack's (a lighter first load, polish Task 7). On a
+// desktop all three fan out as the track slides, and are asked for alike.
+it('asks a phone for the stacks’ back photographs at half the screen', () => {
+  const d = parse(prerender())
+  const photos = [...d.querySelectorAll('#obekti .trk__ph')]
+  expect(photos).toHaveLength(21)
+  for (const ph of photos) {
+    const wanted = ph.getAttribute('data-n') === '0' ? '(max-width: 900px) 86vw, 34vw' : '(max-width: 900px) 50vw, 34vw'
+    for (const source of ph.querySelectorAll('source')) expect(source.getAttribute('sizes'), ph.getAttribute('data-n')).toBe(wanted)
+  }
+})
+
 it('prerenders the story with the contract’s sentence, the seven works and the legacy sections', () => {
   const d = parse(prerender())
   expect(textOf(d.querySelector('#istoriya'))).toMatch(/основана през месец септември 2008/)
