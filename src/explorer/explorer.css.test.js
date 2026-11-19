@@ -230,7 +230,12 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
   // 360 × 640 or smaller, the stage's bar takes a row more and its hint
   // grows, and the plan's 250 px floor left the side column (the counts, the
   // key, the table) no height. There, and only with that spacing, the plan
-  // gives way: two fifths of the body at most, the side column the rest. The
+  // gives way: a third of the body at most, the side column the rest (two
+  // fifths until the header lost its EU row, 2026-11-19: with the stage
+  // 36 px taller the column, which takes the whole gain without the
+  // spacing, came out 4 px short with it at 320 × 568, 180 px against 184,
+  // and 3 px at 340 × 600; with a third, 200 against 184 and 221 against
+  // 202, measured in Chrome). The
   // spacing shows in the body's own line height: a reader's sets every line
   // height to 1.5, important, so the body's 1lh leaves the 1.6em it declares
   // and --spaced grows from 0 past any screen. At the site's own spacing
@@ -243,7 +248,7 @@ describe('the plan stage and the unit panel (spec §2.2, §7.4, §7.6, §7.7)', 
       '--spaced': 'calc(max(0px, 1.57em - 1lh, 1lh - 1.63em) * 100000)',
       '--plan-h': 'max(250px, calc(var(--screen-h) * .44))',
       'line-height': '1.6',
-      'grid-template-rows': 'minmax(max(0px, 250px - var(--spaced)), min(var(--plan-h), max(40%, var(--plan-h) - var(--spaced)))) minmax(0, 1fr)',
+      'grid-template-rows': 'minmax(max(0px, 250px - var(--spaced)), min(var(--plan-h), max(33.333%, var(--plan-h) - var(--spaced)))) minmax(0, 1fr)',
     })
     // The line height the body declares is the one it inherits, the page's
     // (the stage is a portal at the foot of <body>): at the site's own

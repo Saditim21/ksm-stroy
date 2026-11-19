@@ -1392,8 +1392,10 @@
    360 × 640 or smaller, the stage's bar takes a row more and its hint grows,
    and the plan's 250 px floor left the side column (the counts, the key, the
    table) no height. There, and only with that spacing, the plan gives way:
-   two fifths of the body at most, the side column the rest, at least the
-   height it has without the spacing (at 320 × 568, 146 px against 127).
+   a third of the body at most, the side column the rest, at least the
+   height it has without the spacing (at 320 × 568, 200 px against 184; it
+   was two fifths until the header lost its EU row and the stage grew 36 px,
+   which left the column 4 px short).
    - The spacing shows in the body's line height: a reader's sets every line
      height to 1.5, important, so 1lh leaves the 1.6em the body declares (the
      page's, which it inherits anyway) and --spaced grows from 0 past any
@@ -1407,7 +1409,7 @@
       --spaced: calc(max(0px, 1.57em - 1lh, 1lh - 1.63em) * 100000);
       --plan-h: max(250px, calc(var(--screen-h) * .44));
       line-height: 1.6;
-      grid-template-rows: minmax(max(0px, 250px - var(--spaced)), min(var(--plan-h), max(40%, var(--plan-h) - var(--spaced)))) minmax(0, 1fr);
+      grid-template-rows: minmax(max(0px, 250px - var(--spaced)), min(var(--plan-h), max(33.333%, var(--plan-h) - var(--spaced)))) minmax(0, 1fr);
     }
   }
 }
