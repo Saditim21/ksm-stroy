@@ -56,6 +56,56 @@
     color-scheme: dark;
   }
 
+  /* The light theme („травертин“, polish spec §5): the visitor's choice, on
+     <html> before the first paint (src/utils/theme.js). The same keys as
+     src/styles/palette.js's LIGHT_PALETTE; src/styles/tokens.test.js holds
+     the two together and to the contrast floors. */
+  :root[data-theme="light"] {
+    --onyx: #ECE6DA;
+    --umber: #E2DACC;
+    --umber-2: #D8CEBE;
+    --ivory: #17140F;
+    --ivory-2: rgba(23, 20, 15, 0.8);
+    --ivory-3: rgba(23, 20, 15, 0.66);
+    --stone: #5E574B;
+    --hair: rgba(23, 20, 15, 0.2);
+    --hair-2: rgba(23, 20, 15, 0.1);
+    --hair-ctl: rgba(23, 20, 15, 0.5);
+    --brass: #8E6D2C;
+    --brass-l: #735619;
+    --status-free: #237F4E;
+    --status-reserved: #B0621A;
+    --status-sold: #BA4136;
+    --status-blocked: #7A756B;
+    color-scheme: light;
+  }
+
+  /* A dark island in the light theme: what sits on photographs (the
+     openings, the works' panel, the film bands, the explorer's facade) keeps
+     the dark values, so its text and lines stay readable on the picture.
+     So does the header over a page's dark opening, until it turns solid. */
+  :root[data-theme="light"] .hdr[data-look="overlay"],
+  :root[data-theme="light"] .dark {
+    --onyx: #0E0D0B;
+    --umber: #1A1714;
+    --umber-2: #211D19;
+    --ivory: #EFE9DD;
+    --ivory-2: rgba(239, 233, 221, 0.82);
+    --ivory-3: rgba(239, 233, 221, 0.62);
+    --stone: #9B9488;
+    --hair: rgba(155, 148, 136, 0.3);
+    --hair-2: rgba(155, 148, 136, 0.16);
+    --hair-ctl: rgba(155, 148, 136, 0.62);
+    --brass: #B8954A;
+    --brass-l: #D8BD7A;
+    --status-free: #4FBF85;
+    --status-reserved: #E9953F;
+    --status-sold: #D4574E;
+    --status-blocked: #8A867D;
+    color-scheme: dark;
+    color: var(--ivory);
+  }
+
   /* Better text rendering and prevent overscroll */
   html {
     -webkit-font-smoothing: antialiased;

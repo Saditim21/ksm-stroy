@@ -6,6 +6,7 @@ import { PRIMARY_PHONE } from '../config/site'
 import { normalizePathname } from '../utils/pathname'
 import EuLine from './EuLine'
 import SiteMenu from './SiteMenu'
+import ThemeSwitch from './ThemeSwitch'
 import { inquiryTarget, useRouteHandle } from './handle'
 
 // The site's header (spec §6.2; extract §4.2): one fixed element holding the
@@ -80,6 +81,7 @@ export default function SiteHeader() {
             <Logo markClassName="text-brass" />
           </Link>
           <div className="hdr__right">
+            <ThemeSwitch />
             <button
               ref={menuButton}
               type="button"

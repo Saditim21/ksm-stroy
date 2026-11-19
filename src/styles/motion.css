@@ -123,3 +123,18 @@
    opaque arriving page (Home's halves, the Golden Residence hero) until the
    change was over, and came back with a step. */
 ::view-transition-group(grain) { z-index: 3; }
+
+/* The theme switch's change (src/shell/ThemeSwitch.jsx, polish spec §5): one
+   snapshot of the whole page, revealed inside a circle that grows from the
+   switch, which the switch animates on ::view-transition-new(root). While
+   it runs (:root.theme-vt) the page's named groups join the root, so the
+   header, the menu and the grain change inside the circle with the rest, and
+   the doors' rules above stand aside. */
+:root.theme-vt .hdr,
+:root.theme-vt .menu,
+:root.theme-vt .grain { view-transition-name: none; }
+:root.theme-vt.js::view-transition-old(root),
+:root.theme-vt.js::view-transition-new(root),
+:root.theme-vt::view-transition-old(root),
+:root.theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+:root.theme-vt::view-transition-new(root) { z-index: 1; }

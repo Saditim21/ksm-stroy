@@ -57,10 +57,11 @@ describe('the header (spec §6.2)', () => {
     expect(declaredFor('.hdr__bar').transition).toBe('border-color .45s var(--e-soft)')
   })
 
-  it('is see-through over its scrim, then onyx at 86 % with the blur and a hair-2 rule', () => {
+  it('is see-through over its scrim, then the ground at 86 % with the blur and a hair-2 rule', () => {
     expect(declaredFor('.hdr::before').background).toBe('linear-gradient(rgba(14, 13, 11, .55), rgba(14, 13, 11, 0))')
     expect(declaredFor('.hdr[data-look="solid"]')).toMatchObject({
-      'background-color': 'rgba(14, 13, 11, .86)',
+      // The ground's colour, so it follows the theme (polish spec §5).
+      'background-color': 'color-mix(in srgb, var(--onyx) 86%, transparent)',
       'backdrop-filter': 'blur(14px) saturate(1.1)',
     })
     expect(declaredFor('.hdr[data-look="solid"]::before').opacity).toBe('0')

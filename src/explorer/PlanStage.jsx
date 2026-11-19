@@ -4,7 +4,6 @@ import StatusChip from '../components/ui/StatusChip'
 import StatusLegend from '../components/ui/StatusLegend'
 import useScrollLock from '../hooks/useScrollLock'
 import useMotionNow from '../motion/useMotionNow'
-import { PALETTE } from '../styles/palette'
 import { formatArea } from '../utils/format'
 import { trapTab } from '../utils/trapTab'
 import { FloorCounts, FloorMeta } from './FloorFacts'
@@ -166,7 +165,7 @@ export default function PlanStage({ project, plans, dated = null, model, block, 
   const downRef = useRef(null)
   const titleId = useId()
   const motionNow = useMotionNow()
-  useScrollLock(PALETTE.umber)
+  useScrollLock('var(--umber)')
   const data = model?.floors.get(floorKey(block, floor)) ?? { block, floor, units: [], counts: null }
   // The unit pointed at, on the plan or in the table; and the last one, which
   // the inspector keeps while it fades.

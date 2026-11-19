@@ -199,7 +199,7 @@ describe('as a dialog', () => {
   it('holds the page still while it is open, on umber', () => {
     const { unmount } = renderStage()
     expect(document.documentElement.style.overflow).toBe('hidden')
-    expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
+    expect(document.documentElement.style.backgroundColor).toBe('var(--umber)')
     unmount()
     expect(document.documentElement.style.overflow).toBe('')
   })

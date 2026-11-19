@@ -10,7 +10,7 @@ import { goOffline, renderSiteAt } from '../tests/contracts/site'
 import LenisScrollSync from './motion/LenisScrollSync'
 import App, { Layout } from './root'
 import { mockMatchMedia } from './test/media'
-import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
+import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT, THEME_SCRIPT } from './utils/headScripts'
 
 // The document root.jsx puts around every page, and the app inside it. React
 // Router's head and script components need the framework's context, which a
@@ -54,11 +54,24 @@ it('renders <html lang="bg"> with no class, the gate script right after the scre
   expect(html.slice(screenHeight + SCREEN_HEIGHT_SCRIPT.length, gate)).toBe('</script><script>')
 })
 
+// Polish spec §5: the visitor's theme is on <html> before the first paint,
+// set by the theme script right after the gate, before the stylesheet.
+it('runs the theme script right after the gate, before the stylesheet', () => {
+  const html = renderToString(<MemoryRouter><Layout><p /></Layout></MemoryRouter>)
+  const gate = html.indexOf(MOTION_GATE_SCRIPT)
+  const theme = html.indexOf(THEME_SCRIPT)
+  expect(theme).toBeGreaterThan(gate)
+  expect(html.slice(gate + MOTION_GATE_SCRIPT.length, theme)).toBe('</script><script>')
+  expect(theme).toBeLessThan(html.indexOf('<style>'))
+})
+
 // Onyx from the first paint, before the stylesheet has loaded.
 it('paints the onyx ground before the stylesheet', () => {
   const critical = /<style>([^<]*)<\/style>/.exec(documentHtml())?.[1]
 
   expect(critical).toContain('background-color:#0E0D0B')
+  // A visitor who chose light gets the light ground at once, never onyx first.
+  expect(critical).toContain('[data-theme=light] body{background-color:#ECE6DA;color:#17140F}')
 })
 
 // --screen-h (src/utils/screenHeight.js): the head script writes it before

@@ -7,12 +7,12 @@ import { grFree } from '../data/availability/select'
 import { useAvailability } from '../data/availability/useAvailability'
 import useScrollLock from '../hooks/useScrollLock'
 import useMotionNow from '../motion/useMotionNow'
-import { PALETTE } from '../styles/palette'
 import { bindAddress, plural } from '../utils/format'
 import { EASE_IN_OUT, EASE_OUT } from '../utils/motion'
 import { normalizePathname } from '../utils/pathname'
 import { trapTab } from '../utils/trapTab'
 import EuLine from './EuLine'
+import ThemeSwitch from './ThemeSwitch'
 import { NAV, currentFor } from './nav'
 
 // The menu (spec §6.4; extract §4.3), a diptych of its own: on onyx, the
@@ -69,7 +69,7 @@ export default function SiteMenu({ id, pathname, onClose }) {
   const closing = useRef(false)
   const motionNow = useMotionNow()
   const free = grFree(useAvailability())
-  useScrollLock(PALETTE.umber)
+  useScrollLock('var(--umber)')
 
   // The opening, before the menu's first paint, so the motion starts from
   // its first frame; then the focus moves in, unless the keyboard has already
@@ -193,6 +193,10 @@ export default function SiteMenu({ id, pathname, onClose }) {
             <a href={`mailto:${SITE.email}`} className="hit">
               <span>{SITE.email}</span>
             </a>
+          </div>
+          <div>
+            <h2>Тема</h2>
+            <ThemeSwitch variant="menu" />
           </div>
           <EuLine variant="menu" />
         </div>

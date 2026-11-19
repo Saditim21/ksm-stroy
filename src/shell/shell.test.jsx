@@ -49,6 +49,15 @@ describe('the header', () => {
     expect(within(header).queryByRole('link', { name: 'Продажби' })).toBeNull()
   })
 
+  // Polish spec §5: the theme switch stands before „Меню“.
+  it('holds the theme switch before „Меню“', async () => {
+    renderSiteAt('/about')
+    const header = await screen.findByRole('banner')
+    const theme = within(header).getByRole('button', { name: 'Светла тема' })
+    const menu = within(header).getByRole('button', { name: /Меню/ })
+    expect(theme.compareDocumentPosition(menu) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   // Spec §6.3, §14.1: the EU line is the header's top row on every page, so
   // the emblem and its „Съфинансирано от Европейския съюз“ are seen on
   // landing without scrolling. The owner asked for the row without the
@@ -374,6 +383,8 @@ describe('the menu', () => {
     expect(textOf(menu)).toContain('Пн–Пт 8:00–18:00 · Сб 9:00–14:00 · Нд почивен ден')
     expect(textOf(menu)).toContain(SHORT_EU_TEXT)
     expect(inMenu.getByRole('link', { name: 'За проекта' })).toHaveAttribute('href', '/eu-proekt')
+    // Polish spec §5: the theme switch, in the menu too.
+    expect(inMenu.getByRole('button', { name: 'Светла тема' })).toBeInTheDocument()
   })
 
   // The prerender renders /about as /about/ and the browser runs it at
@@ -407,7 +418,7 @@ describe('the menu', () => {
     expect(menu.parentElement).toBe(document.body)
     expect(document.documentElement.style.overflow).toBe('hidden')
     // The scrollbar's kept gutter takes the umber of the menu's right half.
-    expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
+    expect(document.documentElement.style.backgroundColor).toBe('var(--umber)')
   })
 
   it('moves focus into the menu, keeps Tab inside, and Escape returns it to „Меню“', async () => {

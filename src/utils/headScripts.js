@@ -13,3 +13,4 @@
 // before the script itself (see SCREEN_HEIGHT_SCRIPT).
 export { SCREEN_HEIGHT_SCRIPT } from './screenHeight'
 export { MOTION_GATE_SCRIPT } from './motionGate'
+export { THEME_SCRIPT } from './theme'

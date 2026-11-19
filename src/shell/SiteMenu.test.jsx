@@ -120,8 +120,9 @@ describe('the motion', () => {
       { method: 'fromTo', targets: items, from: { opacity: 0, y: 26 }, vars: { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', stagger: 0.04 }, position: 0.5 },
       { method: 'fromTo', targets: close, from: { opacity: 0 }, vars: { opacity: 1, duration: 0.4, ease: 'expo.out' }, position: 0.5 },
     ])
-    // The six pages, the four details and the EU line rise, item by item.
-    expect(items).toHaveLength(11)
+    // The six pages, the four details, the theme switch and the EU line rise,
+    // item by item.
+    expect(items).toHaveLength(12)
     expect(opening.steps[3].targets[0]).toBe(items[0])
 
     // Once in, it takes off what it set.
@@ -184,7 +185,7 @@ describe('the motion', () => {
 it('paints the scrollbar’s strip umber while it is open', () => {
   renderMenu()
   expect(document.documentElement.style.overflow).toBe('hidden')
-  expect(document.documentElement.style.backgroundColor).toBe('rgb(26, 23, 20)')
+  expect(document.documentElement.style.backgroundColor).toBe('var(--umber)')
 })
 
 // The shared trap (src/utils/trapTab.js): from outside the menu, where the

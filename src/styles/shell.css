@@ -80,7 +80,7 @@
     z-index: -1;
   }
   .hdr[data-look="solid"] {
-    background-color: rgba(14, 13, 11, .86);
+    background-color: color-mix(in srgb, var(--onyx) 86%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.1);
     backdrop-filter: blur(14px) saturate(1.1);
   }
@@ -180,6 +180,45 @@
     letter-spacing: .02em;
     transition: color .2s;
   }
+
+  /* ---------- the theme switch (polish spec §5; src/shell/ThemeSwitch.jsx) ---------- */
+  /* A brass disc, half filled: the filled half moves across as the theme
+     changes. In the bar its name shows from 1280 px; below, the disc alone,
+     44 px wide to the finger, the name its accessible name. */
+  .theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 44px;
+    height: 44px;
+    color: var(--ivory);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .03em;
+  }
+  .theme__disc {
+    position: relative;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--brass);
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .theme__disc::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 50%;
+    background: var(--brass);
+    transition: transform .5s var(--e-out);
+  }
+  :root[data-theme="light"] .theme__disc::after { transform: translateX(-100%); }
+  .theme:not(.theme--menu) .theme__label { display: none; }
+  @media (min-width: 1280px) {
+    .theme:not(.theme--menu) .theme__label { display: inline; }
+  }
+  .theme--menu { justify-content: flex-start; font-size: 16px; }
 
   /* ---------- the EU line (spec §6.3) ---------- */
   /* The logos on the light plate (their lettering is dark), the text, and
@@ -515,6 +554,7 @@
   @media (hover: hover) and (pointer: fine) {
     .hdr__menu:hover i::after { right: 0; }
     .hdr__tel:hover { color: var(--ivory); }
+    .theme:hover .theme__disc { border-color: var(--brass-l); }
     .eu a:hover { text-decoration-color: var(--brass-l); }
     .menu__pages a:hover { color: var(--brass-l); }
     .menu__info a:hover { color: var(--brass-l); }

@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { cwd } from 'node:process'
 import { expect, it } from 'vitest'
 import config from '../../tailwind.config.js'
-import { PALETTE } from './palette.js'
+import { LIGHT_PALETTE, PALETTE } from './palette.js'
 
 // The Diptych tokens (spec §2.1, §3.2): src/styles/palette.js is the single
 // source, Tailwind's colours and src/index.css's :root variables both carry it.
@@ -43,11 +43,58 @@ it('carries the Diptych palette', () => {
     'status-sold': '#D4574E', 'status-blocked': '#8A867D',
   })
   expect(Object.isFrozen(PALETTE)).toBe(true)
-  // Tailwind's colours are the palette alone (spec M3/M4 §9: the legacy
-  // palettes left with the legacy pages, ivory's shades with them).
-  expect(c).toEqual({ ...PALETTE })
+  // Tailwind's colours are the palette's custom properties alone (spec M3/M4
+  // §9: the legacy palettes left with the legacy pages, ivory's shades with
+  // them), so a utility follows the theme (polish spec §5).
+  expect(c).toEqual(Object.fromEntries(Object.keys(PALETTE).map((key) => [key, `var(--${key})`])))
   for (const gone of ['paper', 'ink', 'dusk', 'light', 'gold-ink', 'graphite', 'rule', 'bronze-ink', 'status-free-deep'])
     expect(c[gone]).toBeUndefined()
+})
+
+// Polish spec §5: the light theme („травертин“), the same keys.
+it('carries the light palette, key for key', () => {
+  expect(LIGHT_PALETTE).toEqual({
+    onyx: '#ECE6DA', umber: '#E2DACC', 'umber-2': '#D8CEBE', ivory: '#17140F',
+    'ivory-2': 'rgba(23, 20, 15, 0.8)', 'ivory-3': 'rgba(23, 20, 15, 0.66)', stone: '#5E574B',
+    hair: 'rgba(23, 20, 15, 0.2)', 'hair-2': 'rgba(23, 20, 15, 0.1)', 'hair-ctl': 'rgba(23, 20, 15, 0.5)',
+    brass: '#8E6D2C', 'brass-l': '#735619', 'status-free': '#237F4E', 'status-reserved': '#B0621A',
+    'status-sold': '#BA4136', 'status-blocked': '#7A756B',
+  })
+  expect(Object.isFrozen(LIGHT_PALETTE)).toBe(true)
+  expect(Object.keys(LIGHT_PALETTE)).toEqual(Object.keys(PALETTE))
+})
+
+// The light values override the dark ones under :root[data-theme="light"],
+// and a .dark island (what sits on photographs) takes the dark ones back.
+it('writes the light values under :root[data-theme="light"] and the dark ones on .dark', () => {
+  const block = (selector) => {
+    const at = indexCss.indexOf(`${selector} {`)
+    expect(at, selector).toBeGreaterThan(-1)
+    return indexCss.slice(at, indexCss.indexOf('}', at))
+  }
+  const light = block(':root[data-theme="light"]')
+  for (const [key, value] of Object.entries(LIGHT_PALETTE)) expect(light).toContain(`--${key}: ${value};`)
+  expect(light).toContain('color-scheme: light;')
+  const dark = block(':root[data-theme="light"] .dark')
+  for (const [key, value] of Object.entries(PALETTE)) expect(dark).toContain(`--${key}: ${value};`)
+  expect(dark).toContain('color-scheme: dark;')
+  // The header over a page's dark opening (its overlay look) is one too,
+  // until the page scrolls and it turns solid.
+  expect(indexCss).toContain(':root[data-theme="light"] .hdr[data-look="overlay"],\n  :root[data-theme="light"] .dark {')
+})
+
+it('meets the contrast floors in the light theme', () => {
+  const L = LIGHT_PALETTE
+  expect(contrast(L.ivory, L.onyx)).toBeGreaterThanOrEqual(12)
+  for (const ground of [L.onyx, L.umber]) {
+    expect(contrast(blend(L['ivory-3'], ground), ground)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(L.stone, ground)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(L['brass-l'], ground)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(L.brass, ground)).toBeGreaterThanOrEqual(3)
+    expect(contrast(blend(L['hair-ctl'], ground), ground)).toBeGreaterThanOrEqual(3)
+    for (const s of ['status-free', 'status-reserved', 'status-sold', 'status-blocked'])
+      expect(contrast(L[s], ground)).toBeGreaterThanOrEqual(3)
+  }
 })
 
 // Spec M3/M4 §9: the legacy theme went with the legacy pages: the Inter and

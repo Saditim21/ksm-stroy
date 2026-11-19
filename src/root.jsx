@@ -8,7 +8,7 @@ import { Arrival } from './shell/arrival'
 import SiteFooter from './shell/SiteFooter'
 import SiteHeader from './shell/SiteHeader'
 import { useRouteHandle } from './shell/handle'
-import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT } from './utils/headScripts'
+import { MOTION_GATE_SCRIPT, SCREEN_HEIGHT_SCRIPT, THEME_SCRIPT } from './utils/headScripts'
 import { normalizePathname } from './utils/pathname'
 import { trackScreenHeight } from './utils/screenHeight'
 import { focusOn } from './utils/scroll'
@@ -42,7 +42,9 @@ export const links = () => [
 // The page's ground from the first paint, before the stylesheet: onyx with
 // ivory text (spec §2.1), the colours of the shell around every page. Only
 // <body> has a margin of its own to drop.
-const CRITICAL_CSS = 'body{margin:0;background-color:#0E0D0B;color:#EFE9DD}'
+// A visitor who chose light (src/utils/theme.js, set before this style by
+// the theme script) gets the light ground from the first paint too.
+const CRITICAL_CSS = 'body{margin:0;background-color:#0E0D0B;color:#EFE9DD}[data-theme=light] body{background-color:#ECE6DA;color:#17140F}'
 
 // <html> carries no className: the motion gate's class is the one attribute a
 // script writes there, before React hydrates (src/utils/motionGate.js), and
@@ -67,6 +69,8 @@ export function Layout({ children }) {
             The screen height first, then the motion gate. */}
         <script dangerouslySetInnerHTML={{ __html: SCREEN_HEIGHT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: MOTION_GATE_SCRIPT }} />
+        {/* The visitor's theme on <html> before the first paint (polish spec §5). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <Links />
         <style dangerouslySetInnerHTML={{ __html: CRITICAL_CSS }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }} />

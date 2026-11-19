@@ -40,8 +40,9 @@ export default {
       '2xl': '1536px',
     },
     extend: {
-      // Diptych (src/styles/palette.js, spec §2.1).
-      colors: { ...PALETTE },
+      // Diptych (src/styles/palette.js, spec §2.1), as the custom properties
+      // src/index.css writes, so a utility follows the theme (polish spec §5).
+      colors: Object.fromEntries(Object.keys(PALETTE).map((key) => [key, `var(--${key})`])),
 
       // KSM Display is Cormorant Garamond, KSM Text is Manrope (spec §3.1;
       // src/styles/fonts.css), each followed by its metric-matched fallbacks.
