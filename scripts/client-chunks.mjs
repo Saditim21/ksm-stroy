@@ -136,9 +136,8 @@ export const COPIES = [
   // За нас's photos (Task 5), two of them Home's and Обекти's.
   { by: 'src/pages/about/photos.js', module: 'src/data/images/home.json', query: 'about' },
   { by: 'src/pages/about/photos.js', module: 'src/data/images/works.json', query: 'about' },
-  // Its wall (polish spec §4), with the two buildings' renders.
-  { by: 'src/pages/about/photos.js', module: 'src/data/images/golden-residence.json', query: 'about' },
-  { by: 'src/pages/about/photos.js', module: 'src/data/images/mnogofamilna.json', query: 'about' },
+  // Its wall (polish spec §4) has small files of its own (wall.json), the two
+  // buildings' renders among them, and imports neither building's manifest.
 ]
 // The 404 page (Task 6) and the EU page (ruling T6d) copy by hand instead:
 // neither may import a module the facade group's chunk holds, so each

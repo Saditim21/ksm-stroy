@@ -1584,5 +1584,481 @@
       720,
       1024
     ]
+  },
+  {
+    "id": "wall-work-green-life",
+    "group": "wall",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45306470_104924097180788_3096088000648445952_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-aivazovski-1",
+    "group": "wall",
+    "src": "src/assets/projects/Айвазовски Парк - гр.Поморие/45361708_108250726848125_8745212082250579968_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-terrace",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-terrace-1600.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-hotel-paradise-2",
+    "group": "wall",
+    "src": "src/assets/projects/Хотел Парадайс - с.Огняново/45261593_104656053874259_6758029915251015680_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-chitalishte-3",
+    "group": "wall",
+    "src": "src/assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-015.jpg",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-sunny-hill-26",
+    "group": "wall",
+    "src": "src/assets/projects/Сънни Хил блок 9 - кв. Меден Рудник гр. Бургас/57289416_162614494745081_1080609403691859968_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-mn-front",
+    "group": "wall",
+    "src": "src/assets/продажби/project 1/photos/photo-1.png",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-green-life-1",
+    "group": "wall",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45279177_104924087180789_4294631158974513152_n (1).webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-balconies",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-balconies-1300.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-sanirane-1",
+    "group": "wall",
+    "src": "src/assets/projects/Саниране 2017 г. - гр. Бургас/45353069_106987780307753_3019444107387863040_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-panorama-21",
+    "group": "wall",
+    "src": "src/assets/projects/Панорама Резидънс - гр.Созопол/48359770_128123468194184_3584791648992755712_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-aivazovski",
+    "group": "wall",
+    "src": "src/assets/projects/Айвазовски Парк - гр.Поморие/45652633_108252286847969_7426443512180113408_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-entrance",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-entrance-1920.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-hotel-paradise-3",
+    "group": "wall",
+    "src": "src/assets/projects/Хотел Парадайс - с.Огняново/45263613_104668413873023_2147464397956579328_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-chitalishte",
+    "group": "wall",
+    "src": "src/assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-36-13-125.jpg",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-green-life-3",
+    "group": "wall",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45288292_104924173847447_4815299079217086464_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-garden",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-garden-1600.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-sunny-hill",
+    "group": "wall",
+    "src": "src/assets/projects/Сънни Хил блок 9 - кв. Меден Рудник гр. Бургас/57077613_162614501411747_1358123651756457984_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-hotel-paradise-7",
+    "group": "wall",
+    "src": "src/assets/projects/Хотел Парадайс - с.Огняново/45359157_104656047207593_2634777009472929792_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-mn-persp",
+    "group": "wall",
+    "src": "src/assets/продажби/project 1/photos/photo-2.png",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-svc-residential",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/res-photo4-1600.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-aivazovski-5",
+    "group": "wall",
+    "src": "src/assets/projects/Айвазовски Парк - гр.Поморие/45506198_108250740181457_402422110464507904_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-hotel-paradise",
+    "group": "wall",
+    "src": "src/assets/projects/Хотел Парадайс - с.Огняново/45222690_104656040540927_7174317773579878400_n (1).webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-cornerView",
+    "group": "wall",
+    "src": "C:/ksm-stroy/golden-residence/public/images/gallery/cornerView-1024.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-green-life-5",
+    "group": "wall",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45306733_104924253847439_2184019800915705856_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-sanirane-3",
+    "group": "wall",
+    "src": "src/assets/projects/Саниране 2017 г. - гр. Бургас/45383206_106987876974410_6215534137986514944_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-about-slider-1",
+    "group": "wall",
+    "src": "src/assets/images/optimized/slider01.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-panorama",
+    "group": "wall",
+    "src": "src/assets/projects/Панорама Резидънс - гр.Созопол/47682915_125662661773598_6339324471370842112_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-end-towers",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-endtowers-1600.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-chitalishte-11",
+    "group": "wall",
+    "src": "src/assets/projects/ЧИТАЛИЩЕ АСЕН ЗЛАТАРОВ-1924 ОГНЯНОВО/viber__2025-07-07_12-43-46-392.jpg",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-green-life-6",
+    "group": "wall",
+    "src": "src/assets/projects/Green Life - Paradise Gardens and Town House - гр.Созопол/45318511_104924170514114_470934586956709888_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-gr-long-facade",
+    "group": "wall",
+    "src": "C:/ksm-stroy/design/2026-11-14-concepts/c2-diptych/img/gr-longfacade-1024.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-work-aivazovski-6",
+    "group": "wall",
+    "src": "src/assets/projects/Айвазовски Парк - гр.Поморие/45520465_108251800181351_8799674939033518080_n.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
+  },
+  {
+    "id": "wall-about-slider-3",
+    "group": "wall",
+    "src": "src/assets/images/slider03.webp",
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "quality": {
+      "avif": 42,
+      "webp": 62
+    }
   }
 ]

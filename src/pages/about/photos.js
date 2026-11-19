@@ -1,7 +1,6 @@
 import aboutImages from '../../data/images/about.json'
-import grImages from '../../data/images/golden-residence.json?about'
 import homeImages from '../../data/images/home.json?about'
-import mnImages from '../../data/images/mnogofamilna.json?about'
+import wallImages from '../../data/images/wall.json'
 import worksImages from '../../data/images/works.json?about'
 
 // За нас's photographs (polish spec §4), the company's own, each through the
@@ -17,13 +16,19 @@ const work = (id) => worksImages[id] ?? homeImages[id]
 // of a work stand side by side. The eighteenth, the centre, is the one the
 // wall zooms into: Хотел Парадайс from the air, the sharpest photograph the
 // company has (2000 px), which then fills the screen.
+//
+// The tiles are darkened and small, so each is a small file of its own (the
+// group "wall" in scripts/images/sources.json, up to 480 px): the page's first
+// load stays light (M4: an LCP of 2.5 s or less on a phone). The centre, which
+// the zoom fills the screen with, keeps the photograph's own ladder.
+const tile = (id) => wallImages[`wall-${id}`]
 export const WALL_CENTRE = 17
 export const WALL = [
-  work('work-green-life'), work('work-aivazovski-1'), grImages['gr-terrace'], work('work-hotel-paradise-2'), work('work-chitalishte-3'), work('work-sunny-hill-26'), mnImages['mn-front'],
-  work('work-green-life-1'), grImages['gr-balconies'], work('work-sanirane-1'), work('work-panorama-21'), work('work-aivazovski'), grImages['gr-entrance'], work('work-hotel-paradise-3'),
-  work('work-chitalishte'), work('work-green-life-3'), grImages['gr-garden'], aboutImages['about-slider-2'], work('work-sunny-hill'), work('work-hotel-paradise-7'), mnImages['mn-persp'],
-  homeImages['svc-residential'], work('work-aivazovski-5'), work('work-hotel-paradise'), grImages['gr-cornerView'], work('work-green-life-5'), work('work-sanirane-3'), aboutImages['about-slider-1'],
-  work('work-panorama'), grImages['gr-end-towers'], work('work-chitalishte-11'), work('work-green-life-6'), grImages['gr-long-facade'], work('work-aivazovski-6'), aboutImages['about-slider-3'],
+  tile('work-green-life'), tile('work-aivazovski-1'), tile('gr-terrace'), tile('work-hotel-paradise-2'), tile('work-chitalishte-3'), tile('work-sunny-hill-26'), tile('mn-front'),
+  tile('work-green-life-1'), tile('gr-balconies'), tile('work-sanirane-1'), tile('work-panorama-21'), tile('work-aivazovski'), tile('gr-entrance'), tile('work-hotel-paradise-3'),
+  tile('work-chitalishte'), tile('work-green-life-3'), tile('gr-garden'), aboutImages['about-slider-2'], tile('work-sunny-hill'), tile('work-hotel-paradise-7'), tile('mn-persp'),
+  tile('svc-residential'), tile('work-aivazovski-5'), tile('work-hotel-paradise'), tile('gr-cornerView'), tile('work-green-life-5'), tile('work-sanirane-3'), tile('about-slider-1'),
+  tile('work-panorama'), tile('gr-end-towers'), tile('work-chitalishte-11'), tile('work-green-life-6'), tile('gr-long-facade'), tile('work-aivazovski-6'), tile('about-slider-3'),
 ]
 
 // How it began (Origin.jsx): from a dig to a finished building.

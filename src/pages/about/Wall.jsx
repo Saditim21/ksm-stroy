@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import ResponsivePicture from '../../components/ui/ResponsivePicture'
 import useMotion from '../../motion/useMotion'
 import { PHOTOS, WALL, WALL_CENTRE } from './photos'
@@ -21,7 +21,11 @@ import { PHOTOS, WALL, WALL_CENTRE } from './photos'
 // The wall is decoration, hidden from assistive technology; the H1 is the
 // page's, and the story below carries the words.
 
-const TILE_SIZES = '(max-width: 900px) 40vw, 22vw'
+// The tiles' widths on the screen (about.css: 7 across 152vw, 5 across 190vw
+// on a phone), every one at the lowest priority, after the page's code; the
+// centre's larger, as the zoom brings it up before the full photograph.
+const TILE_SIZES = '(max-width: 900px) 37vw, 21vw'
+const CENTRE_SIZES = '(max-width: 900px) 60vw, 33vw'
 
 // A tile's distance from the centre in steps, for the opening's stagger
 // (about.css: --d); the grid is 7 × 5 (5 × 7 on a phone, the same count).
@@ -29,6 +33,11 @@ const distance = (i) => Math.hypot((i % 7) - 3, Math.floor(i / 7) - 2)
 
 export default function Wall() {
   const ref = useRef(null)
+  // The full-size photograph the zoom ends on: in the page only once the
+  // reader scrolls into the zoom, so it costs the page's first load nothing
+  // (its LCP), and never covers the wall where the zoom cannot run (reduced
+  // motion, no engine).
+  const [full, setFull] = useState(false)
 
   useMotion(ref, ({ gsap }) => {
     const root = ref.current
@@ -58,6 +67,11 @@ export default function Wall() {
         scrub: 0.6,
         invalidateOnRefresh: true,
         anticipatePin: 1,
+        // The zoom needs the full photograph only near its end (0.86 below);
+        // at the top, before any scroll, its progress is a hair above 0.
+        onUpdate: (self) => {
+          if (self.progress > 0.01) setFull(true)
+        },
       },
     })
       .to(grid, { scale: cover, ease: 'power2.in', duration: 1 }, 0)
@@ -80,12 +94,12 @@ export default function Wall() {
         <div className="wl__grid" aria-hidden="true">
           {WALL.map((image, i) => (
             <div key={image.path} className={i === WALL_CENTRE ? 'wl__t wl__t--c' : 'wl__t'} style={{ '--d': distance(i).toFixed(2) }}>
-              <ResponsivePicture image={image} alt="" sizes={i === WALL_CENTRE ? '(max-width: 900px) 60vw, 33vw' : TILE_SIZES} eager={distance(i) < 1.5} />
+              <ResponsivePicture image={image} alt="" sizes={i === WALL_CENTRE ? CENTRE_SIZES : TILE_SIZES} fetchPriority="low" />
             </div>
           ))}
         </div>
         <div className="wl__full" aria-hidden="true">
-          <ResponsivePicture image={PHOTOS.aerial} alt="" sizes="100vw" />
+          {full ? <ResponsivePicture image={PHOTOS.aerial} alt="" sizes="100vw" /> : null}
         </div>
         <div className="wl__veil" aria-hidden="true" />
         <div className="wl__text">

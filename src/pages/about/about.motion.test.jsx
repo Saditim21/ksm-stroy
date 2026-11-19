@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import About from '../../routes/about'
@@ -13,6 +13,8 @@ const engine = vi.hoisted(() => ({ motion: null }))
 vi.mock('../../motion/engine.js', () => ({ default: engine.motion }))
 vi.mock('../../motion/useMotionNow', () => ({ default: () => () => engine.motion }))
 const recorder = recordingMotion()
+// WorksTrack.jsx's line: below it the works stand still.
+const STILL = '(max-width: 900px), (max-height: 599px)'
 engine.motion = recorder.motion
 
 let restoreMedia
@@ -44,6 +46,15 @@ it('pins the wall and zooms it into its centre with the scroll', async () => {
   expect(zoom.vars.scrollTrigger.scrub).toBeTruthy()
   const grow = zoom.steps.find((step) => step.targets === document.querySelector('.wl__grid'))
   expect(typeof grow.vars.scale).toBe('function')
+  // The full-size photograph the zoom ends on comes with the reader's first
+  // scroll into it, never with the page's first load (its LCP).
+  expect(document.querySelector('.wl__full img')).toBeNull()
+  // A pin at the very top starts a hair above it (-0.001 px), so at the top,
+  // before any scroll, its progress is a hair above 0 (6e-7 in Chrome).
+  act(() => zoom.vars.scrollTrigger.onUpdate({ progress: 6e-7 }))
+  expect(document.querySelector('.wl__full img')).toBeNull()
+  act(() => zoom.vars.scrollTrigger.onUpdate({ progress: 0.02 }))
+  expect(document.querySelector('.wl__full img')).not.toBeNull()
 })
 
 it('pins the works and slides their track sideways on a desktop', async () => {
@@ -52,6 +63,27 @@ it('pins the works and slides their track sideways on a desktop', async () => {
   const slide = recorder.tweens.find((t) => t.targets === document.querySelector('.trk__track'))
   expect(slide).toBeDefined()
   expect(slide.vars.scrollTrigger).toMatchObject({ pin: true })
+  // The row it slides along is laid out only while it slides (about.css).
+  expect(document.querySelector('.trk').hasAttribute('data-slide')).toBe(true)
+})
+
+// A phone, or a screen too short for the works' names under their photographs
+// (a phone on its side): the works stand in a grid and nothing pins. Turning
+// the screen across that line undoes the slide (the final review's first
+// finding: an iPad turned from upright to its side).
+it('keeps the works still on a phone or a short screen, and follows a turn of the screen', async () => {
+  await renderPage({ fine: true })
+  expect(document.querySelector('.trk').hasAttribute('data-slide')).toBe(true)
+
+  const still = window.matchMedia(STILL)
+  act(() => {
+    still.matches = true
+    still.dispatchEvent(new Event('change'))
+  })
+  await flushMotion()
+
+  expect(document.querySelector('.trk').hasAttribute('data-slide')).toBe(false)
+  expect(recorder.tweens.filter((t) => t.targets === document.querySelector('.trk__track'))).toHaveLength(1)
 })
 
 it('moves nothing under reduced motion', async () => {

@@ -46,13 +46,22 @@ it('prerenders one H1, the motto, in two lines that part at the seam', () => {
   expect(textOf(h1s[0].querySelector('.wl__r'))).toBe('реклама за майстора')
 })
 
-it('prerenders the wall: 35 photographs, the eighteenth its centre, the full photograph behind them', () => {
+it('prerenders the wall: 35 photographs, the eighteenth its centre', () => {
   const d = parse(prerender())
   const tiles = [...d.querySelectorAll('.wl__grid > .wl__t')]
   expect(tiles).toHaveLength(35)
   expect(tiles.findIndex((tile) => tile.classList.contains('wl__t--c'))).toBe(17)
   for (const tile of tiles) expect(tile.querySelector('img')).not.toBeNull()
-  expect(d.querySelector('.wl__full img')).not.toBeNull()
+  // The page's first paint is its words (the LCP): every tile is a small file
+  // at the lowest priority, fetched as the browser lays out, never ahead of
+  // them; the full-size photograph only the zoom shows is not in the page
+  // until the zoom is ready (Wall.jsx), so it costs no first load, and never
+  // covers the wall where the zoom cannot run.
+  for (const img of d.querySelectorAll('.wl__grid img')) {
+    expect(img.getAttribute('loading')).toBe('lazy')
+    expect(img.getAttribute('fetchpriority')).toBe('low')
+  }
+  expect(d.querySelector('.wl__full img')).toBeNull()
   expect(d.querySelector('#top').classList.contains('dark')).toBe(true)
 })
 

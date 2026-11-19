@@ -1,0 +1,376 @@
+{
+  "wall-about-slider-1": {
+    "path": "/img/wall-about-slider-1",
+    "w": 2048,
+    "h": 1365,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#5F8196"
+  },
+  "wall-about-slider-3": {
+    "path": "/img/wall-about-slider-3",
+    "w": 1024,
+    "h": 683,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#4B5245"
+  },
+  "wall-gr-balconies": {
+    "path": "/img/wall-gr-balconies",
+    "w": 1300,
+    "h": 1352,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#645C50"
+  },
+  "wall-gr-cornerView": {
+    "path": "/img/wall-gr-cornerView",
+    "w": 1024,
+    "h": 796,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#72746F"
+  },
+  "wall-gr-end-towers": {
+    "path": "/img/wall-gr-end-towers",
+    "w": 1600,
+    "h": 796,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#6B6A60"
+  },
+  "wall-gr-entrance": {
+    "path": "/img/wall-gr-entrance",
+    "w": 1920,
+    "h": 760,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#49443E"
+  },
+  "wall-gr-garden": {
+    "path": "/img/wall-gr-garden",
+    "w": 1600,
+    "h": 633,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#4C4F39"
+  },
+  "wall-gr-long-facade": {
+    "path": "/img/wall-gr-long-facade",
+    "w": 1024,
+    "h": 573,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#767363"
+  },
+  "wall-gr-terrace": {
+    "path": "/img/wall-gr-terrace",
+    "w": 1600,
+    "h": 633,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#645C55"
+  },
+  "wall-mn-front": {
+    "path": "/img/wall-mn-front",
+    "w": 1352,
+    "h": 829,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#5B7883"
+  },
+  "wall-mn-persp": {
+    "path": "/img/wall-mn-persp",
+    "w": 1356,
+    "h": 826,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#657F96"
+  },
+  "wall-svc-residential": {
+    "path": "/img/wall-svc-residential",
+    "w": 1600,
+    "h": 959,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#777161"
+  },
+  "wall-work-aivazovski": {
+    "path": "/img/wall-work-aivazovski",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#737767"
+  },
+  "wall-work-aivazovski-1": {
+    "path": "/img/wall-work-aivazovski-1",
+    "w": 960,
+    "h": 540,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#A59D98"
+  },
+  "wall-work-aivazovski-5": {
+    "path": "/img/wall-work-aivazovski-5",
+    "w": 960,
+    "h": 540,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#97918C"
+  },
+  "wall-work-aivazovski-6": {
+    "path": "/img/wall-work-aivazovski-6",
+    "w": 960,
+    "h": 351,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#688E86"
+  },
+  "wall-work-chitalishte": {
+    "path": "/img/wall-work-chitalishte",
+    "w": 1600,
+    "h": 900,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#9A9CA2"
+  },
+  "wall-work-chitalishte-11": {
+    "path": "/img/wall-work-chitalishte-11",
+    "w": 1600,
+    "h": 900,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#A8A69A"
+  },
+  "wall-work-chitalishte-3": {
+    "path": "/img/wall-work-chitalishte-3",
+    "w": 1600,
+    "h": 900,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#9B9D8B"
+  },
+  "wall-work-green-life": {
+    "path": "/img/wall-work-green-life",
+    "w": 960,
+    "h": 641,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#AFB3A6"
+  },
+  "wall-work-green-life-1": {
+    "path": "/img/wall-work-green-life-1",
+    "w": 800,
+    "h": 450,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#646554"
+  },
+  "wall-work-green-life-3": {
+    "path": "/img/wall-work-green-life-3",
+    "w": 960,
+    "h": 640,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#434441"
+  },
+  "wall-work-green-life-5": {
+    "path": "/img/wall-work-green-life-5",
+    "w": 960,
+    "h": 640,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#737C78"
+  },
+  "wall-work-green-life-6": {
+    "path": "/img/wall-work-green-life-6",
+    "w": 795,
+    "h": 364,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#4A6788"
+  },
+  "wall-work-hotel-paradise": {
+    "path": "/img/wall-work-hotel-paradise",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#ADB5A3"
+  },
+  "wall-work-hotel-paradise-2": {
+    "path": "/img/wall-work-hotel-paradise-2",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#616C58"
+  },
+  "wall-work-hotel-paradise-3": {
+    "path": "/img/wall-work-hotel-paradise-3",
+    "w": 960,
+    "h": 640,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#315670"
+  },
+  "wall-work-hotel-paradise-7": {
+    "path": "/img/wall-work-hotel-paradise-7",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#727467"
+  },
+  "wall-work-panorama": {
+    "path": "/img/wall-work-panorama",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#6C757B"
+  },
+  "wall-work-panorama-21": {
+    "path": "/img/wall-work-panorama-21",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#908A85"
+  },
+  "wall-work-sanirane-1": {
+    "path": "/img/wall-work-sanirane-1",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#8B8A8B"
+  },
+  "wall-work-sanirane-3": {
+    "path": "/img/wall-work-sanirane-3",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#706E6B"
+  },
+  "wall-work-sunny-hill": {
+    "path": "/img/wall-work-sunny-hill",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#84868C"
+  },
+  "wall-work-sunny-hill-26": {
+    "path": "/img/wall-work-sunny-hill-26",
+    "w": 960,
+    "h": 720,
+    "widths": [
+      240,
+      320,
+      480
+    ],
+    "color": "#878589"
+  }
+}

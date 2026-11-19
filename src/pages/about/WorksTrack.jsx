@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Link } from 'react-router'
 import Button from '../../components/ui/Button'
 import ResponsivePicture from '../../components/ui/ResponsivePicture'
+import useMediaQuery from '../../hooks/useMediaQuery'
 import useMotion from '../../motion/useMotion'
 import useReveals from '../../motion/useReveals'
 import { WORKS } from './photos'
@@ -10,13 +11,19 @@ import { WORKS } from './photos'
 // stack of three of its photographs, its name (a link to its record on
 // Обекти, /blog#<id>) and its place and type, then „Всички обекти“.
 //
-// On a desktop, where motion runs, the section pins and its track slides
-// sideways with the scroll; each stack fans out as it reaches the middle of
-// the screen and gathers as it leaves. On a phone, and without motion, the
-// works stand in a column, each stack fanned a little (about.css). The stacks
-// are decoration: the names carry the words.
+// On a desktop tall enough, where motion runs, the section pins and its
+// track slides sideways with the scroll; each stack fans out as it reaches
+// the middle of the screen and gathers as it leaves. The row and the pin are
+// laid out only while that runs (data-slide, about.css): on a phone, a short
+// screen, or without motion, the works stand in a grid, each stack fanned a
+// little, every one of them on the page. The stacks are decoration: the
+// names carry the words.
 
-const PHONE = '(max-width: 900px)'
+// Below this line the works stand still: a phone, or a screen too short for
+// a work's name under its photographs in one pinned screen (a phone on its
+// side). The slide follows the screen across it (a tablet turned, a window
+// resized): the setup runs again, and undoes or makes the slide.
+const STILL = '(max-width: 900px), (max-height: 599px)'
 // The three photographs at rest, back to front: [rotation, x %, y %].
 const REST = [[-7, -9, 5], [5, 8, -3], [-2, 0, 0]]
 const SPREAD = [[-8, -16, -7], [6, 14, 5], [-1, 0, 0]]
@@ -24,11 +31,14 @@ const SPREAD = [[-8, -16, -7], [6, 14, 5], [-1, 0, 0]]
 export default function WorksTrack() {
   const ref = useRef(null)
   useReveals(ref)
+  const still = useMediaQuery(STILL)
 
   useMotion(ref, ({ gsap }) => {
     const root = ref.current
     const track = root?.querySelector('.trk__track')
-    if (!track || window.matchMedia(PHONE).matches) return
+    if (!track || still) return undefined
+    // The row and its one pinned screen, before anything measures them.
+    root.setAttribute('data-slide', '')
     const distance = () => Math.max(0, track.scrollWidth - window.innerWidth + 40)
     const slide = gsap.to(track, {
       x: () => -distance(),
@@ -41,7 +51,8 @@ export default function WorksTrack() {
         .to(photos, { rotation: (k) => SPREAD[k][0], xPercent: (k) => SPREAD[k][1], yPercent: (k) => SPREAD[k][2], ease: 'sine.inOut', duration: 1 })
         .to(photos, { rotation: (k) => REST[k][0], xPercent: (k) => REST[k][1], yPercent: (k) => REST[k][2], ease: 'sine.inOut', duration: 1 })
     }
-  })
+    return () => root.removeAttribute('data-slide')
+  }, [still])
 
   return (
     <section ref={ref} className="trk" id="obekti" aria-labelledby="trk-h">

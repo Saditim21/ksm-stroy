@@ -112,13 +112,19 @@ describe('the photos', () => {
 
   // The pipeline's `works` group: one entry a photo, none wider than its
   // source, and no source photo encoded twice (spec §4.3): a photo's .jpg
-  // twin is the same photo.
+  // twin is the same photo. The one exception is За нас's wall (group
+  // `wall`, a polish ruling): a small rendition, at a lower quality, of a
+  // photo the site already has, for its 34 dimmed tiles, whose own ladders
+  // start at 480 to 720 px. It adds no photo of its own.
   it('come from the pipeline, each source once, no rung wider than it', () => {
     const works = sources.filter(({ group }) => group === 'works')
     expect(works.map(({ id }) => id).sort()).toEqual(Object.keys(worksImages).sort())
     const photo = (src) => src.replace(/\.(webp|jpe?g)$/i, '').toLowerCase()
-    const all = sources.map(({ src }) => photo(src))
+    const all = sources.filter(({ group }) => group !== 'wall').map(({ src }) => photo(src))
     expect(new Set(all).size).toBe(all.length)
+    for (const { id } of sources.filter(({ group }) => group === 'wall')) {
+      expect(sources.some((each) => each.group !== 'wall' && `wall-${each.id}` === id), id).toBe(true)
+    }
     for (const [id, { w, widths }] of Object.entries(worksImages)) {
       expect(Math.max(...widths), id).toBeLessThanOrEqual(w)
       expect(widths[0], id).toBe(240)
