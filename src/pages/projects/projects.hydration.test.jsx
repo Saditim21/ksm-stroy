@@ -1,4 +1,4 @@
-import { act, waitFor } from '@testing-library/react'
+import { act } from '@testing-library/react'
 import { hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import { createMemoryRouter, RouterProvider } from 'react-router'
@@ -9,16 +9,10 @@ import Projects, { handle } from '../../routes/projects'
 import { mockMatchMedia } from '../../test/media'
 
 // The browser hydrates Продажби's prerendered HTML (projects.prerender.test.jsx
-// reads it as the build makes it, in Node), and what the browser knows (a
-// fine pointer or a finger, motion allowed) must not change the first client
-// render (plan, global rules; spec M3/M4 §7.1): no recoverable error and no
-// console.error. Golden Residence's squares take their statuses once the
-// store has its data, after hydration (here the data built into the site,
-// offline). Rendered on the "server" here, then hydrated, as
-// contact.hydration.test.jsx does.
+// reads it as the build makes it), and what the browser knows (a fine pointer
+// or a finger, motion allowed or not, the light theme) must not change the
+// first client render: no recoverable error and no console.error.
 
-// The motion engine never loads here: hydration is the question, and GSAP
-// and Lenis have no business in jsdom.
 vi.mock('../../motion/runtime', () => ({
   loadMotion: () => new Promise(() => {}),
   getMotion: () => null,
@@ -44,12 +38,11 @@ afterEach(() => {
   container.remove()
   restore?.()
   restore = undefined
+  document.documentElement.removeAttribute('data-theme')
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
-// Hydrates the prerendered page with `media` (mockMatchMedia's); every
-// recoverable error is kept, to fail the test, and console.error is watched.
 async function hydrate(media) {
   const html = renderToString(page())
   restore = mockMatchMedia(media)
@@ -62,15 +55,13 @@ async function hydrate(media) {
   return { errors, logged }
 }
 
-const grSquares = () => [...container.querySelectorAll('.bd--gr .blk__grid button')]
-
 it('hydrates with a fine pointer and motion allowed, and no recoverable error', async () => {
   const { errors, logged } = await hydrate({ fine: true })
 
   expect(errors).toEqual([])
   expect(logged.mock.calls).toEqual([])
   expect(textOf(container.querySelector('h1'))).toBe('Продажби')
-  expect(container.querySelectorAll('.bd--mn .blk__grid .s-free')).toHaveLength(16)
+  expect(container.querySelectorAll('#etazhi button.fr')).toHaveLength(16)
 })
 
 it('hydrates on a phone with no error', async () => {
@@ -80,22 +71,17 @@ it('hydrates on a phone with no error', async () => {
   expect(logged.mock.calls).toEqual([])
 })
 
-// Spec §7.1: Golden Residence's squares, neutral in the HTML, take their
-// statuses once the store has its data (the data built into the site here),
-// with its counts, and the notice that labels them as not live.
-it('colours Golden Residence’s squares once its data is in, after hydration, with the notice', async () => {
-  const { errors, logged } = await hydrate({ fine: true })
+it('hydrates under reduced motion with no error', async () => {
+  const { errors, logged } = await hydrate({ reduce: true })
 
-  await waitFor(() => expect(grSquares().filter((square) => square.className === 's-none')).toHaveLength(0), { timeout: 15000 })
-  expect(grSquares()).toHaveLength(192)
-  expect(textOf(container.querySelector('.bd--gr .bd__count'))).toMatch(/^\d+ свободни от 192 в момента$/)
-  expect(container.querySelector('.bd--gr .stale')).not.toBeNull()
-  // The notice is its building's last part, where a desktop shows it, under
-  // the caption (projects.css): the keyboard reaches „Разгледайте
-  // апартаментите“ before the notice's phone number.
-  const building = container.querySelector('.bd--gr')
-  expect(building.lastElementChild).toBe(container.querySelector('.bd--gr .stale'))
-  expect([...building.querySelectorAll('a[href]')].map(textOf).slice(-2)).toEqual(['Разгледайте апартаментите', '+359 887 886 166'])
   expect(errors).toEqual([])
   expect(logged.mock.calls).toEqual([])
-}, 30000)
+})
+
+it('hydrates over the light theme with no error', async () => {
+  document.documentElement.setAttribute('data-theme', 'light')
+  const { errors, logged } = await hydrate({ fine: true })
+
+  expect(errors).toEqual([])
+  expect(logged.mock.calls).toEqual([])
+})

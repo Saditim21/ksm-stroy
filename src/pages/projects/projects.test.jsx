@@ -1,215 +1,157 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { goOffline, renderSiteAt } from '../../../tests/contracts/site'
-import { MN_PROJECT } from '../../explorer/projects/mn'
-import { MN_UNITS } from '../../explorer/projects/mn.units'
-import Projects, { meta } from '../../routes/projects'
-import { recordingMotion, stubIdle } from '../../test/gsap'
-import { mockMatchMedia } from '../../test/media'
-import { mouseClick, tap } from '../../test/pointer'
+import { meta } from '../../routes/projects'
 
-// Продажби (spec M3/M4 §7.1), opened as a visitor opens it
+// Продажби, „Две сгради“ (polish spec §3), opened as a visitor opens it
 // (tests/contracts/site.jsx), offline, so the store ends on the data built
-// into the site: the sales board, whose squares open their apartments on
-// their buildings' pages, a finger's first tap only previewing one, and
-// whose caption names the floor and the apartment a pointer, the keyboard
-// or a tap is on. The motion engine is a recording stand-in
-// (src/test/gsap.js): nothing moves, and what would is kept.
+// into the site: Golden Residence's built-in rows (127 free of 192: 12
+// ателиета, 53 двустайни, 31 тристайни, 31 with no type; free from 43,98 to
+// 114,58 м²) and Многофамилна's snapshot of 01.12.2025 (16 free of 144: 6
+// двустайни, 10 тристайни).
 
-const engine = vi.hoisted(() => ({ motion: null }))
-vi.mock('../../motion/engine.js', () => ({ default: engine.motion }))
-const recorder = recordingMotion()
-engine.motion = recorder.motion
-
-const plot = (name) => screen.getByRole('group', { name })
-const square = (building, label) => within(plot(building)).getByRole('button', { name: (name) => name.split(',')[0] === label })
-const caption = (key) => document.querySelector(`.bd--${key} .bd__cap`)
 const textOf = (element) => element.textContent.replace(/\s+/g, ' ').trim()
-const path = () => `${window.location.pathname}${window.location.search}${window.location.hash}`
-const GR = 'Golden Residence'
-const MN = 'Многофамилна сграда'
+const half = (key) => document.querySelector(`.gw__half--${key}`)
+const ledger = () => screen.getByRole('region', { name: 'Етаж по етаж' })
+const list = () => screen.getByRole('region', { name: 'Свободни апартаменти' })
+const rowsOf = (region) => within(region).queryAllByRole('link').filter((link) => link.classList.contains('fl__row'))
 
-let flushMotion
 beforeEach(() => {
-  recorder.reset()
   goOffline()
-  flushMotion = stubIdle()
 })
-afterEach(async () => {
-  vi.useRealTimers()
-  await flushMotion()
+afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
-// The page, once Golden Residence's squares have their statuses (the data
-// built into the site, offline).
-async function openBoard() {
+async function openPage() {
   renderSiteAt('/projects')
-  await waitFor(() => expect(square(GR, 'А 301').className).not.toBe('s-none'), { timeout: 15000 })
+  await waitFor(() => expect(textOf(half('gr').querySelector('.gw__count'))).toMatch(/^127 /), { timeout: 15000 })
 }
 
-// Spec §7.1: the squares are neutral until Golden Residence's data is in,
-// then each takes its status (А 301 is free in the built-in data).
-it('colours Golden Residence’s squares once its data is in: А 301 free', async () => {
-  await openBoard()
+describe('#top, the two buildings', () => {
+  it('opens on both buildings, each with its free apartments of all', async () => {
+    await openPage()
 
-  expect(square(GR, 'А 301')).toHaveClass('s-free')
-  expect(square(GR, 'А 301')).toHaveAccessibleName('А 301, Свободен')
-  expect(within(plot(GR)).getAllByRole('button').filter((each) => each.className === 's-none')).toHaveLength(0)
-}, 30000)
-
-describe('the caption', () => {
-  // Spec §7.1: hover or focus on a square names its floor with its counts,
-  // and the apartment with its type, area, exposure and status.
-  it('names the floor and the apartment a mouse points at', async () => {
-    await openBoard()
-    fireEvent.pointerOver(square(GR, 'А 301'), { pointerType: 'mouse' })
-
-    const shown = caption('gr')
-    expect(textOf(shown.querySelector('.cap__fl .serif'))).toBe('Блок А, етаж 3')
-    expect(shown.querySelector('.cap__fl .serif').textContent).toBe('Блок А, етаж 3')
-    expect([...shown.querySelectorAll('.cap__fl .st')].map(textOf)[0]).toMatch(/^\d+ свободн(и|ен)$/)
-    expect(textOf(shown.querySelector('.cap__u'))).toBe('А 301 2-стаен, 62,18 м², юг Свободен')
-    expect(shown.querySelector('.legend')).toBeNull()
-    // The rest of the building dims, its floor lit (projects.css).
-    expect(document.querySelector('.bd--gr .bd__plot')).toHaveAttribute('data-hot')
+    expect(screen.getByRole('heading', { level: 1, name: 'Продажби' })).toBeInTheDocument()
+    expect(within(half('gr')).getByRole('heading', { level: 2, name: 'Golden Residence' })).toBeInTheDocument()
+    expect(within(half('mn')).getByRole('heading', { level: 2, name: 'Многофамилна сграда' })).toBeInTheDocument()
+    expect(textOf(half('gr').querySelector('.gw__count'))).toBe('127 свободни апартамента от 192')
+    expect(textOf(half('mn').querySelector('.gw__count'))).toBe('16 свободни апартамента от 144, по данни към 01.12.2025')
+    expect(within(half('gr')).getByRole('img', { name: 'Golden Residence по здрач, визуализация' })).toBeInTheDocument()
   }, 30000)
 
-  it('follows the keyboard: a square that takes the focus names its floor and apartment', async () => {
-    await openBoard()
-    act(() => square(MN, 'Б-807').focus())
+  it('says the rest in words, under a bar of the statuses', async () => {
+    await openPage()
 
-    expect(textOf(caption('mn').querySelector('.cap__fl .serif'))).toBe('Блок Б, етаж 9')
-    expect(textOf(caption('mn').querySelector('.cap__u'))).toBe('Б-807 3-стаен, 100,71 м², север/запад Свободен')
+    expect(within(half('gr')).getByRole('img', { name: '127 свободни, 6 резервирани, 59 продадени' })).toHaveClass('sbar')
+    expect(textOf(half('gr').querySelector('.gw__rest'))).toBe('6 резервирани, 59 продадени')
+    expect(textOf(half('mn').querySelector('.gw__rest'))).toBe('6 резервирани, 122 продадени')
   }, 30000)
 
-  // The floor of Многофамилна's top row is 10, its attic.
-  it('names Многофамилна’s floors by the data: А-101 on floor 2', async () => {
-    await openBoard()
-    fireEvent.pointerOver(square(MN, 'А-101'), { pointerType: 'mouse' })
+  it('counts the free apartments by type, and gives the range of their areas', async () => {
+    await openPage()
 
-    expect(textOf(caption('mn').querySelector('.cap__fl .serif'))).toBe('Блок А, етаж 2')
+    const types = (key) => [...half(key).querySelectorAll('.gw__types li')].map(textOf)
+    expect(types('gr')).toEqual(['12 ателиета', '53 двустайни', '31 тристайни'])
+    expect(types('mn')).toEqual(['6 двустайни', '10 тристайни'])
+    expect(textOf(half('gr').querySelector('.gw__area'))).toBe('Свободните са от 43,98 до 114,58 м².')
   }, 30000)
 
-  it('goes back to the building’s legend when the mouse leaves', async () => {
-    await openBoard()
-    fireEvent.pointerOver(square(GR, 'Б 702'), { pointerType: 'mouse' })
-    expect(caption('gr').querySelector('.cap__u')).not.toBeNull()
+  it('leads to each building, and to its free apartments alone', async () => {
+    await openPage()
 
-    vi.useFakeTimers()
-    fireEvent.pointerLeave(document.querySelector('.bd--gr .bd__plot'), { pointerType: 'mouse' })
-    act(() => vi.advanceTimersByTime(300))
-    expect(caption('gr').querySelector('.cap__u')).toBeNull()
-    expect(caption('gr').querySelector('.legend')).not.toBeNull()
-    expect(document.querySelector('.bd--gr .bd__plot')).not.toHaveAttribute('data-hot')
-  }, 30000)
+    expect(within(half('gr')).getByRole('link', { name: 'Разгледайте сградата' })).toHaveAttribute('href', '/projects/golden-residence#explorer')
+    expect(within(half('mn')).getByRole('link', { name: 'Разгледайте сградата' })).toHaveAttribute('href', '/projects/mnogofamilna-sgrada')
 
-  it('goes back to the keyboard’s square when the mouse leaves with the focus still on the board', async () => {
-    await openBoard()
-    act(() => square(GR, 'А 301').focus())
-    fireEvent.pointerOver(square(GR, 'Б 702'), { pointerType: 'mouse' })
-    expect(textOf(caption('gr').querySelector('.cap__u'))).toMatch(/^Б 702 /)
-
-    fireEvent.pointerLeave(document.querySelector('.bd--gr .bd__plot'), { pointerType: 'mouse' })
-    expect(textOf(caption('gr').querySelector('.cap__u'))).toMatch(/^А 301 /)
-    expect(textOf(caption('gr').querySelector('.cap__fl .serif'))).toBe('Блок А, етаж 3')
+    await userEvent.click(within(half('mn')).getByRole('link', { name: 'Само свободните' }))
+    expect(within(list()).getByRole('button', { name: /^Многофамилна/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(rowsOf(list()).every((row) => row.textContent.includes('Многофамилна'))).toBe(true)
   }, 30000)
 })
 
-// Spec §7.1: a click or Enter opens the unit on its project's page.
-describe('opening an apartment', () => {
-  it('opens a Golden Residence square’s apartment on its page’s explorer with a click', async () => {
-    await openBoard()
-    mouseClick(square(GR, 'А 301'))
+describe('#etazhi, floor by floor', () => {
+  it('shows Golden Residence first: a row a floor, top floor first, each with its free count', async () => {
+    await openPage()
 
-    await waitFor(() => expect(path()).toBe(`/projects/golden-residence?unit=${encodeURIComponent('А 301')}#explorer`))
+    const rows = within(ledger()).getAllByRole('button', { name: /^Блок/ })
+    expect(rows).toHaveLength(16)
+    expect(rows[0]).toHaveAccessibleName('Блок А, етаж 8: 12 свободни от 12')
+    expect(rows.find((row) => row.getAttribute('aria-label').startsWith('Блок Б, етаж 3'))).toHaveAccessibleName('Блок Б, етаж 3: няма свободни от 12')
+    expect(rows[0].querySelectorAll('.fr__c > i')).toHaveLength(12)
   }, 30000)
 
-  it('opens a Многофамилна square’s apartment with Enter', async () => {
-    await openBoard()
-    const target = square(MN, 'Б-702')
-    act(() => target.focus())
-    fireEvent.keyDown(target, { key: 'Enter' })
-    fireEvent.click(target, { detail: 0 })
+  it('switches to Многофамилна: floors 10 to 2, labelled as on its page', async () => {
+    await openPage()
+    await userEvent.click(within(ledger()).getByRole('button', { name: 'Многофамилна сграда' }))
 
-    await waitFor(() => expect(path()).toBe(`/projects/mnogofamilna-sgrada?unit=${encodeURIComponent('Б-702')}`))
+    const rows = within(ledger()).getAllByRole('button', { name: /^Блок/ })
+    expect(rows).toHaveLength(18)
+    expect(rows[0]).toHaveAccessibleName('Блок А, етаж 10: няма свободни от 8')
+    expect(rows.find((row) => row.getAttribute('aria-label').startsWith('Блок А, етаж 9'))).toHaveAccessibleName('Блок А, етаж 9: 2 свободни от 8')
   }, 30000)
 
-  // Spec §7.1: on touch, the first tap previews and the second opens.
-  it('previews on a finger’s first tap, and opens on the second', async () => {
-    await openBoard()
-    tap(square(MN, 'Б-702'))
+  it('opens a floor to its free apartments, each a link to it on its building’s page', async () => {
+    await openPage()
+    await userEvent.click(within(ledger()).getByRole('button', { name: 'Многофамилна сграда' }))
+    const row = within(ledger()).getByRole('button', { name: /^Блок А, етаж 9:/ })
 
-    expect(path()).toBe('/projects')
-    expect(textOf(caption('mn').querySelector('.cap__u'))).toMatch(/^Б-702 /)
+    await userEvent.click(row)
 
-    tap(square(MN, 'Б-702'))
-    await waitFor(() => expect(path()).toBe(`/projects/mnogofamilna-sgrada?unit=${encodeURIComponent('Б-702')}`))
-  }, 30000)
+    expect(row).toHaveAttribute('aria-expanded', 'true')
+    const panel = document.getElementById(row.getAttribute('aria-controls'))
+    const links = within(panel).getAllByRole('link')
+    expect(links.map((link) => textOf(link.querySelector('b')))).toEqual(['А-802', 'А-808'])
+    expect(links[0]).toHaveAttribute('href', '/projects/mnogofamilna-sgrada?unit=%D0%90-802')
 
-  it('previews again when a finger taps another square, and lets go when it taps outside the board', async () => {
-    await openBoard()
-    tap(square(MN, 'Б-702'))
-    tap(square(MN, 'Б-801'))
-
-    expect(path()).toBe('/projects')
-    expect(textOf(caption('mn').querySelector('.cap__u'))).toMatch(/^Б-801 /)
-
-    fireEvent.pointerDown(document.body, { pointerType: 'touch' })
-    expect(caption('mn').querySelector('.cap__u')).toBeNull()
-    tap(square(MN, 'Б-801'))
-    expect(path()).toBe('/projects')
+    await userEvent.click(row)
+    expect(row).toHaveAttribute('aria-expanded', 'false')
   }, 30000)
 })
 
-// The board reads Многофамилна as its explorer does (projects/mn.units.js,
-// which MN_PROJECT is made of): the same labels on every floor.
-it('labels Многофамилна’s squares as its explorer does', () => {
-  expect(MN_PROJECT).toMatchObject(MN_UNITS)
-  const { floors, perFloor } = MN_UNITS
-  for (let floor = floors.min; floor <= floors.max; floor += 1) {
-    for (let n = 1; n <= perFloor; n += 1) {
-      const unit = { block: 'Б', floor, suffix: String(n).padStart(2, '0') }
-      expect(MN_UNITS.unitLabel(unit)).toBe(MN_PROJECT.unitLabel(unit))
-    }
-  }
+describe('#svobodni, the free apartments', () => {
+  it('lists both buildings’ free apartments, ten, then the rest on request', async () => {
+    await openPage()
+
+    expect(textOf(list().querySelector('.fl__sum'))).toBe('143 от 143 свободни в двете сгради')
+    expect(rowsOf(list())).toHaveLength(10)
+    await userEvent.click(within(list()).getByRole('button', { name: 'Покажи още 133' }))
+    expect(rowsOf(list())).toHaveLength(143)
+  }, 30000)
+
+  it('filters by building, rooms and floor, each choice with its count', async () => {
+    await openPage()
+    const choice = (name) => within(list()).getByRole('button', { name })
+
+    expect(choice(/^Многофамилна 16$/)).toHaveAttribute('aria-pressed', 'false')
+    await userEvent.click(choice(/^Многофамилна 16$/))
+    await userEvent.click(choice(/^Тристаен 10$/))
+
+    expect(textOf(list().querySelector('.fl__sum'))).toBe('10 от 143 свободни в двете сгради')
+    expect(rowsOf(list())).toHaveLength(10)
+    expect(rowsOf(list()).every((row) => /Многофамилна.*тристаен/.test(textOf(row)))).toBe(true)
+  }, 30000)
+
+  it('says what to do when nothing matches', async () => {
+    await openPage()
+    await userEvent.click(within(list()).getByRole('button', { name: /^Многофамилна/ }))
+    await userEvent.click(within(list()).getByRole('button', { name: /^Ателие 0$/ }))
+
+    expect(rowsOf(list())).toHaveLength(0)
+    expect(list()).toHaveTextContent('Няма свободни апартаменти с тези условия')
+  }, 30000)
+
+  it('links each apartment to it on its building’s page', async () => {
+    await openPage()
+
+    const [first] = rowsOf(list())
+    expect(textOf(first.querySelector('.fl__id'))).toBe('А 101')
+    expect(first).toHaveAttribute('href', '/projects/golden-residence?unit=%D0%90%20101#explorer')
+  }, 30000)
 })
 
-// Ruling M4-PF13: the board is the first screen, so the squares' own
-// reveal (BlockGrid's, for a block coming up from below) returns before any
-// tween: with motion on, at scroll 0, no square is hidden. The page alone,
-// without the site's smooth scrolling, which the recording engine does not
-// model.
-it('hides no square at scroll 0 with motion on', async () => {
-  const restore = mockMatchMedia({ fine: true })
-  try {
-    render(
-      <MemoryRouter initialEntries={['/projects']}>
-        <Projects />
-      </MemoryRouter>,
-    )
-    await waitFor(() => expect(square(GR, 'А 301').className).not.toBe('s-none'), { timeout: 15000 })
-    await flushMotion()
-
-    expect(recorder.motion.gsap.context).toHaveBeenCalled()
-    const squares = [...document.querySelectorAll('#top .blk__grid button')]
-    expect(squares).toHaveLength(336)
-    const tweened = recorder.tweens.flatMap(({ targets }) => (targets instanceof Element ? [targets] : [...targets]))
-    expect(tweened.filter((element) => squares.includes(element))).toEqual([])
-    expect(squares.filter((element) => element.style.opacity !== '')).toEqual([])
-  } finally {
-    restore()
-  }
-}, 30000)
-
-// Production's head (its Projects.jsx), and its share image (spec M3/M4 §11):
-// the page's first picture, Golden Residence's render over the buildings'
-// rows.
-it('keeps production’s head and shares Golden Residence’s render', () => {
+it('keeps production’s head', () => {
   const head = meta()
   expect(head).toContainEqual({ title: 'Продажби - KSM Stroy' })
-  expect(head).toContainEqual({ tagName: 'link', rel: 'canonical', href: 'https://www.ksmstroy.com/projects' })
-  expect(head).toContainEqual({ property: 'og:image', content: 'https://www.ksmstroy.com/img/gr-corner-og.jpg' })
 })

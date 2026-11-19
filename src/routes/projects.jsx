@@ -1,23 +1,27 @@
-import { useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Seam from '../components/ui/Seam'
 import Ways from '../components/ui/Ways.jsx?projects'
 import { PRIMARY_PHONE } from '../config/site'
 import { availabilityPreload } from '../data/availability/useAvailability'
 import grImages from '../data/images/golden-residence.json'
 import useReveals from '../motion/useReveals'
-import BuildingRows from '../pages/projects/BuildingRows'
-import SalesBoard from '../pages/projects/SalesBoard'
+import { BUILDINGS, useBuildings } from '../pages/projects/buildings'
+import FloorLedger from '../pages/projects/FloorLedger'
+import FreeList from '../pages/projects/FreeList'
+import Gateway from '../pages/projects/Gateway'
 import { pageMeta } from '../seo/meta'
 import { preloadWithDocument } from '../utils/documentPreloads'
 import { DISPLAY_FONT_PRELOADS } from '../utils/fontLinks'
+import { scrollToId } from '../utils/scroll'
 import '../pages/projects/projects.css'
 
-// Продажби, /projects (spec M3/M4 §7.1; the concept's prodazhbi.html): the
-// sales board, every apartment of both buildings as a square in its status's
-// colour, each opening that apartment on its building's page
-// (SalesBoard.jsx, #top, the page's moment); the two buildings compared row
-// by row (BuildingRows.jsx, #sgradite); and the closing, production's call
-// to action as the system's two ways, the first solid (ruling M4-PF14).
+// Продажби, /projects, „Две сгради“ (polish spec §3; the concept
+// design/2026-11-19-polish-concepts/pz-a.html): the two buildings first
+// (Gateway.jsx, #top, the page's moment), floor by floor (FloorLedger.jsx,
+// #etazhi), the free apartments of both with their filters (FreeList.jsx,
+// #svobodni), and the closing, production's call to action as the system's
+// two ways, the first solid (ruling M4-PF14). A building's „Само свободните“
+// sets the list's filter to it and glides there: the filter lives here.
 //
 // Ways comes in under a query of its own (Ways.jsx?projects), as Контакти's
 // does (src/routes/contact.jsx): the build gives this page its own copy
@@ -25,10 +29,10 @@ import '../pages/projects/projects.css'
 // to Home's first load (spec M3/M4 §4.4: an extracted piece never grows
 // Home's). The pages still share ways.css, a stylesheet of its own.
 
-// How the site's shell frames this page (src/shell/handle.js): below the
-// solid header. It has no inquiry of its own: the header's „Запитване“ goes
-// to the contact page's form (M3/M4 spec §8).
-export const handle = { header: 'solid' }
+// How the site's shell frames this page (src/shell/handle.js): over its
+// opening, the two buildings' photographs. It has no inquiry of its own: the
+// header's „Запитване“ goes to the contact page's form (M3/M4 spec §8).
+export const handle = { header: 'overlay' }
 
 // The availability API, which Golden Residence's squares and counts read,
 // and the upright display face, which the title and the buildings' names
@@ -78,12 +82,24 @@ function Closing() {
   )
 }
 
+// Each building with its numbers now: Golden Residence's model live (null
+// until the store has its rows), Многофамилна's from its dated snapshot.
+const TOTALS = { gr: 192, mn: 144 }
+
 export default function Projects() {
   preloadWithDocument(PRELOADS)
+  const numbers = useBuildings()
+  const buildings = BUILDINGS.map((building) => ({ building, ...numbers[building.key], total: TOTALS[building.key] }))
+  const [filter, setFilter] = useState({ building: null, type: null, band: null })
+  const only = useCallback((key) => {
+    setFilter({ building: key, type: null, band: null })
+    scrollToId('svobodni')
+  }, [])
   return (
     <>
-      <SalesBoard />
-      <BuildingRows />
+      <Gateway buildings={buildings} onOnly={only} />
+      <FloorLedger buildings={buildings} />
+      <FreeList buildings={buildings} filter={filter} onFilter={setFilter} />
       <Closing />
     </>
   )
